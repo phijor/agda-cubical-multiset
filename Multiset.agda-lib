@@ -1,0 +1,4 @@
+name: multiset
+depend: cubical
+include: src
+flags: --cubical
