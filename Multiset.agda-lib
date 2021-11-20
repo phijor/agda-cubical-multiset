@@ -1,4 +1,4 @@
 name: multiset
 depend: cubical
-include: src
+include: .
 flags: --cubical
