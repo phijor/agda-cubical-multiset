@@ -26,42 +26,39 @@ iter! (suc n) x = mapM (iter! n) x
 
 record ωTree : Type where
   field
-    branch : (n : ℕ) → iterM n Unit
-    natural : (n : ℕ) → iter! n (branch (suc n)) ≡ branch n
+    level : (n : ℕ) → iterM n Unit
+    cut : (n : ℕ) → iter! n (level (suc n)) ≡ level n
 
-!-ωChain : ωChain
-!-ωChain = record
+!-ωCochain : ωCochain
+!-ωCochain = record
   { ob = λ n → iterM n Unit
   ; ∂ = iter!
   }
 
-open module MCone = Multiset.Limits.ωCone !-ωChain
+open module MCone = Multiset.Limits.ωCone !-ωCochain
 
 Lim : ωCone
 Lim = record
   { Apex = ωTree
-  ; leg = λ n vr → vr .branch n
-  ; cond = λ n vr → vr .natural n
+  ; leg = λ n vr → vr .level n
+  ; cond = λ n vr → vr .cut n
   } where open ωTree
 
 Lim-map : (V : ωCone) → V .Apex → ωTree
 Lim-map V v = record
-  { branch = λ n → V .leg n v
-  ; natural = λ n → V .cond n v
+  { level = λ n → V .leg n v
+  ; cut = λ n → V .cond n v
   }
 
 Lim-up-∃ : (V : ωCone) → ωConeMap V Lim
 Lim-up-∃ V = record
   { map = Lim-map V
-  ; commutes = λ n v → refl
+  ; cut = λ n v → refl
   }
 
 Lim-up-! : (V : ωCone) (f : ωConeMap V Lim)
   → Lim-up-∃ V ≡ f
-Lim-up-! V f i = record
-  { map = λ v → {!   !}
-  ; commutes = {!   !}
-  }
+Lim-up-! V f = map-≡→≡ ?
 
 Lim-is-Limit : is-Limit Lim
 Lim-is-Limit V = (Lim-up-∃ V) , (Lim-up-! V)
