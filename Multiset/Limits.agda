@@ -76,11 +76,11 @@ module ωCone (F : ωCochain) where
   ωConeMap≡Prop' {V} {W} FIsSet map≡ = Σ≡Prop (λ h → isPropΠ2 λ n v → FIsSet n _ _) map≡
 
   ωConeMap≡Prop : {V W : ωCone} → {f g : ωConeMap V W}
-    → (FIsSet : (n : ℕ) → let open ωCochain in isSet (F .ob n))
+    → (FIsSet : (n : ℕ) → isSet (F .ob n))
     → (f .map ≡ g .map)
     → f ≡ g
   ωConeMap≡Prop {V} {W} {f} {g} FIsSet map-≡ =
-    isoFunInjective  ωConeMap≅Σ f g (ωConeMap≡Prop' {V} {W} FIsSet map-≡)
+    isoFunInjective ωConeMap≅Σ f g (ωConeMap≡Prop' {V} {W} FIsSet map-≡)
   
   is-Limit : (ωCone) → Type₁
   is-Limit L = (V : ωCone) → isContr (ωConeMap V L)
