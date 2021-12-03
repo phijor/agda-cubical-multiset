@@ -9,7 +9,7 @@ open import Cubical.Foundations.Prelude
 
 infixr 8 _⊕_
 
-data M (X : Type) : Type where
+data M {ℓ : Level} (X : Type ℓ) : Type ℓ where
 -- -- point constructors
   η : (x : X) → M X          -- η = \eta
   ε : M X                     -- ε = \Ge or \epsilon
