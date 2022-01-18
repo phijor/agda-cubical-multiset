@@ -19,18 +19,22 @@ record SignatureStr (ℓG : Level) (Op : Type ℓ) : Type (ℓ-max ℓ (ℓ-suc 
 
   field
     arity : Op → ℕ
-    -- Action : ∀ op → PermutationAction (arity op) ℓG
     Action : ∀ op → PermutationAction (arity op) ℓG
 
 Signature : ∀ ℓσ ℓG → Type (ℓ-suc (ℓ-max ℓσ ℓG))
 Signature ℓσ ℓG = TypeWithStr ℓσ (SignatureStr ℓG)
 
 module _ where
-  OrderedTreesSignature : Signature ℓ-zero ℓ-zero
-  OrderedTreesSignature = ℕ , signaturestr arity λ op → Unit , UnitActionStr (Fin (arity op))
-    where
-      import Multiset.GroupAction.Instances using (UnitActionStr)
-      open import Cubical.Algebra.Group.Instances.Unit using (Unit)
+  import Multiset.GroupAction.Instances
 
-      arity : ℕ → ℕ
-      arity n = n
+  open Multiset.GroupAction.Instances.FinPermutation
+
+  private
+    arity : ℕ → ℕ
+    arity n = n
+
+  OrderedTreesSignature : Signature ℓ-zero ℓ-zero
+  OrderedTreesSignature = ℕ , signaturestr arity UnitPermAction
+
+  UnorderedTreesSignature : Signature ℓ-zero ℓ-zero
+  UnorderedTreesSignature = ℕ , signaturestr arity SymPermAction
