@@ -3,7 +3,9 @@ module Multiset.GroupAction.Orbit where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Structure
-open import Cubical.Algebra.Group
+open import Cubical.Algebra.Group hiding (_/_)
+open import Cubical.HITs.TypeQuotients.Base renaming (_/ₜ_ to _/_)
+open import Cubical.HITs.TypeQuotients.Properties
 
 open import Multiset.GroupAction.Base
 open import Multiset.GroupAction.Properties
@@ -12,7 +14,7 @@ private
   variable
     ℓG ℓS : Level
     
-module _ {G : Group ℓG} {S : GroupAction G ℓS} where
+module _ (G : Group ℓG) (S : GroupAction G ℓS) where
 
   open import Cubical.Relation.Binary.Base
 
@@ -54,3 +56,8 @@ module _ {G : Group ℓG} {S : GroupAction G ℓS} where
   ∼-isEquivRel : isEquivRel
   ∼-isEquivRel = BinaryRelation.equivRel ∼-refl ∼-sym ∼-trans
   
+  S/G : Type (ℓ-max ℓG ℓS)
+  S/G = ⟨ S ⟩ / _∼_
+
+  orbit : ⟨ S ⟩ → S/G
+  orbit s = [ s ]
