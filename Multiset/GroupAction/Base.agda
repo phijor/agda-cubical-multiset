@@ -46,8 +46,11 @@ record GroupActionStr (G : Group ℓG) (S : Type ℓS) : Type (ℓ-max ℓG ℓS
 GroupAction : (G : Group ℓG) → ∀ ℓS → Type (ℓ-max ℓG (ℓ-suc ℓS))
 GroupAction G ℓS = TypeWithStr ℓS (GroupActionStr G)
 
-PermutationAction : (k : ℕ) → ∀ ℓG → Type (ℓ-suc ℓG)
-PermutationAction k ℓG = TypeWithStr ℓG (λ G → Σ[ Gs ∈ GroupStr G ] GroupActionStr (G , Gs) (Fin k))
+GroupActionOn : (S : Type ℓS) → ∀ ℓG → Type (ℓ-max ℓS (ℓ-suc ℓG))
+GroupActionOn S ℓG = Σ[ G ∈ Group ℓG ] GroupActionStr G S
+
+PermutationAction : (n : ℕ) → ∀ ℓG → Type (ℓ-suc ℓG)
+PermutationAction n = GroupActionOn (Fin n)
 
 -- Notes:
 -- Type of all permutations of a type: T ≃ T
