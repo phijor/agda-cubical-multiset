@@ -3,8 +3,8 @@ module Multiset.GroupAction.Properties where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Structure
-open import Cubical.Data.Nat hiding (_·_)
-open import Cubical.Algebra.Group
+open import Cubical.Data.Nat.Base hiding (_·_)
+open import Cubical.Algebra.Group.Base
 
 open import Multiset.GroupAction.Base
 

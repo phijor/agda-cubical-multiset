@@ -1,16 +1,10 @@
 module Multiset.GroupAction.Base where
 
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Structure
-open import Cubical.Data.Nat hiding (_·_)
-open import Cubical.Data.Nat.Order using (¬-<-zero; ≤-refl)
-open import Cubical.Data.Nat.Properties using (+-suc)
-open import Cubical.Data.Prod
-open import Cubical.Data.Fin
-open import Cubical.Data.Bool.Base renaming (Bool to BoolType; _⊕_ to xor)
-open import Cubical.Data.Empty renaming (rec to ex-falso)
-open import Cubical.Algebra.Group
+open import Cubical.Data.Nat.Base hiding (_·_)
+open import Cubical.Data.Fin.Base
+open import Cubical.Algebra.Group.Base
 open import Cubical.Reflection.RecordEquiv
 
 private
@@ -49,14 +43,14 @@ GroupAction G ℓS = TypeWithStr ℓS (GroupActionStr G)
 GroupActionOn : (S : Type ℓS) → ∀ ℓG → Type (ℓ-max ℓS (ℓ-suc ℓG))
 GroupActionOn S ℓG = Σ[ G ∈ Group ℓG ] GroupActionStr G S
 
-groupActionOnToAction : {S : Type ℓS} {ℓG : Level} → (P : GroupActionOn S ℓG) → GroupAction (P .fst) ℓS
-groupActionOnToAction {S = S} {ℓG = ℓG} P = S , P .snd
+groupActionOnToAction : {S : Type ℓS} → (P : GroupActionOn S ℓG) → GroupAction (P .fst) ℓS
+groupActionOnToAction {S = S} P = S , P .snd
 
 PermutationAction : (n : ℕ) → ∀ ℓG → Type (ℓ-suc ℓG)
 PermutationAction n = GroupActionOn (Fin n)
 
-permutationActionToAction : {n : ℕ} {ℓG : Level} → (P : PermutationAction n ℓG) → GroupAction (P .fst) ℓ-zero
-permutationActionToAction {n = n} {ℓG = Level} = groupActionOnToAction
+permutationActionToAction : {n : ℕ} → (P : PermutationAction n ℓG) → GroupAction (P .fst) ℓ-zero
+permutationActionToAction {n = n} = groupActionOnToAction
 
 -- Notes:
 -- Type of all permutations of a type: T ≃ T

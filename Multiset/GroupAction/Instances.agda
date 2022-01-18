@@ -3,17 +3,23 @@ module Multiset.GroupAction.Instances where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Structure
 open import Cubical.Foundations.HLevels using (hSet)
-open import Cubical.Data.Nat using (ℕ)
-open import Cubical.Data.Fin using (Fin)
+open import Cubical.Foundations.Equiv using (equivFun ; invEquiv)
+open import Cubical.Data.Nat.Base using (ℕ)
+open import Cubical.Data.Fin.Base using (Fin)
+open import Cubical.Data.Fin.Properties using (isSetFin)
 open import Cubical.Algebra.Group.Base
 open import Cubical.Algebra.Group.Instances.Unit
 open import Cubical.Algebra.SymmetricGroup
 
 open import Multiset.GroupAction.Base
 
+private
+  variable
+    ℓS ℓG : Level
+
 --- The trivial action of a group G on an arbitrary Type S.
 --- Each element of G acts by the identity.
-module Trivial {ℓG : Level} (G : Group ℓG) {ℓS : Level} (S : Type ℓS) where
+module _ (G : Group ℓG) (S : Type ℓS) where
 
   TrivialActionStr : GroupActionStr G S
   TrivialActionStr = groupactionstr (λ _ s → s) (isgroupaction (λ _ → refl) (λ _ _ _ → refl))
@@ -24,13 +30,10 @@ module Trivial {ℓG : Level} (G : Group ℓG) {ℓS : Level} (S : Type ℓS) wh
 --- The unit action:
 ---
 --- The 1-element group (Unit) acts by identity on each element of S.
---- contravariant.
-module Unit {ℓS : Level} (S : Type ℓS) where
+module _ (S : Type ℓS) where
   
   UnitActionStr : GroupActionStr Unit S
-  UnitActionStr = TrivialUnit.TrivialActionStr
-    where
-      module TrivialUnit = Trivial Unit S
+  UnitActionStr = TrivialActionStr Unit S
 
   UnitAction : GroupAction Unit ℓS
   UnitAction = S , UnitActionStr
@@ -45,10 +48,10 @@ module Unit {ℓS : Level} (S : Type ℓS) where
 ---
 --- Note that the inverse is necessary since composition of equivalences
 --- is defined covariantly (diagramatically), but function application is
-module Symmetric {ℓS : Level} (S : hSet ℓS) where
-  open import Cubical.Foundations.Equiv
+--- contravariant.
+module _ (S : hSet ℓS) where
   
-  SymmetricGroup : Group _
+  SymmetricGroup : Group ℓS
   SymmetricGroup = Symmetric-Group (⟨ S ⟩) (str S)
 
   -- SymmetricActionStr : GroupActionStr (SymmetricGroup )
@@ -59,22 +62,20 @@ module Symmetric {ℓS : Level} (S : hSet ℓS) where
 
 --- The symmetric action on a finite set.
 --- This is a specialization of the symmetric action of a general type.
-module Sym (n : ℕ) where
-  open import Cubical.Data.Fin using (isSetFin)
-  open import Cubical.Foundations.Structure
+module _ (n : ℕ) where
 
   SymAction : GroupAction (Sym n) ℓ-zero
-  SymAction = Symmetric.SymmetricAction (Fin n , isSetFin)
+  SymAction = SymmetricAction (Fin n , isSetFin)
 
   SymActionStr : GroupActionStr (Sym n) (Fin n)
   SymActionStr = str SymAction
 
 
 --- Actions on finite sets, specialized to `PermutationAction`s.
-module FinPermutation (n : ℕ) where
+module _ (n : ℕ) where
 
-  UnitPermAction : PermutationAction n _
-  UnitPermAction = Unit , Unit.UnitActionStr (Fin n)
+  UnitPermAction : PermutationAction n ℓ-zero
+  UnitPermAction = Unit , UnitActionStr (Fin n)
 
-  SymPermAction : PermutationAction n _
-  SymPermAction = (Sym n) , Sym.SymActionStr n
+  SymPermAction : PermutationAction n ℓ-zero
+  SymPermAction = (Sym n) , SymActionStr n

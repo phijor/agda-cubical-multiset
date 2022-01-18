@@ -2,8 +2,8 @@ module Multiset.GroupAction.Induced where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Structure
-open import Cubical.Data.Empty renaming (rec to ex-falso)
-open import Cubical.Algebra.Group
+open import Cubical.Algebra.Group.Base
+open import Cubical.Algebra.Group.Properties
 
 open import Multiset.GroupAction.Base
 
@@ -11,7 +11,7 @@ private
   variable
     ℓG ℓS : Level
 
-module Opposite (G : Group ℓG) where
+module _ (G : Group ℓG) where
 
   private
     open module G = GroupStr (str G)
@@ -24,7 +24,6 @@ module Opposite (G : Group ℓG) where
   
   open import Cubical.Algebra.Monoid.Base
   open import Cubical.Algebra.Semigroup.Base
-  open import Cubical.Algebra.Group.Properties
 
   OppositeGroup : Group ℓG
   OppositeGroup = ⟨ G ⟩ , (groupstr 1g _·'_ G.inv op-isgroup)
@@ -39,16 +38,17 @@ module Opposite (G : Group ℓG) where
       op-isgroup = isgroup op-ismonoid (λ g → (G.invl g) , (G.invr g))
 
 
-module Induced {G : Group ℓG} (S : GroupAction G ℓS) where
+module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX : Level} (X : Type ℓX) where
 
   private
     open module S = GroupActionStr (str S)
     open module G = GroupStr (str G)
-    open module OppositeG = Opposite G renaming (OppositeGroup to Gᵒᵖ)
     open module GT = GroupTheory G
 
-  Induced : {ℓX : Level} (X : Type ℓX) → GroupAction Gᵒᵖ (ℓ-max ℓS ℓX)
-  Induced {ℓX} X =
+    Gᵒᵖ = OppositeGroup G
+
+  Induced : GroupAction Gᵒᵖ (ℓ-max ℓS ℓX)
+  Induced =
     ( (⟨ S ⟩ → X)
     , groupactionstr
       (λ g f s → f (g ▸ s))
@@ -72,8 +72,8 @@ module Induced {G : Group ℓG} (S : GroupAction G ℓS) where
       inv (g · h) ▸ s ∎
     )
 
-  InducedInv : {ℓX : Level} (X : Type ℓX) → GroupAction G (ℓ-max ℓS ℓX)
-  InducedInv X =
+  InducedInv : GroupAction G (ℓ-max ℓS ℓX)
+  InducedInv =
     ( (⟨ S ⟩ → X)
     , ( groupactionstr
         (λ g f s → f (inv g ▸ s))

@@ -2,10 +2,9 @@ module Multiset.Analytic.Base where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Structure
-open import Cubical.Data.Nat hiding (Unit)
-open import Cubical.Data.Sigma
-open import Cubical.Data.Fin
-open import Cubical.Algebra.Group
+open import Cubical.Data.Nat.Base
+open import Cubical.Data.Fin.Base
+open import Cubical.Algebra.Group.Base
 
 open import Multiset.GroupAction
 
