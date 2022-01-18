@@ -49,8 +49,14 @@ GroupAction G ℓS = TypeWithStr ℓS (GroupActionStr G)
 GroupActionOn : (S : Type ℓS) → ∀ ℓG → Type (ℓ-max ℓS (ℓ-suc ℓG))
 GroupActionOn S ℓG = Σ[ G ∈ Group ℓG ] GroupActionStr G S
 
+groupActionOnToAction : {S : Type ℓS} {ℓG : Level} → (P : GroupActionOn S ℓG) → GroupAction (P .fst) ℓS
+groupActionOnToAction {S = S} {ℓG = ℓG} P = S , P .snd
+
 PermutationAction : (n : ℕ) → ∀ ℓG → Type (ℓ-suc ℓG)
 PermutationAction n = GroupActionOn (Fin n)
+
+permutationActionToAction : {n : ℕ} {ℓG : Level} → (P : PermutationAction n ℓG) → GroupAction (P .fst) ℓ-zero
+permutationActionToAction {n = n} {ℓG = Level} = groupActionOnToAction
 
 -- Notes:
 -- Type of all permutations of a type: T ≃ T

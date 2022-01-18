@@ -39,7 +39,7 @@ module Opposite (G : Group ℓG) where
       op-isgroup = isgroup op-ismonoid (λ g → (G.invl g) , (G.invr g))
 
 
-module _ {G : Group ℓG} {S : GroupAction G ℓS} where
+module Induced {G : Group ℓG} (S : GroupAction G ℓS) where
 
   private
     open module S = GroupActionStr (str S)

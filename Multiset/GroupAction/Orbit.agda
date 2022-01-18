@@ -14,7 +14,7 @@ private
   variable
     ℓG ℓS : Level
     
-module _ (G : Group ℓG) (S : GroupAction G ℓS) where
+module Orbit {G : Group ℓG} (S : GroupAction G ℓS) where
 
   open import Cubical.Relation.Binary.Base
 
