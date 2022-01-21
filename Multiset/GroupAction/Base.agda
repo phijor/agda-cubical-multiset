@@ -52,6 +52,17 @@ PermutationAction n = GroupActionOn (Fin n)
 permutationActionToAction : {n : ℕ} → (P : PermutationAction n ℓG) → GroupAction (P .fst) ℓ-zero
 permutationActionToAction {n = n} = groupActionOnToAction
 
+module _ {G : Group ℓG} {ℓT : Level} (S : GroupAction G ℓS) (T : GroupAction G ℓT) where
+  private
+    open module S = GroupActionStr (str S)
+    open module T = GroupActionStr (str T)
+
+  isEquivariant : (f : ⟨ S ⟩ → ⟨ T ⟩) → Type (ℓ-max ℓG (ℓ-max ℓS ℓT))
+  isEquivariant f = ∀ g s → f (g S.▸ s) ≡ g T.▸ (f s)
+
+  EquivariantMap : Type (ℓ-max ℓG (ℓ-max ℓS ℓT))
+  EquivariantMap = Σ[ f ∈ (⟨ S ⟩ → ⟨ T ⟩) ] isEquivariant f
+
 -- Notes:
 -- Type of all permutations of a type: T ≃ T
 -- Type of all permutations of `k` elements: Sym (Fin k) := (Fin k) ≃ (Fin k)

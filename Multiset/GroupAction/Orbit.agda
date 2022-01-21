@@ -55,9 +55,27 @@ module _ (G : Group ℓG) (S : GroupAction G ℓS) where
 
   ∼-isEquivRel : isEquivRel
   ∼-isEquivRel = BinaryRelation.equivRel ∼-refl ∼-sym ∼-trans
-  
+
   Orbit : Type (ℓ-max ℓG ℓS)
   Orbit = ⟨ S ⟩ / _∼_
 
   orbit : ⟨ S ⟩ → Orbit
   orbit s = [ s ]
+
+map : {ℓS ℓT : Level} {G : Group ℓG} {S : GroupAction G ℓS} {T : GroupAction G ℓT}
+  (f : EquivariantMap S T) → Orbit G S → Orbit G T
+map f [ s ] = [ f .fst s ]
+map {S = S} {T = T} (f , isEquivariant-f) (eq/ s₀ s₁ (g , g▸s₀≡s₁) i) = well-defined i
+  where
+    open module T = GroupActionStr (str T)
+    open module S = GroupActionStr (str S)
+
+    well-defined : [ f s₀ ] ≡ [ f s₁ ]
+    well-defined = eq/ _ _
+      ( g
+      , ( g T.▸ (f s₀)
+        ≡⟨ sym (isEquivariant-f g s₀) ⟩
+          (f (g S.▸ s₀))
+        ≡⟨ cong f g▸s₀≡s₁ ⟩ f s₁ ∎
+        )
+      )
