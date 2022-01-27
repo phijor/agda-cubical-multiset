@@ -12,8 +12,12 @@ open import Multiset.GroupAction.Properties
 private
   variable
     ℓG ℓS : Level
-    
-module _ (G : Group ℓG) (S : GroupAction G ℓS) where
+
+reachable : {G : Group ℓG} (S : GroupAction G ℓS) (s t : ⟨ S ⟩) → Type (ℓ-max ℓG ℓS)
+reachable {G = G} S s t = Σ[ g ∈ ⟨ G ⟩ ] g ▸ s ≡ t where
+  open GroupActionStr (str S)
+
+module _ {G : Group ℓG} (S : GroupAction G ℓS) where
 
   private
     open import Cubical.Relation.Binary.Base
@@ -23,7 +27,7 @@ module _ (G : Group ℓG) (S : GroupAction G ℓS) where
     open module GAT = GroupActionTheory G S
 
   _∼_ : (s t : ⟨ S ⟩) → Type (ℓ-max ℓG ℓS)
-  s ∼ t = Σ[ g ∈ ⟨ G ⟩ ] g ▸ s ≡ t
+  s ∼ t = reachable S s t
 
   isTransitive : Type (ℓ-max ℓG ℓS)
   isTransitive = (s t : ⟨ S ⟩) → s ∼ t
@@ -63,7 +67,7 @@ module _ (G : Group ℓG) (S : GroupAction G ℓS) where
   orbit s = [ s ]
 
 map : {ℓS ℓT : Level} {G : Group ℓG} {S : GroupAction G ℓS} {T : GroupAction G ℓT}
-  (f : EquivariantMap S T) → Orbit G S → Orbit G T
+  (f : EquivariantMap S T) → Orbit S → Orbit T
 map f [ s ] = [ f .fst s ]
 map {S = S} {T = T} (f , isEquivariant-f) (eq/ s₀ s₁ (g , g▸s₀≡s₁) i) = well-defined i
   where

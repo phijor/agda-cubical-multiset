@@ -35,7 +35,7 @@ module Functor (Sig : Signature ℓσ ℓG) where
     --- * ∼ is the orbit relation on X^σ under coordinate permutation,
     ---   as induced by G.
     _^_/∼ : Type (ℓ-max ℓG ℓX)
-    _^_/∼ = Orbit _ coordAction
+    _^_/∼ = Orbit coordAction
 
   _/∼ : {ℓX : Level} (X : Type ℓX) → Type _
   _/∼ {ℓX = ℓX} X = Σ[ σ ∈ ⟨ Sig ⟩ ] ( X ^ σ /∼ )
