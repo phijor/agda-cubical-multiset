@@ -2,10 +2,13 @@ module Multiset.GroupAction.Induced where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Structure
+open import Cubical.Foundations.Function
 open import Cubical.Algebra.Group.Base
 open import Cubical.Algebra.Group.Properties
+open import Cubical.HITs.TypeQuotients.Base
 
 open import Multiset.GroupAction.Base
+open import Multiset.GroupAction.Orbit
 
 private
   variable
@@ -21,7 +24,7 @@ module _ (G : Group ℓG) where
 
   ·'-assoc : (g h k : ⟨ G ⟩) → g ·' (h ·' k) ≡ (g ·' h) ·' k
   ·'-assoc g h k = sym (G.assoc k h g)
-  
+
   open import Cubical.Algebra.Monoid.Base
   open import Cubical.Algebra.Semigroup.Base
 
@@ -83,3 +86,57 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX : Level} (X : Type ℓX
         )
       )
     )
+
+module OrbitMap {G : Group ℓG} (S : GroupAction G ℓS)
+  {ℓX ℓY : Level} {X : Type ℓX} {Y : Type ℓY}
+  where
+  well-defined : (f : X → Y) (v w : ⟨ S ⟩ → X)
+    → (v∼w : reachable (Induced S X) v w)
+    → orbit (Induced S Y) (f ∘ v) ≡ orbit (Induced S Y) (f ∘ w)
+  well-defined f v w (g , g▸v≡w) = eq/ _ _
+    ( g
+    , λ i s → f (g▸v≡w i s)
+      -- TODO: to use proofs that are written in equational
+      -- reasoning style, one has to get rid of the extra
+      -- refl introduced by ∎.  Use the groupoid laws for ≡
+      -- to get rid of it (Foundations.GroupoidLaws).
+      -- 1. (g ▸Y (f ∘ v) ≡⟨ (λ i s → f (g▸v≡w i s)) ⟩ f ∘ w ∎)
+      -- 2. funExt
+      --   (λ s →
+      --     ( (g ▸Y (f ∘ v)) s
+      --       ≡⟨ refl ⟩
+      --     f (v (inv g S.▸ s))
+      --       ≡⟨ cong f (funExt⁻ g▸v≡w s) ⟩
+      --     f (w s)
+      --       ∎
+      --     )
+      --   )
+    )
+
+  descend : (f : X → Y) → Orbit (Induced S X) → Orbit (Induced S Y)
+  descend f [ v ] = [ f ∘ v ]
+  descend f (eq/ v w v∼w i) = well-defined f v w v∼w i
+
+module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX : Level} (X : Type ℓX) where
+  open OrbitMap S
+
+  descend-id : descend (idfun X) ≡ idfun (Orbit (Induced S X))
+  descend-id = funExt aux
+    where
+      aux : ∀ v → descend (idfun X) v ≡ v
+      aux [ v ] = refl
+      aux (eq/ v w v∼w i) = refl
+
+module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX ℓY ℓZ : Level}
+  {X : Type ℓX} {Y : Type ℓY} {Z : Type ℓZ}
+  where
+
+  open module OrbitMapS = OrbitMap S
+
+  descend-comp : (f : X → Y) (g : Y → Z)
+    → descend (g ∘ f) ≡ descend g ∘ descend f
+  descend-comp f g = funExt aux
+    where
+      aux : ∀ v → descend (g ∘ f) v ≡ descend g (descend f v)
+      aux [ v ] = refl
+      aux (eq/ v w v∼w i) = λ _ → well-defined (g ∘ f) v w v∼w i
