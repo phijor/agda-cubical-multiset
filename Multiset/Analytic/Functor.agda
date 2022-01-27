@@ -2,6 +2,7 @@ module Multiset.Analytic.Functor where
 
 open import Cubical.Foundations.Prelude renaming (funExt⁻ to happly)
 open import Cubical.Foundations.Structure
+open import Cubical.Foundations.Function
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Fin.Base
 open import Cubical.Algebra.Group.Base
@@ -15,7 +16,7 @@ open import Multiset.Analytic.Base
 
 private
   variable
-    ℓ ℓG ℓX ℓσ : Level
+    ℓ ℓG ℓX ℓY ℓZ ℓσ : Level
 
 module Functor (Sig : Signature ℓσ ℓG) where
   module _ (X : Type ℓX) (σ : ⟨ Sig ⟩) where
@@ -37,49 +38,36 @@ module Functor (Sig : Signature ℓσ ℓG) where
     _^_/∼ : Type (ℓ-max ℓG ℓX)
     _^_/∼ = Orbit coordAction
 
-  _/∼ : {ℓX : Level} (X : Type ℓX) → Type _
+  _/∼ : (X : Type ℓX) → Type _
   _/∼ {ℓX = ℓX} X = Σ[ σ ∈ ⟨ Sig ⟩ ] ( X ^ σ /∼ )
 
   private
-    map-fin : {ℓX ℓY : Level} {X : Type ℓX} {Y : Type ℓY}
-      → {n : ℕ}
-      → (f : X → Y) (v : Fin n → X) → Fin n → Y
-    map-fin f v k = f (v k)
+    variable
+      X : Type ℓX
+      Y : Type ℓY
+      Z : Type ℓZ
 
-  _^_/ₘ∼ : {ℓX ℓY : Level} {X : Type ℓX} {Y : Type ℓY}
-    → (f : X → Y) (σ : ⟨ Sig ⟩)
-    → X ^ σ /∼ → Y ^ σ /∼
-  (f ^ σ /ₘ∼) [ v ] = [ map-fin f v ]
-  _^_/ₘ∼ {X = X} {Y = Y} f σ (eq/ v w (g , g▸v≡w) i) = well-defined i
-    where
-      open SignatureStr (str Sig)
+  _^_/ₘ∼ : (f : X → Y) (σ : ⟨ Sig ⟩) → (X ^ σ /∼ → Y ^ σ /∼)
+  _^_/ₘ∼ f σ = OrbitMap.descend Sσ f where
+    open SignatureStr (str Sig)
 
-      Gσ : Group _
-      Gσ = Action σ .fst
+    Gσ : Group ℓG
+    Gσ = Action σ .fst
 
-      Sσ : GroupAction Gσ ℓ-zero
-      Sσ = permutationActionToAction (Action σ)
+    Sσ : GroupAction Gσ ℓ-zero
+    Sσ = permutationActionToAction (Action σ)
 
-      open GroupStr (str Gσ)
-      open GroupActionStr (str Sσ)
-      open GroupActionStr (str (coordAction Y σ)) renaming (_▸_ to _▸Y_)
+  id-/∼ : (σ : ⟨ Sig ⟩) → (idfun X) ^ σ /ₘ∼ ≡ idfun (X ^ σ /∼)
+  id-/∼ {X = X} σ = descend-id _ _
 
-      aux : (s  : ⟨ Sσ ⟩) → (g ▸Y map-fin f v) s ≡ f (w s)
-      aux s =
-        ( (g ▸Y map-fin f v) s
-            ≡⟨ refl ⟩
-          f (v (inv g ▸ s))
-            ≡⟨ cong f (happly g▸v≡w s) ⟩
-          f (w s) ∎
-        )
-
-      well-defined : [ map-fin f v ] ≡ [ map-fin f w ]
-      well-defined = eq/ _ _ (g , funExt aux)
-
+  comp-/∼ : (σ : ⟨ Sig ⟩)
+    → (f : X → Y) (g : Y → Z)
+    → (g ∘ f) ^ σ /ₘ∼ ≡ (g ^ σ /ₘ∼) ∘ (f ^ σ /ₘ∼)
+  comp-/∼ σ f g = descend-comp _ f g
 
 module Example where
   open import Cubical.HITs.TypeQuotients.Base
-  
+
   open import Multiset.GroupAction.Instances
 
   private
