@@ -26,7 +26,7 @@ module Functor (Sig : Signature ℓσ ℓG) where
       Gσ = Action σ .fst
 
     coordAction : GroupAction (Sig.Action σ .fst) ℓX
-    coordAction = InducedInv (permutationActionToAction (Action σ)) X
+    coordAction = Induced (permutationActionToAction (Action σ)) X
 
     --- Define the set of orbits X^σ/∼ where...
     ---

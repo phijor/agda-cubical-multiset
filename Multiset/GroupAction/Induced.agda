@@ -47,8 +47,8 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX : Level} (X : Type ℓX
 
     Gᵒᵖ = OppositeGroup G
 
-  Induced : GroupAction Gᵒᵖ (ℓ-max ℓS ℓX)
-  Induced =
+  InducedOp : GroupAction Gᵒᵖ (ℓ-max ℓS ℓX)
+  InducedOp =
     ( (⟨ S ⟩ → X)
     , groupactionstr
       (λ g f s → f (g ▸ s))
@@ -72,8 +72,8 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX : Level} (X : Type ℓX
       inv (g · h) ▸ s ∎
     )
 
-  InducedInv : GroupAction G (ℓ-max ℓS ℓX)
-  InducedInv =
+  Induced : GroupAction G (ℓ-max ℓS ℓX)
+  Induced =
     ( (⟨ S ⟩ → X)
     , ( groupactionstr
         (λ g f s → f (inv g ▸ s))
