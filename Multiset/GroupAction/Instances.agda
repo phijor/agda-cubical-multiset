@@ -31,7 +31,7 @@ module _ (G : Group ℓG) (S : Type ℓS) where
 ---
 --- The 1-element group (Unit) acts by identity on each element of S.
 module _ (S : Type ℓS) where
-  
+
   UnitActionStr : GroupActionStr Unit S
   UnitActionStr = TrivialActionStr Unit S
 
@@ -39,7 +39,7 @@ module _ (S : Type ℓS) where
   UnitAction = S , UnitActionStr
 
 --- The symmetric action:
---- 
+---
 --- The symmetric group of self-equivalences of a *set* S (i.e. S ≃ S)
 --- acts by inverse function application:
 ---
@@ -50,7 +50,7 @@ module _ (S : Type ℓS) where
 --- is defined covariantly (diagramatically), but function application is
 --- contravariant.
 module _ (S : hSet ℓS) where
-  
+
   SymmetricGroup : Group ℓS
   SymmetricGroup = Symmetric-Group (⟨ S ⟩) (str S)
 

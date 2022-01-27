@@ -35,7 +35,7 @@ module GroupActionTheory (G : Group ℓG) (S : GroupAction G ℓS) where
     )
 
   act-at : (g : ⟨ G ⟩) → ⟨ S ⟩ → ⟨ S ⟩
-  act-at g = g ▸_ 
+  act-at g = g ▸_
 
   actionAtIsIso : (g : ⟨ G ⟩) → isIso (g ▸_)
   actionAtIsIso g =

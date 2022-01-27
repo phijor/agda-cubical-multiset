@@ -59,7 +59,7 @@ module ωCone (F : ωCochain) where
     → (
       Σ (f .map ≡ g .map)
       λ map≡ → (n : ℕ) → (v : V .Apex) →
-        PathP (λ i → W .leg n (map≡ i v) ≡ V .leg n v) (f .commutes n v) (g .commutes n v) 
+        PathP (λ i → W .leg n (map≡ i v) ≡ V .leg n v) (f .commutes n v) (g .commutes n v)
       )
     → f ≡ g
   ≡ωConeMap (≡map , ≡commutes) =
@@ -81,7 +81,6 @@ module ωCone (F : ωCochain) where
     → f ≡ g
   ωConeMap≡Prop {V} {W} {f} {g} FIsSet map-≡ =
     isoFunInjective ωConeMap≅Σ f g (ωConeMap≡Prop' {V} {W} FIsSet map-≡)
-  
+
   is-Limit : (ωCone) → Type₁
   is-Limit L = (V : ωCone) → isContr (ωConeMap V L)
-  
