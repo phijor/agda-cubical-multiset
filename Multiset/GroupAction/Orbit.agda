@@ -60,6 +60,20 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) where
   ∼-isEquivRel : isEquivRel
   ∼-isEquivRel = BinaryRelation.equivRel ∼-refl ∼-sym ∼-trans
 
+  ∼-isPropValued : isFree → isSet ⟨ S ⟩ → isPropValued
+  ∼-isPropValued freeness isSet-S s t (g , g▸s≡t) (h , h▸s≡t) = ΣPathP (g≡h , aux₂)
+    where
+      open import Cubical.Data.Sigma
+
+      aux₁ : g ▸ s ≡ h ▸ s
+      aux₁ = g▸s≡t ∙ sym h▸s≡t
+
+      g≡h : g ≡ h
+      g≡h = freeness g h ( s , aux₁ )
+
+      aux₂ : PathP (λ i → g≡h i ▸ s ≡ t) g▸s≡t h▸s≡t
+      aux₂ = {!   !}
+
   Orbit : Type (ℓ-max ℓG ℓS)
   Orbit = ⟨ S ⟩ / _∼_
 
