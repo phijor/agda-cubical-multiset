@@ -16,18 +16,16 @@ open import Multiset.Analytic.Base
 
 private
   variable
-    ℓ ℓG ℓX ℓY ℓZ ℓσ : Level
+    ℓG ℓS ℓX ℓY ℓZ ℓσ : Level
 
-module Functor (Sig : Signature ℓσ ℓG) where
+module Functor (Sig : Signature ℓG ℓS ℓσ) where
   module _ (X : Type ℓX) (σ : ⟨ Sig ⟩) where
     private
       open module Sig = SignatureStr (str Sig)
 
-      Gσ : Group _
-      Gσ = Action σ .fst
+    -- coordAction : GroupAction (Sig.Action σ .fst) ℓX
+    coordAction = Induced (arity σ) X
 
-    coordAction : GroupAction (Sig.Action σ .fst) ℓX
-    coordAction = Induced (permutationActionToAction (Action σ)) X
 
     --- Define the set of orbits X^σ/∼ where...
     ---
@@ -35,7 +33,7 @@ module Functor (Sig : Signature ℓσ ℓG) where
     --- * X^σ is X to the power of the arity of an operation σ
     --- * ∼ is the orbit relation on X^σ under coordinate permutation,
     ---   as induced by G.
-    _^_/∼ : Type (ℓ-max ℓG ℓX)
+    _^_/∼ : Type (ℓ-max (ℓ-max ℓG ℓS) ℓX)
     _^_/∼ = Orbit coordAction
 
   _/∼ : (X : Type ℓX) → Type _
@@ -48,14 +46,14 @@ module Functor (Sig : Signature ℓσ ℓG) where
       Z : Type ℓZ
 
   _^_/ₘ∼ : (f : X → Y) (σ : ⟨ Sig ⟩) → (X ^ σ /∼ → Y ^ σ /∼)
-  _^_/ₘ∼ f σ = OrbitMap.descend Sσ f where
+  _^_/ₘ∼ f σ = OrbitMap.descend (arity σ) f where
     open SignatureStr (str Sig)
 
-    Gσ : Group ℓG
-    Gσ = Action σ .fst
+    -- Gσ : Group ℓG
+    -- Gσ = Action σ .fst
 
-    Sσ : GroupAction Gσ ℓ-zero
-    Sσ = permutationActionToAction (Action σ)
+    -- Sσ : GroupAction Gσ ℓ-zero
+    -- Sσ = permutationActionToAction (Action σ)
 
   id-/∼ : (σ : ⟨ Sig ⟩) → (idfun X) ^ σ /ₘ∼ ≡ idfun (X ^ σ /∼)
   id-/∼ {X = X} σ = descend-id _ _
@@ -67,6 +65,8 @@ module Functor (Sig : Signature ℓσ ℓG) where
 
 module Example where
   open import Cubical.HITs.TypeQuotients.Base
+  open import Cubical.Algebra.SymmetricGroup
+  open import Cubical.Algebra.Group.Instances.Unit renaming (Unit to UnitGroup)
 
   open import Multiset.GroupAction.Instances
 
@@ -74,22 +74,39 @@ module Example where
     arity : ℕ → ℕ
     arity n = n
 
-  OrderedTreesSignature : Signature ℓ-zero ℓ-zero
-  OrderedTreesSignature = ℕ , signaturestr arity UnitPermAction
+  OrderedTreesSignature : Signature₀
+  OrderedTreesSignature = ℕ , signaturestr (λ _ → UnitGroup) λ n → UnitAction (Fin n)
 
-  UnorderedTreesSignature : Signature ℓ-zero ℓ-zero
-  UnorderedTreesSignature = ℕ , signaturestr arity SymPermAction
+  UnorderedTreesSignature : Signature₀
+  UnorderedTreesSignature =  ℕ , signaturestr Sym SymAction
 
   open Functor UnorderedTreesSignature
 
   ex₁ : Type → Type
   ex₁ X =  X ^ 2 /∼
 
-  ex₂ : (X : Type) (x₀ x₁ : X) → X /∼
-  ex₂ X x₀ x₁ = 2 , [ v ]  where
-    open import Cubical.Data.Nat.Order
+  vec₂ : {X : Type} (x₀ x₁ : X) → Fin 2 → X
+  vec₂ x₀ _ (0 , _) = x₀
+  vec₂ _ x₁ (1 , _) = x₁
+  vec₂ _ _ _ = {!   !}
 
-    v : Fin 2 → X
-    v (0 , _) = x₀
-    v (1 , _) = x₁
-    v (suc (suc k) , k' , p) = {! !}
+  ex₂ : {X : Type} (x₀ x₁ : X) → X /∼
+  ex₂ {X = X} x₀ x₁ = 2 , [ vec₂ x₀ x₁ ]
+
+  ex₂-swap : {X : Type} (x₀ x₁ : X) → ex₂ x₀ x₁ ≡ ex₂ x₁ x₀
+  ex₂-swap {X = X} x₀ x₁ = ΣPathP (refl , eq/ (vec₂ x₀ x₁) (vec₂ x₁ x₀) swap)
+    where
+      open import Cubical.Data.Sigma
+
+      swap-impl : Fin 2 → Fin 2
+      swap-impl (zero , _) = (suc zero , (0 , refl))
+      swap-impl (suc zero , _) = (zero , (1 , refl))
+      swap-impl (suc (suc _) , _) = {!  !}
+
+      do-swap : ∀ s → vec₂ x₀ x₁ (swap-impl s) ≡ vec₂ x₁ x₀ s
+      do-swap (zero , snd₁) = refl
+      do-swap (suc zero , snd₁) = refl
+      do-swap (suc (suc fst₁) , snd₁) = {!   !}
+
+      swap : reachable (Induced (SymAction 2) X) (vec₂ x₀ x₁) (vec₂ x₁ x₀)
+      swap = (swap-impl , {! isEquiv swap-impl  !}) , funExt do-swap
