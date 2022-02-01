@@ -109,7 +109,12 @@ module Chain (Sig : Signature ℓG ℓS ℓσ) where
     lemma = {!   !}
 
 module Example where
+  open import Cubical.Foundations.Equiv
+  open import Cubical.Foundations.Isomorphism
   open import Cubical.HITs.TypeQuotients.Base
+  open import Cubical.Data.Nat.Properties
+  open import Cubical.Data.Nat.Order
+  open import Cubical.Data.Empty.Base renaming (rec to ex-falso)
   open import Cubical.Algebra.SymmetricGroup
   open import Cubical.Algebra.Group.Instances.Unit renaming (Unit to UnitGroup)
 
@@ -130,10 +135,20 @@ module Example where
   ex₁ : Type → Type
   ex₁ X =  X ^ 2 /∼
 
+  m+iter-suc≡iter-suc+m : (n : ℕ) (m k : ℕ) → m + (iter n suc k) ≡ iter n suc (m + k)
+  m+iter-suc≡iter-suc+m zero m k = refl
+  m+iter-suc≡iter-suc+m (suc n) m k = +-suc m _ ∙ cong suc (m+iter-suc≡iter-suc+m n m k)
+
+  ¬suc-suc-k<2 : {k : ℕ} (p : suc (suc k) < 2) → ⊥
+  ¬suc-suc-k<2 {k} (m , p) = snotz (injSuc (injSuc (sym (m+iter-suc≡iter-suc+m 3 _ _) ∙ p)))
+
+  absurd-suc-suc-k<2 : {ℓ : Level} {X : Type ℓ} {k : ℕ} (p : suc (suc k) < 2) → X
+  absurd-suc-suc-k<2 p = ex-falso (¬suc-suc-k<2 p)
+
   vec₂ : {X : Type} (x₀ x₁ : X) → Fin 2 → X
   vec₂ x₀ _ (0 , _) = x₀
   vec₂ _ x₁ (1 , _) = x₁
-  vec₂ _ _ _ = {!   !}
+  vec₂ _ _ ((suc (suc k)) , p) = absurd-suc-suc-k<2 p
 
   ex₂ : {X : Type} (x₀ x₁ : X) → X /∼
   ex₂ {X = X} x₀ x₁ = 2 , [ vec₂ x₀ x₁ ]
@@ -141,17 +156,22 @@ module Example where
   ex₂-swap : {X : Type} (x₀ x₁ : X) → ex₂ x₀ x₁ ≡ ex₂ x₁ x₀
   ex₂-swap {X = X} x₀ x₁ = ΣPathP (refl , eq/ (vec₂ x₀ x₁) (vec₂ x₁ x₀) swap)
     where
-      open import Cubical.Data.Sigma
-
       swap-impl : Fin 2 → Fin 2
       swap-impl (zero , _) = (suc zero , (0 , refl))
       swap-impl (suc zero , _) = (zero , (1 , refl))
-      swap-impl (suc (suc _) , _) = {!  !}
+      swap-impl (suc (suc _) , p) = absurd-suc-suc-k<2 p
 
       do-swap : ∀ s → vec₂ x₀ x₁ (swap-impl s) ≡ vec₂ x₁ x₀ s
       do-swap (zero , snd₁) = refl
       do-swap (suc zero , snd₁) = refl
-      do-swap (suc (suc fst₁) , snd₁) = {!   !}
+      do-swap (suc (suc k) , p) = absurd-suc-suc-k<2 p
 
       swap : reachable (Induced (SymAction 2) X) (vec₂ x₀ x₁) (vec₂ x₁ x₀)
-      swap = (swap-impl , {! isEquiv swap-impl  !}) , funExt do-swap
+      swap = (swap-impl , equivIsEquiv (isoToEquiv swap-iso)) , funExt do-swap where
+        swap-swap-id : (k : Fin 2) → swap-impl (swap-impl k) ≡ k
+        swap-swap-id (zero , snd₁) = Σ≡Prop (λ _ → m≤n-isProp) refl
+        swap-swap-id (suc zero , snd₁) = Σ≡Prop (λ _ → m≤n-isProp) refl
+        swap-swap-id (suc (suc fst₁) , p) = absurd-suc-suc-k<2 p
+
+        swap-iso : Iso (Fin 2) (Fin 2)
+        swap-iso = iso swap-impl swap-impl swap-swap-id swap-swap-id
