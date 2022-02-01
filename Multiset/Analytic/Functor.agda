@@ -3,6 +3,7 @@ module Multiset.Analytic.Functor where
 open import Cubical.Foundations.Prelude renaming (funExt⁻ to happly)
 open import Cubical.Foundations.Structure
 open import Cubical.Foundations.Function
+open import Cubical.Data.Sigma
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Fin.Base
 open import Cubical.Algebra.Group.Base
@@ -55,13 +56,57 @@ module Functor (Sig : Signature ℓG ℓS ℓσ) where
     -- Sσ : GroupAction Gσ ℓ-zero
     -- Sσ = permutationActionToAction (Action σ)
 
-  id-/∼ : (σ : ⟨ Sig ⟩) → (idfun X) ^ σ /ₘ∼ ≡ idfun (X ^ σ /∼)
-  id-/∼ {X = X} σ = descend-id _ _
+  _/ₘ∼ : (f : X → Y) → (X /∼ → Y /∼)
+  (f /ₘ∼) (σ , x) = σ , (f ^ σ /ₘ∼) x
 
-  comp-/∼ : (σ : ⟨ Sig ⟩)
-    → (f : X → Y) (g : Y → Z)
-    → (g ∘ f) ^ σ /ₘ∼ ≡ (g ^ σ /ₘ∼) ∘ (f ^ σ /ₘ∼)
-  comp-/∼ σ f g = descend-comp _ f g
+  id-/∼ : (idfun X) /ₘ∼ ≡ idfun (X /∼)
+  id-/∼ {X = X} = λ i (σ , x) → σ , aux σ i x where
+    aux : (σ : ⟨ Sig ⟩) → (idfun X) ^ σ /ₘ∼ ≡ idfun (X ^ σ /∼)
+    aux σ = descend-id _ _
+
+  comp-/ₘ∼ : (f : X → Y) → (g : Y → Z)
+    → (g ∘ f) /ₘ∼ ≡ g /ₘ∼ ∘ f /ₘ∼
+  comp-/ₘ∼ f g = λ i (σ , x) → σ , aux σ i x where
+    aux : (σ : ⟨ Sig ⟩) → (g ∘ f) ^ σ /ₘ∼ ≡ (g ^ σ /ₘ∼) ∘ (f ^ σ /ₘ∼)
+    aux σ = descend-comp _ f g
+
+module Chain (Sig : Signature ℓG ℓS ℓσ) where
+  open import Multiset.Chains
+
+  private
+    variable
+      ℓ : Level
+
+    open module F = Functor Sig
+    open Chain
+    open Limit
+    open ChainLimit
+
+  apChain : (X : Chain ℓ) → Chain (ℓ-max (ℓ-max (ℓ-max ℓG ℓS) ℓσ) ℓ)
+  apChain X = chain ((_/∼) ∘ X .Ob) ((_/ₘ∼) ∘ X .π)
+
+  α : {X : Chain ℓ}
+    → (ChainLimit X) /∼ → ChainLimit (apChain X)
+  α {X = X} (σ , [ v ]) = lim
+    (λ n → σ , [ w n ]) (λ n → ΣPathP ( refl , lemma₂ n )) where
+      open module Sig = SignatureStr (str Sig)
+      open module Gσ = GroupStr (str (symmetry σ))
+
+      w : (n : ℕ) → ⟨ arity σ ⟩ → X .Ob n
+      w n k = v k .proj n
+
+      module _ (n : ℕ) where
+        Sσ = coordAction (X .Ob n) σ
+        open module Sσ = GroupActionStr (str Sσ)
+
+        lemma₁ : (X .π n) ∘ (w (suc n)) ≡ w n
+        lemma₁ = funExt λ k → v k .isChainLimit n
+
+        lemma₂ : [ (X .π n) ∘ (w (suc n)) ] ≡ [ w n ]
+        lemma₂ = Path→OrbitPath Sσ lemma₁
+  α (σ , eq/ v w r i) = lemma i where
+    lemma : α (σ , [ v ]) ≡ α (σ , [ w ])
+    lemma = {!   !}
 
 module Example where
   open import Cubical.HITs.TypeQuotients.Base
