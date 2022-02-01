@@ -37,6 +37,9 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) where
   ∼-refl : isRefl
   ∼-refl s = 1g , S.act-1g s
 
+  Path→∼ : {s t : ⟨ S ⟩} → s ≡ t → s ∼ t
+  Path→∼ {s = s} s≡t = 1g , (S.act-1g s ∙ s≡t)
+
   ∼-sym : isSym
   ∼-sym s t (g , g▸s≡t) =
     ( inv g
@@ -65,6 +68,9 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) where
 
   orbit : ⟨ S ⟩ → Orbit
   orbit s = [ s ]
+
+  Path→OrbitPath : {s t : ⟨ S ⟩} → s ≡ t → orbit s ≡ orbit t
+  Path→OrbitPath s≡t = eq/ _ _ (Path→∼ s≡t)
 
 map : {ℓS ℓT : Level} {G : Group ℓG} {S : GroupAction G ℓS} {T : GroupAction G ℓT}
   (f : EquivariantMap S T) → Orbit S → Orbit T
