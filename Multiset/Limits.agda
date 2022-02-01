@@ -50,7 +50,7 @@ module ωCone (F : ωCochain) where
     (λ _ → refl)
 
   ωConeMapAux : (V W : ωCone) → Type
-  ωConeMapAux V W = (Σ (V .Apex → W .Apex) λ m → (n : ℕ) → (v : V .Apex) → W .leg n (m v) ≡ V .leg n v)
+  ωConeMapAux V W = (Σ (V .Apex → W .Apex) λ m → (n : ℕ) → (v : V .Apex) → W .leg n (m v) ≡ V .leg n v)
 
   ωConeMap≡Σ : {V W : ωCone} → ωConeMap V W ≡ (Σ (V .Apex → W .Apex) λ m → (n : ℕ) → (v : V .Apex) → W .leg n (m v) ≡ V .leg n v)
   ωConeMap≡Σ = isoToPath ωConeMap≅Σ

@@ -40,8 +40,8 @@ record GroupActionStr (G : Group ℓG) (S : Type ℓS) : Type (ℓ-max ℓG ℓS
 GroupAction : (G : Group ℓG) → ∀ ℓS → Type (ℓ-max ℓG (ℓ-suc ℓS))
 GroupAction G ℓS = TypeWithStr ℓS (GroupActionStr G)
 
-GroupActionOn : (S : Type ℓS) → ∀ ℓG → Type (ℓ-max ℓS (ℓ-suc ℓG))
-GroupActionOn S ℓG = Σ[ G ∈ Group ℓG ] GroupActionStr G S
+GroupActionOn : (S : Type ℓS) → ∀ ℓG → Type (ℓ-max ℓS (ℓ-suc ℓG))
+GroupActionOn S ℓG = Σ[ G ∈ Group ℓG ] GroupActionStr G S
 
 groupActionOnToAction : {S : Type ℓS} → (P : GroupActionOn S ℓG) → GroupAction (P .fst) ℓS
 groupActionOnToAction {S = S} P = S , P .snd
