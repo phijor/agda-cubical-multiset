@@ -63,16 +63,16 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX : Level} (X : Type ℓX
 
   act-inv-1g : ∀ s → inv 1g ▸ s ≡ s
   act-inv-1g s =
-    ( inv 1g ▸ s ≡⟨ cong (_▸ s) inv1g ⟩
-      1g ▸ s     ≡⟨ act-1g s ⟩
-      s ∎
+    ( {- inv 1g ▸ s -} cong (_▸ s) inv1g
+    ∙ {- 1g ▸ s -} act-1g s
+      {- s -}
     )
 
   act-inv-distmul : ∀ g h s → inv h ▸ (inv g ▸ s) ≡ inv (g · h) ▸ s
   act-inv-distmul g h s =
-    ( inv h ▸ (inv g ▸ s) ≡⟨ act-distmul _ _ _ ⟩
-      (inv h · inv g) ▸ s  ≡⟨ cong (_▸ s) (sym (invDistr _ _)) ⟩
-      inv (g · h) ▸ s ∎
+    ( {- inv h ▸ (inv g ▸ s) -} act-distmul _ _ _
+    ∙ {- (inv h · inv g) ▸ s -} cong (_▸ s) (sym (invDistr _ _))
+      {- inv (g · h) ▸ s -}
     )
 
   Induced : GroupAction G (ℓ-max ℓS ℓX)
@@ -90,12 +90,15 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX : Level} (X : Type ℓX
 module OrbitMap {G : Group ℓG} (S : GroupAction G ℓS)
   {ℓX ℓY : Level} {X : Type ℓX} {Y : Type ℓY}
   where
+  open Orbit (Induced S Y)
+
+  -- postComp : {v w : ⟨ S ⟩ → X} (v∼w : v ∼ w) (f : )
+
   well-defined : (f : X → Y) (v w : ⟨ S ⟩ → X)
-    → (v∼w : reachable (Induced S X) v w)
-    → orbit (Induced S Y) (f ∘ v) ≡ orbit (Induced S Y) (f ∘ w)
+    → (v∼w : [ Induced S X ∣ v ∼ w ])
+    → orbitof (f ∘ v) ≡ orbitof (f ∘ w)
   well-defined f v w (g , g▸v≡w) = eq/ _ _
-    ( g
-    , λ i s → f (g▸v≡w i s)
+    ( g , cong (f ∘_) (g▸v≡w)
       -- TODO: to use proofs that are written in equational
       -- reasoning style, one has to get rid of the extra
       -- refl introduced by ∎.  Use the groupoid laws for ≡
@@ -113,22 +116,21 @@ module OrbitMap {G : Group ℓG} (S : GroupAction G ℓS)
       --   )
     )
 
-  descend : (f : X → Y) → Orbit (Induced S X) → Orbit (Induced S Y)
-  descend f [ v ] = [ f ∘ v ]
-  descend f (eq/ v w v∼w i) = well-defined f v w v∼w i
+  descend : (f : X → Y) → (Induced S X) /∼ → (Induced S Y) /∼
+  descend f = Orbit.elim (Induced S X) (λ v → [ f ∘ v ]) (well-defined f)
 
 module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX : Level} (X : Type ℓX) where
   open OrbitMap S
+  open Orbit (Induced S X)
 
-  descend-id : descend (idfun X) ≡ idfun (Orbit (Induced S X))
+  descend-id : descend (idfun X) ≡ idfun ((Induced S X) /∼)
   descend-id = funExt aux
     where
       aux : ∀ v → descend (idfun X) v ≡ v
-      aux [ v ] = refl
-      aux (eq/ v w v∼w i) = refl
+      aux = elim (λ s → refl) λ s t s∼t i → refl
 
 module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX ℓY ℓZ : Level}
-  {X : Type ℓX} {Y : Type ℓY} {Z : Type ℓZ}
+  {X : Type ℓX} {Y : Type ℓY} {Z : Type ℓZ}
   where
 
   open module OrbitMapS = OrbitMap S
@@ -138,5 +140,6 @@ module _ {G : Group ℓG} (S : GroupAction G ℓS) {ℓX ℓY ℓZ : Level}
   descend-comp f g = funExt aux
     where
       aux : ∀ v → descend (g ∘ f) v ≡ descend g (descend f v)
-      aux [ v ] = refl
-      aux (eq/ v w v∼w i) = λ _ → well-defined (g ∘ f) v w v∼w i
+      aux = Orbit.elim (Induced S X)
+        (λ _ → refl)
+        (λ s t s∼t i j → well-defined (g ∘ f) s t s∼t i)
