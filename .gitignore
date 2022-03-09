@@ -1,2 +1,10 @@
 _build/
 MAlonzo
+
+# Exclude local copies of references
+*.pdf
+*.djvu
+
+# JabRef backup/temporary files
+*.bak
+*.sav.tmp
