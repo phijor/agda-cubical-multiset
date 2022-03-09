@@ -20,6 +20,7 @@ record IsGroupAction
   open GroupStr (str G) using (_·_; 1g)
 
   field
+    is-set-carrier : isSet S
     act-1g : ∀ s → 1g ▸ s ≡ s
     act-distmul : ∀ g h (s : S) → g ▸ (h ▸ s) ≡ (g · h) ▸ s
 

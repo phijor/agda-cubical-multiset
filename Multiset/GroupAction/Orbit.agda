@@ -3,6 +3,8 @@ module Multiset.GroupAction.Orbit where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Structure
+open import Cubical.Foundations.HLevels
+open import Cubical.Data.Sigma
 open import Cubical.Algebra.Group.Base
 open import Cubical.HITs.TypeQuotients.Base renaming (_/ₜ_ to _/_)
 open import Cubical.HITs.TypeQuotients.Properties renaming
@@ -22,8 +24,17 @@ isReachable : {G : Group ℓG} (S : GroupAction G ℓS) (s t : ⟨ S ⟩) → Ty
 isReachable {G = G} S s t = Σ[ g ∈ ⟨ G ⟩ ] g ▸ s ≡ t where
   open GroupActionStr (str S)
 
-[_∣_∼_] : {G : Group ℓG} (S : GroupAction G ℓS) (s t : ⟨ S ⟩) → Type (ℓ-max ℓG ℓS)
-[ S ∣ s ∼ t ] = isReachable S s t
+∼-syntax : {G : Group ℓG} (S : GroupAction G ℓS) (s t : ⟨ S ⟩) → Type (ℓ-max ℓG ℓS)
+∼-syntax = isReachable
+
+syntax ∼-syntax S s t = s ∼[ S ] t
+
+isFree→isPropIsReachable : {G : Group ℓG} (S : GroupAction G ℓS) → GroupActionTheory.isFree G S → (s t : ⟨ S ⟩) → isProp (s ∼[ S ] t)
+isFree→isPropIsReachable {G = G} S freeness s t (g , g▸s≡t) (h , h▸s≡t) = Σ≡Prop (λ g → is-set-carrier _ t) (freeness _ _ s g▸s≡h▸s) where
+  open GroupActionStr (str S)
+
+  g▸s≡h▸s : g ▸ s ≡ h ▸ s
+  g▸s≡h▸s = g▸s≡t ∙ (sym h▸s≡t)
 
 module Orbit {G : Group ℓG} (S : GroupAction G ℓS) where
 

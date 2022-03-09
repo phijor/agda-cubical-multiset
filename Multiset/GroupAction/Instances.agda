@@ -19,24 +19,24 @@ private
 
 --- The trivial action of a group G on an arbitrary Type S.
 --- Each element of G acts by the identity.
-module _ (G : Group ℓG) (S : Type ℓS) where
+module _ (G : Group ℓG) (S : hSet ℓS) where
 
-  TrivialActionStr : GroupActionStr G S
-  TrivialActionStr = groupactionstr (λ _ s → s) (isgroupaction (λ _ → refl) (λ _ _ _ → refl))
+  TrivialActionStr : GroupActionStr G ⟨ S ⟩
+  TrivialActionStr = groupactionstr (λ _ s → s) (isgroupaction (str S) (λ _ → refl) (λ _ _ _ → refl))
 
   TrivialAction : GroupAction G ℓS
-  TrivialAction = (S ,  TrivialActionStr)
+  TrivialAction = (⟨ S ⟩ ,  TrivialActionStr)
 
 --- The unit action:
 ---
 --- The 1-element group (Unit) acts by identity on each element of S.
-module _ (S : Type ℓS) where
+module _ (S : hSet ℓS) where
 
-  UnitActionStr : GroupActionStr Unit S
+  UnitActionStr : GroupActionStr Unit ⟨ S ⟩
   UnitActionStr = TrivialActionStr Unit S
 
   UnitAction : GroupAction Unit ℓS
-  UnitAction = S , UnitActionStr
+  UnitAction = ⟨ S ⟩ , UnitActionStr
 
 --- The symmetric action:
 ---
@@ -57,7 +57,7 @@ module _ (S : hSet ℓS) where
   -- SymmetricActionStr : GroupActionStr (SymmetricGroup )
 
   SymmetricAction : GroupAction SymmetricGroup ℓS
-  SymmetricAction = ⟨ S ⟩ , groupactionstr (λ σ s → equivFun (invEquiv σ) s) (isgroupaction (λ s → refl) (λ g h s → refl))
+  SymmetricAction = ⟨ S ⟩ , groupactionstr (λ σ s → equivFun (invEquiv σ) s) (isgroupaction (str S) (λ s → refl) (λ g h s → refl))
 
 
 --- The symmetric action on a finite set.
@@ -75,7 +75,7 @@ module _ (n : ℕ) where
 module _ (n : ℕ) where
 
   UnitPermAction : PermutationAction n ℓ-zero
-  UnitPermAction = Unit , UnitActionStr (Fin n)
+  UnitPermAction = Unit , UnitActionStr (Fin n , isSetFin)
 
   SymPermAction : PermutationAction n ℓ-zero
   SymPermAction = (Sym n) , SymActionStr n

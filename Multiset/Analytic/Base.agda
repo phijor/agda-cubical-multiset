@@ -2,6 +2,7 @@ module Multiset.Analytic.Base where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Structure
+open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat.Base
 open import Cubical.Algebra.Group.Base
 
@@ -16,8 +17,13 @@ record SignatureStr (ℓG ℓS : Level) (Op : Type ℓ) : Type (ℓ-max (ℓ-max
   constructor signaturestr
 
   field
+    is-set-op : isSet Op
     symmetry : Op → Group ℓG
     arity : ∀ op → GroupAction (symmetry op) ℓS
+
+record GpdSig (ℓG : Level) (Op : Type ℓ) : Type (ℓ-suc (ℓ-max ℓG ℓ)) where
+  field
+    arity : (op : Op) → hGroupoid ℓG
 
 
 Signature : ∀ ℓG ℓS ℓσ → Type (ℓ-max (ℓ-max (ℓ-suc ℓG) (ℓ-suc ℓS)) (ℓ-suc ℓσ))

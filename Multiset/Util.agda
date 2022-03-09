@@ -2,6 +2,7 @@ module Multiset.Util where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.GroupoidLaws
+open import Cubical.Foundations.Structure
 
 private
   variable
@@ -89,3 +90,20 @@ square-comp-vertical : {aₗ aᵣ bₗ bᵣ cₗ cᵣ : A}
   (bot : Square hₘ hₛ qₗ qᵣ)
   → Square hₜ hₛ (pₗ ∙ qₗ) (pᵣ ∙ qᵣ)
 square-comp-vertical top bot i j = {!  bot ∙ top !}
+
+private
+  variable
+    ℓ' ℓX ℓY : Level
+
+MapOfStr : (S : {ℓ : Level} → Type ℓ → Type ℓ') → (X : TypeWithStr ℓX S) → (Y : TypeWithStr ℓY S) → Type (ℓ-max ℓX ℓY)
+MapOfStr _ X Y = ⟨ X ⟩ → ⟨ Y ⟩
+
+map-syntax : (S : {ℓ : Level} → Type ℓ → Type ℓ') → (X : TypeWithStr ℓX S) → (Y : TypeWithStr ℓY S) → Type (ℓ-max ℓX ℓY)
+map-syntax = MapOfStr
+
+_→ₛ_ : {S : {ℓ : Level} → Type ℓ → Type ℓ'} (X : TypeWithStr ℓX S) → (Y : TypeWithStr ℓY S) → Type (ℓ-max ℓX ℓY)
+X →ₛ Y = ⟨ X ⟩ → ⟨ Y ⟩
+
+infixr 6 _→ₛ_
+
+syntax map-syntax S X Y = X →ₛ[ S ] Y

@@ -47,6 +47,12 @@ module GroupActionTheory (G : Group ℓG) (S : GroupAction G ℓS) where
     )
 
   --- A group action is faithful if the homormorphism G → Sym(S)
-  --- given by (λ g → g ▸_) has trivial kernel. 
+  --- given by (λ g → g ▸_) has trivial kernel.
+  isFaithful' : Type (ℓ-max ℓG ℓS)
+  isFaithful' = (g : ⟨ G ⟩) → (act-at g) ≡ (λ s → s) → g ≡ 1g
+
   isFaithful : Type (ℓ-max ℓG ℓS)
-  isFaithful = (g : ⟨ G ⟩) → (act-at g) ≡ (λ s → s) → g ≡ 1g
+  isFaithful = (g h : ⟨ G ⟩) → (act-at g) ≡ (act-at h) → g ≡ h
+
+  isFree : Type (ℓ-max ℓG ℓS)
+  isFree = (g h : ⟨ G ⟩) → (s : ⟨ S ⟩) → g ▸ s ≡ h ▸ s → g ≡ h
