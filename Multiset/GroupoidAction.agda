@@ -6,6 +6,7 @@ open import Cubical.Foundations.Equiv.Properties
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Isomorphism
+open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Structure
   using (TypeWithStr; ⟨_⟩; str)
 
@@ -219,7 +220,6 @@ module _ (ℓ : Level) where
   𝕄 X = Σ[ B ∈ 𝔹 ℓ ] (⟨ B ⟩ → X)
 
   module 𝕄 {X : Type ℓ'} where
-    open import Cubical.Foundations.Function using (_∘_)
     open import Cubical.Foundations.Transport
 
     isGroupoid𝕄 : isGroupoid X → isGroupoid (𝕄 X)
@@ -254,7 +254,6 @@ module _ (ℓ : Level) where
 
     ≡-intro-subst : ∀ {B₀ B₁ : 𝔹 ℓ} {e₀ : ⟨ B₀ ⟩ → X} {e₁ : ⟨ B₁ ⟩ → X}
       → (π : ⟨ B₀ ⟩ ≃ ⟨ B₁ ⟩)
-      -- → (e₀ ≡ e₁ ∘ (transport π))
       → (subst (λ B → B → X) (ua π) e₀ ≡ e₁)
       → (B₀ , e₀) ≡ (B₁ , e₁)
     ≡-intro-subst {B₀} {B₁} {e₀} {e₁} π same-els = ≡-intro B₀≡B₁ filler where
@@ -270,21 +269,64 @@ module _ (ℓ : Level) where
       filler : PathP (λ i → (ua-π i) → X) e₀ e₁
       filler = lemma ▷ same-els
 
+    module Transport-lemma {ℓX ℓT : Level} {X₀ X₁ : Type ℓX} (T : Type ℓT) where
+      -- Two things are the same:
+      -- * composition of a function with a transport of arguments
+      -- * substituting the argument type of a function
+      comm-transport⁻-subst : (g : X₀ → T) → (p : X₀ ≡ X₁) → (g ∘ transport⁻ p) ≡ subst (λ X → (X → T)) p g
+      comm-transport⁻-subst g p = J Pattern (funExt transport-hell) p where
+        Pattern : (X : Type ℓX) → (X₀ ≡ X) → Type _
+        Pattern X X₀≡X = g ∘ transport⁻ X₀≡X ≡ subst (λ X → (X → T)) X₀≡X g
+
+        transport-hell : (x₀ : X₀) → g (transport refl x₀) ≡ transport (refl {x = T}) (g (transport (refl {x = X₀}) x₀))
+        transport-hell x₀ = sym (transportRefl _)
+          -- g (transport refl x₀)
+          --   ≡⟨ sym (transportRefl _) ⟩
+          -- transport (refl {x = T}) (g (transport (refl {x = X₀}) x₀))
+          --   ∎
+
+      comm-transport-subst-sym : (g : X₁ → T) → (p : X₀ ≡ X₁) → (g ∘ transport p) ≡ subst (λ X → (X → T)) (sym p) g
+      comm-transport-subst-sym g p = J Pattern (funExt transport-hell) (sym p) where
+        Pattern : (X : Type ℓX) → (X₁ ≡ X) → Type _
+        Pattern X X₁≡X =  g ∘ transport⁻ X₁≡X ≡ subst (λ X → (X → T)) X₁≡X g
+
+        g-substRefl : subst (λ X → X → T) refl g ≡ g
+        g-substRefl = substRefl {B = (λ X → X → T)} g
+
+        transport-hell : (x₁ : X₁) → g (transport⁻ refl x₁) ≡ subst (λ X → X → T) refl g x₁
+        transport-hell x₁ = cong g (transportRefl x₁) ∙ sym (λ i → g-substRefl i x₁)
+
+      comm-transport⁻-transport-symm : (p : X₀ ≡ X₁) → transport⁻ p ≡ transport (sym p)
+      comm-transport⁻-transport-symm p = refl
 
     ≡-intro-permute : ∀ {B₀ B₁ : 𝔹 ℓ} {e₀ : ⟨ B₀ ⟩ → X} {e₁ : ⟨ B₁ ⟩ → X}
-      → (π : ⟨ B₀ ⟩ ≡ ⟨ B₁ ⟩)
-      → (e₀ ≡ e₁ ∘ (transport π))
+      → (π : ⟨ B₀ ⟩ ≃ ⟨ B₁ ⟩)
+      → (e₀ ≡ e₁ ∘ (equivFun π))
       → (B₀ , e₀) ≡ (B₁ , e₁)
-    ≡-intro-permute {B₀} {B₁} {e₀} {e₁} π same-els = ≡-intro-subst (pathToEquiv π) {!   !} -- where
-      -- lemma : subst (λ B → B → X) (ua π) e₀ ≡ e₁
-      -- lemma = {!  substCommSlice (λ B → B → X) (λ B → B → X) ? (ua π) e₀ !}
+    ≡-intro-permute {B₀} {B₁} {e₀} {e₁} π same-els = ≡-intro-subst π lemma where
+      open Transport-lemma
 
-      -- step₂ : subst (λ B → B → X) (ua π) (e₁ ∘ (equivFun π)) ≡ {!   !}
-      -- step₂ = {! substCommSlice (λ B → B → X) (λ B → B → X) (λ B e → e ∘ (equivFun π)) (ua π) e₀  !}
+      p : ⟨ B₀ ⟩ ≡ ⟨ B₁ ⟩
+      p = ua π
 
-    module Stupid (X Y T : Type) where
-      ≃-push : (π : X ≃ Y) → ((Y → T) ≃ (X → T))
-      ≃-push π = preCompEquiv π
+      uaβ⁻ : {A B : Type ℓ} (e : A ≃ B) (x : B) → transport⁻ (ua e) x ≡ invEq e x
+      uaβ⁻ e x = funExt⁻ (sym (transportUaInv e)) x ∙ transportRefl (invEq e x)
+
+      step₁ : e₀ ∘ transport⁻ p ≡ subst (λ X₁ → X₁ → X) p e₀
+      step₁ = comm-transport⁻-subst X e₀ p
+
+      step₂ : e₀ ∘ transport⁻ p ≡ e₁
+      step₂ =
+        e₀ ∘ transport⁻ p
+          ≡⟨ cong (λ g → g ∘ transport⁻ p) same-els ⟩
+        (e₁ ∘ equivFun π) ∘ transport⁻ (ua π)
+          ≡⟨ funExt  (λ b → cong (e₁ ∘ equivFun π) (uaβ⁻ π b)) ⟩
+        (e₁ ∘ equivFun π) ∘ invEq π
+          ≡⟨ funExt (λ b → cong e₁ (secEq π b)) ⟩
+        e₁ ∎
+
+      lemma : subst (λ B → B → X) p e₀ ≡ e₁
+      lemma = sym step₁ ∙ step₂
 
 module Ex where
   open import Cubical.Data.Bool
@@ -315,25 +357,24 @@ module Ex where
   ex' : 𝕄 ℓ-zero ℕ
   ex' = 𝟚 , elems'
 
-  switch-≃ : ⟨ 𝟚 ⟩ ≃ ⟨ 𝟚 ⟩
-  switch-≃ = isoToEquiv (iso switch-fun switch-fun inv inv) where
-    switch-fun : Fin 2 → Fin 2
-    switch-fun (0 , p) = 1
-    switch-fun (1 , p) = 0
-    switch-fun (suc (suc _) , p) = impossible-fin p
+  switch : Fin 2 → Fin 2
+  switch (0 , p) = 1
+  switch (1 , p) = 0
+  switch (suc (suc _) , p) = impossible-fin p
 
-    inv : ∀ k → switch-fun (switch-fun k) ≡ k
-    inv (0 , p) = Σ≡Prop (λ _ → m≤n-isProp) refl
-    inv (1 , snd₁) = Σ≡Prop (λ _ → m≤n-isProp) refl
+  switch-≃ : ⟨ 𝟚 ⟩ ≃ ⟨ 𝟚 ⟩
+  switch-≃ = isoToEquiv (iso switch switch inv inv) where
+    inv : ∀ k → switch (switch k) ≡ k
+    inv (0 , _) = Σ≡Prop (λ _ → m≤n-isProp) refl
+    inv (1 , _) = Σ≡Prop (λ _ → m≤n-isProp) refl
     inv (suc (suc _) , p) = impossible-fin p
 
-  switch : 𝟚 ≡ 𝟚
-  switch = 𝔹.≡-intro (ua switch-≃)
-
   ex≡ : ex ≡ ex'
-  ex≡ = 𝕄.≡-intro-subst _ (switch-≃) {!   !} -- where
-    -- eq-proof : PathP (λ i → ⟨ switch i ⟩ → ℕ) elems elems'
-    -- eq-proof = cong {!   !} switch
+  ex≡ = 𝕄.≡-intro-permute _ switch-≃ (funExt same-elements) where
+    same-elements : ∀ k → elems k ≡ elems' (switch k)
+    same-elements (0 , _) = refl
+    same-elements (1 , _) = refl
+    same-elements (suc (suc _) , p) = impossible-fin p
 
 module _ (X : Type ℓ) where
 
