@@ -197,19 +197,6 @@ data Dunce (n : ℕ) : Type where
   loop : base ≡ base
   surf : PathP (λ i → loop i ≡ loop i) (loop ^ n) refl
 
-module Dunce' where abstract
-  import Cubical.HITs.DunceCap as Lib
-
-  Dunce₁≃Dunce : Dunce 1 ≃ Lib.Dunce
-  Dunce₁≃Dunce = isoToEquiv (iso toLib ofLib {!   !} {!   !}) where
-    toLib : Dunce 1 → Lib.Dunce
-    toLib base = Lib.base
-    toLib (loop i) = Lib.loop i
-    toLib (surf i j) = Lib.surf {!   !} {!   !}
-
-    ofLib : Lib.Dunce → Dunce 1
-    ofLib = {!   !}
-
 module _ (ℓ : Level) where
 
   private
