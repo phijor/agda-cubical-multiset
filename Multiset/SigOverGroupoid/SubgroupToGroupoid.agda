@@ -62,30 +62,39 @@ isGroupoidFinSet {ℓ = ℓ} = isGroupoidRetract from to (λ _ → refl) isGroup
 FinSet≡ : {X Y : FinSet {ℓ}} → ⟨ X ⟩ ≡ ⟨ Y ⟩ → X ≡ Y
 FinSet≡ = Σ≡Prop (λ _ → isProp-isFinSet)
 
+module Fatten {ℓ ℓ' : Level} (X : Type ℓ) (E : X → Type ℓ') where
 
+  data Fattened : Type (ℓ-max ℓ ℓ') where
+    ⌜_⌝ : (pt : X) → Fattened
+    loop : ∀ {pt} → (e : E pt) → ⌜ pt ⌝  ≡ ⌜ pt ⌝
+    groupoidTrunc : isGroupoid Fattened
 
+  rec : {B : Type ℓOp} → isGroupoid B
+    → (f : X → B)
+    → (pres-loop : ∀ {pt} (e : E pt) → f pt ≡ f pt)
+    → (Fattened → B)
+  rec _      f pres-loop ⌜ pt ⌝ = f pt
+  rec _      f pres-loop (loop e i) = pres-loop e i
+  rec isGpdB f pres-loop (groupoidTrunc F₁ F₂ p₁ p₂ sq₁ sq₂ i₁ i₂ i₃) =
+    isGpdB _ _ _ _
+      (λ i j → rec isGpdB f pres-loop (sq₁ i j))
+      (λ i j → rec isGpdB f pres-loop (sq₂ i j))
+      i₁ i₂ i₃
+
+  isGroupoidFattened : isGroupoid Fattened
+  isGroupoidFattened = groupoidTrunc
 
 toGpdSig : SubgroupSignature ℓOp → GroupoidSignature ℓOp ℓ-zero
 toGpdSig {ℓOp = ℓOp} Sig = groupoidsig Fattened isGroupoidFattened Pos where
   open SubgroupSignature Sig
 
-  data Loops : Op → Op → Type ℓOp where
-    extra : ∀ op → (g : ⟨ SymmGrp op ⟩) → Loops op op
-
-  Fattened : Type ℓOp
-  Fattened = ∥ Op /ₜ Loops ∥₃
-
-  isGroupoidFattened : isGroupoid Fattened
-  isGroupoidFattened = isGroupoidGroupoidTrunc
-
-  pos : Op → FinSet
+  pos : Op → FinSet {ℓ = ℓ-zero}
   pos op = Fin (arity op) , isFinSetFin
 
-  permutation : ∀ {op} → (g : ⟨ SymmGrp op ⟩) → (Fin (arity op) ≡ Fin (arity op))
-  permutation (π , _) = ua π
+  permutation : ∀ {op} → (g : ⟨ SymmGrp op ⟩) → pos op ≡ pos op
+  permutation {op} (π , _) = FinSet≡ (ua π)
 
-  loopLift : ∀ op₁ op₂ → Loops op₁ op₂ → pos op₁ ≡ pos op₂
-  loopLift op .op (extra .op g) = FinSetPath (permutation g)
+  open Fatten Op (λ op → ⟨ SymmGrp op ⟩)
 
   Pos : Fattened → FinSet
-  Pos = ∥-∥₃-rec isGroupoidFinSet (/ₜ-rec pos loopLift)
+  Pos = rec isGroupoidFinSet pos permutation
