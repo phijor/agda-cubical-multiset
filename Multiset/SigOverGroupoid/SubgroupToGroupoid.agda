@@ -17,6 +17,11 @@ open import Cubical.HITs.TypeQuotients
 open import Cubical.HITs.GroupoidTruncation
   renaming
     (rec to ∥-∥₃-rec)
+open import Cubical.HITs.PropositionalTruncation
+  renaming
+    ( rec to ∥-∥₀-rec
+    ; map to ∥-∥₀-map
+    )
 
 open import Cubical.Data.FinSet
 
