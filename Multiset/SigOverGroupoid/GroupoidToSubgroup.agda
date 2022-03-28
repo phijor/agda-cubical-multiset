@@ -9,7 +9,7 @@ open import Cubical.Foundations.Function
 import Cubical.Foundations.GroupoidLaws as GpdLaws
 
 open import Cubical.Data.Nat
-open import Cubical.Data.Fin
+open import Cubical.Data.SumFin
 
 open import Cubical.HITs.SetTruncation
   renaming
@@ -22,7 +22,6 @@ open import Cubical.HITs.PropositionalTruncation
     (isPropPropTrunc)
 
 open import Cubical.Algebra.Group
-open import Cubical.Algebra.SymmetricGroup
 
 open import Multiset.Util using (pathToEquivComp)
 open import Multiset.SigOverGroupoid.Base

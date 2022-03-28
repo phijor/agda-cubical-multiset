@@ -1,4 +1,5 @@
 name: multiset
-depend: cubical
-include: .
+include:
+    lib/cubical
+    .
 flags: --cubical --allow-unsolved-metas
