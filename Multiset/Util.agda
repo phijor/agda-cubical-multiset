@@ -9,6 +9,53 @@ private
     ℓ : Level
     A : Type ℓ
 
+module _ {X Y : Type ℓ} (p : X ≡ Y) where abstract
+  open import Cubical.Foundations.Equiv
+    using
+      ( invEquiv
+      ; idEquiv
+      ; invEquivIdEquiv
+      ; compEquivEquivId
+      )
+    renaming
+      (compEquiv to _∘≃_)
+  open import Cubical.Foundations.Univalence
+    using
+      ( pathToEquiv
+      ; pathToEquivRefl
+      )
+  import Cubical.Foundations.GroupoidLaws as GpdLaws
+
+  -- TODO: This is not needed anymore, but keep it for later.
+  -- It's a useful lemma.
+  pathToEquivSymRefl : pathToEquiv (sym (refl {x = X})) ≡ invEquiv (pathToEquiv refl)
+  pathToEquivSymRefl =
+    pathToEquiv (sym refl)
+      ≡⟨ pathToEquivRefl ⟩
+    idEquiv _
+      ≡⟨ sym (invEquivIdEquiv _) ⟩
+    invEquiv (idEquiv _)
+      ≡⟨ sym (cong invEquiv pathToEquivRefl) ⟩
+    invEquiv (pathToEquiv refl)
+      ∎
+
+  pathToEquivSym : pathToEquiv (sym p) ≡ invEquiv (pathToEquiv p)
+  pathToEquivSym = J (λ Y' p' → pathToEquiv (sym p') ≡ invEquiv (pathToEquiv p')) pathToEquivSymRefl p
+
+  pathToEquivCompRefl : pathToEquiv (p ∙ refl) ≡ (pathToEquiv p ∘≃ pathToEquiv refl)
+  pathToEquivCompRefl =
+    pathToEquiv (p ∙ refl)
+      ≡⟨ cong pathToEquiv (sym (GpdLaws.rUnit p)) ⟩
+    pathToEquiv p
+      ≡⟨ sym (compEquivEquivId (pathToEquiv p)) ⟩
+    (pathToEquiv p ∘≃ idEquiv Y)
+      ≡⟨ cong (pathToEquiv p ∘≃_) (sym pathToEquivRefl) ⟩
+    (pathToEquiv p ∘≃ pathToEquiv refl)
+      ∎
+
+  pathToEquivComp : {Z : Type ℓ} (q : Y ≡ Z) → pathToEquiv (p ∙ q) ≡ pathToEquiv p ∘≃ pathToEquiv q
+  pathToEquivComp = J (λ Z' q' → pathToEquiv (p ∙ q') ≡ pathToEquiv p ∘≃ pathToEquiv q') pathToEquivCompRefl
+
 -- Square t b l r
 
 -- A square
