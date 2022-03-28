@@ -59,11 +59,11 @@ isGroupoidFinSet {ℓ = ℓ} = isGroupoidRetract from to (λ _ → refl) isGroup
   from : FinSet {ℓ} → FinSet'
   from (X , isFinSetX) = (X , isFinSet→isSet isFinSetX) , isFinSetX
 
+FinSet≡ : {X Y : FinSet {ℓ}} → ⟨ X ⟩ ≡ ⟨ Y ⟩ → X ≡ Y
+FinSet≡ = Σ≡Prop (λ _ → isProp-isFinSet)
 
 
 
-FinSetPath : {X Y : FinSet {ℓ}} → ⟨ X ⟩ ≡ ⟨ Y ⟩ → X ≡ Y
-FinSetPath = Σ≡Prop (λ _ → isProp-isFinSet)
 
 toGpdSig : SubgroupSignature ℓOp → GroupoidSignature ℓOp ℓ-zero
 toGpdSig {ℓOp = ℓOp} Sig = groupoidsig Fattened isGroupoidFattened Pos where
