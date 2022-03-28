@@ -30,19 +30,17 @@ private
   ℓSh : Level
   ℓSh = ℓ-zero
 
+isFinSet→isSet : {X : Type ℓ} → isFinSet X → isSet X
+isFinSet→isSet {X = X} = ∥-∥₀-rec isPropIsSet FinEquiv→isSetX where
+
+  FinEquiv→isSetX : Σ[ n ∈ ℕ ] (X ≃ Fin n) → isSet X
+  FinEquiv→isSetX (n , α) = isOfHLevelRespectEquiv 2 (invEquiv α) isSetFin
+
+FinSet→hSet : FinSet {ℓ} → hSet ℓ
+FinSet→hSet (X , isFinSetX) = X , (isFinSet→isSet isFinSetX)
+
 isGroupoidFinSet : isGroupoid (FinSet {ℓ})
-isGroupoidFinSet {ℓ = ℓ} = isOfHLevelRespectEquiv 3 equiv isGroupoidFinSet' where
-  open import Cubical.HITs.PropositionalTruncation
-    renaming (rec to ∥-∥-rec)
-
-  isFinSet→isSet : {X : Type ℓ} → isFinSet X → isSet X
-  isFinSet→isSet {X = X} isFinSetX = ∥-∥-rec isPropIsSet FinEquiv→isSetX isFinSetX where
-
-    FinEquiv→isSetX : Σ[ n ∈ ℕ ] (X ≃ Fin n) → isSet X
-    FinEquiv→isSetX (n , α) = isOfHLevelRespectEquiv 2 (invEquiv α) isSetFin
-
-    isFinSetΣX : isFinSetΣ X
-    isFinSetΣX = transport isFinSet≡isFinSetΣ isFinSetX
+isGroupoidFinSet {ℓ = ℓ} = isGroupoidRetract from to (λ _ → refl) isGroupoidFinSet' where
 
   FinSet' : Type (ℓ-suc ℓ)
   FinSet' = Σ[ X ∈ (hSet ℓ) ] ∃[ n ∈ ℕ ] ⟨ X ⟩ ≃ Fin n
@@ -50,20 +48,14 @@ isGroupoidFinSet {ℓ = ℓ} = isOfHLevelRespectEquiv 3 equiv isGroupoidFinSet' 
   isGroupoidFinSet' : isGroupoid FinSet'
   isGroupoidFinSet' = isOfHLevelΣ 3 (isOfHLevelTypeOfHLevel 2) (λ X → isProp→isOfHLevelSuc 2 isPropPropTrunc)
 
-  equiv : FinSet' ≃ FinSet {ℓ}
-  equiv = isoToEquiv (iso to from sect retr) where
+  to : FinSet' → FinSet {ℓ}
+  to (X , isFinX) = ⟨ X ⟩ , isFinX
 
-    to : FinSet' → FinSet {ℓ}
-    to (X , isFinX) = ⟨ X ⟩ , ∥-∥-rec isProp-isFinSet (λ (n , α) → ∣ n , α ∣) isFinX
+  from : FinSet {ℓ} → FinSet'
+  from (X , isFinSetX) = (X , isFinSet→isSet isFinSetX) , isFinSetX
 
-    from : FinSet {ℓ} → FinSet'
-    from (X , isFinSetX) = (X , isFinSet→isSet isFinSetX) , ∥-∥-rec isPropPropTrunc (λ (n , α) → ∣ n , α ∣) isFinSetX
 
-    sect : section to from
-    sect _ = Σ≡Prop (λ _ → isProp-isFinSet) refl
 
-    retr : retract to from
-    retr X = Σ≡Prop (λ _ → isPropPropTrunc) (Σ≡Prop (λ _ → isPropIsSet) refl)
 
 FinSetPath : {X Y : FinSet {ℓ}} → ⟨ X ⟩ ≡ ⟨ Y ⟩ → X ≡ Y
 FinSetPath = Σ≡Prop (λ _ → isProp-isFinSet)
