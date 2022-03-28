@@ -14,6 +14,7 @@ open import Cubical.Data.Fin
 open import Cubical.Algebra.Group
   using
     ( Group
+    ; Group₀
     ; makeGroup
     ; Subgroup
     ; Subgroup→Group
@@ -25,6 +26,12 @@ open import Cubical.Data.FinSet
     ( FinSet
     ; card
     )
+
+private
+  ℓ-one : Level
+  ℓ-one = ℓ-suc ℓ-zero
+
+  Group₁ = Group ℓ-one
 
 module _ {ℓ : Level} {X : Type ℓ} (x : X) (isSetPath : isSet (x ≡ x)) where
   import Cubical.Foundations.GroupoidLaws as GpdLaws
@@ -39,7 +46,7 @@ module _ {ℓ : Level} {X : Type ℓ} (x : X) (isSetPath : isSet (x ≡ x)) wher
         (sym ∘ GpdLaws.rUnit) (sym ∘ GpdLaws.lUnit)
         GpdLaws.rCancel GpdLaws.lCancel
 
-Perm : (n : ℕ) → Group (ℓ-suc ℓ-zero)
+Perm : (n : ℕ) → Group₁
 Perm n = Aut (Fin n) (isOfHLevel≡ 2 (isSetFin) (isSetFin))
 
 record GroupoidSignature (ℓSh ℓPos : Level) : Type (ℓ-suc (ℓ-max ℓSh ℓPos)) where
@@ -60,5 +67,5 @@ record SubgroupSignature (ℓOp : Level) : Type (ℓ-suc ℓOp) where
     arity : Op → ℕ
     Symm : ∀ op → Subgroup (Sym (arity op))
 
-  SymmGrp : (op : Op) → Group ℓ-zero
+  SymmGrp : (op : Op) → Group₀
   SymmGrp op = Subgroup→Group (Sym (arity op)) (Symm op)
