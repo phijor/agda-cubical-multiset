@@ -3,7 +3,7 @@ module Multiset.SigOverGroupoid.GroupoidToSubgroup where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Equiv
-  renaming (compEquiv to _∘≃_)
+  renaming (compEquiv to infixr 9 _∘≃_)
 open import Cubical.Foundations.Function
   using (_∘_)
 import Cubical.Foundations.GroupoidLaws as GpdLaws
@@ -31,11 +31,11 @@ private
   variable
     ℓ ℓPos ℓOp : Level
 
--- TODO: Subgroups don't play well with universe levels.
--- Mostly because group-homs go between types of the same level.
--- Restrict to shapes that live in level 0 for now.
-ℓSh : Level
-ℓSh = ℓ-zero
+  -- TODO: Subgroups don't play well with universe levels.
+  -- Mostly because group-homs go between types of the same level.
+  -- Restrict to shapes that live in level 0 for now.
+  ℓSh : Level
+  ℓSh = ℓ-zero
 
 toSubGpSig : GroupoidSignature ℓSh ℓOp → SubgroupSignature ℓSh
 toSubGpSig Sig = subgroupsig Op isSetSetTrunc arity G where
@@ -54,7 +54,7 @@ toSubGpSig Sig = subgroupsig Op isSetSetTrunc arity G where
 
   -- Here comes the definition of the family of subgroups,
   -- encoding the symmetries of the groupoid of shapes.
-  module _ (sh : Shape) where
+  module _ (sh : Shape) where abstract
     -- The group of automorphisms of a shape is its set of
     -- self-identifications.
     AutSh : Group ℓSh
@@ -81,9 +81,9 @@ toSubGpSig Sig = subgroupsig Op isSetSetTrunc arity G where
       pathToEquiv∘ϕ-pres∙ : ∀ p₁ p₂ → pathToEquiv (ϕ (p₁ ∙ p₂)) ≡ (pathToEquiv (ϕ p₁)) ∘≃ (pathToEquiv (ϕ p₂))
       pathToEquiv∘ϕ-pres∙ p₁ p₂ = cong pathToEquiv (ϕ-pres∙ p₁ p₂) ∙ pathToEquivComp (ϕ p₁) (ϕ p₂)
 
-    -- The image of this lift defines a subgroups of permutations.
-    G' : Subgroup (Sym (sz sh))
-    G' = imSubgroup shapePathToPermutation
+  -- The image of this lift defines a subgroups of permutations.
+  G' : (sh : Shape) → Subgroup (Sym (sz sh))
+  G' sh = imSubgroup (shapePathToPermutation sh)
 
 
   G : (op : Op) → Subgroup (Sym (arity op))
