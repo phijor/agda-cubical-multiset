@@ -51,11 +51,19 @@ module Fatten {ℓ ℓ' : Level} (X : Type ℓ) (E : X → Type ℓ') where
     → (Fattened → B)
   rec _      f pres-loop ⌜ pt ⌝ = f pt
   rec _      f pres-loop (loop e i) = pres-loop e i
-  rec isGpdB f pres-loop (groupoidTrunc F₁ F₂ p₁ p₂ sq₁ sq₂ i₁ i₂ i₃) =
-    isGpdB _ _ _ _
-      (λ i j → rec isGpdB f pres-loop (sq₁ i j))
-      (λ i j → rec isGpdB f pres-loop (sq₂ i j))
-      i₁ i₂ i₃
+  rec {B = B} isGpdB f pres-loop (groupoidTrunc F₁ F₂ p₁ p₂ sq₁ sq₂ i j k) = cube i j k where
+
+      rec-f : Fattened → B
+      rec-f = rec isGpdB f pres-loop
+
+      cube : Cube _ _ _ _ refl refl
+      cube = isGpdB
+        (rec-f F₁)
+        (rec-f F₂)
+        (cong rec-f p₁)
+        (cong rec-f p₂)
+        (cong (cong rec-f) sq₁)
+        (cong (cong rec-f) sq₂)
 
   isGroupoidFattened : isGroupoid Fattened
   isGroupoidFattened = groupoidTrunc
