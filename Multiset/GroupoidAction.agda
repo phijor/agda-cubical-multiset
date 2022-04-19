@@ -433,19 +433,3 @@ module Examples where
   -- components that stay unchanged under set-truncation.
   isFinGroupoidFin : ∀ k → isFinGroupoid (Fin k)
   isFinGroupoidFin k = isSet→isGroupoid isSetFin , k , ∣ setTruncIdempotent≃ isSetFin ∣₀
-
-module _ {ℓ : Level} where
-  record IsGroup (G : Type ℓ) : Type ℓ where
-    no-eta-equality
-    constructor isgroup
-
-    field
-      pt : G
-      is-connected : ∥ G ∥₀ × ((x y : G) → x ≡ y)
-      is-groupoid : isGroupoid G
-
-  record Group : Type (ℓ-suc ℓ) where
-    field
-      B : Type ℓ
-      is-group : IsGroup B
-
