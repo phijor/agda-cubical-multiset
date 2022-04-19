@@ -30,10 +30,7 @@ open import Multiset.SigOverGroupoid.Base
 
 private
   variable
-    ℓ ℓPos ℓOp : Level
-
-  ℓSh : Level
-  ℓSh = ℓ-zero
+    ℓ ℓOp ℓSymm : Level
 
 FinSet→hSet : FinSet ℓ → hSet ℓ
 FinSet→hSet (X , isFinSetX) = X , (isFinSet→isSet isFinSetX)
@@ -68,15 +65,21 @@ module Fatten {ℓ ℓ' : Level} (X : Type ℓ) (E : X → Type ℓ') where
   isGroupoidFattened : isGroupoid Fattened
   isGroupoidFattened = groupoidTrunc
 
-toGpdSig : SubgroupSignature ℓOp → GroupoidSignature ℓOp ℓ-zero
-toGpdSig {ℓOp = ℓOp} Sig = groupoidsig Fattened isGroupoidFattened Pos where
+toGpdSig : SubgroupSignature ℓOp ℓSymm
+  → GroupoidSignature
+    {- ℓSh = -} (ℓ-max ℓOp ℓSymm)
+    {- ℓPos = -} ℓ-zero
+toGpdSig {ℓOp = ℓOp} {ℓSymm = ℓSymm} Sig = groupoidsig Fattened isGroupoidFattened Pos where
   open SubgroupSignature Sig
 
   pos : Op → FinSet ℓ-zero
   pos op = Fin (arity op) , isFinSetFin
 
   permutation : ∀ {op} → (g : ⟨ SymmGrp op ⟩) → pos op ≡ pos op
-  permutation {op} (π , _) = Σ≡Prop (λ _ → isPropIsFinSet) (ua π)
+  permutation {op} g = Σ≡Prop (λ _ → isPropIsFinSet) (ϕ g) where
+    open PermutationGroup
+
+    ϕ = (Symm op) .embedding .fst
 
   open Fatten Op (λ op → ⟨ SymmGrp op ⟩)
 

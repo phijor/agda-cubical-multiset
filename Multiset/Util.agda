@@ -1,8 +1,11 @@
 module Multiset.Util where
 
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.GroupoidLaws
+open import Cubical.Foundations.GroupoidLaws hiding (_⁻¹)
 open import Cubical.Foundations.Structure
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Function
 
 private
   variable
@@ -154,3 +157,73 @@ X →ₛ Y = ⟨ X ⟩ → ⟨ Y ⟩
 infixr 6 _→ₛ_
 
 syntax map-syntax S X Y = X →ₛ[ S ] Y
+
+
+module Conjugate {ℓ' : Level} {K : Type ℓ'} (isSetK≃K : isSet (K ≃ K)) where
+  open import Cubical.Foundations.Univalence
+  import Cubical.HITs.PropositionalTruncation as Prop
+  open import Cubical.Foundations.Equiv
+    renaming
+      ( compEquiv to infixl 4 _∙≃_
+      ; invEquiv to infix 40 _⁻¹
+      )
+
+  open Prop renaming (∥_∥ to ∥_∥₁)
+
+  conjugate′ : A ≃ K → A ≃ A → K ≃ K
+  conjugate′ ε α = (ε ⁻¹) ∙≃ α ∙≃ ε
+
+  is2ConstantConjugate : (α : A ≃ A) (ε η : A ≃ K) → conjugate′ ε α ≡ conjugate′ η α
+  is2ConstantConjugate α ε η = {!   !}
+
+  conjugate : ∥ A ≃ K ∥₁ → A ≃ A → K ≃ K
+  conjugate ∣ε∣ α = rec→Set isSetK≃K (λ ε → conjugate′ ε α) (is2ConstantConjugate α) ∣ε∣
+
+open Conjugate public
+
+module CounterExample where
+  open import Cubical.Foundations.Isomorphism
+  open import Cubical.Data.SumFin
+  open import Cubical.Data.Empty
+  open import Cubical.Algebra.SymmetricGroup
+  open import Cubical.Relation.Nullary.Base
+
+  open Conjugate {K = Fin 3} (isOfHLevel≃ 2 isSetFin isSetFin) renaming (conjugate′ to conj)
+
+
+
+  -- ⎛ 0 1 2 ⎞
+  -- ⎝ 0 2 1 ⎠
+  α-fun : Fin 3 → Fin 3
+  α-fun fzero = fzero
+  α-fun (fsuc fzero) = fsuc (fsuc fzero)
+  α-fun (fsuc (fsuc fzero)) = fsuc fzero
+
+  α : Fin 3 ≃ Fin 3
+  α = isoToEquiv (iso α-fun α-fun α-inv α-inv) where
+    α-inv : ∀ k → α-fun (α-fun k) ≡ k
+    α-inv (inl x) = refl
+    α-inv (fsuc (inl x)) = refl
+    α-inv (fsuc (fsuc (inl x))) = refl
+
+  -- ⎛ 0 1 2 ⎞
+  -- ⎝ 1 0 2 ⎠
+  η-fun : Fin 3 → Fin 3
+  η-fun fzero = fsuc fzero
+  η-fun (fsuc fzero) = fzero
+  η-fun (fsuc (fsuc fzero)) = (fsuc (fsuc fzero))
+
+  η : Fin 3 ≃ Fin 3
+  η = isoToEquiv (iso η-fun η-fun η-inv η-inv) where
+    η-inv : ∀ k → η-fun (η-fun k) ≡ k
+    η-inv fzero = refl
+    η-inv (fsuc fzero) = refl
+    η-inv (fsuc (fsuc fzero)) = refl
+
+  counterExample : ¬ (conj α (idEquiv _) ≡ conj α η)
+  counterExample ch = not-that that where
+    that : fzero ≡ fsuc (fsuc fzero)
+    that = funExt⁻ (cong fst ch) ((fzero))
+
+    not-that : ¬ (fzero ≡ fsuc (fsuc fzero))
+    not-that = SumFin≡≃ 3 fzero (fsuc (fsuc fzero)) .fst
