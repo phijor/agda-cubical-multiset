@@ -5,12 +5,17 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Isomorphism
   using
-    ( isoToEquiv
+    ( Iso
+    ; isoToEquiv
     ; iso
     )
 open import Cubical.Foundations.HLevels
   using
     ( isSetΣ
+    ; isOfHLevel
+    ; isOfHLevelΣ
+    ; isOfHLevelΠ
+    ; isSet×
     )
 open import Cubical.Foundations.Function
   using
@@ -21,10 +26,20 @@ open import Cubical.Foundations.Function
 open import Cubical.Foundations.Structure
 open import Cubical.Syntax.⟨⟩
 
+open import Cubical.Data.Unit as ⊤
+  using
+    ( Unit
+    )
+open import Cubical.Data.Empty as ⊥
+  using
+    ( ⊥
+    )
+import Cubical.Data.Sum as Sum
 open import Cubical.Data.Sigma as Σ
   using
     ( ΣPathP
     ; Σ≡Prop
+    ; _×_
     )
 open import Cubical.Data.Nat as ℕ
   using
@@ -52,6 +67,7 @@ open import Cubical.HITs.SetTruncation as SetTrunc
     ( ∥_∥₂
     ; ∣_∣₂
     ; squash₂
+    ; isSetSetTrunc
     )
 open import Cubical.HITs.PropositionalTruncation as PropTrunc
   using
@@ -84,6 +100,9 @@ FinSet₀ = FinSet ℓ-zero
   → Path (𝕄G X) ((V , finV) , v) (((W , finW) , w))
 𝕄GPathP p P = ΣPathP ((Σ≡Prop (λ _ → isPropIsFinSet) p) , P)
 
+isGroupoid𝕄G : isGroupoid X → isGroupoid (𝕄G X)
+isGroupoid𝕄G h = isOfHLevelΣ 3 FinSet.isGroupoidFinSet λ _ → isOfHLevelΠ 3 (λ _ → h)
+
 𝕄GPathP≃ : ∀ {V W : Type}
   → {finV : isFinSet V}
   → {finW : isFinSet W}
@@ -95,7 +114,7 @@ FinSet₀ = FinSet ℓ-zero
 𝕄GPathP≃ α eq = 𝕄GPathP (ua α) (ua→ eq)
 
 SymmetricAction : (n : ℕ) → Rel (Fin n → X) (Fin n → X) _
-SymmetricAction {X = X} n v w = Σ[ σ ∈ (Fin n ≃ Fin n) ] (λ i → (ua σ i → X)) [ v ≡ w ]
+SymmetricAction {X = X} n v w = Σ[ σ ∈ (Fin n ≃ Fin n) ] PathP (λ i → (ua σ i → X)) v w
 
 𝕄S : Type ℓ → Type ℓ
 𝕄S X = Σ[ n ∈ ℕ ] (Fin n → X) / SymmetricAction n
@@ -124,7 +143,7 @@ isSet𝕄 = isSetΣ ℕ.isSetℕ (λ _ → SetQuotients.squash/)
   from-equiv α = [ v ∘ invEq α ]₂
 
   is2Const : (α β : Y ≃ Fin n) → [ v ∘ (invEq α) ]₂ ≡ [ v ∘ (invEq β) ]₂
-  is2Const α β = SetQuotients.eq/ {R = SymmetricAction n} _ _ (σ , (ua→ step₂)) where
+  is2Const α β = SetQuotients.eq/ {R = SymmetricAction n} _ _ (σ , ua→ step₂) where
     σ : Fin n ≃ Fin n
     σ = invEquiv α ∙ₑ β
 
@@ -178,3 +197,134 @@ isSet𝕄 = isSetΣ ℕ.isSetℕ (λ _ → SetQuotients.squash/)
 
 𝕄S≃∥𝕄G∥₂ : 𝕄S X ≃ ∥ 𝕄G X ∥₂
 𝕄S≃∥𝕄G∥₂ = isoToEquiv (iso 𝕄S→∥𝕄G∥₂ ∥𝕄G∥₂→𝕄S ∥𝕄G∥₂→𝕄S→∥𝕄G∥₂ 𝕄S→∥𝕄G∥₂→𝕄S)
+
+module Choice where
+  private
+    variable
+      ℓA ℓB : Level
+      A : Type ℓA
+      B : Type ℓB
+
+  setTrunc≃ : A ≃ B → ∥ A ∥₂ ≃ ∥ B ∥₂
+  setTrunc≃ e = isoToEquiv (SetTrunc.setTruncIso (equivToIso e))
+
+  ∥∥₂-×-≃ : ∥ A ∥₂ × ∥ B ∥₂ ≃ ∥ A × B ∥₂
+  ∥∥₂-×-≃ {A = A} {B = B} = isoToEquiv ∥∥₂-×-Iso where
+    open Iso
+    ∥∥₂-×-Iso : Iso (∥ A ∥₂ × ∥ B ∥₂) ∥ A × B ∥₂
+    ∥∥₂-×-Iso .fun (∣a∣ , ∣b∣) = SetTrunc.rec2 isSetSetTrunc f ∣a∣ ∣b∣ where
+      f : A → B → ∥ A × B ∥₂
+      f a b = ∣ a , b ∣₂
+    ∥∥₂-×-Iso .inv = SetTrunc.rec (isSet× isSetSetTrunc isSetSetTrunc) λ (a , b) → ∣ a ∣₂ , ∣ b ∣₂
+    ∥∥₂-×-Iso .rightInv = SetTrunc.elim (λ _ → isProp→isSet (isSetSetTrunc _ _)) λ _ → refl
+    ∥∥₂-×-Iso .leftInv (∣a∣ , ∣b∣) = SetTrunc.elim2
+      {C = λ a b → ∥∥₂-×-Iso .inv (∥∥₂-×-Iso .fun (a , b)) ≡ (a , b)}
+      (λ x y → isProp→isSet (isSet× isSetSetTrunc isSetSetTrunc _ _))
+      (λ a b → refl)
+      ∣a∣ ∣b∣
+
+    -- ∥ A ∥₂ × ∥ B ∥₂
+    --   ≃⟨ invEquiv (SetTrunc.setTruncIdempotent≃ (isSet× SetTrunc.isSetSetTrunc SetTrunc.isSetSetTrunc)) ⟩
+    -- ∥ (∥ A ∥₂ × ∥ B ∥₂) ∥₂
+    --   ≃⟨ {!   !} ⟩
+    -- ∥ (A × ∥ B ∥₂) ∥₂
+    --   ≃⟨ {!   !} ⟩
+    -- ∥ A × B ∥₂
+    --   ■
+
+  setChoice≃Fin : {n : ℕ}
+    → (Y : Fin n → Type ℓ')
+    → ((k : Fin n) → ∥ Y k ∥₂) ≃ ∥ ((k : Fin n) → Y k) ∥₂
+  setChoice≃Fin {ℓ' = ℓ'} {n = 0} Y =
+    ((k : ⊥) → ∥ Y k ∥₂)
+      ≃⟨ ⊤.isContr→≃Unit ⊥.isContrΠ⊥ ⟩
+    Unit
+      ≃⟨ ⊤.Unit≃Unit* ⟩
+    ⊤.Unit* {ℓ'}
+      ≃⟨ invEquiv (SetTrunc.setTruncIdempotent≃ ⊤.isSetUnit*) ⟩
+    ∥ ⊤.Unit* {ℓ'} ∥₂
+      ≃⟨ setTrunc≃ (invEquiv ⊤.Unit≃Unit*) ⟩
+    ∥ ⊤.Unit ∥₂
+      ≃⟨ setTrunc≃ (invEquiv (⊤.isContr→≃Unit ⊥.isContrΠ⊥)) ⟩
+    ∥ ((k : ⊥) → Y k) ∥₂
+      ■
+  setChoice≃Fin {n = suc n} Y =
+    ((k : ⊤ ⊎ Fin n) → ∥ Y k ∥₂)
+      ≃⟨ Sum.Π⊎≃ ⟩
+    ((_ : ⊤) → ∥ Y (inl _) ∥₂) × ((k : Fin n) → ∥ Y (fsuc k) ∥₂)
+      ≃⟨ Σ.Σ-cong-equiv-fst (⊤.ΠUnit (λ x → ∥ Y (inl x) ∥₂)) ⟩
+    ∥ Y (inl ⊤.tt) ∥₂ × ((k : Fin n) → ∥ Y (fsuc k) ∥₂)
+      ≃⟨ Σ.Σ-cong-equiv-snd (λ _ → setChoice≃Fin {n = n} λ k → Y (inr k)) ⟩
+    ∥ Y (inl ⊤.tt) ∥₂ × ∥ ((k : Fin n) → Y (fsuc k) )∥₂
+      ≃⟨ Σ.Σ-cong-equiv-fst (setTrunc≃ (invEquiv (⊤.ΠUnit (λ x → Y (inl x))))) ⟩
+    ∥ ((_ : ⊤) → Y (inl _)) ∥₂ × ∥ ((k : Fin n) → Y (fsuc k) )∥₂
+      ≃⟨ ∥∥₂-×-≃ ⟩
+    ∥ ((_ : ⊤) → Y (inl _)) × ((k : Fin n) → Y (inr k)) ∥₂
+      ≃⟨ setTrunc≃ (invEquiv Sum.Π⊎≃) ⟩
+    ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
+      ■
+
+-- Idempotency of 𝕄S on set truncations:
+
+𝕄S∘∥-∥₂→𝕄S : 𝕄S ∥ X ∥₂ → 𝕄S X
+𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = SetQuotients.elim (λ _ → isSet𝕄) go well-defined v where
+
+  box : ∥ (Fin n → X) ∥₂ → Fin n → ∥ X ∥₂
+  box = invEq (Choice.setChoice≃Fin (λ _ → X))
+
+  unbox : (v : Fin n → ∥ X ∥₂) → ∥ (Fin n → X) ∥₂
+  unbox = equivFun (Choice.setChoice≃Fin (λ _ → X))
+
+  to-quot : ∥ (Fin n → X) ∥₂ → (Fin n → X) / SymmetricAction n
+  to-quot = SetTrunc.rec SetQuotients.squash/ [_]₂
+
+  go : (v : Fin n → ∥ X ∥₂) → 𝕄S X
+  go v = n , to-quot (unbox v)
+
+  well-defined' : ∀ v w → SymmetricAction n (box v) (box w) → to-quot v ≡ to-quot w
+  well-defined' = SetTrunc.elim2 {!   !} (λ a b (σ , p) → SetQuotients.eq/ _ _ (σ , {! box ∣ a ∣₂  !}))
+
+  well-defined : ∀ v w → SymmetricAction n v w → go v ≡ go w
+  well-defined v w (σ , p) = ΣPathP (refl , goal) where
+    v′ = unbox v
+    w′ = unbox w
+
+    goal : SetTrunc.rec SetQuotients.squash/ [_]₂ v′
+      ≡ SetTrunc.rec SetQuotients.squash/ [_]₂ w′
+    goal = {!   !}
+
+ua→cong : ∀ {ℓ ℓ' ℓ''} {A₀ A₁ : Type ℓ} {e : A₀ ≃ A₁}
+  {B : (i : I) → Type ℓ'}
+  {C : (i : I) → Type ℓ''}
+  {f₀ : A₀ → B i0} {f₁ : A₁ → B i1}
+  (F : {i : I} → B i → C i)
+  (p : PathP (λ i → ua e i → B i) f₀ f₁)
+  → PathP (λ i → ua e i → C i) (F {i0} ∘ f₀) (F {i1} ∘ f₁)
+ua→cong F p = λ i x → F (p i x)
+
+ua→cong≡ua→∘cong∘ua→⁻ : ∀ {ℓ ℓ' ℓ''} {A₀ A₁ : Type ℓ} {e : A₀ ≃ A₁}
+  {B : (i : I) → Type ℓ'}
+  {C : (i : I) → Type ℓ''}
+  {f₀ : A₀ → B i0} {f₁ : A₁ → B i1}
+  (F : {i : I} → B i → C i)
+  (p : PathP (λ i → ua e i → B i) f₀ f₁)
+  → ua→cong F p ≡ ua→ λ a i → F (ua→⁻ p a i)
+ua→cong≡ua→∘cong∘ua→⁻ F p = {!  !}
+
+𝕄S→𝕄S∘∥-∥₂ : 𝕄S X → 𝕄S ∥ X ∥₂
+𝕄S→𝕄S∘∥-∥₂ (n , [v]) = n , SetQuotients.rec SetQuotients.squash/ go well-defined [v] where
+  box : (Fin n → X) → (Fin n → ∥ X ∥₂)
+  box v = ∣_∣₂ ∘ v
+
+  go : (Fin n → X) → (Fin n → ∥ X ∥₂) / SymmetricAction n
+  go v = [ box v ]₂
+
+  module _ (v w : Fin n → X) ((σ , r) : SymmetricAction n v w) where
+    rel-box : SymmetricAction n (box v) (box w)
+    rel-box = σ , ua→cong ∣_∣₂ r
+
+    well-defined : go v ≡ go w
+    well-defined = SetQuotients.eq/ (box v) (box w) rel-box
+
+𝕄S∘∥-∥₂≃𝕄S : 𝕄S ∥ X ∥₂ ≃ 𝕄S X
+𝕄S∘∥-∥₂≃𝕄S = isoToEquiv (iso 𝕄S∘∥-∥₂→𝕄S 𝕄S→𝕄S∘∥-∥₂ {!   !} {!   !})
