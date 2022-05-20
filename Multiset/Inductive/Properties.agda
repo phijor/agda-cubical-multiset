@@ -1,4 +1,4 @@
-module Multiset.Algebra where
+module Multiset.Inductive.Properties where
 
 open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
@@ -22,7 +22,7 @@ open import Cubical.Relation.Nullary.Base
         ; no
         )
 
-open import Multiset.Base
+open import Multiset.Inductive.Base
 
 record M-Dalg {ℓ : Level} {X : Type} : Type (ℓ-suc ℓ) where
   field

@@ -1,4 +1,4 @@
-module Multiset.Base where
+module Multiset.Inductive.Base where
 
 open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
