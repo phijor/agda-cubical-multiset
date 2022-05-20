@@ -73,6 +73,7 @@ module _ (n : ℕ) where
 
 --- Actions on finite sets, specialized to `PermutationAction`s.
 module _ (n : ℕ) where
+  -- TODO: This is insanely slow to typecheck.  Figure out why.
 
   UnitPermAction : PermutationAction n ℓ-zero
   UnitPermAction = Unit , UnitActionStr (Fin n , isSetFin)
