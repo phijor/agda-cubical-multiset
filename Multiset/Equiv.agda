@@ -1,5 +1,22 @@
 module Multiset.Equiv where
 
+open import Multiset.OverSet as OverSet
+  using
+    ( SymmetricAction
+    ; _∼_
+    )
+  renaming
+    ( FMSet to 𝕄S
+    )
+
+open import Multiset.OverGroupoid as OverGroupoid
+  using ()
+  renaming
+    ( FMSet to 𝕄G
+    )
+
+open import Multiset.Util using (Π⊥≡elim)
+
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Univalence
@@ -13,12 +30,8 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
   using
     ( _∘_
-    ; 2-Constant
     ; const
     )
-
-open import Cubical.Foundations.Structure
-open import Cubical.Syntax.⟨⟩
 
 open import Cubical.Data.Unit as ⊤
   using
@@ -34,9 +47,8 @@ open import Cubical.Data.Sum as Sum
     )
 open import Cubical.Data.Sigma as Σ
   using
-    ( ΣPathP
-    ; Σ≡Prop
-    ; _×_
+    ( _×_
+    ; ΣPathP
     )
 open import Cubical.Data.Nat as ℕ
   using
@@ -53,28 +65,23 @@ open import Cubical.Data.FinSet as FinSet
     )
 open import Cubical.Data.SumFin as Fin
 
-open import Cubical.HITs.SetQuotients as SetQuotients
-  using
-    ( _/_
-    )
+open import Cubical.HITs.SetQuotients as SQ
+  using ()
   renaming
-    ( [_] to [_]₂
+    ( _/_ to _/₂_
+    ; [_] to [_]₂
     )
-open import Cubical.HITs.SetTruncation as SetTrunc
+open import Cubical.HITs.SetTruncation as ST
   using
     ( ∥_∥₂
     ; ∣_∣₂
     ; squash₂
     ; isSetSetTrunc
     )
-open import Cubical.HITs.PropositionalTruncation as PropTrunc
+open import Cubical.HITs.PropositionalTruncation as PT
   using
     ( ∥_∥
     ; ∣_∣
-    )
-open import Cubical.Relation.Binary as BinRel
-  using
-    ( Rel
     )
 
 private
@@ -84,169 +91,21 @@ private
 
 open Iso
 
-FinSet₀ : Type₁
-FinSet₀ = FinSet ℓ-zero
-
-ua→cong : ∀ {ℓ ℓ' ℓ''} {A₀ A₁ : Type ℓ} {e : A₀ ≃ A₁}
-  {B : (i : I) → Type ℓ'}
-  {C : (i : I) → Type ℓ''}
-  {f₀ : A₀ → B i0} {f₁ : A₁ → B i1}
-  (F : {i : I} → B i → C i)
-  (p : PathP (λ i → ua e i → B i) f₀ f₁)
-  → PathP (λ i → ua e i → C i) (F {i0} ∘ f₀) (F {i1} ∘ f₁)
-ua→cong F p = λ i x → F (p i x)
-
-Π⊥≡elim : ∀ {ℓ} {Z : ⊥ → Type ℓ} (v : (k : ⊥) → Z k) → ⊥.elim ≡ v
-Π⊥≡elim v _ ()
-
-𝕄G : Type ℓ → Type (ℓ-max ℓ (ℓ-suc ℓ-zero))
-𝕄G X = Σ[ Y ∈ FinSet₀ ] (⟨ Y ⟩ → X)
-
-𝕄GPath : ∀ {V W : Type}
-  → {finV : isFinSet V}
-  → {finW : isFinSet W}
-  → {v : V → X}
-  → {w : W → X}
-  → (p : V ≡ W)
-  → (P : PathP (λ i → p i → X) v w)
-  → Path (𝕄G X) ((V , finV) , v) (((W , finW) , w))
-𝕄GPath p P = ΣPathP ((Σ≡Prop (λ _ → isPropIsFinSet) p) , P)
-
-isGroupoid𝕄G : isGroupoid X → isGroupoid (𝕄G X)
-isGroupoid𝕄G h = isOfHLevelΣ 3 FinSet.isGroupoidFinSet λ _ → isOfHLevelΠ 3 (λ _ → h)
-
-𝕄GPathP≃ : ∀ {V W : Type}
-  → {finV : isFinSet V}
-  → {finW : isFinSet W}
-  → {v : V → X}
-  → {w : W → X}
-  → (α : V ≃ W)
-  → (eq : ∀ k → v k ≡ w (equivFun α k))
-  → Path (𝕄G X) ((V , finV) , v) (((W , finW) , w))
-𝕄GPathP≃ α eq = 𝕄GPath (ua α) (ua→ eq)
-
-_∷G_ : X → 𝕄G X → 𝕄G X
-x ∷G ((Y , n , finY) , v) =
-  ( ( ⊤ ⊎ Y
-    , (suc n)
-    , PropTrunc.map (Sum.⊎-equiv (idEquiv ⊤)) finY
-    )
-  , Sum.elim (λ _ → x) v
-  )
-
-SymmetricAction : (n : ℕ) → Rel (Fin n → X) (Fin n → X) _
-SymmetricAction {X = X} n v w = Σ[ σ ∈ (Fin n ≃ Fin n) ] PathP (λ i → (ua σ i → X)) v w
-
-_∼_ : {n : ℕ} → (v w : Fin n → X) → Type _
-v ∼ w = SymmetricAction _ v w
-
-∼cong : ∀ {ℓ''} {Y : Type ℓ''}  {n : ℕ} {v w : Fin n → X}
-  → (f : X → Y)
-  → (v ∼ w)
-  → (f ∘ v) ∼ (f ∘ w)
-∼cong f (σ , v-rel-w) = σ , (ua→cong f v-rel-w)
-
-𝕄S : Type ℓ → Type ℓ
-𝕄S X = Σ[ n ∈ ℕ ] (Fin n → X) / SymmetricAction n
-
-𝕄SPath : ∀ {n}
-  → (v w : Fin n → X)
-  → (σ : Fin n ≃ Fin n)
-  → (p : (λ i → (ua σ i → X)) [ v ≡ w ])
-  → Path (𝕄S X) (n , [ v ]₂) (n , [ w ]₂)
-𝕄SPath v w σ p = ΣPathP (refl , (SetQuotients.eq/ v w (σ , p)))
-
-isSet𝕄 : isSet (𝕄S X)
-isSet𝕄 = isSetΣ ℕ.isSetℕ (λ _ → SetQuotients.squash/)
-
-[]ₛ : 𝕄S X
-[]ₛ = 0 , [ ⊥.elim ]₂
-
-private
-  _∷ᶠ_ : ∀ {n} → (x : X) → (xs : Fin n → X) → Fin (suc n) → X
-  x ∷ᶠ xs = Sum.rec (λ _ → x) xs
-
-  infixr 5 _∷ᶠ_
-
-_∷S_ : X → 𝕄S X → 𝕄S X
-_∷S_ {X = X} x (n , [v]) = (suc n) , x∷v where
-  x∷_ : (v : Fin n → X) → (Fin (suc n) → X) / SymmetricAction (suc n)
-  x∷_ v = [ x ∷ᶠ v ]₂
-
-  fsuc≃ : Fin n ≃ Fin n → Fin (suc n) ≃ Fin (suc n)
-  fsuc≃ σ = Sum.⊎-equiv (idEquiv ⊤) σ
-
-  x∷-well-defined : ∀ v w → (v ∼ w) → x∷ v ≡ x∷ w
-  x∷-well-defined v w (σ , p) = SetQuotients.eq/
-    (Sum.rec (λ _ → x) v)
-    (Sum.rec (λ _ → x) w)
-    (fsuc≃ σ , ua→ (Sum.elim (λ _ → refl) (ua→⁻ p)))
-
-  x∷v : (⊤ ⊎ Fin n → X) / SymmetricAction (suc n)
-  x∷v = SetQuotients.elim (λ _ → SetQuotients.squash/) x∷_ x∷-well-defined [v]
-
-infixr 5 _∷S_
-
-∷S-comm : ∀ x y → (xs : 𝕄S X)
-  → x ∷S y ∷S xs ≡ y ∷S x ∷S xs
-∷S-comm {X = X} x y (n , v) = SetQuotients.elimProp
-  {P = λ [v] → x ∷S y ∷S (n , [v]) ≡ y ∷S x ∷S (n , [v])}
-  (λ _ → isSet𝕄 _ _)
-  (λ v → 𝕄SPath _ _ swap₀₁ (ua→ (comm v)))
-  v
-  where
-    open Sum
-
-    swap₀₁ : (Fin (2 + n)) ≃ (Fin (2 + n))
-    swap₀₁ = invEquiv ⊎-assoc-≃ ∙ₑ ⊎-equiv ⊎-swap-≃ (idEquiv (Fin n)) ∙ₑ ⊎-assoc-≃
-
-    module _ (v : Fin n → X) where
-      comm : (k : Fin (2 + n))
-        → (x ∷ᶠ y ∷ᶠ v) k ≡ (y ∷ᶠ x ∷ᶠ v) ((equivFun swap₀₁) k)
-      comm (inl x) = refl
-      comm (fsuc (inl x)) = refl
-      comm (fsuc (fsuc x)) = refl
-
-isContr𝕄S₀ : ([v] : (⊥ → X) / SymmetricAction 0) → []ₛ ≡ (0 , [v])
-isContr𝕄S₀ [v] = ΣPathP
-  ( refl
-  , ( SetQuotients.elimProp {P = λ [v] → [ ⊥.elim ]₂ ≡ [v]}
-      (λ _ → SetQuotients.squash/ _ _)
-      (λ v → cong [_]₂ (Π⊥≡elim v))
-      [v]
-    )
-  )
-
-∷S-elim : {B : 𝕄S X → Type ℓ'}
-  → (setB : ∀ m → isSet (B m))
-  → (nil : B []ₛ)
-  → (cons : (x : X) → {xs : 𝕄S X} → B xs → B (x ∷S xs))
-  → (comm : (x y : X) → {xs : 𝕄S X} → {b : B xs} → PathP (λ i → B (∷S-comm x y xs i)) (cons x (cons y b)) (cons y (cons x b)))
-  → (m : 𝕄S X) → B m
-∷S-elim {X = X} {B = B} setB nil cons comm = go where
-  go : (m : 𝕄S X) → B m
-  go (0     , v) = subst B (isContr𝕄S₀ v) nil
-  go (suc n , v) = SetQuotients.elim {P = λ [v] → B (suc n , [v])}
-    (λ m → setB (suc n , m))
-    (λ v → let x = v (inl tt) in let v' = v ∘ inr in subst B {!   !} (cons x {!   !}))
-    {!   !}
-    v
-
 𝕄S→∥𝕄G∥₂ : 𝕄S X → ∥ 𝕄G X ∥₂
-𝕄S→∥𝕄G∥₂ (n , x) = SetQuotients.rec squash₂ f well-defined x where
+𝕄S→∥𝕄G∥₂ (n , x) = SQ.rec squash₂ f well-defined x where
   f : (Fin n → X) → ∥ 𝕄G X ∥₂
   f v = ∣ (Fin n , isFinSetFin) , v ∣₂
 
-  well-defined : (v w : Fin n → X) → SymmetricAction n v w → f v ≡ f w
-  well-defined v w (σ , v∘σ≡w) = cong ∣_∣₂ (𝕄GPath (ua σ) v∘σ≡w)
+  well-defined : (v w : Fin n → X) → OverSet.SymmetricAction n v w → f v ≡ f w
+  well-defined v w (σ , v∘σ≡w) = cong ∣_∣₂ (OverGroupoid.FMSetPath (ua σ) v∘σ≡w)
 
 𝕄G→𝕄S : 𝕄G X → 𝕄S X
-𝕄G→𝕄S {X = X} ((Y , n , e) , v) = n , (PropTrunc.rec→Set SetQuotients.squash/ from-equiv is2Const e) where
-  from-equiv : Y ≃ Fin n → (Fin n → X) / SymmetricAction n
+𝕄G→𝕄S {X = X} ((Y , n , e) , v) = n , (PT.rec→Set SQ.squash/ from-equiv is2Const e) where
+  from-equiv : Y ≃ Fin n → (Fin n → X) /₂ SymmetricAction n
   from-equiv α = [ v ∘ invEq α ]₂
 
   is2Const : (α β : Y ≃ Fin n) → [ v ∘ (invEq α) ]₂ ≡ [ v ∘ (invEq β) ]₂
-  is2Const α β = SetQuotients.eq/ {R = SymmetricAction n} _ _ (σ , ua→ step₂) where
+  is2Const α β = SQ.eq/ {R = SymmetricAction n} _ _ (σ , ua→ step₂) where
     σ : Fin n ≃ Fin n
     σ = invEquiv α ∙ₑ β
 
@@ -262,22 +121,22 @@ isContr𝕄S₀ [v] = ΣPathP
       step₂ = cong v step₁
 
 ∥𝕄G∥₂→𝕄S : ∥ 𝕄G X ∥₂ → 𝕄S X
-∥𝕄G∥₂→𝕄S = SetTrunc.rec isSet𝕄 𝕄G→𝕄S
+∥𝕄G∥₂→𝕄S = ST.rec OverSet.isSetFMSet 𝕄G→𝕄S
 
 -- Section
 ∥𝕄G∥₂→𝕄S→∥𝕄G∥₂ : (x : ∥ 𝕄G X ∥₂) → 𝕄S→∥𝕄G∥₂ (∥𝕄G∥₂→𝕄S x) ≡ x
-∥𝕄G∥₂→𝕄S→∥𝕄G∥₂ {X = X} = SetTrunc.elim (λ _ → isProp→isSet (SetTrunc.squash₂ _ _)) go where
+∥𝕄G∥₂→𝕄S→∥𝕄G∥₂ {X = X} = ST.elim (λ _ → isProp→isSet (ST.squash₂ _ _)) go where
 
   module _ (Y : Type) (n : ℕ) (v : Y → X) (α : Y ≃ Fin n) where
     equiv-path :
       (λ i → ∥ ua (invEquiv α) i ≃ Fin n ∥) [ ∣ idEquiv (Fin n) ∣ ≡ ∣ α ∣ ]
-    equiv-path = isProp→PathP (λ i → PropTrunc.isPropPropTrunc) _ _
+    equiv-path = isProp→PathP (λ i → PT.isPropPropTrunc) _ _
 
     is-permutation : ∀ k → (v ∘ invEq α) k ≡ v (invEq α k)
     is-permutation _ = refl
 
     sect : ∣ (Fin n , n , ∣ idEquiv (Fin n) ∣) , v ∘ invEq α ∣₂ ≡ ∣ (Y , n , ∣ α ∣) , v ∣₂
-    sect = cong ∣_∣₂ (𝕄GPathP≃ (invEquiv α) is-permutation)
+    sect = cong ∣_∣₂ (OverGroupoid.FMSetPathP≃ (invEquiv α) is-permutation)
 
   f : ∥ 𝕄G X ∥₂ → ∥ 𝕄G X ∥₂
   f x = 𝕄S→∥𝕄G∥₂ (∥𝕄G∥₂→𝕄S x)
@@ -285,16 +144,16 @@ isContr𝕄S₀ [v] = ΣPathP
   -- Proof by induction on the propositionally truncated
   -- equivalence (e : ∥ Y ≃ Fin k ∥):
   go : (x : 𝕄G X) → f ∣ x ∣₂ ≡ ∣ x ∣₂
-  go ((Y , n , e) , v) = PropTrunc.elim
+  go ((Y , n , e) , v) = PT.elim
     -- Equality in a set truncation is a proposition:
     (λ α → let x = ∣ (Y , n , α) , v ∣₂ in squash₂ (f x) x)
     (sect Y n v)
     e
 
 𝕄S→∥𝕄G∥₂→𝕄S : (x : 𝕄S X) → ∥𝕄G∥₂→𝕄S (𝕄S→∥𝕄G∥₂ x) ≡ x
-𝕄S→∥𝕄G∥₂→𝕄S (n , v) = SetQuotients.elimProp
+𝕄S→∥𝕄G∥₂→𝕄S (n , v) = SQ.elimProp
   {P = λ v → ∥𝕄G∥₂→𝕄S (𝕄S→∥𝕄G∥₂ (n , v)) ≡ (n , v)}
-  (λ _ → isSet𝕄 _ _)
+  (λ _ → OverSet.isSetFMSet _ _)
   (λ v → refl)
   v
 
@@ -326,28 +185,28 @@ module Choice where
 
 
   setTrunc≃ : A ≃ B → ∥ A ∥₂ ≃ ∥ B ∥₂
-  setTrunc≃ e = isoToEquiv (SetTrunc.setTruncIso (equivToIso e))
+  setTrunc≃ e = isoToEquiv (ST.setTruncIso (equivToIso e))
 
   ∥∥₂×∥∥₂→∥×∥₂ : ∥ A ∥₂ × ∥ B ∥₂ → ∥ A × B ∥₂
-  ∥∥₂×∥∥₂→∥×∥₂ (∣a∣ , ∣b∣)= SetTrunc.rec2 isSetSetTrunc (λ a b → ∣ a , b ∣₂) ∣a∣ ∣b∣
+  ∥∥₂×∥∥₂→∥×∥₂ (∣a∣ , ∣b∣)= ST.rec2 ST.isSetSetTrunc (λ a b → ∣ a , b ∣₂) ∣a∣ ∣b∣
 
   ∥×∥₂→∥∥₂×∥∥₂ : ∥ A × B ∥₂ → ∥ A ∥₂ × ∥ B ∥₂
-  ∥×∥₂→∥∥₂×∥∥₂ = SetTrunc.rec (isSet× isSetSetTrunc isSetSetTrunc) (λ (a , b) → ∣ a ∣₂ , ∣ b ∣₂)
+  ∥×∥₂→∥∥₂×∥∥₂ = ST.rec (isSet× isSetSetTrunc isSetSetTrunc) (λ (a , b) → ∣ a ∣₂ , ∣ b ∣₂)
 
   ∥∥₂-×-≃ : ∥ A ∥₂ × ∥ B ∥₂ ≃ ∥ A × B ∥₂
   ∥∥₂-×-≃ {A = A} {B = B} = isoToEquiv ∥∥₂-×-Iso where
     ∥∥₂-×-Iso : Iso (∥ A ∥₂ × ∥ B ∥₂) ∥ A × B ∥₂
     ∥∥₂-×-Iso .fun = ∥∥₂×∥∥₂→∥×∥₂
     ∥∥₂-×-Iso .inv = ∥×∥₂→∥∥₂×∥∥₂
-    ∥∥₂-×-Iso .rightInv = SetTrunc.elim (λ _ → isProp→isSet (isSetSetTrunc _ _)) λ _ → refl
-    ∥∥₂-×-Iso .leftInv (∣a∣ , ∣b∣) = SetTrunc.elim2
+    ∥∥₂-×-Iso .rightInv = ST.elim (λ _ → isProp→isSet (isSetSetTrunc _ _)) λ _ → refl
+    ∥∥₂-×-Iso .leftInv (∣a∣ , ∣b∣) = ST.elim2
       {C = λ a b → ∥∥₂-×-Iso .inv (∥∥₂-×-Iso .fun (a , b)) ≡ (a , b)}
       (λ x y → isProp→isSet (isSet× isSetSetTrunc isSetSetTrunc _ _))
       (λ a b → refl)
       ∣a∣ ∣b∣
 
     -- ∥ A ∥₂ × ∥ B ∥₂
-    --   ≃⟨ invEquiv (SetTrunc.setTruncIdempotent≃ (isSet× SetTrunc.isSetSetTrunc SetTrunc.isSetSetTrunc)) ⟩
+    --   ≃⟨ invEquiv (ST.STIdempotent≃ (isSet× ST.isSetSetTrunc ST.isSetSetTrunc)) ⟩
     -- ∥ (∥ A ∥₂ × ∥ B ∥₂) ∥₂
     --   ≃⟨ {!   !} ⟩
     -- ∥ (A × ∥ B ∥₂) ∥₂
@@ -362,17 +221,17 @@ module Choice where
 
     -- Boxing:
     Π⊤∥∥₂→∥Π⊤∥₂ : ((t : ⊤) → ∥ Y t ∥₂) → ∥ ((t : ⊤) → Y t) ∥₂
-    Π⊤∥∥₂→∥Π⊤∥₂ v = SetTrunc.elim (λ _ → isSetSetTrunc) (λ y₀ → ∣ const y₀ ∣₂) (v tt)
+    Π⊤∥∥₂→∥Π⊤∥₂ v = ST.elim (λ _ → isSetSetTrunc) (λ y₀ → ∣ const y₀ ∣₂) (v tt)
 
     -- Unboxing:
     ∥Π⊤∥→Π⊤∥∥₂ : ∥ ((t : ⊤) → Y t) ∥₂ → ((t : ⊤) → ∥ Y t ∥₂)
-    ∥Π⊤∥→Π⊤∥∥₂ = SetTrunc.elim (λ _ → isSetΠ⊤∥∥₂) (∣_∣₂ ∘_)
+    ∥Π⊤∥→Π⊤∥∥₂ = ST.elim (λ _ → isSetΠ⊤∥∥₂) (∣_∣₂ ∘_)
 
     ∥∥₂-Π⊤-Iso : Iso ((t : ⊤) → ∥ Y t ∥₂) ∥ ((t : ⊤) → Y t) ∥₂
     ∥∥₂-Π⊤-Iso .fun = Π⊤∥∥₂→∥Π⊤∥₂
     ∥∥₂-Π⊤-Iso .inv = ∥Π⊤∥→Π⊤∥∥₂
-    ∥∥₂-Π⊤-Iso .rightInv = SetTrunc.elim (λ ∣v∣ → isProp→isSet (isSetSetTrunc _ ∣v∣)) (λ v → refl)
-    ∥∥₂-Π⊤-Iso .leftInv v = SetTrunc.elim
+    ∥∥₂-Π⊤-Iso .rightInv = ST.elim (λ ∣v∣ → isProp→isSet (isSetSetTrunc _ ∣v∣)) (λ v → refl)
+    ∥∥₂-Π⊤-Iso .leftInv v = ST.elim
       {B = Motive}
       (λ ∣y∣ → isProp→isSet (isSetΠ⊤∥∥₂ _ (const ∣y∣)))
       (λ y₀ → refl)
@@ -388,7 +247,7 @@ module Choice where
     iso₀ : Iso ((k : ⊥) → ∥ Y k ∥₂) ∥ ((k : ⊥) → Y k) ∥₂
     iso₀ .fun _ = ∣ ⊥.elim ∣₂
     iso₀ .inv _ = ⊥.elim
-    iso₀ .rightInv = SetTrunc.elim (λ _ → isProp→isSet (isSetSetTrunc _ _)) (cong ∣_∣₂ ∘ Π⊥≡elim)
+    iso₀ .rightInv = ST.elim (λ _ → isProp→isSet (isSetSetTrunc _ _)) (cong ∣_∣₂ ∘ Π⊥≡elim)
     iso₀ .leftInv  = Π⊥≡elim
   setChoice≅Fin {n = suc n} Y = isoₙ₊₁ where
     isoₙ₊₁ : Iso ((k : ⊤ ⊎ Fin n) → ∥ Y k ∥₂) ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
@@ -409,14 +268,14 @@ module Choice where
       ∣vₗ×vᵣ∣ = ∥∥₂×∥∥₂→∥×∥₂ (∣vₗ∣ , ∣vᵣ∣)
 
       ∣v∣ : ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
-      ∣v∣ = SetTrunc.elim (λ _ → isSetSetTrunc) (λ (l , r) → ∣ Sum.elim l r ∣₂) ∣vₗ×vᵣ∣
-    isoₙ₊₁ .inv = SetTrunc.rec (isSetΠ (λ _ → isSetSetTrunc)) λ v k → ∣ v k ∣₂
+      ∣v∣ = ST.elim (λ _ → isSetSetTrunc) (λ (l , r) → ∣ Sum.elim l r ∣₂) ∣vₗ×vᵣ∣
+    isoₙ₊₁ .inv = ST.rec (isSetΠ (λ _ → isSetSetTrunc)) λ v k → ∣ v k ∣₂
     isoₙ₊₁ .rightInv = goal where
       rec' : ∀ v → fun isoₙ₊₁ (inv isoₙ₊₁ ∣ v ∣₂) ≡ ∣ v ∣₂
       rec' = {!   !}
 
       goal : ∀ v → fun isoₙ₊₁ (inv isoₙ₊₁ v) ≡ v
-      goal v = SetTrunc.elim {!   !} {!   !} v
+      goal v = ST.elim {!   !} {!   !} v
     isoₙ₊₁ .leftInv  = {!   !}
 
   setChoice≃Fin : {n : ℕ}
@@ -428,7 +287,7 @@ module Choice where
     Unit
       ≃⟨ ⊤.Unit≃Unit* ⟩
     ⊤.Unit* {ℓ'}
-      ≃⟨ invEquiv (SetTrunc.setTruncIdempotent≃ ⊤.isSetUnit*) ⟩
+      ≃⟨ invEquiv (ST.setTruncIdempotent≃ ⊤.isSetUnit*) ⟩
     ∥ ⊤.Unit* {ℓ'} ∥₂
       ≃⟨ setTrunc≃ (invEquiv ⊤.Unit≃Unit*) ⟩
     ∥ ⊤.Unit ∥₂
@@ -454,7 +313,7 @@ module Choice where
 -- Idempotency of 𝕄S on set truncations:
 
 𝕄S∘∥-∥₂→𝕄S : 𝕄S ∥ X ∥₂ → 𝕄S X
-𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = SetQuotients.elim (λ _ → isSet𝕄) go well-defined v where
+𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = SQ.elim (λ _ → OverSet.isSetFMSet) go well-defined v where
   open Choice
 
   box : ∥ (Fin n → X) ∥₂ → Fin n → ∥ X ∥₂
@@ -463,15 +322,15 @@ module Choice where
   unbox : (v : Fin n → ∥ X ∥₂) → ∥ (Fin n → X) ∥₂
   unbox = setChoice≅Fin (λ _ → X) .fun
 
-  to-quot : ∥ (Fin n → X) ∥₂ → (Fin n → X) / SymmetricAction n
-  to-quot = SetTrunc.rec SetQuotients.squash/ [_]₂
+  to-quot : ∥ (Fin n → X) ∥₂ → (Fin n → X) /₂ SymmetricAction n
+  to-quot = ST.rec SQ.squash/ [_]₂
 
   go : (v : Fin n → ∥ X ∥₂) → 𝕄S X
   go v = n , to-quot (unbox v)
 
   -- well-defined' : ∀ v w → SymmetricAction n (box v) (box w) → to-quot v ≡ to-quot w
-  -- well-defined' = SetTrunc.elim2 {!   !}
-  --   (λ a b (σ , p) → SetQuotients.eq/ _ _ (σ , {!   !}))
+  -- well-defined' = ST.elim2 {!   !}
+  --   (λ a b (σ , p) → SQ.eq/ _ _ (σ , {!   !}))
 
   well-defined : ∀ v w → SymmetricAction n v w → go v ≡ go w
   well-defined v→∣∣ w→∣∣ (σ , p) = ΣPathP (refl , goal) where
@@ -480,22 +339,22 @@ module Choice where
 
     goal : to-quot v′ ≡ to-quot w′
     goal = {!   !}
-      -- SetTrunc.elim2
+      -- ST.elim2
       -- {C = λ ∣v∣ ∣w∣ → ∣v∣ ≡ unbox v→∣∣ → ∣w∣ ≡ unbox w→∣∣ → to-quot ∣v∣ ≡ to-quot ∣w∣}
-      -- (λ _ _ → {! SetQuotients.is  !})
-      -- (λ v w h₁ h₂ → SetQuotients.eq/ v w (σ , ua→ (λ k → {! (ua→⁻ p k)  !}))) v′ w′ refl refl
+      -- (λ _ _ → {! SQ.is  !})
+      -- (λ v w h₁ h₂ → SQ.eq/ v w (σ , ua→ (λ k → {! (ua→⁻ p k)  !}))) v′ w′ refl refl
 
 𝕄S→𝕄S∘∥-∥₂ : 𝕄S X → 𝕄S ∥ X ∥₂
-𝕄S→𝕄S∘∥-∥₂ (n , [v]) = n , SetQuotients.rec SetQuotients.squash/ go well-defined [v] where
+𝕄S→𝕄S∘∥-∥₂ (n , [v]) = n , SQ.rec SQ.squash/ go well-defined [v] where
   box : (Fin n → X) → (Fin n → ∥ X ∥₂)
   box v = ∣_∣₂ ∘ v
 
-  go : (Fin n → X) → (Fin n → ∥ X ∥₂) / SymmetricAction n
+  go : (Fin n → X) → (Fin n → ∥ X ∥₂) /₂ SymmetricAction n
   go v = [ box v ]₂
 
   module _ (v w : Fin n → X) (v∼w : v ∼ w) where
     well-defined : go v ≡ go w
-    well-defined = SetQuotients.eq/ (box v) (box w) (∼cong ∣_∣₂ v∼w)
+    well-defined = SQ.eq/ (box v) (box w) (OverSet.∼cong ∣_∣₂ v∼w)
 
 𝕄S∘∥-∥₂≃𝕄S : 𝕄S ∥ X ∥₂ ≃ 𝕄S X
 𝕄S∘∥-∥₂≃𝕄S = isoToEquiv (iso 𝕄S∘∥-∥₂→𝕄S 𝕄S→𝕄S∘∥-∥₂ {!   !} {!   !})
@@ -519,10 +378,10 @@ module HIT where
   FMSet→FMSet∥∥₂ = FMSet.Rec.f FMSet.trunc [] ∣_∣₂∷_ ∣∣₂∷-comm
 
   _∷*_ : ∥ X ∥₂ → FMSet X → FMSet X
-  _∷*_ = SetTrunc.rec (isSetΠ (λ _ → FMSet.trunc)) _∷_
+  _∷*_ = ST.rec (isSetΠ (λ _ → FMSet.trunc)) _∷_
 
   ∷*-comm : (x y : ∥ X ∥₂) → (xs : FMSet X) → x ∷* (y ∷* xs) ≡ y ∷* (x ∷* xs)
-  ∷*-comm ∣x∣ ∣y∣ xs = SetTrunc.elim2 {C = λ ∣x∣ ∣y∣ → ∣x∣ ∷* (∣y∣ ∷* xs) ≡ ∣y∣ ∷* (∣x∣ ∷* xs)}
+  ∷*-comm ∣x∣ ∣y∣ xs = ST.elim2 {C = λ ∣x∣ ∣y∣ → ∣x∣ ∷* (∣y∣ ∷* xs) ≡ ∣y∣ ∷* (∣x∣ ∷* xs)}
     (λ _ _ → isProp→isSet (FMSet.trunc _ _))
     (λ x y → FMSet.comm x y xs) ∣x∣ ∣y∣
 
@@ -538,7 +397,7 @@ module HIT where
         → {xs : FMSet ∥ X ∥₂}
         → FMSet→FMSet∥∥₂ (FMSet∥∥₂→FMSet xs) ≡ xs
         → FMSet→FMSet∥∥₂ (FMSet∥∥₂→FMSet (∣x∣ ∷ xs)) ≡ ∣x∣ ∷ xs
-      lemma = SetTrunc.elim
+      lemma = ST.elim
         {B = λ ∣x∣ → ∀ {xs} → (FMSet→FMSet∥∥₂ (FMSet∥∥₂→FMSet xs) ≡ xs) → FMSet→FMSet∥∥₂ (FMSet∥∥₂→FMSet (∣x∣ ∷ xs)) ≡ ∣x∣ ∷ xs}
         (λ ∣x∣ → isSetImplicitΠ λ xs → isSetΠ λ p → isProp→isSet (FMSet.trunc _ _))
         (λ x → cong ∣ x ∣₂∷_)
