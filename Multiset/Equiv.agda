@@ -167,23 +167,6 @@ module Choice where
       A : Type ℓA
       B : Type ℓB
 
-  elimₙ : ∀ {n} {P : (Fin n → ∥ X ∥₂) → Type ℓ'}
-    → (setP : ∀ ∣v∣ → isSet (P ∣v∣))
-    → (choice : (v : Fin n → X) → P (λ k → ∣ v k ∣₂))
-    → (v : Fin n → ∥ X ∥₂) → P v
-  elimₙ {n = ℕ.zero} {P = P} _ choice v =
-    subst P (funExt ⊥.elim) (choice ⊥.elim)
-  elimₙ {X = X} {n = suc n} {P = P} setP choice v = subst P {!   !} (choice {!   !}) where
-    v₀ : ⊤ → ∥ X ∥₂
-    v₀ = v ∘ inl
-
-    v₋ : (k : Fin n) → ∥ X ∥₂
-    v₋ = v ∘ fsuc
-
-    induction : {! P (λ k → )  !}
-    induction = {!   !} -- elimₙ {n = n} {!   !} {!   !} v₋
-
-
   setTrunc≃ : A ≃ B → ∥ A ∥₂ ≃ ∥ B ∥₂
   setTrunc≃ e = isoToEquiv (ST.setTruncIso (equivToIso e))
 
@@ -221,7 +204,7 @@ module Choice where
 
     -- Boxing:
     Π⊤∥∥₂→∥Π⊤∥₂ : ((t : ⊤) → ∥ Y t ∥₂) → ∥ ((t : ⊤) → Y t) ∥₂
-    Π⊤∥∥₂→∥Π⊤∥₂ v = ST.elim (λ _ → isSetSetTrunc) (λ y₀ → ∣ const y₀ ∣₂) (v tt)
+    Π⊤∥∥₂→∥Π⊤∥₂ v = ST.rec isSetSetTrunc (λ y₀ → ∣ const y₀ ∣₂) (v tt)
 
     -- Unboxing:
     ∥Π⊤∥→Π⊤∥∥₂ : ∥ ((t : ⊤) → Y t) ∥₂ → ((t : ⊤) → ∥ Y t ∥₂)
@@ -239,6 +222,72 @@ module Choice where
         Motive : ∥ Y tt ∥₂ → Type ℓ
         Motive ∣y∣ = ∥Π⊤∥→Π⊤∥∥₂ (Π⊤∥∥₂→∥Π⊤∥₂ (const ∣y∣)) ≡ const ∣y∣
 
+  -- TODO: Prove computation rules for nested recursions on set truncation
+  module _ where
+    rec-rec : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
+      → (setZ : isSet Z)
+      → (f : X → Y)
+      → (g : Y → Z)
+      → (x : ∥ X ∥₂)
+      → ST.rec setZ g (ST.rec isSetSetTrunc (∣_∣₂ ∘ f) x) ≡ ST.rec setZ (g ∘ f) x
+    rec-rec = {!   !}
+
+    rec-rec2 : ∀ {ℓy ℓz ℓw} {Y : Type ℓy} {Z : Type ℓz} {W : Type ℓw}
+      → (setZ : isSet Z)
+      → (f : X → W → Y)
+      → (g : Y → Z)
+      → (x : ∥ X ∥₂)
+      → (w : ∥ W ∥₂)
+      → ST.rec setZ g (ST.rec2 isSetSetTrunc (λ x w → ∣ f x w ∣₂) x w) ≡ ST.rec2 setZ (λ x w → g (f x w)) x w
+    rec-rec2 = {!   !}
+
+    rec2-const2 :  ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
+      → (setZ : isSet Z)
+      → (f : X → Z)
+      → (x : ∥ X ∥₂)
+      → (w : ∥ W ∥₂)
+      → ST.rec2 setZ (λ x w → f x) x w ≡ ST.rec setZ f x
+    rec2-const2 setZ f x w = {!   !}
+
+    rec2-const1 :  ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
+      → (setZ : isSet Z)
+      → (f : W → Z)
+      → (x : ∥ X ∥₂)
+      → (w : ∥ W ∥₂)
+      → ST.rec2 setZ (λ x w → f w) x w ≡ ST.rec setZ f w
+    rec2-const1 setZ f x w = {!   !}
+
+  box : {n : ℕ}
+    → (Y : Fin n → Type ℓ')
+    → ((k : Fin n) → ∥ Y k ∥₂) →  ∥ ((k : Fin n) → Y k) ∥₂
+  box {n = ℕ.zero} Y v = ∣ ⊥.elim ∣₂
+  box {n = suc n} Y v =  ∣v∣ where
+      ∣vᵣ∣ : ∥ ((k : Fin n) → Y (fsuc k)) ∥₂
+      ∣vᵣ∣ = box (λ k → Y (fsuc k)) (v ∘ inr)
+
+      ∣v∣ : ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
+      ∣v∣ = ST.rec2 isSetSetTrunc (λ vₗ vᵣ → ∣ Sum.elim (const vₗ) vᵣ ∣₂) (v fzero) ∣vᵣ∣
+
+  unbox : {n : ℕ}
+    → (Y : Fin n → Type ℓ')
+    → ∥ ((k : Fin n) → Y k) ∥₂ → (k : Fin n) → ∥ Y k ∥₂
+  unbox Y ∣v∣ k = ST.rec isSetSetTrunc (λ v → ∣ v k ∣₂) ∣v∣
+
+  -- TODO: Clean up.
+  -- 1) Split into lemmata
+  -- 2) Use equational reasoning
+  unbox∘box : ∀ {n : ℕ} (Y : Fin n → Type ℓ') (v : (k : Fin n) → ∥ Y k ∥₂)
+    → unbox Y (box Y v) ≡ v
+  unbox∘box {n = ℕ.zero} Y v = isContr→isProp ⊥.isContrΠ⊥ _ v
+  unbox∘box {n = suc n} Y v = funExt (Sum.elim
+    ( λ t → rec-rec2 isSetSetTrunc (λ vₗ vᵣ → Sum.elim (λ _ → vₗ) vᵣ) (λ v → ∣ v (inl t) ∣₂) (v fzero) (box (λ k → Y (fsuc k)) (λ x → v (fsuc x)))
+    ∙ rec2-const2 isSetSetTrunc ∣_∣₂ (v fzero) _
+    ∙ ST.elim {B = λ v → ST.rec isSetSetTrunc ∣_∣₂ v ≡ v} (λ _ → ST.isSetPathImplicit) (λ _ → refl) (v fzero)
+    ) λ k → rec-rec2 isSetSetTrunc (λ vₗ vᵣ → Sum.elim (λ _ → vₗ) vᵣ) (λ v → ∣ v (inr k) ∣₂) (v fzero) (box (λ k → Y (fsuc k)) (λ x → v (fsuc x)))
+    ∙ rec2-const1 isSetSetTrunc (λ v → ∣ v k ∣₂) (v fzero) (box (Y ∘ fsuc) (v ∘ fsuc))
+    ∙ funExt⁻ (unbox∘box {n = n} (Y ∘ fsuc) (v ∘ fsuc)) k
+    )
+
   setChoice≅Fin : {n : ℕ}
     → (Y : Fin n → Type ℓ')
     → Iso ((k : Fin n) → ∥ Y k ∥₂) ∥ ((k : Fin n) → Y k) ∥₂
@@ -246,9 +295,9 @@ module Choice where
 
     iso₀ : Iso ((k : ⊥) → ∥ Y k ∥₂) ∥ ((k : ⊥) → Y k) ∥₂
     iso₀ .fun _ = ∣ ⊥.elim ∣₂
-    iso₀ .inv _ = ⊥.elim
+    iso₀ .inv = unbox {n = 0} Y
     iso₀ .rightInv = ST.elim (λ _ → isProp→isSet (isSetSetTrunc _ _)) (cong ∣_∣₂ ∘ Π⊥≡elim)
-    iso₀ .leftInv  = Π⊥≡elim
+    iso₀ .leftInv  = λ v → isContr→isProp ⊥.isContrΠ⊥ _ v
   setChoice≅Fin {n = suc n} Y = isoₙ₊₁ where
     isoₙ₊₁ : Iso ((k : ⊤ ⊎ Fin n) → ∥ Y k ∥₂) ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
     isoₙ₊₁ .fun v = ∣v∣ where
@@ -269,13 +318,13 @@ module Choice where
 
       ∣v∣ : ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
       ∣v∣ = ST.elim (λ _ → isSetSetTrunc) (λ (l , r) → ∣ Sum.elim l r ∣₂) ∣vₗ×vᵣ∣
-    isoₙ₊₁ .inv = ST.rec (isSetΠ (λ _ → isSetSetTrunc)) λ v k → ∣ v k ∣₂
+    isoₙ₊₁ .inv = unbox {n = suc n} Y
     isoₙ₊₁ .rightInv = goal where
       rec' : ∀ v → fun isoₙ₊₁ (inv isoₙ₊₁ ∣ v ∣₂) ≡ ∣ v ∣₂
       rec' = {!   !}
 
       goal : ∀ v → fun isoₙ₊₁ (inv isoₙ₊₁ v) ≡ v
-      goal v = ST.elim {!   !} {!   !} v
+      goal v = {!   !}
     isoₙ₊₁ .leftInv  = {!   !}
 
   setChoice≃Fin : {n : ℕ}
@@ -310,39 +359,46 @@ module Choice where
     ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
       ■
 
+
+  elimₙ : ∀ {n} {P : (Fin n → ∥ X ∥₂) → Type ℓ'}
+    → (setP : ∀ ∣v∣ → isSet (P ∣v∣))
+    → (choice : (v : Fin n → X) → P (λ k → ∣ v k ∣₂))
+    → (v : Fin n → ∥ X ∥₂) → P v
+  elimₙ {X = X} {n = n} {P = P} setP choice v = goal where
+    v′ : ∥ (Fin n → X) ∥₂
+    v′ = box (λ _ → X) v
+
+    step : P (unbox (λ _ → X) v′)
+    step = ST.elim {B = λ v′ → P (unbox (λ _ → X) v′)} (λ ∣v∣ → setP (unbox _ ∣v∣)) choice v′
+
+    goal : P v
+    goal = subst P (unbox∘box _ v) step
+
+  elimₙ-comp : ∀ {n} {P : (Fin n → ∥ X ∥₂) → Type ℓ'}
+    → (setP : ∀ ∣v∣ → isSet (P ∣v∣))
+    → (choice : (v : Fin n → X) → P (λ k → ∣ v k ∣₂))
+    → (v : Fin n → X) → elimₙ setP choice (∣_∣₂ ∘ v) ≡ choice v
+  elimₙ-comp setP choice v = {!   !}
+
 -- Idempotency of 𝕄S on set truncations:
 
 𝕄S∘∥-∥₂→𝕄S : 𝕄S ∥ X ∥₂ → 𝕄S X
-𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = SQ.elim (λ _ → OverSet.isSetFMSet) go well-defined v where
+𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = SQ.rec (OverSet.isSetFMSet) go well-defined v where
   open Choice
 
-  box : ∥ (Fin n → X) ∥₂ → Fin n → ∥ X ∥₂
-  box = Choice.setChoice≅Fin (λ _ → X) .inv
-
-  unbox : (v : Fin n → ∥ X ∥₂) → ∥ (Fin n → X) ∥₂
-  unbox = setChoice≅Fin (λ _ → X) .fun
-
-  to-quot : ∥ (Fin n → X) ∥₂ → (Fin n → X) /₂ SymmetricAction n
-  to-quot = ST.rec SQ.squash/ [_]₂
-
-  go : (v : Fin n → ∥ X ∥₂) → 𝕄S X
-  go v = n , to-quot (unbox v)
-
-  -- well-defined' : ∀ v w → SymmetricAction n (box v) (box w) → to-quot v ≡ to-quot w
-  -- well-defined' = ST.elim2 {!   !}
-  --   (λ a b (σ , p) → SQ.eq/ _ _ (σ , {!   !}))
+  -- TODO: Pull the n outside.
+  go : (Fin n → ∥ X ∥₂) → 𝕄S X
+  go = Choice.elimₙ {P = λ _ → 𝕄S X} (λ _ → OverSet.isSetFMSet) λ v → n , [ v ]₂
 
   well-defined : ∀ v w → SymmetricAction n v w → go v ≡ go w
-  well-defined v→∣∣ w→∣∣ (σ , p) = ΣPathP (refl , goal) where
-    v′ = unbox v→∣∣
-    w′ = unbox w→∣∣
-
-    goal : to-quot v′ ≡ to-quot w′
-    goal = {!   !}
-      -- ST.elim2
-      -- {C = λ ∣v∣ ∣w∣ → ∣v∣ ≡ unbox v→∣∣ → ∣w∣ ≡ unbox w→∣∣ → to-quot ∣v∣ ≡ to-quot ∣w∣}
-      -- (λ _ _ → {! SQ.is  !})
-      -- (λ v w h₁ h₂ → SQ.eq/ v w (σ , ua→ (λ k → {! (ua→⁻ p k)  !}))) v′ w′ refl refl
+  well-defined = elimₙ {P = λ v → (w : Fin n → ∥ X ∥₂) → SymmetricAction n v w → go v ≡ go w}
+    {!   !}
+    λ v → elimₙ {P = λ w → SymmetricAction n (λ k → ∣ v k ∣₂) w → go (λ k → ∣ v k ∣₂) ≡ go w}
+      {!   !}
+      λ w (σ , p) →
+        elimₙ-comp (λ _ → OverSet.isSetFMSet) (λ v → n , [ v ]₂) v
+          ∙ OverSet.FMSetPath v w σ (ua→ {! ua→⁻ p  !}) -- TODO: Need to proptrunc the witness `p` in def of SymmetricAction
+          ∙ sym (elimₙ-comp (λ _ → OverSet.isSetFMSet) (λ v → n , [ v ]₂) w)
 
 𝕄S→𝕄S∘∥-∥₂ : 𝕄S X → 𝕄S ∥ X ∥₂
 𝕄S→𝕄S∘∥-∥₂ (n , [v]) = n , SQ.rec SQ.squash/ go well-defined [v] where
@@ -355,6 +411,12 @@ module Choice where
   module _ (v w : Fin n → X) (v∼w : v ∼ w) where
     well-defined : go v ≡ go w
     well-defined = SQ.eq/ (box v) (box w) (OverSet.∼cong ∣_∣₂ v∼w)
+
+𝕄S→𝕄S∘∥-∥₂→𝕄S : (xs : 𝕄S X) → 𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ xs) ≡ xs
+𝕄S→𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = SQ.elimProp {P = λ v → 𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ (n , v)) ≡ (n , v)}
+  (λ _ → OverSet.isSetFMSet _ _)
+  (Choice.elimₙ-comp {P = λ _ → 𝕄S X} (λ _ → OverSet.isSetFMSet) (λ v → n , [ v ]₂))
+  v
 
 𝕄S∘∥-∥₂≃𝕄S : 𝕄S ∥ X ∥₂ ≃ 𝕄S X
 𝕄S∘∥-∥₂≃𝕄S = isoToEquiv (iso 𝕄S∘∥-∥₂→𝕄S 𝕄S→𝕄S∘∥-∥₂ {!   !} {!   !})
