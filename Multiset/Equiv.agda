@@ -160,7 +160,12 @@ open Iso
 𝕄S≃∥𝕄G∥₂ : 𝕄S X ≃ ∥ 𝕄G X ∥₂
 𝕄S≃∥𝕄G∥₂ = isoToEquiv (iso 𝕄S→∥𝕄G∥₂ ∥𝕄G∥₂→𝕄S ∥𝕄G∥₂→𝕄S→∥𝕄G∥₂ 𝕄S→∥𝕄G∥₂→𝕄S)
 
+module STExt where
+  map-id : (∣x∣ : ∥ X ∥₂)
+    → ST.map (λ x → x) ∣x∣ ≡ ∣x∣
+  map-id = ST.elim (λ _ → ST.isSetPathImplicit) λ _ → refl
 
+module Choice where
   -- TODO: Prove computation rules for nested recursions on set truncation
   module _ where
     isSetSetPathImplicit : isSet X → {x y : X} → isSet (x ≡ y)
@@ -276,7 +281,9 @@ open Iso
       ST.rec2 isSetSetTrunc (λ y₀ → const ∣ y₀ ∣₂) v₀ ∣vₙ∣
         ≡⟨ rec2-const2 isSetSetTrunc ∣_∣₂ v₀ ∣vₙ∣ ⟩
       ST.rec isSetSetTrunc ∣_∣₂ v₀
-        ≡⟨ ST.elim {B = λ v → ST.rec isSetSetTrunc ∣_∣₂ v ≡ v} (λ _ → ST.isSetPathImplicit) (λ _ → refl) v₀ ⟩
+        ≡⟨ refl ⟩
+      ST.map (λ v → v) v₀
+        ≡⟨ STExt.map-id v₀ ⟩
       v fzero
         ∎
 
