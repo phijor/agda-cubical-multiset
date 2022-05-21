@@ -224,13 +224,19 @@ module Choice where
 
   -- TODO: Prove computation rules for nested recursions on set truncation
   module _ where
+    isSetSetPathImplicit : isSet X → {x y : X} → isSet (x ≡ y)
+    isSetSetPathImplicit setX = isProp→isSet (setX _ _)
+
+    isPropΠ⊥ : {Y : ⊥ → Type ℓ'} → isProp ((k : ⊥) → Y k)
+    isPropΠ⊥ = isContr→isProp ⊥.isContrΠ⊥
+
     rec-rec : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
       → (setZ : isSet Z)
       → (f : X → Y)
       → (g : Y → Z)
       → (x : ∥ X ∥₂)
       → ST.rec setZ g (ST.rec isSetSetTrunc (∣_∣₂ ∘ f) x) ≡ ST.rec setZ (g ∘ f) x
-    rec-rec = {!   !}
+    rec-rec setZ f g = ST.elim (λ _ → isSetSetPathImplicit setZ) λ _ → refl
 
     rec-rec2 : ∀ {ℓy ℓz ℓw} {Y : Type ℓy} {Z : Type ℓz} {W : Type ℓw}
       → (setZ : isSet Z)
@@ -239,7 +245,7 @@ module Choice where
       → (x : ∥ X ∥₂)
       → (w : ∥ W ∥₂)
       → ST.rec setZ g (ST.rec2 isSetSetTrunc (λ x w → ∣ f x w ∣₂) x w) ≡ ST.rec2 setZ (λ x w → g (f x w)) x w
-    rec-rec2 = {!   !}
+    rec-rec2 {Z = Z} setZ f g = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) λ _ _ → refl
 
     rec2-const2 :  ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
       → (setZ : isSet Z)
@@ -247,7 +253,7 @@ module Choice where
       → (x : ∥ X ∥₂)
       → (w : ∥ W ∥₂)
       → ST.rec2 setZ (λ x w → f x) x w ≡ ST.rec setZ f x
-    rec2-const2 setZ f x w = {!   !}
+    rec2-const2 setZ f = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) (λ _ _ → refl)
 
     rec2-const1 :  ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
       → (setZ : isSet Z)
@@ -255,7 +261,7 @@ module Choice where
       → (x : ∥ X ∥₂)
       → (w : ∥ W ∥₂)
       → ST.rec2 setZ (λ x w → f w) x w ≡ ST.rec setZ f w
-    rec2-const1 setZ f x w = {!   !}
+    rec2-const1 setZ f = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) (λ _ _ → refl)
 
   box : {n : ℕ}
     → (Y : Fin n → Type ℓ')
