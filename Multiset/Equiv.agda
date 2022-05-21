@@ -263,36 +263,100 @@ module Choice where
       → ST.rec2 setZ (λ x w → f w) x w ≡ ST.rec setZ f w
     rec2-const1 setZ f = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) (λ _ _ → refl)
 
-  box : {n : ℕ}
-    → (Y : Fin n → Type ℓ')
-    → ((k : Fin n) → ∥ Y k ∥₂) →  ∥ ((k : Fin n) → Y k) ∥₂
-  box {n = ℕ.zero} Y v = ∣ ⊥.elim ∣₂
-  box {n = suc n} Y v =  ∣v∣ where
-      ∣vᵣ∣ : ∥ ((k : Fin n) → Y (fsuc k)) ∥₂
-      ∣vᵣ∣ = box (λ k → Y (fsuc k)) (v ∘ inr)
+  box-cons : {n : ℕ}
+    → {Y : Fin (suc n) → Type ℓ'}
+    → ∥ Y fzero ∥₂
+    → ∥ ((k : Fin n) → Y (fsuc k)) ∥₂
+    → ∥ ((k : Fin (suc n)) → Y k) ∥₂
+  box-cons = ST.rec2 isSetSetTrunc (λ v₀ vₙ → ∣ Sum.elim (const v₀) vₙ ∣₂)
 
-      ∣v∣ : ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
-      ∣v∣ = ST.rec2 isSetSetTrunc (λ vₗ vᵣ → ∣ Sum.elim (const vₗ) vᵣ ∣₂) (v fzero) ∣vᵣ∣
+  box-cons-up : {n : ℕ}
+    → {Y : Fin (suc n) → Type ℓ'}
+    → {v : (k : Fin (suc n)) → Y k}
+    → box-cons {Y = Y} ∣ v fzero ∣₂ ∣ v ∘ fsuc ∣₂ ≡ ∣ v ∣₂
+  box-cons-up = cong ∣_∣₂ (funExt (Sum.elim (λ _ → refl) (λ _ → refl)))
+
+  box : {n : ℕ}
+    → {Y : Fin n → Type ℓ'}
+    → ((k : Fin n) → ∥ Y k ∥₂) →  ∥ ((k : Fin n) → Y k) ∥₂
+  box {n = ℕ.zero} v = ∣ ⊥.elim ∣₂
+  box {n = suc n} {Y = Y} v = box-cons (v fzero) (box (v ∘ inr))
+
+  box-up : {n : ℕ}
+    → {Y : Fin n → Type ℓ'}
+    → (v : (k : Fin n) → Y k)
+    → box (∣_∣₂ ∘ v) ≡ ∣ v ∣₂
+  box-up {n = 0} v = cong ∣_∣₂ (isPropΠ⊥ ⊥.elim v)
+  box-up {n = suc n} {Y = Y} v = goal where
+    v₀ : Y fzero
+    v₀ = v fzero
+
+    vₙ : (k : Fin n) → Y (fsuc k)
+    vₙ = v ∘ fsuc
+
+    induction : box (∣_∣₂ ∘ vₙ) ≡ ∣ vₙ ∣₂
+    induction = box-up vₙ
+
+    goal : box (∣_∣₂ ∘ v) ≡ ∣ v ∣₂
+    goal =
+      box-cons (∣ v₀ ∣₂) (box (∣_∣₂ ∘ vₙ))
+        ≡⟨ cong (box-cons ∣ v₀ ∣₂) induction ⟩
+      box-cons ∣ v₀ ∣₂ ∣ vₙ ∣₂
+        ≡⟨ box-cons-up ⟩
+      ∣ v ∣₂
+        ∎
 
   unbox : {n : ℕ}
-    → (Y : Fin n → Type ℓ')
+    → {Y : Fin n → Type ℓ'}
     → ∥ ((k : Fin n) → Y k) ∥₂ → (k : Fin n) → ∥ Y k ∥₂
-  unbox Y ∣v∣ k = ST.rec isSetSetTrunc (λ v → ∣ v k ∣₂) ∣v∣
+  unbox ∣v∣ k = ST.rec isSetSetTrunc (λ v → ∣ v k ∣₂) ∣v∣
 
-  -- TODO: Clean up.
-  -- 1) Split into lemmata
-  -- 2) Use equational reasoning
-  unbox∘box : ∀ {n : ℕ} (Y : Fin n → Type ℓ') (v : (k : Fin n) → ∥ Y k ∥₂)
-    → unbox Y (box Y v) ≡ v
-  unbox∘box {n = ℕ.zero} Y v = isContr→isProp ⊥.isContrΠ⊥ _ v
-  unbox∘box {n = suc n} Y v = funExt (Sum.elim
-    ( λ t → rec-rec2 isSetSetTrunc (λ vₗ vᵣ → Sum.elim (λ _ → vₗ) vᵣ) (λ v → ∣ v (inl t) ∣₂) (v fzero) (box (λ k → Y (fsuc k)) (λ x → v (fsuc x)))
-    ∙ rec2-const2 isSetSetTrunc ∣_∣₂ (v fzero) _
-    ∙ ST.elim {B = λ v → ST.rec isSetSetTrunc ∣_∣₂ v ≡ v} (λ _ → ST.isSetPathImplicit) (λ _ → refl) (v fzero)
-    ) λ k → rec-rec2 isSetSetTrunc (λ vₗ vᵣ → Sum.elim (λ _ → vₗ) vᵣ) (λ v → ∣ v (inr k) ∣₂) (v fzero) (box (λ k → Y (fsuc k)) (λ x → v (fsuc x)))
-    ∙ rec2-const1 isSetSetTrunc (λ v → ∣ v k ∣₂) (v fzero) (box (Y ∘ fsuc) (v ∘ fsuc))
-    ∙ funExt⁻ (unbox∘box {n = n} (Y ∘ fsuc) (v ∘ fsuc)) k
-    )
+  unbox∘box : ∀ {n : ℕ} {Y : Fin n → Type ℓ'} (v : (k : Fin n) → ∥ Y k ∥₂)
+    → unbox (box v) ≡ v
+  unbox∘box {n = 0} v = isContr→isProp ⊥.isContrΠ⊥ _ v
+  unbox∘box {n = suc n} {Y = Y} v = funExt (Sum.elim (λ (_ : ⊤) → case₀) caseₙ) where
+    -- v is a vector of length 1 + n:
+    _ : (k : Fin (1 + n)) → ∥ Y k ∥₂
+    _ = v
+
+    -- Denote its head by v₀:
+    v₀ : ∥ Y fzero ∥₂
+    v₀ = v fzero
+
+    -- ...and its n elements long tail by vₙ:
+    vₙ : (k : Fin n) → ∥ Y (fsuc k) ∥₂
+    vₙ = v ∘ fsuc
+
+    ∣vₙ∣ : ∥ ((k : Fin n) → Y (fsuc k)) ∥₂
+    ∣vₙ∣ = box {Y = Y ∘ fsuc} (v ∘ fsuc)
+
+    case₀ : unbox (box v) fzero ≡ v fzero
+    case₀ =
+      unbox (box v) fzero
+        ≡⟨ rec-rec2 isSetSetTrunc (λ v₀ vₙ → Sum.elim {C = Y} (λ (_ : ⊤) → v₀) vₙ) (λ v → ∣ v fzero ∣₂) v₀ ∣vₙ∣ ⟩
+      ST.rec2 isSetSetTrunc (λ y₀ → const ∣ y₀ ∣₂) v₀ ∣vₙ∣
+        ≡⟨ rec2-const2 isSetSetTrunc ∣_∣₂ v₀ ∣vₙ∣ ⟩
+      ST.rec isSetSetTrunc ∣_∣₂ v₀
+        ≡⟨ ST.elim {B = λ v → ST.rec isSetSetTrunc ∣_∣₂ v ≡ v} (λ _ → ST.isSetPathImplicit) (λ _ → refl) v₀ ⟩
+      v fzero
+        ∎
+
+    caseₙ : (k : Fin n) → unbox (box v) (fsuc k) ≡ v (fsuc k)
+    caseₙ k =
+      unbox (box v) (fsuc k)
+        ≡⟨ rec-rec2 isSetSetTrunc (λ vₗ vᵣ → Sum.elim (λ _ → vₗ) vᵣ) (λ v → ∣ v (fsuc k) ∣₂) v₀ ∣vₙ∣ ⟩
+      ST.rec2 isSetSetTrunc (const λ v → ∣ v k ∣₂) v₀ ∣vₙ∣
+        ≡⟨ rec2-const1 isSetSetTrunc (λ v → ∣ v k ∣₂) v₀ ∣vₙ∣ ⟩
+      ST.rec isSetSetTrunc (λ v → ∣ v k ∣₂) ∣vₙ∣
+        ≡⟨ refl ⟩
+      unbox (box {Y = Y ∘ fsuc} vₙ) k
+        ≡⟨ funExt⁻ (unbox∘box {n = n} vₙ) k ⟩
+      vₙ k
+        ∎
+
+  box∘unbox : ∀ {n : ℕ} {Y : Fin n → Type ℓ'} (v : ∥ ((k : Fin n) → Y k) ∥₂)
+    → box (unbox v) ≡ v
+  box∘unbox = ST.elim (λ _ → ST.isSetPathImplicit) box-up
 
   setChoice≅Fin : {n : ℕ}
     → (Y : Fin n → Type ℓ')
@@ -370,15 +434,12 @@ module Choice where
     → (setP : ∀ ∣v∣ → isSet (P ∣v∣))
     → (choice : (v : Fin n → X) → P (λ k → ∣ v k ∣₂))
     → (v : Fin n → ∥ X ∥₂) → P v
-  elimₙ {X = X} {n = n} {P = P} setP choice v = goal where
-    v′ : ∥ (Fin n → X) ∥₂
-    v′ = box (λ _ → X) v
-
-    step : P (unbox (λ _ → X) v′)
-    step = ST.elim {B = λ v′ → P (unbox (λ _ → X) v′)} (λ ∣v∣ → setP (unbox _ ∣v∣)) choice v′
+  elimₙ {P = P} setP choice v = goal where
+    step : P (unbox (box v))
+    step = ST.elim {B = P ∘ unbox} (setP ∘ unbox) choice (box v)
 
     goal : P v
-    goal = subst P (unbox∘box _ v) step
+    goal = subst P (unbox∘box v) step
 
   elimₙ-comp : ∀ {n} {P : (Fin n → ∥ X ∥₂) → Type ℓ'}
     → (setP : ∀ ∣v∣ → isSet (P ∣v∣))
