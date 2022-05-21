@@ -15,7 +15,8 @@ open import Multiset.OverGroupoid as OverGroupoid
     ( FMSet to 𝕄G
     )
 
-open import Multiset.Util using (Π⊥≡elim)
+open import Multiset.Util using (Π⊥≡elim ; isPropΠ⊥)
+import Multiset.Util.SetTruncation as STExt
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
@@ -160,59 +161,13 @@ open Iso
 𝕄S≃∥𝕄G∥₂ : 𝕄S X ≃ ∥ 𝕄G X ∥₂
 𝕄S≃∥𝕄G∥₂ = isoToEquiv (iso 𝕄S→∥𝕄G∥₂ ∥𝕄G∥₂→𝕄S ∥𝕄G∥₂→𝕄S→∥𝕄G∥₂ 𝕄S→∥𝕄G∥₂→𝕄S)
 
-module STExt where
-  map-id : (∣x∣ : ∥ X ∥₂)
-    → ST.map (λ x → x) ∣x∣ ≡ ∣x∣
-  map-id = ST.elim (λ _ → ST.isSetPathImplicit) λ _ → refl
-
 module Choice where
-  -- TODO: Prove computation rules for nested recursions on set truncation
-  module _ where
-    isSetSetPathImplicit : isSet X → {x y : X} → isSet (x ≡ y)
-    isSetSetPathImplicit setX = isProp→isSet (setX _ _)
-
-    isPropΠ⊥ : {Y : ⊥ → Type ℓ'} → isProp ((k : ⊥) → Y k)
-    isPropΠ⊥ = isContr→isProp ⊥.isContrΠ⊥
-
-    rec-rec : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
-      → (setZ : isSet Z)
-      → (f : X → Y)
-      → (g : Y → Z)
-      → (x : ∥ X ∥₂)
-      → ST.rec setZ g (ST.rec isSetSetTrunc (∣_∣₂ ∘ f) x) ≡ ST.rec setZ (g ∘ f) x
-    rec-rec setZ f g = ST.elim (λ _ → isSetSetPathImplicit setZ) λ _ → refl
-
-    rec-rec2 : ∀ {ℓy ℓz ℓw} {Y : Type ℓy} {Z : Type ℓz} {W : Type ℓw}
-      → (setZ : isSet Z)
-      → (f : X → W → Y)
-      → (g : Y → Z)
-      → (x : ∥ X ∥₂)
-      → (w : ∥ W ∥₂)
-      → ST.rec setZ g (ST.rec2 isSetSetTrunc (λ x w → ∣ f x w ∣₂) x w) ≡ ST.rec2 setZ (λ x w → g (f x w)) x w
-    rec-rec2 {Z = Z} setZ f g = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) λ _ _ → refl
-
-    rec2-const2 :  ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
-      → (setZ : isSet Z)
-      → (f : X → Z)
-      → (x : ∥ X ∥₂)
-      → (w : ∥ W ∥₂)
-      → ST.rec2 setZ (λ x w → f x) x w ≡ ST.rec setZ f x
-    rec2-const2 setZ f = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) (λ _ _ → refl)
-
-    rec2-const1 :  ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
-      → (setZ : isSet Z)
-      → (f : W → Z)
-      → (x : ∥ X ∥₂)
-      → (w : ∥ W ∥₂)
-      → ST.rec2 setZ (λ x w → f w) x w ≡ ST.rec setZ f w
-    rec2-const1 setZ f = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) (λ _ _ → refl)
-
   box-cons : {n : ℕ}
     → {Y : Fin (suc n) → Type ℓ'}
     → ∥ Y fzero ∥₂
     → ∥ ((k : Fin n) → Y (fsuc k)) ∥₂
     → ∥ ((k : Fin (suc n)) → Y k) ∥₂
-  box-cons = ST.rec2 isSetSetTrunc (λ v₀ vₙ → ∣ Sum.elim (const v₀) vₙ ∣₂)
+  box-cons = STExt.map2 (λ v₀ vₙ → Sum.elim (const v₀) vₙ)
 
   box-cons-up : {n : ℕ}
     → {Y : Fin (suc n) → Type ℓ'}
@@ -253,7 +208,7 @@ module Choice where
   unbox : {n : ℕ}
     → {Y : Fin n → Type ℓ'}
     → ∥ ((k : Fin n) → Y k) ∥₂ → (k : Fin n) → ∥ Y k ∥₂
-  unbox ∣v∣ k = ST.rec isSetSetTrunc (λ v → ∣ v k ∣₂) ∣v∣
+  unbox ∣v∣ k = ST.map (λ v → v k) ∣v∣
 
   unbox∘box : ∀ {n : ℕ} {Y : Fin n → Type ℓ'} (v : (k : Fin n) → ∥ Y k ∥₂)
     → unbox (box v) ≡ v
@@ -277,23 +232,19 @@ module Choice where
     case₀ : unbox (box v) fzero ≡ v fzero
     case₀ =
       unbox (box v) fzero
-        ≡⟨ rec-rec2 isSetSetTrunc (λ v₀ vₙ → Sum.elim {C = Y} (λ (_ : ⊤) → v₀) vₙ) (λ v → ∣ v fzero ∣₂) v₀ ∣vₙ∣ ⟩
-      ST.rec2 isSetSetTrunc (λ y₀ → const ∣ y₀ ∣₂) v₀ ∣vₙ∣
-        ≡⟨ rec2-const2 isSetSetTrunc ∣_∣₂ v₀ ∣vₙ∣ ⟩
-      ST.rec isSetSetTrunc ∣_∣₂ v₀
-        ≡⟨ refl ⟩
-      ST.map (λ v → v) v₀
-        ≡⟨ STExt.map-id v₀ ⟩
+        ≡⟨ STExt.mapMap2 _ (λ v → v fzero) v₀ ∣vₙ∣ ⟩
+      STExt.map2 (λ y₀ _ → y₀) v₀ ∣vₙ∣
+        ≡⟨ STExt.map2IdRight v₀ ∣vₙ∣ ⟩
       v fzero
         ∎
 
     caseₙ : (k : Fin n) → unbox (box v) (fsuc k) ≡ v (fsuc k)
     caseₙ k =
       unbox (box v) (fsuc k)
-        ≡⟨ rec-rec2 isSetSetTrunc (λ vₗ vᵣ → Sum.elim (λ _ → vₗ) vᵣ) (λ v → ∣ v (fsuc k) ∣₂) v₀ ∣vₙ∣ ⟩
-      ST.rec2 isSetSetTrunc (const λ v → ∣ v k ∣₂) v₀ ∣vₙ∣
-        ≡⟨ rec2-const1 isSetSetTrunc (λ v → ∣ v k ∣₂) v₀ ∣vₙ∣ ⟩
-      ST.rec isSetSetTrunc (λ v → ∣ v k ∣₂) ∣vₙ∣
+        ≡⟨ STExt.mapMap2 _ (λ v → v (fsuc k)) v₀ ∣vₙ∣ ⟩
+      STExt.map2 (λ _ v → v k) v₀ ∣vₙ∣
+        ≡⟨ STExt.map2ConstLeft _ v₀ ∣vₙ∣ ⟩
+      ST.map (λ v → v k) ∣vₙ∣
         ≡⟨ refl ⟩
       unbox (box {Y = Y ∘ fsuc} vₙ) k
         ≡⟨ funExt⁻ (unbox∘box {n = n} vₙ) k ⟩

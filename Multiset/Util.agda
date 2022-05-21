@@ -25,8 +25,12 @@ ua→cong : ∀ {ℓ ℓ' ℓ''} {A₀ A₁ : Type ℓ} {e : A₀ ≃ A₁}
   → PathP (λ i → ua e i → C i) (F {i0} ∘ f₀) (F {i1} ∘ f₁)
 ua→cong F p = λ i x → F (p i x)
 
-Π⊥≡elim : ∀ {ℓ} {Z : ⊥ → Type ℓ} (v : (k : ⊥) → Z k) → Empty.elim ≡ v
-Π⊥≡elim v _ ()
+module _ {ℓ' : Level} {Y : ⊥ → Type ℓ'} where
+  isPropΠ⊥ : isProp ((k : ⊥) → Y k)
+  isPropΠ⊥ = isContr→isProp Empty.isContrΠ⊥
+
+  Π⊥≡elim : (v : (k : ⊥) → Y k) → Empty.elim ≡ v
+  Π⊥≡elim v _ ()
 
 module _ {X Y : Type ℓ} (p : X ≡ Y) where abstract
   open import Cubical.Foundations.Equiv
