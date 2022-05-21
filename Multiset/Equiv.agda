@@ -160,67 +160,6 @@ open Iso
 𝕄S≃∥𝕄G∥₂ : 𝕄S X ≃ ∥ 𝕄G X ∥₂
 𝕄S≃∥𝕄G∥₂ = isoToEquiv (iso 𝕄S→∥𝕄G∥₂ ∥𝕄G∥₂→𝕄S ∥𝕄G∥₂→𝕄S→∥𝕄G∥₂ 𝕄S→∥𝕄G∥₂→𝕄S)
 
-module Choice where
-  private
-    variable
-      ℓA ℓB : Level
-      A : Type ℓA
-      B : Type ℓB
-
-  setTrunc≃ : A ≃ B → ∥ A ∥₂ ≃ ∥ B ∥₂
-  setTrunc≃ e = isoToEquiv (ST.setTruncIso (equivToIso e))
-
-  ∥∥₂×∥∥₂→∥×∥₂ : ∥ A ∥₂ × ∥ B ∥₂ → ∥ A × B ∥₂
-  ∥∥₂×∥∥₂→∥×∥₂ (∣a∣ , ∣b∣)= ST.rec2 ST.isSetSetTrunc (λ a b → ∣ a , b ∣₂) ∣a∣ ∣b∣
-
-  ∥×∥₂→∥∥₂×∥∥₂ : ∥ A × B ∥₂ → ∥ A ∥₂ × ∥ B ∥₂
-  ∥×∥₂→∥∥₂×∥∥₂ = ST.rec (isSet× isSetSetTrunc isSetSetTrunc) (λ (a , b) → ∣ a ∣₂ , ∣ b ∣₂)
-
-  ∥∥₂-×-≃ : ∥ A ∥₂ × ∥ B ∥₂ ≃ ∥ A × B ∥₂
-  ∥∥₂-×-≃ {A = A} {B = B} = isoToEquiv ∥∥₂-×-Iso where
-    ∥∥₂-×-Iso : Iso (∥ A ∥₂ × ∥ B ∥₂) ∥ A × B ∥₂
-    ∥∥₂-×-Iso .fun = ∥∥₂×∥∥₂→∥×∥₂
-    ∥∥₂-×-Iso .inv = ∥×∥₂→∥∥₂×∥∥₂
-    ∥∥₂-×-Iso .rightInv = ST.elim (λ _ → isProp→isSet (isSetSetTrunc _ _)) λ _ → refl
-    ∥∥₂-×-Iso .leftInv (∣a∣ , ∣b∣) = ST.elim2
-      {C = λ a b → ∥∥₂-×-Iso .inv (∥∥₂-×-Iso .fun (a , b)) ≡ (a , b)}
-      (λ x y → isProp→isSet (isSet× isSetSetTrunc isSetSetTrunc _ _))
-      (λ a b → refl)
-      ∣a∣ ∣b∣
-
-    -- ∥ A ∥₂ × ∥ B ∥₂
-    --   ≃⟨ invEquiv (ST.STIdempotent≃ (isSet× ST.isSetSetTrunc ST.isSetSetTrunc)) ⟩
-    -- ∥ (∥ A ∥₂ × ∥ B ∥₂) ∥₂
-    --   ≃⟨ {!   !} ⟩
-    -- ∥ (A × ∥ B ∥₂) ∥₂
-    --   ≃⟨ {!   !} ⟩
-    -- ∥ A × B ∥₂
-    --   ■
-
-  module _ {ℓ : Level} {Y : (t : ⊤) → Type ℓ} where
-    -- Helper: Function from the unit type into a set truncations form a set.
-    isSetΠ⊤∥∥₂ : isSet ((t : ⊤) → ∥ Y t ∥₂)
-    isSetΠ⊤∥∥₂ = isSetΠ (λ _ → isSetSetTrunc)
-
-    -- Boxing:
-    Π⊤∥∥₂→∥Π⊤∥₂ : ((t : ⊤) → ∥ Y t ∥₂) → ∥ ((t : ⊤) → Y t) ∥₂
-    Π⊤∥∥₂→∥Π⊤∥₂ v = ST.rec isSetSetTrunc (λ y₀ → ∣ const y₀ ∣₂) (v tt)
-
-    -- Unboxing:
-    ∥Π⊤∥→Π⊤∥∥₂ : ∥ ((t : ⊤) → Y t) ∥₂ → ((t : ⊤) → ∥ Y t ∥₂)
-    ∥Π⊤∥→Π⊤∥∥₂ = ST.elim (λ _ → isSetΠ⊤∥∥₂) (∣_∣₂ ∘_)
-
-    ∥∥₂-Π⊤-Iso : Iso ((t : ⊤) → ∥ Y t ∥₂) ∥ ((t : ⊤) → Y t) ∥₂
-    ∥∥₂-Π⊤-Iso .fun = Π⊤∥∥₂→∥Π⊤∥₂
-    ∥∥₂-Π⊤-Iso .inv = ∥Π⊤∥→Π⊤∥∥₂
-    ∥∥₂-Π⊤-Iso .rightInv = ST.elim (λ ∣v∣ → isProp→isSet (isSetSetTrunc _ ∣v∣)) (λ v → refl)
-    ∥∥₂-Π⊤-Iso .leftInv v = ST.elim
-      {B = Motive}
-      (λ ∣y∣ → isProp→isSet (isSetΠ⊤∥∥₂ _ (const ∣y∣)))
-      (λ y₀ → refl)
-      (v tt) where
-        Motive : ∥ Y tt ∥₂ → Type ℓ
-        Motive ∣y∣ = ∥Π⊤∥→Π⊤∥∥₂ (Π⊤∥∥₂→∥Π⊤∥₂ (const ∣y∣)) ≡ const ∣y∣
 
   -- TODO: Prove computation rules for nested recursions on set truncation
   module _ where
@@ -361,73 +300,17 @@ module Choice where
   setChoice≅Fin : {n : ℕ}
     → (Y : Fin n → Type ℓ')
     → Iso ((k : Fin n) → ∥ Y k ∥₂) ∥ ((k : Fin n) → Y k) ∥₂
-  setChoice≅Fin {n = ℕ.zero} Y = iso₀ where
-
-    iso₀ : Iso ((k : ⊥) → ∥ Y k ∥₂) ∥ ((k : ⊥) → Y k) ∥₂
-    iso₀ .fun _ = ∣ ⊥.elim ∣₂
-    iso₀ .inv = unbox {n = 0} Y
-    iso₀ .rightInv = ST.elim (λ _ → isProp→isSet (isSetSetTrunc _ _)) (cong ∣_∣₂ ∘ Π⊥≡elim)
-    iso₀ .leftInv  = λ v → isContr→isProp ⊥.isContrΠ⊥ _ v
-  setChoice≅Fin {n = suc n} Y = isoₙ₊₁ where
-    isoₙ₊₁ : Iso ((k : ⊤ ⊎ Fin n) → ∥ Y k ∥₂) ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
-    isoₙ₊₁ .fun v = ∣v∣ where
-      vᵣ : (k : Fin n) → ∥ Y (fsuc k) ∥₂
-      vᵣ = v ∘ inr
-
-      ∣vᵣ∣ : ∥ ((k : Fin n) → Y (fsuc k)) ∥₂
-      ∣vᵣ∣ = setChoice≅Fin (λ k → Y (fsuc k)) .fun vᵣ
-
-      vₗ : (t : ⊤) → ∥ Y (inl t) ∥₂
-      vₗ = v ∘ inl
-
-      ∣vₗ∣ : ∥ ((t : ⊤) → Y (inl t)) ∥₂
-      ∣vₗ∣ = Π⊤∥∥₂→∥Π⊤∥₂ vₗ
-
-      ∣vₗ×vᵣ∣ : ∥ ((t : ⊤) → Y (inl t)) × ((k : Fin n) → Y (inr k)) ∥₂
-      ∣vₗ×vᵣ∣ = ∥∥₂×∥∥₂→∥×∥₂ (∣vₗ∣ , ∣vᵣ∣)
-
-      ∣v∣ : ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
-      ∣v∣ = ST.elim (λ _ → isSetSetTrunc) (λ (l , r) → ∣ Sum.elim l r ∣₂) ∣vₗ×vᵣ∣
-    isoₙ₊₁ .inv = unbox {n = suc n} Y
-    isoₙ₊₁ .rightInv = goal where
-      rec' : ∀ v → fun isoₙ₊₁ (inv isoₙ₊₁ ∣ v ∣₂) ≡ ∣ v ∣₂
-      rec' = {!   !}
-
-      goal : ∀ v → fun isoₙ₊₁ (inv isoₙ₊₁ v) ≡ v
-      goal v = {!   !}
-    isoₙ₊₁ .leftInv  = {!   !}
+  setChoice≅Fin Y = go where
+    go : Iso _ _
+    go .fun = box
+    go .inv = unbox
+    go .rightInv = box∘unbox
+    go .leftInv = unbox∘box
 
   setChoice≃Fin : {n : ℕ}
     → (Y : Fin n → Type ℓ')
     → ((k : Fin n) → ∥ Y k ∥₂) ≃ ∥ ((k : Fin n) → Y k) ∥₂
-  setChoice≃Fin {ℓ' = ℓ'} {n = 0} Y =
-    ((k : ⊥) → ∥ Y k ∥₂)
-      ≃⟨ ⊤.isContr→≃Unit ⊥.isContrΠ⊥ ⟩
-    Unit
-      ≃⟨ ⊤.Unit≃Unit* ⟩
-    ⊤.Unit* {ℓ'}
-      ≃⟨ invEquiv (ST.setTruncIdempotent≃ ⊤.isSetUnit*) ⟩
-    ∥ ⊤.Unit* {ℓ'} ∥₂
-      ≃⟨ setTrunc≃ (invEquiv ⊤.Unit≃Unit*) ⟩
-    ∥ ⊤.Unit ∥₂
-      ≃⟨ setTrunc≃ (invEquiv (⊤.isContr→≃Unit ⊥.isContrΠ⊥)) ⟩
-    ∥ ((k : ⊥) → Y k) ∥₂
-      ■
-  setChoice≃Fin {n = suc n} Y =
-    ((k : ⊤ ⊎ Fin n) → ∥ Y k ∥₂)
-      ≃⟨ Sum.Π⊎≃ ⟩
-    ((_ : ⊤) → ∥ Y (inl _) ∥₂) × ((k : Fin n) → ∥ Y (fsuc k) ∥₂)
-      ≃⟨ Σ.Σ-cong-equiv-fst (⊤.ΠUnit (λ x → ∥ Y (inl x) ∥₂)) ⟩
-    ∥ Y (inl ⊤.tt) ∥₂ × ((k : Fin n) → ∥ Y (fsuc k) ∥₂)
-      ≃⟨ Σ.Σ-cong-equiv-snd (λ _ → setChoice≃Fin {n = n} λ k → Y (inr k)) ⟩
-    ∥ Y (inl ⊤.tt) ∥₂ × ∥ ((k : Fin n) → Y (fsuc k) )∥₂
-      ≃⟨ Σ.Σ-cong-equiv-fst (setTrunc≃ (invEquiv (⊤.ΠUnit (λ x → Y (inl x))))) ⟩
-    ∥ ((_ : ⊤) → Y (inl _)) ∥₂ × ∥ ((k : Fin n) → Y (fsuc k) )∥₂
-      ≃⟨ ∥∥₂-×-≃ ⟩
-    ∥ ((_ : ⊤) → Y (inl _)) × ((k : Fin n) → Y (inr k)) ∥₂
-      ≃⟨ setTrunc≃ (invEquiv Sum.Π⊎≃) ⟩
-    ∥ ((k : ⊤ ⊎ Fin n) → Y k) ∥₂
-      ■
+  setChoice≃Fin Y = isoToEquiv (setChoice≅Fin Y)
 
 
   elimₙ : ∀ {n} {P : (Fin n → ∥ X ∥₂) → Type ℓ'}
