@@ -6,9 +6,6 @@ import Multiset.Util.SetTruncation as STExt
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Transport
-  using
-    ( isSet-subst
-    )
 open import Cubical.Foundations.Isomorphism
   using
     ( Iso
@@ -50,16 +47,29 @@ private
 
 open Iso
 
+private
+  -- Cons for Fin-indexed vectors:
+  _∷_ : {Y : Fin (suc n) → Type ℓ'}
+    → (Y fzero)
+    → ((k : Fin n) → Y (fsuc k))
+    → ((k : Fin (suc n)) → Y k)
+  v₀ ∷ vₙ = Sum.elim (const v₀) vₙ
+
+  -- Accessing the kᵗʰ element of a Fin-indexed vector.
+  -- The partial application (at k) is a useful shorthand.
+  at : (k : Fin n) → (v : (k : Fin n) → Y k) → Y k
+  at k v = v k
+
 module _ {Y : Fin (suc n) → Type ℓ'} where
   box-cons
     : ∥ Y fzero ∥₂
     → ∥ ((k : Fin n) → Y (fsuc k)) ∥₂
     → ∥ ((k : Fin (suc n)) → Y k) ∥₂
-  box-cons = STExt.map2 (λ v₀ vₙ → Sum.elim (const v₀) vₙ)
+  box-cons = STExt.map2 _∷_
 
-  box-cons-up : {v : (k : Fin (suc n)) → Y k}
+  box-cons-compute : {v : (k : Fin (suc n)) → Y k}
     → box-cons ∣ v fzero ∣₂ ∣ v ∘ fsuc ∣₂ ≡ ∣ v ∣₂
-  box-cons-up = cong ∣_∣₂ (funExt (Sum.elim (λ _ → refl) (λ _ → refl)))
+  box-cons-compute = cong ∣_∣₂ (funExt (Sum.elim (λ _ → refl) (λ _ → refl)))
 
 module _ where
   box : ∀ {n} {Y : Fin n → Type ℓ'}
@@ -68,11 +78,11 @@ module _ where
   box {n = ℕ.zero} v = ∣ ⊥.elim ∣₂
   box {n = suc n} {Y = Y} v = box-cons (v fzero) (box (v ∘ fsuc))
 
-  box-up : ∀ {n} {Y : Fin n → Type ℓ'}
+  box-compute : ∀ {n} {Y : Fin n → Type ℓ'}
     → (v : (k : Fin n) → Y k)
     → box (∣_∣₂ ∘ v) ≡ ∣ v ∣₂
-  box-up {n = 0} v = cong ∣_∣₂ (isPropΠ⊥ ⊥.elim v)
-  box-up {n = suc n} {Y = Y} v = goal where
+  box-compute {n = 0} v = cong ∣_∣₂ (isPropΠ⊥ ⊥.elim v)
+  box-compute {n = suc n} {Y = Y} v = goal where
     v₀ : Y fzero
     v₀ = v fzero
 
@@ -80,20 +90,20 @@ module _ where
     vₙ = v ∘ fsuc
 
     induction : box (∣_∣₂ ∘ vₙ) ≡ ∣ vₙ ∣₂
-    induction = box-up vₙ
+    induction = box-compute vₙ
 
     goal : box (∣_∣₂ ∘ v) ≡ ∣ v ∣₂
     goal =
       box-cons (∣ v₀ ∣₂) (box (∣_∣₂ ∘ vₙ))
         ≡⟨ cong (box-cons ∣ v₀ ∣₂) induction ⟩
       box-cons ∣ v₀ ∣₂ ∣ vₙ ∣₂
-        ≡⟨ box-cons-up ⟩
+        ≡⟨ box-cons-compute ⟩
       ∣ v ∣₂
         ∎
 
 unbox : ∥ ((k : Fin n) → Y k) ∥₂
   → (k : Fin n) → ∥ Y k ∥₂
-unbox ∣v∣ k = ST.map (λ v → v k) ∣v∣
+unbox ∣v∣ k = ST.map (at k) ∣v∣
 
 unbox∘box : ∀ {n : ℕ} {Y : Fin n → Type ℓ'}
   → (v : (k : Fin n) → ∥ Y k ∥₂)
@@ -112,34 +122,55 @@ unbox∘box {n = suc n} {Y = Y} v = funExt (Sum.elim (λ (_ : ⊤) → case₀) 
   vₙ : (k : Fin n) → ∥ Y (fsuc k) ∥₂
   vₙ = v ∘ fsuc
 
-  ∣vₙ∣ : ∥ ((k : Fin n) → Y (fsuc k)) ∥₂
-  ∣vₙ∣ = box {Y = Y ∘ fsuc} (v ∘ fsuc)
+  -- First, we unfold the definitions of unbox and box once:
+  unfold-once : ∀ k → unbox (box v) k ≡ STExt.map2 (λ y₀ yₙ → at {Y = Y} k (y₀ ∷ yₙ)) v₀ (box vₙ)
+  unfold-once k =
+    -- Both unbox and box are defined using map and map2, respectively.
+    ST.map (at {Y = Y} k) (STExt.map2 _∷_ v₀ (box vₙ))
+      ≡⟨
+        -- Functoriality of set truncation means we can merge the above
+        -- applications of map and map2 into a single application of map2:
+        STExt.map∘map2 (at k) _ v₀ (box vₙ)
+      ⟩
+    STExt.map2 (λ y₀ yₙ → at {Y = Y} k (y₀ ∷ yₙ)) v₀ (box vₙ)
+      ∎
 
   case₀ : unbox (box v) fzero ≡ v fzero
   case₀ =
     unbox (box v) fzero
-      ≡⟨ STExt.mapMap2 _ (λ v → v fzero) v₀ ∣vₙ∣ ⟩
-    STExt.map2 (λ y₀ _ → y₀) v₀ ∣vₙ∣
-      ≡⟨ STExt.map2IdRight v₀ ∣vₙ∣ ⟩
-    v fzero
+      ≡⟨ -- Unfold the definitions once.
+        unfold-once fzero
+      ⟩
+    STExt.map2 (λ y₀ yₙ → at {Y = Y} fzero (y₀ ∷ yₙ)) v₀ (box vₙ)
+      ≡⟨ -- Accessing the cons of a head (y₀) and a tail (yₙ) at
+         -- index 0 is constant in the tail and simply returns the head.
+        STExt.map2IdRight v₀ (box vₙ)
+      ⟩
+    v₀
       ∎
 
   caseₙ : (k : Fin n) → unbox (box v) (fsuc k) ≡ v (fsuc k)
   caseₙ k =
     unbox (box v) (fsuc k)
-      ≡⟨ STExt.mapMap2 _ (λ v → v (fsuc k)) v₀ ∣vₙ∣ ⟩
-    STExt.map2 (λ _ v → v k) v₀ ∣vₙ∣
-      ≡⟨ STExt.map2ConstLeft _ v₀ ∣vₙ∣ ⟩
-    ST.map (λ v → v k) ∣vₙ∣
-      ≡⟨ refl ⟩
+      ≡⟨ {- Unfold defs -} unfold-once (fsuc k) ⟩
+    STExt.map2 (λ y₀ yₙ → at k yₙ) v₀ (box vₙ)
+      ≡⟨ -- Accessing the cons of a head (y₀) and a tail (yₙ) at
+         -- a index (k + 1) is constant in the head and reduces
+         -- to accessing the tail at index k.
+        STExt.map2ConstLeft _ v₀ (box vₙ)
+      ⟩
+    ST.map (at k) (box vₙ)
+      ≡⟨ {- Notice that this is just the goal again, but at k + 1. -} refl ⟩
     unbox (box {Y = Y ∘ fsuc} vₙ) k
-      ≡⟨ funExt⁻ (unbox∘box {n = n} vₙ) k ⟩
+      ≡⟨ -- By induction, this reduces to the tail at index k
+        funExt⁻ (unbox∘box {n = n} vₙ) k
+      ⟩
     vₙ k
       ∎
 
 box∘unbox : (v : ∥ ((k : Fin n) → Y k) ∥₂)
   → box (unbox v) ≡ v
-box∘unbox = ST.elim (λ _ → ST.isSetPathImplicit) box-up
+box∘unbox = ST.elim (λ _ → ST.isSetPathImplicit) box-compute
 
 setFinChoice≅ : (Y : Fin n → Type ℓ')
   → Iso ((k : Fin n) → ∥ Y k ∥₂) ∥ ((k : Fin n) → Y k) ∥₂
@@ -154,20 +185,31 @@ setFinChoice≃ : (Y : Fin n → Type ℓ')
   → ((k : Fin n) → ∥ Y k ∥₂) ≃ ∥ ((k : Fin n) → Y k) ∥₂
 setFinChoice≃ Y = isoToEquiv (setFinChoice≅ Y)
 
+module _ {B : (Fin n → ∥ X ∥₂) → Type ℓ'}
+  (setB : ∀ ∣v∣ → isSet (B ∣v∣))
+  (choice : (v : Fin n → X) → B (λ k → ∣ v k ∣₂)) where
 
-elimₙ : ∀ {B : (Fin n → ∥ X ∥₂) → Type ℓ'}
-  → (setB : ∀ ∣v∣ → isSet (B ∣v∣))
-  → (choice : (v : Fin n → X) → B (λ k → ∣ v k ∣₂))
-  → (v : Fin n → ∥ X ∥₂) → B v
-elimₙ {B = B} setB choice v = goal where
-  step : B (unbox (box v))
-  step = ST.elim {B = B ∘ unbox} (setB ∘ unbox) choice (box v)
+  elimₙ′ : (v : Fin n → ∥ X ∥₂) → B (unbox (box v))
+  elimₙ′ v = ST.elim {B = B ∘ unbox} (setB ∘ unbox) choice (box v)
 
-  goal : B v
-  goal = subst B (unbox∘box v) step
+  elimₙ : (v : Fin n → ∥ X ∥₂) → B v
+  elimₙ v = subst B (unbox∘box v) (elimₙ′ v)
 
-elimₙ-comp : ∀ {n : ℕ} {B : (Fin n → ∥ X ∥₂) → Type ℓ'}
-  → (setB : ∀ ∣v∣ → isSet (B ∣v∣))
-  → (choice : (v : Fin n → X) → B (λ k → ∣ v k ∣₂))
-  → (v : Fin n → X) → elimₙ setB choice (∣_∣₂ ∘ v) ≡ choice v
-elimₙ-comp {X = X} {B = B} setB choice v = let Q = isSet-subst {B = B} (isSetΠ (λ _ → ST.isSetSetTrunc)) (unbox∘box {!   !}) in {!   !}
+  elimₙ′-comp : (v : Fin n → X)
+    → PathP (λ i → B (unbox (box-compute v i)))
+      (elimₙ′ (∣_∣₂ ∘ v))
+      (choice v)
+  elimₙ′-comp v = cong (ST.elim (setB ∘ unbox) choice) (box-compute v) where
+    _ : unbox (box (∣_∣₂ ∘ v)) ≡ ∣_∣₂ ∘ v
+    _ = cong unbox (box-compute v)
+
+  elimₙ-comp : (v : Fin n → X) → elimₙ (∣_∣₂ ∘ v) ≡ choice v
+  elimₙ-comp v =
+    subst B (unbox∘box (∣_∣₂ ∘ v)) (ST.elim (setB ∘ unbox) choice (box (∣_∣₂ ∘ v)))
+      ≡⟨ {!   !} ⟩
+    subst B refl (ST.elim (setB ∘ unbox) choice ∣ v ∣₂)
+      ≡⟨ substRefl {B = B} (choice v) ⟩
+    ST.elim (setB ∘ unbox) choice ∣ v ∣₂
+      ≡⟨ refl ⟩
+    choice v
+      ∎

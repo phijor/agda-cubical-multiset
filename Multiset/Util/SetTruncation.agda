@@ -28,42 +28,42 @@ private
   isSetSetPathImplicit : isSet X → {x y : X} → isSet (x ≡ y)
   isSetSetPathImplicit setX = isProp→isSet (setX _ _)
 
-recMap : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
+rec∘map : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
   → (setZ : isSet Z)
   → (f : X → Y)
   → (g : Y → Z)
   → (x : ∥ X ∥₂)
   → ST.rec setZ g (ST.map f x) ≡ ST.rec setZ (g ∘ f) x
-recMap setZ f g = ST.elim (λ _ → isSetSetPathImplicit setZ) λ _ → refl
+rec∘map setZ f g = ST.elim (λ _ → isSetSetPathImplicit setZ) λ _ → refl
 
-mapMap : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
+map∘map : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
   → (f : X → Y)
   → (g : Y → Z)
   → (x : ∥ X ∥₂)
   → ST.map g (ST.map f x) ≡ ST.map (g ∘ f) x
-mapMap f g = recMap isSetSetTrunc f (∣_∣₂ ∘ g)
+map∘map f g = rec∘map isSetSetTrunc f (∣_∣₂ ∘ g)
 
 map2 : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
   → (f : X → Y → Z)
   → ∥ X ∥₂ → ∥ Y ∥₂ → ∥ Z ∥₂
 map2 f = ST.rec2 ST.isSetSetTrunc λ x y → ∣ f x y ∣₂
 
-recMap2 : ∀ {ℓy ℓz ℓw} {Y : Type ℓy} {Z : Type ℓz} {W : Type ℓw}
+rec∘map2 : ∀ {ℓy ℓz ℓw} {Y : Type ℓy} {Z : Type ℓz} {W : Type ℓw}
   → (setZ : isSet Z)
   → (f : X → W → Y)
   → (g : Y → Z)
   → (x : ∥ X ∥₂)
   → (w : ∥ W ∥₂)
   → ST.rec setZ g (map2 f x w) ≡ ST.rec2 setZ (λ x w → g (f x w)) x w
-recMap2 {Z = Z} setZ f g = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) λ _ _ → refl
+rec∘map2 {Z = Z} setZ f g = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) λ _ _ → refl
 
-mapMap2 : ∀ {ℓy ℓz ℓw} {Y : Type ℓy} {Z : Type ℓz} {W : Type ℓw}
-  → (f : X → W → Y)
+map∘map2 : ∀ {ℓy ℓz ℓw} {Y : Type ℓy} {Z : Type ℓz} {W : Type ℓw}
   → (g : Y → Z)
+  → (f : X → W → Y)
   → (x : ∥ X ∥₂)
   → (w : ∥ W ∥₂)
   → ST.map g (map2 f x w) ≡ map2 (λ x w → g (f x w)) x w
-mapMap2 f g = recMap2 ST.isSetSetTrunc f (∣_∣₂ ∘ g)
+map∘map2 g f = rec∘map2 ST.isSetSetTrunc f (∣_∣₂ ∘ g)
 
 rec2ConstLeft :  ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
   → (setZ : isSet Z)
@@ -73,13 +73,13 @@ rec2ConstLeft :  ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
   → ST.rec2 setZ (λ x w → f w) x w ≡ ST.rec setZ f w
 rec2ConstLeft setZ f = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) (λ _ _ → refl)
 
-rec2Const₂ : ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
+rec2ConstRight : ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
   → (setZ : isSet Z)
   → (f : X → Z)
   → (x : ∥ X ∥₂)
   → (w : ∥ W ∥₂)
   → ST.rec2 setZ (λ x w → f x) x w ≡ ST.rec setZ f x
-rec2Const₂ setZ f = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) (λ _ _ → refl)
+rec2ConstRight setZ f = ST.elim2 (λ _ _ → isSetSetPathImplicit setZ) (λ _ _ → refl)
 
 map2ConstLeft : ∀ {ℓz ℓw} {Z : Type ℓz} {W : Type ℓw}
   → (f : W → Z)
