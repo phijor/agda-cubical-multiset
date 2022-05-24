@@ -84,6 +84,24 @@ elimSet {B = B} setB obj* hom* = elim (isSet→isGroupoid ∘ setB) obj* hom* id
   comp-coh* α β = isSet→SquareP (λ i j → setB _) _ _ _ _
 
 -- TODO: elimProp
+elimProp : ∀ {ℓ} {P : Bij → Type ℓ}
+  → (propP : (x : Bij) → isProp (P x))
+  → (obj* : (n : ℕ) → P (obj n))
+  → (x : Bij) → P x
+elimProp {P = P} propP obj* = elimSet (λ x → isProp→isSet (propP x)) obj* hom* where
+  hom* : ∀ {m n : ℕ} (α : Fin m ≃ Fin n)
+    → PathP (λ j → P (hom α j)) (obj* m) (obj* n)
+  hom* α = isProp→PathP (λ i → propP (hom α i)) (obj* _) (obj* _)
+
+elimProp2 : ∀ {ℓ} {P : Bij → Bij → Type ℓ}
+  → (propP : ∀ x y → isProp (P x y))
+  → (obj* : (m n : ℕ) → P (obj m) (obj n))
+  → (x y : Bij) → P x y
+elimProp2 {P = P} propP obj* = elimProp
+  (λ x → isPropΠ (λ y → propP x y))
+  ( λ m
+    → elimProp (λ y → propP (obj m) y) (obj* m)
+  )
 
 rec : ∀ {ℓ} {A : Type ℓ}
   → (gpdA : isGroupoid A)
