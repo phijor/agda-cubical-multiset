@@ -1,0 +1,117 @@
+module Multiset.Bij.Base where
+
+open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Function
+
+open import Cubical.Data.Nat as ℕ
+  using
+    ( ℕ
+    )
+open import Cubical.Data.SumFin as Fin
+  using
+    ( Fin
+    )
+
+data Bij : Type where
+  obj : (n : ℕ) → Bij
+  hom : {m n : ℕ} → (α : Fin m ≃ Fin n) → obj m ≡ obj n
+  id-coh : (n : ℕ) → hom {n = n} (idEquiv _) ≡ refl
+  comp-coh : {m n o : ℕ}
+    → (α : Fin m ≃ Fin n)
+    → (β : Fin n ≃ Fin o)
+    → hom (α ∙ₑ β) ≡ hom α ∙ hom β
+  trunc : isGroupoid Bij
+
+isGroupoidBij : isGroupoid Bij
+isGroupoidBij = trunc
+
+elim : ∀ {ℓ} {B : Bij → Type ℓ}
+  → (gpdB : (x : Bij) → isGroupoid (B x))
+  → (obj* : (n : ℕ) → B (obj n))
+  → (hom* : ∀ {m n} → (α : Fin m ≃ Fin n) → PathP (λ j → B (hom α j)) (obj* m) (obj* n))
+  → (id-coh* : (n : ℕ)
+      → SquareP (λ i j → B (id-coh n i j))
+        (hom* (idEquiv (Fin n))) -- top
+        (refl {x = obj* n})      -- bottom
+        (refl {x = obj* n})      -- left
+        (refl {x = obj* n})      -- right
+    )
+  → (comp-coh* : ∀ {m n o} → (α : Fin m ≃ Fin n) → (β : Fin n ≃ Fin o)
+      → SquareP (λ i j → (B (comp-coh α β i j)))
+        (hom* (α ∙ₑ β))
+        (compPathP' {B = B} (hom* α) (hom* β))
+        (refl {x = obj* m})
+        (refl {x = obj* o})
+    )
+  → (x : Bij) → B x
+elim {B = B} gpdB obj* hom* id-coh* comp-coh* = go where
+  go : (x : Bij) → B x
+  go (obj n) = obj* n
+  go (hom α i) = hom* α i
+  go (id-coh n i j) = id-coh* n i j
+  go (comp-coh α β i j) = comp-coh* α β i j
+  go (trunc x y p q p≡q₁ p≡q₂ i j k) =
+    gpdBDep _ _ _ _
+      (λ j k → go (p≡q₁ j k)) (λ j k → go (p≡q₂ j k))
+      (trunc x y p q p≡q₁ p≡q₂)
+      i j k
+    where
+      gpdBDep : isOfHLevelDep 3 B
+      gpdBDep = isOfHLevel→isOfHLevelDep 3 gpdB
+
+elimSet : ∀ {ℓ} {B : Bij → Type ℓ}
+  → (setB : (x : Bij) → isSet (B x))
+  → (obj* : (n : ℕ) → B (obj n))
+  → (hom* : ∀ {m n} → (α : Fin m ≃ Fin n) → PathP (λ j → B (hom α j)) (obj* m) (obj* n))
+  → (x : Bij) → B x
+elimSet {B = B} setB obj* hom* = elim (isSet→isGroupoid ∘ setB) obj* hom* id-coh* comp-coh* where
+  id-coh* : ∀ n →
+    SquareP (λ i j → B (id-coh n i j))
+      (hom* (idEquiv (Fin n)))
+      (refl {x = obj* n})
+      (refl {x = obj* n})
+      (refl {x = obj* n})
+  id-coh* n = isSet→SquareP (λ i j → setB _) _ _ _ _
+
+  comp-coh* : ∀ {m n o : ℕ} (α : Fin m ≃ Fin n) (β : Fin n ≃ Fin o)
+    → SquareP (λ i j → B (comp-coh α β i j))
+      (hom* (α ∙ₑ β))
+      (compPathP' {B = B} (hom* α) (hom* β))
+      (refl {x = obj* m})
+      (refl {x = obj* o})
+  comp-coh* α β = isSet→SquareP (λ i j → setB _) _ _ _ _
+
+-- TODO: elimProp
+
+rec : ∀ {ℓ} {A : Type ℓ}
+  → (gpdA : isGroupoid A)
+  → (obj* : ℕ → A)
+  → (hom* : ∀ {m n} → Fin m ≃ Fin n → obj* m ≡ obj* n)
+  → (id-coh* : ∀ n → hom* {n = n} (idEquiv _) ≡ refl)
+  → (comp-coh* : ∀ {m n o}
+      → (α : Fin m ≃ Fin n)
+      → (β : Fin n ≃ Fin o)
+      → hom* (α ∙ₑ β) ≡ hom* α ∙ hom* β
+    )
+  → Bij → A
+rec {A = A} gpdA obj* hom* id-coh* comp-coh* = elim {B = λ _ → A} (λ _ → gpdA) obj* hom* id-coh* comp-coh*′ where
+
+  comp-coh*′ : ∀ {m n o : ℕ} (α : Fin m ≃ Fin n) (β : Fin n ≃ Fin o)
+      → SquareP
+        (λ i j → A) (hom* (α ∙ₑ β)) (compPathP' {B = λ _ → A} (hom* α) (hom* β))
+        refl refl
+  comp-coh*′ = {!   !}
+
+  go : Bij → _
+  go (obj n) = obj* n
+  go (hom α i) = hom* α i
+  go (id-coh n i j) = id-coh* n i j
+  go (comp-coh α β i j) = {! comp-coh* α β i j  !}
+  go (trunc x y p q p≡q₁ p≡q₂ i j k) =
+    gpdA
+      (go x) (go y)
+      (cong go p) (cong go q)
+      (λ j k → go (p≡q₁ j k)) ((λ j k → go (p≡q₂ j k)))
+      i j k
