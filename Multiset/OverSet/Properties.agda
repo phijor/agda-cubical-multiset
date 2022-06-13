@@ -31,6 +31,7 @@ open import Cubical.Data.Sum as Sum
 open import Cubical.Data.Sigma as Sigma
   using
     ( ΣPathP
+    ; ∃-syntax
     )
 open import Cubical.Data.SumFin as Fin
   using
@@ -45,6 +46,10 @@ open import Cubical.HITs.SetQuotients as SQ
     ; eq/ to eq/₂
     ; [_] to [_]₂
     ; squash/ to squash/₂
+    )
+open import Cubical.HITs.PropositionalTruncation as PT
+  using
+    ( ∣_∣₁
     )
 
 open import Multiset.Util
@@ -66,8 +71,23 @@ private
 isSetFMSet : isSet (FMSet X)
 isSetFMSet = isSetΣ ℕ.isSetℕ (λ _ → isSetSetQuotient)
 
+FMSetPath : ∀ {n}
+  → (v w : Fin n → X)
+  → (∃[ σ ∈ (Fin n ≃ Fin n) ] PathP (λ i → (ua σ i → X)) v w)
+  → Path (FMSet X) (n , [ v ]₂) (n , [ w ]₂)
+FMSetPath v w = PT.elim (λ _ → isSetFMSet _ _)
+  λ (σ , p) → ΣPathP (refl , (eq/₂ v w ∣ σ , p ∣₁))
+
 map : ∀ {ℓy} {Y : Type ℓy} → (f : X → Y) → FMSet X → FMSet Y
-map f (n , v) = n , (SQ.rec isSetSetQuotient ([_]₂ ∘ (f ∘_)) (λ v w (σ , p) → eq/₂ _ _ (σ , (ua→cong f p))) v)
+map f (n , v) =
+  ( n
+  , ( SQ.rec
+    isSetSetQuotient
+    ([_]₂ ∘ (f ∘_))
+    (λ v w → PT.elim (λ _ → isSetSetQuotient _ _) λ (σ , p) → eq/₂ _ _ ∣ σ , (ua→cong f p) ∣₁)
+    v
+    )
+  )
 
 [] : FMSet X
 [] = 0 , [ Empty.elim ]₂
@@ -86,7 +106,10 @@ private
     [ x ]∷ v = [ x ∷ᶠ v ]₂
 
     []∷-well-defined : {x : X} → (v w : Fin n → X) → (v ∼ w) → [ x ]∷ v ≡ [ x ]∷ w
-    []∷-well-defined {x = x} v w (σ , p) = eq/₂ (x ∷ᶠ v) (x ∷ᶠ w) ((fsuc≃ σ) , ua→ (Sum.elim (λ _ → refl) (ua→⁻ p)))
+    []∷-well-defined {x = x} v w v∼w = eq/₂ (x ∷ᶠ v) (x ∷ᶠ w) rel
+      where
+        rel : SymmetricAction (suc n) (x ∷ᶠ v) (x ∷ᶠ w)
+        rel = PT.map (λ (σ , p) → (fsuc≃ σ) , (ua→ (Sum.elim (λ (_ : Unit) → refl) (ua→⁻ p)))) v∼w
 
 _∷_ : X → FMSet X → FMSet X
 _∷_ {X = X} x (n , [v]) = (suc n) , x∷v where
@@ -100,7 +123,7 @@ infixr 5 _∷_
 ∷-comm {X = X} x y (n , v) = SQ.elimProp
   {P = λ [v] → x ∷ y ∷ (n , [v]) ≡ y ∷ x ∷ (n , [v])}
   (λ _ → isSetFMSet _ _)
-  (λ v → FMSetPath _ _ swap₀₁ (ua→ (comm v)))
+  (λ v → FMSetPath _ _ ∣ swap₀₁ , (ua→ (comm v)) ∣₁)
   v
   where
     open Sum
@@ -136,6 +159,6 @@ isContrFMSet₀ [v] = ΣPathP
   go (0     , v) = subst B (isContrFMSet₀ v) nil
   go (suc n , v) = SQ.elim {P = λ [v] → B (suc n , [v])}
     (λ m → setB (suc n , m))
-    (λ v → let x = v fzero in let v' = v ∘ fsuc in subst B {!   !} (cons x {!   !}))
-    {!   !}
+    (λ v → cons (v fzero) (go (n , {! [ v ∘ fsuc ]₂ !})))
+    (λ v w v∼w → {!   !})
     v

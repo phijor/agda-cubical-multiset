@@ -77,6 +77,7 @@ open import Cubical.HITs.SetQuotients as SQ
   renaming
     ( _/_ to _/₂_
     ; [_] to [_]₂
+    ; eq/ to eq/₂
     )
 open import Cubical.HITs.SetTruncation as ST
   using
@@ -104,7 +105,9 @@ open Iso
   f v = ∣ (Fin n , isFinSetFin) , v ∣₂
 
   well-defined : (v w : Fin n → X) → OverSet.SymmetricAction n v w → f v ≡ f w
-  well-defined v w (σ , v∘σ≡w) = cong ∣_∣₂ (OverGroupoid.FMSetPath (ua σ) v∘σ≡w)
+  well-defined v w = PT.elim
+    (λ _ → isSetSetTrunc _ _)
+    (λ (σ , v∘σ≡w) → cong ∣_∣₂ (OverGroupoid.FMSetPath (ua σ) v∘σ≡w))
 
 𝕄G→𝕄S : 𝕄G X → 𝕄S X
 𝕄G→𝕄S {X = X} ((Y , n , e) , v) = n , (PT.rec→Set SQ.squash/ from-equiv is2Const e) where
@@ -112,7 +115,7 @@ open Iso
   from-equiv α = [ v ∘ invEq α ]₂
 
   is2Const : (α β : Y ≃ Fin n) → [ v ∘ (invEq α) ]₂ ≡ [ v ∘ (invEq β) ]₂
-  is2Const α β = SQ.eq/ {R = SymmetricAction n} _ _ (σ , ua→ step₂) where
+  is2Const α β = SQ.eq/ {R = SymmetricAction n} _ _ ∣ σ , (ua→ step₂) ∣ where
     σ : Fin n ≃ Fin n
     σ = invEquiv α ∙ₑ β
 
@@ -175,8 +178,8 @@ re-quot {X = X} {n = n} = FiniteChoice.elimₙ {B = λ _ → (Fin n → X) /₂ 
 dequot : ∀ {n} → ((Fin n → X) /₂ SymmetricAction n) → Fin n → ∥ X ∥₂
 dequot {n = n} v = SQ.elim {P = λ v → Fin n → ∥ _ ∥₂}
   (λ _ → isSetΠ (λ _ → ST.isSetSetTrunc))
-  ({!   !})
-  (λ v w (σ , p) → {! ua→cong ∣_∣₂  !})
+  (λ v k → ∣ v k ∣₂)
+  (λ v w v∼w → PT.elim (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _) (λ (σ , p) → funExt (λ k → cong ∣_∣₂ {!   !})) v∼w)
   v
 
 𝕄S∘∥-∥₂→𝕄S : 𝕄S ∥ X ∥₂ → 𝕄S X
@@ -189,9 +192,9 @@ dequot {n = n} v = SQ.elim {P = λ v → Fin n → ∥ _ ∥₂}
     {!   !}
     λ v → elimₙ {B = λ w → SymmetricAction n (λ k → ∣ v k ∣₂) w → re-quot (λ k → ∣ v k ∣₂) ≡ re-quot w}
       {!   !}
-      λ w (σ , p) →
+      λ w v∼w →
         elimₙ-comp (λ _ → SQ.squash/) [_]₂ v
-          ∙ {!   !} -- OverSet.FMSetPath v w σ (ua→ {! ua→⁻ p  !}) -- TODO: Need to proptrunc the witness `p` in def of SymmetricAction
+          ∙ eq/₂ v w (PT.map (λ (σ , p) → σ , (ua→ {! ua→⁻ p  !})) v∼w) -- OverSet.FMSetPath v w σ (ua→ {! ua→⁻ p  !}) -- TODO: Need to proptrunc the witness `p` in def of SymmetricAction
           ∙ sym (elimₙ-comp (λ _ → SQ.squash/) [_]₂ w)
 
 𝕄S→𝕄S∘∥-∥₂ : 𝕄S X → 𝕄S ∥ X ∥₂
