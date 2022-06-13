@@ -22,8 +22,10 @@ open import Cubical.Functions.Embedding
 open import Cubical.Functions.Surjection
 
 open import Cubical.HITs.PropositionalTruncation as PT
-  using
-    ( ∣_∣
+  using ()
+  renaming
+    ( ∣_∣₁ to ∣_∣
+    ; ∥_∥₁ to ∥_∥
     )
 
 FinSet₀ : Type₁

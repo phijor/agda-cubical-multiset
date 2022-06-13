@@ -188,7 +188,7 @@ module Conjugate {ℓ' : Level} {K : Type ℓ'} (isSetK≃K : isSet (K ≃ K)) w
       ; invEquiv to infix 40 _⁻¹
       )
 
-  open Prop renaming (∥_∥ to ∥_∥₁)
+  open Prop
 
   conjugate′ : A ≃ K → A ≃ A → K ≃ K
   conjugate′ ε α = (ε ⁻¹) ∙≃ α ∙≃ ε

@@ -82,9 +82,9 @@ open import Cubical.HITs.SetTruncation as ST
     ; isSetSetTrunc
     )
 open import Cubical.HITs.PropositionalTruncation as PT
-  using
-    ( ∥_∥
-    ; ∣_∣
+  renaming
+    ( ∥_∥₁ to ∥_∥
+    ; ∣_∣₁ to ∣_∣
     )
 
 private
