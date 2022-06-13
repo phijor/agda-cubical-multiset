@@ -2,4 +2,4 @@ name: multiset
 include:
     lib/cubical
     .
-flags: --cubical --allow-unsolved-metas
+flags: --cubical --allow-unsolved-metas -vprofile:7 -vprofile.definitions:10
