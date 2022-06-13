@@ -119,23 +119,19 @@ sectionFinSetBij = Bij.elimSet (λ _ → isSetBijPath) on-obj on-hom where
       (hom α)
   on-hom α = {!   !}
 
+isEmbeddingBij→FinSet : isEmbedding Bij→FinSet
+isEmbeddingBij→FinSet = elimProp2 (λ x y → isPropIsEquiv _) is-equiv where
+  is-equiv : ∀ m n → isEquiv {A = obj m ≡ obj n} (cong Bij→FinSet)
+  is-equiv m n = {! cong Bij→FinSet  !} -- TODO: need encode-decode
 
+isSurjectionBij→FinSet : isSurjection Bij→FinSet
+isSurjectionBij→FinSet (Y , n , ∣α∣) = PT.elim {P = λ ∣α∣ → ∥ fiber Bij→FinSet (Y , n , ∣α∣) ∥}
+  (λ _ → PT.isPropPropTrunc) inhFiber ∣α∣ where
+  inhFiber : (α : Y ≃ Fin n) → ∥ fiber Bij→FinSet (Y , n , ∣ α ∣) ∥
+  inhFiber α = ∣ (obj n) , (Σ≡Prop (λ _ → isPropIsFinSet) (sym (ua α))) ∣
 
-retractionFinSetBij : ∀ x → Bij→FinSet (FinSet→Bij x) ≡ x
-retractionFinSetBij (Y , n , ∣α∣) = PT.elim→Set {P = λ α → Bij→FinSet (FinSet→Bij (Y , n , α)) ≡ (Y , n , α)}
-  {!   !} (λ α → Σ≡Prop (λ _ → isPropIsFinSet) (sym (ua α))) isConst ∣α∣ where
-    isConst : ∀ α β → Square
-      (Σ≡Prop (λ _ → isPropIsFinSet) (sym (ua α)))
-      (Σ≡Prop (λ _ → isPropIsFinSet) (sym (ua β)))
-      (λ i → (Fin n , isFinSetFin))
-      λ i → (Y , n , PT.squash ∣ α ∣ ∣ β ∣ i)
-    isConst α β = {!  !}
+Bij≃FinSet : Bij ≃ FinSet₀
+Bij≃FinSet = Bij→FinSet , isEmbedding×isSurjection→isEquiv ({! isEmbeddingBij→FinSet !} , isSurjectionBij→FinSet)
 
-
-open Iso
-
-FinSet≅Bij : Iso FinSet₀ Bij
-FinSet≅Bij .fun = FinSet→Bij
-FinSet≅Bij .inv = Bij→FinSet
-FinSet≅Bij .rightInv = sectionFinSetBij
-FinSet≅Bij .leftInv = {!   !}
+FinSet→Bij' : FinSet₀ → Bij
+FinSet→Bij' = {! invEq Bij≃FinSet  !}
