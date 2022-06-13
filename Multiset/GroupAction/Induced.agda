@@ -10,7 +10,6 @@ open import Cubical.HITs.TypeQuotients.Base
 
 open import Multiset.GroupAction.Base
 open import Multiset.GroupAction.Orbit
-open import Multiset.Util using (_→ₛ_)
 
 private
   variable
