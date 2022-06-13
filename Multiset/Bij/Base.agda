@@ -27,6 +27,9 @@ data Bij : Type where
 isGroupoidBij : isGroupoid Bij
 isGroupoidBij = trunc
 
+isSetBijPath : {x y : Bij} → isSet (x ≡ y)
+isSetBijPath = isGroupoidBij _ _
+
 elim : ∀ {ℓ} {B : Bij → Type ℓ}
   → (gpdB : (x : Bij) → isGroupoid (B x))
   → (obj* : (n : ℕ) → B (obj n))

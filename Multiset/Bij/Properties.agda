@@ -87,7 +87,7 @@ FinSet→Bij-cong : ∀ {X Y : FinSet₀} → (p : X ≡ Y) → cong FinSet→Bi
 FinSet→Bij-cong p = {!   !}
 
 sectionFinSetBij : ∀ x → FinSet→Bij (Bij→FinSet x) ≡ x
-sectionFinSetBij = Bij.elimSet (λ _ → isGroupoidBij _ _) on-obj on-hom where
+sectionFinSetBij = Bij.elimSet (λ _ → isSetBijPath) on-obj on-hom where
   on-obj : ∀ n → FinSet→Bij (Bij→FinSet (obj n)) ≡ obj n
   on-obj n = refl
 
