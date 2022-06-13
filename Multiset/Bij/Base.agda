@@ -86,12 +86,11 @@ elimSet {B = B} setB obj* hom* = elim (isSet→isGroupoid ∘ setB) obj* hom* id
       (refl {x = obj* o})
   comp-coh* α β = isSet→SquareP (λ i j → setB _) _ _ _ _
 
--- TODO: elimProp
 elimProp : ∀ {ℓ} {P : Bij → Type ℓ}
   → (propP : (x : Bij) → isProp (P x))
   → (obj* : (n : ℕ) → P (obj n))
   → (x : Bij) → P x
-elimProp {P = P} propP obj* = elimSet (λ x → isProp→isSet (propP x)) obj* hom* where
+elimProp {P = P} propP obj* = elimSet (isProp→isSet ∘ propP) obj* hom* where
   hom* : ∀ {m n : ℕ} (α : Fin m ≃ Fin n)
     → PathP (λ j → P (hom α j)) (obj* m) (obj* n)
   hom* α = isProp→PathP (λ i → propP (hom α i)) (obj* _) (obj* _)
