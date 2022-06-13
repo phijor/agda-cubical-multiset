@@ -17,12 +17,16 @@ open import Multiset.OverGroupoid as OverGroupoid
 
 import Multiset.FiniteChoice as FiniteChoice
 
-open import Multiset.Util using (Π⊥≡elim ; isPropΠ⊥)
+open import Multiset.Util using (Π⊥≡elim ; isPropΠ⊥ ; ua→cong)
 import Multiset.Util.SetTruncation as STExt
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Univalence
+open import Cubical.Foundations.Transport
+  using
+    ( isSet-subst
+    )
 open import Cubical.Foundations.Isomorphism
   using
     ( Iso
@@ -165,44 +169,79 @@ open Iso
 
 -- Idempotency of 𝕄S on set truncations:
 
+re-quot : ∀ {n} → (Fin n → ∥ X ∥₂) → ((Fin n → X) /₂ SymmetricAction n)
+re-quot {X = X} {n = n} = FiniteChoice.elimₙ {B = λ _ → (Fin n → X) /₂ SymmetricAction n} (λ _ → SQ.squash/) [_]₂
+
+dequot : ∀ {n} → ((Fin n → X) /₂ SymmetricAction n) → Fin n → ∥ X ∥₂
+dequot {n = n} v = SQ.elim {P = λ v → Fin n → ∥ _ ∥₂}
+  (λ _ → isSetΠ (λ _ → ST.isSetSetTrunc))
+  ({!   !})
+  (λ v w (σ , p) → {! ua→cong ∣_∣₂  !})
+  v
+
 𝕄S∘∥-∥₂→𝕄S : 𝕄S ∥ X ∥₂ → 𝕄S X
-𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = SQ.rec (OverSet.isSetFMSet) go well-defined v where
+𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = n , SQ.rec (SQ.squash/) re-quot well-defined v where
   open FiniteChoice
 
   -- TODO: Pull the n outside.
-  go : (Fin n → ∥ X ∥₂) → 𝕄S X
-  go = elimₙ {B = λ _ → 𝕄S X} (λ _ → OverSet.isSetFMSet) λ v → n , [ v ]₂
-
-  well-defined : ∀ v w → SymmetricAction n v w → go v ≡ go w
-  well-defined = elimₙ {B = λ v → (w : Fin n → ∥ X ∥₂) → SymmetricAction n v w → go v ≡ go w}
+  well-defined : ∀ v w → SymmetricAction n v w → re-quot v ≡ re-quot w
+  well-defined = elimₙ {B = λ v → (w : Fin n → ∥ X ∥₂) → SymmetricAction n v w → re-quot v ≡ re-quot w}
     {!   !}
-    λ v → elimₙ {B = λ w → SymmetricAction n (λ k → ∣ v k ∣₂) w → go (λ k → ∣ v k ∣₂) ≡ go w}
+    λ v → elimₙ {B = λ w → SymmetricAction n (λ k → ∣ v k ∣₂) w → re-quot (λ k → ∣ v k ∣₂) ≡ re-quot w}
       {!   !}
       λ w (σ , p) →
-        elimₙ-comp (λ _ → OverSet.isSetFMSet) (λ v → n , [ v ]₂) v
-          ∙ OverSet.FMSetPath v w σ (ua→ {! ua→⁻ p  !}) -- TODO: Need to proptrunc the witness `p` in def of SymmetricAction
-          ∙ sym (elimₙ-comp (λ _ → OverSet.isSetFMSet) (λ v → n , [ v ]₂) w)
+        elimₙ-comp (λ _ → SQ.squash/) [_]₂ v
+          ∙ {!   !} -- OverSet.FMSetPath v w σ (ua→ {! ua→⁻ p  !}) -- TODO: Need to proptrunc the witness `p` in def of SymmetricAction
+          ∙ sym (elimₙ-comp (λ _ → SQ.squash/) [_]₂ w)
 
 𝕄S→𝕄S∘∥-∥₂ : 𝕄S X → 𝕄S ∥ X ∥₂
 𝕄S→𝕄S∘∥-∥₂ (n , [v]) = n , SQ.rec SQ.squash/ go well-defined [v] where
-  box : (Fin n → X) → (Fin n → ∥ X ∥₂)
-  box v = ∣_∣₂ ∘ v
-
   go : (Fin n → X) → (Fin n → ∥ X ∥₂) /₂ SymmetricAction n
-  go v = [ box v ]₂
+  go v = [ ∣_∣₂ ∘ v ]₂
 
   module _ (v w : Fin n → X) (v∼w : v ∼ w) where
     well-defined : go v ≡ go w
-    well-defined = SQ.eq/ (box v) (box w) (OverSet.∼cong ∣_∣₂ v∼w)
+    well-defined = SQ.eq/ (∣_∣₂ ∘ v) (∣_∣₂ ∘ w) (OverSet.∼cong ∣_∣₂ v∼w)
 
 𝕄S→𝕄S∘∥-∥₂→𝕄S : (xs : 𝕄S X) → 𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ xs) ≡ xs
-𝕄S→𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = SQ.elimProp {P = λ v → 𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ (n , v)) ≡ (n , v)}
-  (λ _ → OverSet.isSetFMSet _ _)
-  (FiniteChoice.elimₙ-comp {B = λ _ → 𝕄S X} (λ _ → OverSet.isSetFMSet) (λ v → n , [ v ]₂))
-  v
+𝕄S→𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = ΣPathP (refl , lemma) where
+  lemma : (𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ (n , v))) .snd ≡ v
+  lemma = SQ.elimProp {P = λ v → 𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ (n , v)) .snd ≡ v}
+    (λ _ → SQ.squash/ _ _)
+    (FiniteChoice.elimₙ-comp {B = λ _ → (Fin n → X) /₂ SymmetricAction n}
+      (λ _ → SQ.squash/)
+      [_]₂
+    )
+    v
+
+𝕄S∘∥-∥₂→𝕄S→𝕄S∘∥-∥₂ : (xs : 𝕄S ∥ X ∥₂) → 𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S xs) ≡ xs
+𝕄S∘∥-∥₂→𝕄S→𝕄S∘∥-∥₂ {X = X} (n , v) = ΣPathP (refl , lemma) where
+  step : (v : Fin n → ∥ X ∥₂) → 𝕄S→𝕄S∘∥-∥₂ (n , re-quot v) .snd ≡ [ v ]₂
+  step v = SQ.elimProp {P = λ v → 𝕄S→𝕄S∘∥-∥₂ (n , v) .snd ≡ [ {!   !} ]₂}
+    (λ _ → SQ.squash/ _ _)
+    (λ v → cong [_]₂ {!   !})
+    (re-quot v)
+
+  lemma : (𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S (n , v))) .snd ≡ v
+  lemma = SQ.elimProp {P = λ v → 𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S (n , v)) .snd ≡ v}
+    (λ _ → SQ.squash/ _ _) step v
+
+  -- SQ.elimProp {P = λ v → 𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S (n , v)) ≡ (n , v)}
+  -- (λ _ → OverSet.isSetFMSet _ _)
+  -- (λ v →
+  --   𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S (n , [ v ]₂))
+  --     ≡⟨ refl ⟩
+  --   𝕄S→𝕄S∘∥-∥₂ (n , FiniteChoice.elimₙ {B = λ _ → (Fin n → X) /₂ SymmetricAction n} (λ _ → SQ.squash/) [_]₂ v)
+  --     ≡⟨ cong (λ v → 𝕄S→𝕄S∘∥-∥₂ (n , v)) {!   !} ⟩
+  --   𝕄S→𝕄S∘∥-∥₂ (n , {!   !})
+  --     ≡⟨ {! !} ⟩
+  --   (n , [ v ]₂)
+  --     ∎
+  -- )
+  -- v
 
 𝕄S∘∥-∥₂≃𝕄S : 𝕄S ∥ X ∥₂ ≃ 𝕄S X
-𝕄S∘∥-∥₂≃𝕄S = isoToEquiv (iso 𝕄S∘∥-∥₂→𝕄S 𝕄S→𝕄S∘∥-∥₂ {!   !} {!   !})
+𝕄S∘∥-∥₂≃𝕄S = isoToEquiv (iso 𝕄S∘∥-∥₂→𝕄S 𝕄S→𝕄S∘∥-∥₂ 𝕄S→𝕄S∘∥-∥₂→𝕄S 𝕄S∘∥-∥₂→𝕄S→𝕄S∘∥-∥₂)
 
 module HIT where
   open import Cubical.HITs.FiniteMultiset as FMSet
