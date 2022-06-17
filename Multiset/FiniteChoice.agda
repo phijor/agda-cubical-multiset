@@ -212,6 +212,30 @@ module _ {B : (Fin n → ∥ X ∥₂) → Type ℓ'}
     subst B refl (ST.elim (setB ∘ unbox) choice ∣ v ∣₂)
       ≡⟨ substRefl {B = B} (choice v) ⟩
     ST.elim (setB ∘ unbox) choice ∣ v ∣₂
-      ≡⟨ refl ⟩
+      ≡⟨⟩
     choice v
       ∎
+
+elim2ₙ : {B : (v w : Fin n → ∥ X ∥₂) → Type ℓ'}
+  → (setB : ∀ ∣v∣ ∣w∣ → isSet (B ∣v∣ ∣w∣))
+  → (choice : (v w : Fin n → X) → B ∣ v ∣₂∗ ∣ w ∣₂∗)
+  → (v w : Fin n → ∥ X ∥₂) → B v w
+elim2ₙ {n = n} {X = X} {B = B} setB choice =
+  elimₙ {B = λ v → (w : Fin n → ∥ X ∥₂) → B v w}
+    (λ ∣v∣ → isSetΠ (λ ∣w∣ → setB ∣v∣ ∣w∣))
+    (λ v → elimₙ
+      (λ ∣w∣ → setB ∣ v ∣₂∗ ∣w∣)
+      (λ w → choice v w)
+    )
+
+recₙ : {A : Type ℓ'}
+  → (setA : isSet A)
+  → (choice : (Fin n → X) → A)
+  → (Fin n → ∥ X ∥₂) → A
+recₙ setA = elimₙ (λ _ → setA)
+
+rec2ₙ : {A : Type ℓ'}
+  → (setA : isSet A)
+  → (choice : (v w : Fin n → X) → A)
+  → (v w : Fin n → ∥ X ∥₂) → A
+rec2ₙ setA = elim2ₙ (λ _ _ → setA)
