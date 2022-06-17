@@ -24,10 +24,6 @@ open STExt using (∣_∣₂∗)
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Univalence
-open import Cubical.Foundations.Transport
-  using
-    ( isSet-subst
-    )
 open import Cubical.Foundations.Isomorphism
   using
     ( Iso
@@ -38,29 +34,12 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
   using
     ( _∘_
-    ; const
-    )
-open import Cubical.Functions.FunExtEquiv
-  using
-    ( funExtDep⁻
     )
 
-open import Cubical.Data.Unit as ⊤
-  using
-    ( Unit
-    )
-open import Cubical.Data.Empty as ⊥
-  using
-    ( ⊥
-    )
 open import Cubical.Data.Sum as Sum
-  using
-    ( _⊎_
-    )
 open import Cubical.Data.Sigma as Σ
   using
-    ( _×_
-    ; ΣPathP
+    ( ΣPathP
     )
 open import Cubical.Data.Nat as ℕ
   using
