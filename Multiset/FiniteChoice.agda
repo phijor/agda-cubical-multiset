@@ -3,6 +3,8 @@ module Multiset.FiniteChoice where
 open import Multiset.Util using (Π⊥≡elim ; isPropΠ⊥)
 import Multiset.Util.SetTruncation as STExt
 
+open STExt using (∣_∣₂∗)
+
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Transport
@@ -80,7 +82,7 @@ module _ where
 
   box-compute : ∀ {n} {Y : Fin n → Type ℓ'}
     → (v : (k : Fin n) → Y k)
-    → box (∣_∣₂ ∘ v) ≡ ∣ v ∣₂
+    → box (∣ v ∣₂∗) ≡ ∣ v ∣₂
   box-compute {n = 0} v = cong ∣_∣₂ (isPropΠ⊥ ⊥.elim v)
   box-compute {n = suc n} {Y = Y} v = goal where
     v₀ : Y fzero
@@ -197,15 +199,15 @@ module _ {B : (Fin n → ∥ X ∥₂) → Type ℓ'}
 
   elimₙ′-comp : (v : Fin n → X)
     → PathP (λ i → B (unbox (box-compute v i)))
-      (elimₙ′ (∣_∣₂ ∘ v))
+      (elimₙ′ ∣ v ∣₂∗)
       (choice v)
   elimₙ′-comp v = cong (ST.elim (setB ∘ unbox) choice) (box-compute v) where
     _ : unbox (box (∣_∣₂ ∘ v)) ≡ ∣_∣₂ ∘ v
     _ = cong unbox (box-compute v)
 
-  elimₙ-comp : (v : Fin n → X) → elimₙ (∣_∣₂ ∘ v) ≡ choice v
+  elimₙ-comp : (v : Fin n → X) → elimₙ ∣ v ∣₂∗ ≡ choice v
   elimₙ-comp v =
-    subst B (unbox∘box (∣_∣₂ ∘ v)) (ST.elim (setB ∘ unbox) choice (box (∣_∣₂ ∘ v)))
+    subst B (unbox∘box ∣ v ∣₂∗) (ST.elim (setB ∘ unbox) choice (box (∣ v ∣₂∗)))
       ≡⟨ {!   !} ⟩
     subst B refl (ST.elim (setB ∘ unbox) choice ∣ v ∣₂)
       ≡⟨ substRefl {B = B} (choice v) ⟩

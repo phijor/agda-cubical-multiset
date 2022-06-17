@@ -17,8 +17,12 @@ open import Cubical.HITs.SetTruncation as ST
 
 private
   variable
-    ℓ : Level
-    X : Type ℓ
+    ℓ ℓ' : Level
+    X A : Type ℓ
+    B : X → Type ℓ'
+
+∣_∣₂∗ : ((a : A) → B a) → ((a : A) → ∥ B a ∥₂)
+∣ f ∣₂∗ = λ a → ∣ f a ∣₂
 
 mapId : (∣x∣ : ∥ X ∥₂)
   → ST.map (λ x → x) ∣x∣ ≡ ∣x∣
