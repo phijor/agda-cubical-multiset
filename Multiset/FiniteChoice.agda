@@ -170,6 +170,10 @@ unbox∘box {n = suc n} {Y = Y} v = funExt (Sum.elim (λ (_ : ⊤) → case₀) 
     vₙ k
       ∎
 
+unbox∘box-compute : ∀ {n : ℕ} {Y : Fin n → Type ℓ'} {v : (k : Fin n) → Y k}
+  → unbox∘box ∣ v ∣₂∗ ≡ cong unbox (box-compute v)
+unbox∘box-compute = isSetΠ (λ _ → ST.isSetSetTrunc) _ _ _ _
+
 box∘unbox : (v : ∥ ((k : Fin n) → Y k) ∥₂)
   → box (unbox v) ≡ v
 box∘unbox = ST.elim (λ _ → ST.isSetPathImplicit) box-compute
@@ -201,16 +205,18 @@ module _ {B : (Fin n → ∥ X ∥₂) → Type ℓ'}
     → PathP (λ i → B (unbox (box-compute v i)))
       (elimₙ′ ∣ v ∣₂∗)
       (choice v)
-  elimₙ′-comp v = cong (ST.elim (setB ∘ unbox) choice) (box-compute v) where
-    _ : unbox (box (∣_∣₂ ∘ v)) ≡ ∣_∣₂ ∘ v
-    _ = cong unbox (box-compute v)
+  elimₙ′-comp v = cong (ST.elim (setB ∘ unbox) choice) (box-compute v)
+
+  elimₙ′-comp′ : (v : Fin n → X)
+    → PathP (λ i → B (unbox∘box ∣ v ∣₂∗ i))
+      (elimₙ′ ∣ v ∣₂∗)
+      (choice v)
+  elimₙ′-comp′ v = subst (λ p → PathP (λ i → B (p i)) (elimₙ′ ∣ v ∣₂∗) (choice v)) (sym unbox∘box-compute) (elimₙ′-comp v)
 
   elimₙ-comp : (v : Fin n → X) → elimₙ ∣ v ∣₂∗ ≡ choice v
   elimₙ-comp v =
     subst B (unbox∘box ∣ v ∣₂∗) (ST.elim (setB ∘ unbox) choice (box (∣ v ∣₂∗)))
-      ≡⟨ {!   !} ⟩
-    subst B refl (ST.elim (setB ∘ unbox) choice ∣ v ∣₂)
-      ≡⟨ substRefl {B = B} (choice v) ⟩
+      ≡⟨ fromPathP (elimₙ′-comp′ v) ⟩
     ST.elim (setB ∘ unbox) choice ∣ v ∣₂
       ≡⟨⟩
     choice v
