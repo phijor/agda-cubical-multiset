@@ -25,6 +25,13 @@ ua→cong : ∀ {ℓ ℓ' ℓ''} {A₀ A₁ : Type ℓ} {e : A₀ ≃ A₁}
   → PathP (λ i → ua e i → C i) (F {i0} ∘ f₀) (F {i1} ∘ f₁)
 ua→cong F p = λ i x → F (p i x)
 
+ua→PathP : ∀ {ℓ'} {A₀ A₁ : Type ℓ} {X : Type ℓ'}
+  → (e : A₀ ≃ A₁)
+  → (f₀ : A₀ → X)
+  → (f₁ : A₁ → X)
+  → Type _
+ua→PathP {X = X} e f₀ f₁ = PathP (λ i → ua e i → X) f₀ f₁
+
 module _ {ℓ' : Level} {Y : ⊥ → Type ℓ'} where
   isPropΠ⊥ : isProp ((k : ⊥) → Y k)
   isPropΠ⊥ = isContr→isProp Empty.isContrΠ⊥
