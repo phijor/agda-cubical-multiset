@@ -68,8 +68,11 @@ private
   isSetSetQuotient : {R : X → X → Type ℓ'} → isSet (X /₂ R)
   isSetSetQuotient = squash/₂
 
+isSetSymmQuot : ∀ {n} → isSet ((Fin n → X) /₂ SymmetricAction n)
+isSetSymmQuot = squash/₂
+
 isSetFMSet : isSet (FMSet X)
-isSetFMSet = isSetΣ ℕ.isSetℕ (λ _ → isSetSetQuotient)
+isSetFMSet = isSetΣ ℕ.isSetℕ (λ _ → isSetSymmQuot)
 
 FMSetPath : ∀ {n}
   → (v w : Fin n → X)
@@ -82,9 +85,9 @@ map : ∀ {ℓy} {Y : Type ℓy} → (f : X → Y) → FMSet X → FMSet Y
 map f (n , v) =
   ( n
   , ( SQ.rec
-    isSetSetQuotient
+    isSetSymmQuot
     ([_]₂ ∘ (f ∘_))
-    (λ v w → PT.elim (λ _ → isSetSetQuotient _ _) λ (σ , p) → eq/₂ _ _ ∣ σ , (ua→cong f p) ∣₁)
+    (λ v w → PT.elim (λ _ → isSetSymmQuot _ _) λ (σ , p) → eq/₂ _ _ ∣ σ , (ua→cong f p) ∣₁)
     v
     )
   )
@@ -114,7 +117,7 @@ private
 _∷_ : X → FMSet X → FMSet X
 _∷_ {X = X} x (n , [v]) = (suc n) , x∷v where
   x∷v : (Fin (suc n) → X) /₂ SymmetricAction (suc n)
-  x∷v = SQ.elim (λ _ → isSetSetQuotient) [ x ]∷_ []∷-well-defined [v]
+  x∷v = SQ.elim (λ _ → isSetSymmQuot {n = suc n}) [ x ]∷_ []∷-well-defined [v]
 
 infixr 5 _∷_
 
@@ -142,7 +145,7 @@ isContrFMSet₀ : ([v] : (Fin 0 → X) /₂ SymmetricAction 0) → [] ≡ (0 , [
 isContrFMSet₀ [v] = ΣPathP
   ( refl
   , ( SQ.elimProp {P = λ [v] → [ Empty.elim ]₂ ≡ [v]}
-      (λ _ → isSetSetQuotient _ _)
+      (λ _ → isSetSymmQuot _ _)
       (λ v → cong [_]₂ (Π⊥≡elim v))
       [v]
     )
