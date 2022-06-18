@@ -22,7 +22,7 @@ open import Cubical.Foundations.Path using (PathP≡doubleCompPathʳ)
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.GroupoidLaws using (cong-∙)
-open import Cubical.Foundations.Function using (_∘_ ; flip)
+open import Cubical.Foundations.Function using (_∘_ ; flip ; idfun)
 
 open import Cubical.Foundations.Structure
 open import Cubical.Syntax.⟨⟩
@@ -31,7 +31,7 @@ open import Cubical.Functions.FunExtEquiv
   using (funExtDep)
 
 open import Cubical.Data.Sigma as Sigma
-  using (Σ≡Prop ; ΣPathP)
+  using (Σ≡Prop ; ΣPathP ; ΣPathPProp)
 open import Cubical.Data.Nat as ℕ
   using (ℕ)
 open import Cubical.Data.SumFin as Fin
@@ -46,19 +46,6 @@ module _ (s t : ℕ) where
 
   Fin≃ : hSet₀
   Fin≃ = (Fin s ≃ Fin t) , isSetFin≃
-
--- TODO: Finish this lemma.
--- Shouldn't be too hard; probably needs FinInj : Fin m ≃ Fin n → m ≡ n.
-contrSinglFin≃ : ∀ {m n} → (α : Fin m ≃ Fin n) → (n , idEquiv (Fin n)) ≡ (m , α)
-contrSinglFin≃ {m = m} {n = n} α = ΣPathP (FinInj , toPathP {!   !}) where
-  FinInj : n ≡ m
-  FinInj = {! !}
-
-Fin≃J : ∀ {ℓ'} {n : ℕ}
-  → (P : (m : ℕ) → (α : Fin m ≃ Fin n) → Type ℓ')
-  → (r : P n (idEquiv (Fin n)))
-  → {m : ℕ} → (α : Fin m ≃ Fin n) → P m α
-Fin≃J P r α = subst (λ (m , γ) → P m γ) (contrSinglFin≃ α) r
 
 Fin≃Path : ∀ {s t : ℕ} (m : ℕ) → Fin s ≃ Fin t → Fin≃ s m ≡ Fin≃ t m
 Fin≃Path {s} {t} m α = TypeOfHLevel≡ 2 path where
@@ -182,8 +169,18 @@ encode∘decode {m = m} {x = x} = elimProp {P = λ x → (α : ⟨ Code m x ⟩)
   propP : ∀ x → isProp ((α : ⟨ Code m x ⟩) → encode (decode x α) ≡ α)
   propP x = isPropΠ λ α → isSetCode {m = m} {x = x} (encode (decode x α)) α
 
-  obj* : (n : ℕ) (α : Fin n ≃ Fin m) → encode (decode (obj n) α) ≡ α
-  obj* _ = Fin≃J (λ m γ → encode (decode (obj m) γ) ≡ γ) encode∘decodeIdEquiv
+  module _ (n : ℕ) (α : Fin n ≃ Fin m) where
+    equivFunPath : PathP (λ j → ua α j → Fin m) (equivFun α) (idfun _)
+    equivFunPath = ua→ (λ k → refl)
+
+    equivPath : PathP (λ j → ua α j ≃ Fin m) α (idEquiv (Fin m))
+    equivPath = ΣPathPProp (λ _ → isPropIsEquiv _) equivFunPath
+
+    obj* : encode (decode (obj n) α) ≡ α
+    obj* =
+      encode (decode (obj n) α) ≡⟨⟩
+      transport (λ j → ua α (~ j) ≃ Fin m) (idEquiv (Fin m)) ≡⟨ fromPathP (symP {A = λ j → ua α (~ j) ≃ Fin m} equivPath) ⟩
+      α ∎
 
 open Iso
 
