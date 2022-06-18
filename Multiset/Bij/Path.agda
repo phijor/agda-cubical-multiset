@@ -18,9 +18,11 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Equiv.Properties
+open import Cubical.Foundations.Path using (PathP≡doubleCompPathʳ)
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Isomorphism
-open import Cubical.Foundations.Function using (_∘_)
+open import Cubical.Foundations.GroupoidLaws using (cong-∙)
+open import Cubical.Foundations.Function using (_∘_ ; flip)
 
 open import Cubical.Foundations.Structure
 open import Cubical.Syntax.⟨⟩
@@ -38,61 +40,160 @@ open import Cubical.Data.SumFin as Fin
 hSet₀ : Type₁
 hSet₀ = hSet ℓ-zero
 
-isSetFin≃ : (m n : ℕ) → isSet (Fin m ≃ Fin n)
-isSetFin≃ m n = isOfHLevel≃ 2 (Fin.isSetFin) (Fin.isSetFin)
+module _ (s t : ℕ) where
+  isSetFin≃ : isSet (Fin s ≃ Fin t)
+  isSetFin≃ = isOfHLevel≃ 2 (Fin.isSetFin) (Fin.isSetFin)
 
-Fin≃ : (m n : ℕ) → hSet₀
-Fin≃ m n = (Fin m ≃ Fin n) , isSetFin≃ m n
+  Fin≃ : hSet₀
+  Fin≃ = (Fin s ≃ Fin t) , isSetFin≃
 
-Fin≃Path : ∀ {m n : ℕ} (k : ℕ) → Fin m ≃ Fin n → Fin≃ k m ≡ Fin≃ k n
-Fin≃Path {m = m} {n = n} k α = TypeOfHLevel≡ 2 path where
-  path : (Fin k ≃ Fin m) ≡ (Fin k ≃ Fin n)
-  path = ua (postComp α)
+-- TODO: Finish this lemma.
+-- Shouldn't be too hard; probably needs FinInj : Fin m ≃ Fin n → m ≡ n.
+contrSinglFin≃ : ∀ {m n} → (α : Fin m ≃ Fin n) → (n , idEquiv (Fin n)) ≡ (m , α)
+contrSinglFin≃ {m = m} {n = n} α = ΣPathP (FinInj , toPathP {!   !}) where
+  FinInj : n ≡ m
+  FinInj = {! !}
 
-Fin≃PathId : (m n : ℕ) → Fin≃Path m (idEquiv (Fin n)) ≡ refl {x = Fin≃ m n}
-Fin≃PathId m n = ΣSquarePProp (λ _ → isPropΠ2 (λ _ _ → isPropIsProp))
-  (cong ua postCompIdEquiv ∙ uaIdEquiv)
+Fin≃J : ∀ {ℓ'} {n : ℕ}
+  → (P : (m : ℕ) → (α : Fin m ≃ Fin n) → Type ℓ')
+  → (r : P n (idEquiv (Fin n)))
+  → {m : ℕ} → (α : Fin m ≃ Fin n) → P m α
+Fin≃J P r α = subst (λ (m , γ) → P m γ) (contrSinglFin≃ α) r
+
+Fin≃Path : ∀ {s t : ℕ} (m : ℕ) → Fin s ≃ Fin t → Fin≃ s m ≡ Fin≃ t m
+Fin≃Path {s} {t} m α = TypeOfHLevel≡ 2 path where
+  path : (Fin s ≃ Fin m) ≡ (Fin t ≃ Fin m)
+  path = cong (_≃ Fin m) (ua α)
+
+Fin≃PathId : (m n : ℕ) → Fin≃Path m (idEquiv (Fin n)) ≡ refl {x = Fin≃ n m}
+Fin≃PathId m n = ΣSquarePProp (λ _ → isPropΠ2 (λ _ _ → isPropIsProp)) (cong (cong (_≃ Fin m)) uaIdEquiv)
 
 Fin≃PathComp : ∀ {m n o : ℕ} (k : ℕ)
   → (α : Fin m ≃ Fin n)
   → (β : Fin n ≃ Fin o) →
       Fin≃Path k (α ∙ₑ β) ≡ Fin≃Path k α ∙ Fin≃Path k β
 Fin≃PathComp k α β = ΣSquarePProp ((λ _ → isPropΠ2 (λ _ _ → isPropIsProp)))
-  (cong ua (postCompCompEquiv α β) ∙ uaCompEquiv (postComp α) (postComp β))
+  ( cong (_≃ Fin k) (ua (α ∙ₑ β)) ≡⟨ cong (cong (_≃ Fin k)) (uaCompEquiv α β) ⟩
+    cong (_≃ Fin k) (ua α ∙ ua β) ≡⟨ cong-∙ (_≃ Fin k) (ua α) (ua β) ⟩
+    cong (_≃ Fin k) (ua α) ∙ cong (_≃ Fin k) (ua β) ∎
+  )
 
 Code : ℕ → Bij → hSet₀
 Code m = rec (isOfHLevelTypeOfHLevel 2)
-  (λ n → Fin≃ m n)
+  (flip Fin≃ m)
   (Fin≃Path m)
   (Fin≃PathId m)
   (Fin≃PathComp m)
 
+isSetCode : ∀ {m} {x} → isSet ⟨ Code m x ⟩
+isSetCode {m = m} {x} = str (Code m x)
+
 encode : {n : ℕ} → {x : Bij} → obj n ≡ x → ⟨ Code n x ⟩
 encode {n = n} p = subst (λ x → ⟨ Code n x ⟩) p (idEquiv (Fin n))
 
+encodeRefl : ∀ {n} → encode {x = obj n} refl ≡ idEquiv (Fin n)
+encodeRefl {n = n} = substRefl {B = λ x → ⟨ Code n x ⟩} {x = obj n} (idEquiv (Fin n))
+
 decode : {m : ℕ} → (x : Bij) → ⟨ Code m x ⟩ → obj m ≡ x
 decode {m = m} = elimSet (λ _ → isOfHLevelΠ 2 λ _ → isSetBijPath) (obj* m) (hom* m) where
-  obj* : (m n : ℕ) → (α : Fin m ≃ Fin n) → obj m ≡ obj n
-  obj* m n α = hom α
+  -- NOTE: This is contravariant so that
+  --    PathP (λ i → ⟨ Code m (hom α i) ⟩) β₀ β₁
+  -- reduces to a path of equivalences with ua in their domain.
+  -- This way, we can use `ua→` to extract a commutative
+  -- triangle of equivalences (see `commutesPointwise`).
+  obj* : (m n : ℕ) → Fin n ≃ Fin m → obj m ≡ obj n
+  obj* m n α = sym (hom α)
 
   hom* : ∀ {n₀ n₁ : ℕ} (m : ℕ)
     → (α : Fin n₀ ≃ Fin n₁)
     → PathP (λ j → ⟨ Code m (hom α j) ⟩ → obj m ≡ hom α j) (obj* m n₀) (obj* m n₁)
-  hom* {n₀ = n₀} {n₁ = n₁} m α = funExtDep lemma where
-    module _ {β₀ : Fin m ≃ Fin n₀} {β₁ : Fin m ≃ Fin n₁} (p : PathP (λ j → ⟨ Code m (hom α j) ⟩) β₀ β₁) where abstract
-      eq : β₀ ∙ₑ α ≡ β₁
-      eq =
-        β₀ ∙ₑ α ≡⟨ {! transport !} ⟩
-        β₁      ∎
+  hom* {n₀ = n₀} {n₁ = n₁} m α = funExtDep goal where
+    module _ {β₀ : Fin n₀ ≃ Fin m} {β₁ : Fin n₁ ≃ Fin m} (p : PathP (λ i → ⟨ Code m (hom α i) ⟩) β₀ β₁) where abstract
 
-      sq₁ : Square (hom β₀) (hom β₀ ∙ hom α) refl (hom α)
-      sq₁ = compPath-filler (hom β₀) (hom α)
+      -- From `p`, we can deduce that there is a commutative triangle of equivalences:
+      --
+      --            α
+      --  Fin n₀ -------> Fin n₁
+      --    |               |
+      -- β₀ |               | β₁
+      --    |               |
+      --    '---> Fin m <---'
+      commutesPointwise : ∀ (k : Fin n₀) → equivFun β₀ k ≡ equivFun β₁ (equivFun α k)
+      commutesPointwise = ua→⁻ (congP (λ _ → equivFun) p)
 
-      sq₂ : Square (hom β₀) (hom (β₀ ∙ₑ α)) refl (hom α)
-      sq₂ = subst (λ q → Square (hom β₀) q refl (hom α)) (sym (comp-coh _ _)) sq₁
+      commutes : β₀ ≡ α ∙ₑ β₁
+      commutes = equivEq (funExt commutesPointwise)
 
-      lemma : Square (hom β₀) (hom β₁) (refl {x = obj m}) (hom α)
-      lemma = subst (λ γ → Square (hom β₀) (hom γ) refl (hom α)) eq sq₂
+      -- Using `comp-coh`, this lifts to `hom`s in `Bij`.
+      -- NOTE: We use (_∙'_) here so that the following
+      -- steps become easier.
+      coh-commutes : hom β₀ ≡ hom α ∙' hom β₁
+      coh-commutes =
+        hom β₀                  ≡⟨ cong hom commutes ⟩
+        hom (α ∙ₑ β₁)           ≡⟨ comp-coh α β₁ ⟩
+        hom α ∙ hom β₁          ≡⟨ compPath≡compPath' _ _ ⟩
+        hom α ∙' hom β₁         ≡⟨⟩
+        hom α ∙∙ hom β₁ ∙∙ refl ∎
+
+      -- The above coherence law can be translated back into
+      -- a Square, as required by the goal.
+      coh-sq : Square (hom β₀) (hom β₁) (hom α) (refl {x = obj m})
+      coh-sq = transport (sym (PathP≡doubleCompPathʳ (hom α) (hom β₀) (hom β₁) refl)) coh-commutes
+
+      -- Since `obj*` is defined contravariantly, the goal is
+      -- `coh-sq`, but mirrored horizontally.  This way, the
+      -- top and bottom of the square become
+      --   (obj* _ _ βₓ) ≡ sym (hom βₓ)
+      -- for βₓ ∈ { β₀, β₁ }.
+      goal : Square (obj* _ _ β₀) (obj* _ _ β₁) (refl {x = obj m}) (hom α)
+      goal = λ i j → coh-sq i (~ j)
+
+decodeIdEquiv : ∀ {n} → decode (obj n) (idEquiv (Fin n)) ≡ refl
+decodeIdEquiv {n = n} =
+  decode (obj n) (idEquiv (Fin n)) ≡⟨⟩
+  sym (hom (idEquiv (Fin n)))      ≡⟨ cong sym (id-coh n) ⟩
+  sym refl                         ≡⟨⟩
+  refl ∎
+
+decode∘encodeRefl : ∀ {n} → decode (obj n) (encode refl) ≡ refl
+decode∘encodeRefl {n = n} =
+  decode (obj n) (encode refl) ≡⟨ cong (decode (obj n)) encodeRefl ⟩
+  decode (obj n) (idEquiv _)   ≡⟨ decodeIdEquiv ⟩
+  refl ∎
 
 decode∘encode : ∀ {n} {x : Bij} (p : obj n ≡ x) → decode x (encode p) ≡ p
-decode∘encode p = {! J (λ x p → decode x (encode p) ≡ p) ? p  !} -- J (λ x p → decode x (encode p) ≡ p) {! decode (obj n) (encode refl) ≡⟨ ? ⟩ refl ∎  !}
+decode∘encode {n} {x = x} = elimProp {P = λ x → (p : obj n ≡ x) → decode x (encode p) ≡ p} propP obj* x where
+  propP : ∀ x → isProp ((p : obj n ≡ x) → decode x (encode p) ≡ p)
+  propP x = isPropΠ (λ p → isGroupoidBij _ _ (decode x (encode p)) p)
+
+  obj* : ∀ m (p : obj n ≡ obj m) → decode (obj m) (encode p) ≡ p
+  obj* m = J (λ x (p : obj n ≡ x) → decode x (encode p) ≡ p) decode∘encodeRefl
+
+encode∘decodeIdEquiv : ∀ {m} → encode (decode (obj m) (idEquiv (Fin m))) ≡ idEquiv (Fin m)
+encode∘decodeIdEquiv {m = m} =
+  encode (decode (obj m) (idEquiv (Fin m))) ≡⟨ cong encode decodeIdEquiv ⟩
+  encode refl                               ≡⟨ encodeRefl ⟩
+  idEquiv (Fin m)                           ∎
+
+encode∘decode : ∀ {m} {x}
+  → (α : ⟨ Code m x ⟩)
+  → encode (decode x α) ≡ α
+encode∘decode {m = m} {x = x} = elimProp {P = λ x → (α : ⟨ Code m x ⟩) → encode (decode x α) ≡ α} propP obj* x where
+  propP : ∀ x → isProp ((α : ⟨ Code m x ⟩) → encode (decode x α) ≡ α)
+  propP x = isPropΠ λ α → isSetCode {m = m} {x = x} (encode (decode x α)) α
+
+  obj* : (n : ℕ) (α : Fin n ≃ Fin m) → encode (decode (obj n) α) ≡ α
+  obj* _ = Fin≃J (λ m γ → encode (decode (obj m) γ) ≡ γ) encode∘decodeIdEquiv
+
+open Iso
+
+BijPathFin≃Iso : ∀ {m n} → Iso (obj m ≡ obj n) (Fin n ≃ Fin m)
+BijPathFin≃Iso {m = m} {n = n} = iso′ where
+  iso′ : Iso _ _
+  iso′ .fun = encode
+  iso′ .inv = decode {m = m} (obj n)
+  iso′ .rightInv = encode∘decode {m = m} {x = obj n}
+  iso′ .leftInv = decode∘encode
+
+BijPath≃Fin≃ : ∀ {m n} → (obj m ≡ obj n) ≃ (Fin n ≃ Fin m)
+BijPath≃Fin≃ = isoToEquiv BijPathFin≃Iso
