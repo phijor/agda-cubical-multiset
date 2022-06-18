@@ -18,7 +18,8 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Equiv.Properties
-open import Cubical.Foundations.Path using (PathP≡doubleCompPathʳ)
+open import Cubical.Foundations.Path using (PathP≡doubleCompPathʳ ; fromPathP⁻)
+open import Cubical.Foundations.Transport using (transport⁻)
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.GroupoidLaws using (cong-∙)
@@ -176,10 +177,13 @@ encode∘decode {m = m} {x = x} = elimProp {P = λ x → (α : ⟨ Code m x ⟩)
     equivPath : PathP (λ j → ua α j ≃ Fin m) α (idEquiv (Fin m))
     equivPath = ΣPathPProp (λ _ → isPropIsEquiv _) equivFunPath
 
+    transportPath : α ≡ transport⁻ (λ j → ua α j ≃ Fin m) (idEquiv (Fin m))
+    transportPath = fromPathP⁻ equivPath
+
     obj* : encode (decode (obj n) α) ≡ α
     obj* =
-      encode (decode (obj n) α) ≡⟨⟩
-      transport (λ j → ua α (~ j) ≃ Fin m) (idEquiv (Fin m)) ≡⟨ fromPathP (symP {A = λ j → ua α (~ j) ≃ Fin m} equivPath) ⟩
+      encode (decode (obj n) α)                           ≡⟨⟩
+      transport⁻ (λ j → ua α j ≃ Fin m) (idEquiv (Fin m)) ≡⟨ sym transportPath ⟩
       α ∎
 
 open Iso
