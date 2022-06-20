@@ -4,6 +4,14 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
+open import Cubical.Foundations.GroupoidLaws
+  using
+    ( assoc
+    ; lCancel
+    ; rUnit
+    ; lUnit
+    ; _⁻¹
+    )
 
 open import Cubical.Data.Nat as ℕ
   using
@@ -29,6 +37,32 @@ isGroupoidBij = trunc
 
 isSetBijPath : {x y : Bij} → isSet (x ≡ y)
 isSetBijPath = isGroupoidBij _ _
+
+private
+  infix 40 _⁻ᵉ
+
+  _⁻ᵉ : ∀ {m n} → Fin m ≃ Fin n → Fin n ≃ Fin m
+  α ⁻ᵉ = invEquiv α
+
+-- `hom` is functor of groupoids, so in particular it preserves inverses.
+-- We first show that inverse equivalences compose to `refl` under `hom`
+-- (hom-inv-comp), and deduce from that the coherence law for inverses
+-- (inv-coh).
+hom-inv-comp : ∀ {m n} (α : Fin m ≃ Fin n) → hom (α ⁻ᵉ) ∙ hom α ≡ refl
+hom-inv-comp α =
+  hom (α ⁻ᵉ) ∙ hom α    ≡⟨ sym (comp-coh _ _) ⟩
+  hom (α ⁻ᵉ ∙ₑ α)       ≡⟨ cong hom (invEquiv-is-linv α) ⟩
+  hom (idEquiv (Fin _)) ≡⟨ id-coh _ ⟩
+  refl ∎
+
+inv-coh : ∀ {m n} (α : Fin m ≃ Fin n) → hom (α ⁻ᵉ) ≡ (hom α) ⁻¹
+inv-coh α =
+  hom (α ⁻ᵉ)                        ≡⟨ rUnit (hom (α ⁻ᵉ)) ⟩
+  hom (α ⁻ᵉ) ∙ refl                 ≡⟨ cong (hom (α ⁻ᵉ) ∙_) (sym (lCancel _)) ⟩
+  hom (α ⁻ᵉ) ∙ (hom α ∙ (hom α) ⁻¹) ≡⟨ assoc _ (hom α) ((hom α) ⁻¹) ⟩
+  (hom (α ⁻ᵉ) ∙ hom α) ∙ (hom α) ⁻¹ ≡⟨ cong (_∙ (hom α) ⁻¹) (hom-inv-comp α) ⟩
+  refl ∙ (hom α) ⁻¹                 ≡⟨ sym (lUnit _) ⟩
+  (hom α) ⁻¹ ∎
 
 elim : ∀ {ℓ} {B : Bij → Type ℓ}
   → (gpdB : (x : Bij) → isGroupoid (B x))
