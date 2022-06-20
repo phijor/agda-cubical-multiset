@@ -1,5 +1,8 @@
 module Multiset.Bij.Base where
 
+open import Multiset.Util.Path
+  using (compPathOver ; compPathOver≡comp)
+
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
@@ -151,21 +154,15 @@ rec : ∀ {ℓ} {A : Type ℓ}
     )
   → Bij → A
 rec {A = A} gpdA obj* hom* id-coh* comp-coh* = elim {B = λ _ → A} (λ _ → gpdA) obj* hom* id-coh* comp-coh*′ where
+  module _ {m n o : ℕ} (α : Fin m ≃ Fin n) (β : Fin n ≃ Fin o) where
+    -- `elim` expects a dependent path composition (compPathP') in its
+    -- `comp-coh*` argument, but we're given an ordinary, non-dependent
+    -- path composition.
+    -- Path composition and dependent path composition over a constant
+    -- family (here `A`) are are propositionally equal, so we use that
+    -- to adjust `comp-coh*`.
+    adjust : (hom* α ∙ hom* β) ≡ compPathOver (hom α) (hom β) (hom* α) (hom* β)
+    adjust = sym (compPathOver≡comp (hom α) (hom β) (hom* α) (hom* β))
 
-  comp-coh*′ : ∀ {m n o : ℕ} (α : Fin m ≃ Fin n) (β : Fin n ≃ Fin o)
-      → SquareP
-        (λ i j → A) (hom* (α ∙ₑ β)) (compPathP' {B = λ _ → A} (hom* α) (hom* β))
-        refl refl
-  comp-coh*′ = {!   !}
-
-  go : Bij → _
-  go (obj n) = obj* n
-  go (hom α i) = hom* α i
-  go (id-coh n i j) = id-coh* n i j
-  go (comp-coh α β i j) = {! comp-coh* α β i j  !}
-  go (trunc x y p q p≡q₁ p≡q₂ i j k) =
-    gpdA
-      (go x) (go y)
-      (cong go p) (cong go q)
-      (λ j k → go (p≡q₁ j k)) ((λ j k → go (p≡q₂ j k)))
-      i j k
+    comp-coh*′ : hom* (α ∙ₑ β) ≡ compPathOver (hom α) (hom β) (hom* α) (hom* β)
+    comp-coh*′ = comp-coh* α β ∙ adjust
