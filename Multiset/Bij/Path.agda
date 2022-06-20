@@ -7,21 +7,21 @@ open import Multiset.Util.Square
     ( ΣSquareP
     ; ΣSquarePProp
     )
-open import Multiset.Util.Equiv
-  using
-    ( postComp
-    ; postCompIdEquiv
-    ; postCompCompEquiv
-    )
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Equiv
-open import Cubical.Foundations.Equiv.Properties
 open import Cubical.Foundations.Path using (PathP≡doubleCompPathʳ ; fromPathP⁻)
 open import Cubical.Foundations.Transport using (transport⁻)
 open import Cubical.Foundations.Univalence
-open import Cubical.Foundations.Isomorphism
+  using
+    ( ua
+    ; uaIdEquiv
+    ; uaCompEquiv
+    ; ua→
+    ; ua→⁻
+    )
+open import Cubical.Foundations.Isomorphism using (Iso ; isoToEquiv)
 open import Cubical.Foundations.GroupoidLaws using (cong-∙)
 open import Cubical.Foundations.Function using (_∘_ ; flip ; idfun)
 
@@ -186,10 +186,10 @@ encode∘decode {m = m} {x = x} = elimProp {P = λ x → (α : ⟨ Code m x ⟩)
       transport⁻ (λ j → ua α j ≃ Fin m) (idEquiv (Fin m)) ≡⟨ sym transportPath ⟩
       α ∎
 
-open Iso
-
 BijPathFin≃Iso : ∀ {m n} → Iso (obj m ≡ obj n) (Fin n ≃ Fin m)
 BijPathFin≃Iso {m = m} {n = n} = iso′ where
+  open Iso
+
   iso′ : Iso _ _
   iso′ .fun = encode
   iso′ .inv = decode {m = m} (obj n)

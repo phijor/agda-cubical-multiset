@@ -40,10 +40,9 @@ open import Cubical.Functions.Surjection
     )
 
 open import Cubical.HITs.PropositionalTruncation as PT
-  using ()
-  renaming
-    ( ∣_∣₁ to ∣_∣
-    ; ∥_∥₁ to ∥_∥
+  using
+    ( ∣_∣₁
+    ; ∥_∥₁
     )
 
 FinSet₀ : Type₁
@@ -148,10 +147,10 @@ isEmbeddingBij→FinSet : isEmbedding Bij→FinSet
 isEmbeddingBij→FinSet = elimProp2 (λ x y → isPropIsEquiv _) (λ m n → isEquivBij→FinSetCong)
 
 isSurjectionBij→FinSet : isSurjection Bij→FinSet
-isSurjectionBij→FinSet (Y , n , ∣α∣) = PT.elim {P = λ ∣α∣ → ∥ fiber Bij→FinSet (Y , n , ∣α∣) ∥}
+isSurjectionBij→FinSet (Y , n , ∣α∣) = PT.elim {P = λ ∣α∣ → ∥ fiber Bij→FinSet (Y , n , ∣α∣) ∥₁}
   (λ _ → PT.isPropPropTrunc) inhFiber ∣α∣ where
-  inhFiber : (α : Y ≃ Fin n) → ∥ fiber Bij→FinSet (Y , n , ∣ α ∣) ∥
-  inhFiber α = ∣ (obj n) , (Σ≡Prop (λ _ → isPropIsFinSet) (sym (ua α))) ∣
+  inhFiber : (α : Y ≃ Fin n) → ∥ fiber Bij→FinSet (Y , n , ∣ α ∣₁) ∥₁
+  inhFiber α = ∣ (obj n) , (Σ≡Prop (λ _ → isPropIsFinSet) (sym (ua α))) ∣₁
 
 Bij≃FinSet : Bij ≃ FinSet₀
 Bij≃FinSet = Bij→FinSet , isEmbedding×isSurjection→isEquiv (isEmbeddingBij→FinSet , isSurjectionBij→FinSet)

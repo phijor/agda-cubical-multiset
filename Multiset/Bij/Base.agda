@@ -6,7 +6,7 @@ open import Multiset.Util.Path
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
-open import Cubical.Foundations.Function
+open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.GroupoidLaws
   using
     ( assoc
