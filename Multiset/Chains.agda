@@ -49,6 +49,12 @@ module Limit (C : Chain ℓ) where
     → l₀ ≡ l₁
   ChainLimitPathP (elements≡ , isChainLimit≡) = λ i → lim (elements≡ i) (isChainLimit≡ i)
 
+  ChainLimitPathPExt : {l₀ l₁ : ChainLimit}
+    → (elements≡ : ∀ n → l₀ .elements n ≡ l₁ .elements n)
+    → (isChainLimit≡ : ∀ n → PathP (λ i → C .π n (elements≡ (suc n) i) ≡ elements≡ n i) (l₀ .isChainLimit n) (l₁ .isChainLimit n))
+    → l₀ ≡ l₁
+  ChainLimitPathPExt elements≡ isChainLimit≡ = λ i → lim (λ n → elements≡ n i) (λ n → isChainLimit≡ n i)
+
   record Cone (A : Type ℓA) : Type (ℓ-max ℓ ℓA) where
     constructor cone
     field
