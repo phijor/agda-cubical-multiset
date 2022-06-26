@@ -2,7 +2,8 @@ module Multiset.Util.Square where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Path
-  using (isProp→SquareP)
+  using (isProp→SquareP ; compPathR→PathP∙∙)
+import Cubical.Foundations.GroupoidLaws as GroupoidLaws
 
 private
   variable
@@ -53,3 +54,33 @@ module _
 
     sqB : SquareP (λ i j → B i j (sqA i j)) (sndP x₀₋) (sndP x₁₋) (sndP x₋₀) (sndP x₋₁)
     sqB = isProp→SquareP (λ i j → propB i j) _ _ _ _
+
+{- Generic filler for the square:
+
+              p
+        x --------> y
+        |           |
+     p  |           | q
+        |           |
+        v           v
+        y --------> z
+              q
+
+  It's called "kiteFiller" because a kite
+  is a quadrilateral with two pairs of
+  equal-length sides, where the sides in
+  a pair are adjacent to eachother.
+-}
+kiteFiller : {A : Type ℓ} {x y z : A}
+  → {p : x ≡ y}
+  → {q : y ≡ z}
+  → Square p q p q
+kiteFiller {A = A} {x = x} {p = p} {q = q} = compPathR→PathP∙∙ p≡p∙∙q∙∙q⁻¹ where
+  -- TODO: Can this be expressed as a hcomp?
+
+  p≡p∙∙q∙∙q⁻¹ : p ≡ p ∙∙ q ∙∙ sym q
+  p≡p∙∙q∙∙q⁻¹ =
+    p ≡⟨ GroupoidLaws.rUnit _ ⟩
+    p ∙ refl ≡⟨ cong (p ∙_) (sym (GroupoidLaws.rCancel _)) ⟩
+    (p ∙ q ∙ sym q) ≡⟨ sym (doubleCompPath≡compPath _ _ _) ⟩
+    (p ∙∙ q ∙∙ sym q) ∎
