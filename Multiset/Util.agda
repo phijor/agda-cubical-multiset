@@ -133,32 +133,6 @@ square-comp-horizontal
   faces k j i (i = i0) = face-left k j -- left
   faces k j i (i = i1) = face-right k j -- right
 
--- Filler for the square
---
---  a ∙∙∙∙∙ A
---  ∥       |
---  ∥       p
---  ∥       v
---  a --r-> c
-comp-filler' : {a b c : A} (r : a ≡ c) (p : b ≡ c)
-  → Square {A = A} r (r ∙ sym p) refl (sym p)
-comp-filler' r p = compPath-filler r (sym p)
-
--- Filler for the square
---
---  a ===== A
---  |       |
---  r       |
---  |       r
--- ~p       |
---  |       |
---  b --p-- c
-comp-filler : {a b c : A} (r : a ≡ c) (p : b ≡ c)
-  → Square {A = A} refl p (r ∙ sym p) r
-comp-filler {A = A} {a = a} r p = λ j i → comp-filler' r p (~ i) (j)
-
-filler-comp-refl-top = comp-filler
-
 square-comp-vertical : {aₗ aᵣ bₗ bᵣ cₗ cᵣ : A}
   {pₗ : aₗ ≡ bₗ} {pᵣ : aᵣ ≡ bᵣ}
   {qₗ : bₗ ≡ cₗ} {qᵣ : bᵣ ≡ cᵣ}

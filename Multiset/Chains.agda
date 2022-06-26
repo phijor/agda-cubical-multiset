@@ -114,8 +114,8 @@ module Colimit (C : Cochain ℓ) where
     → l₀ ≡ l₁
   CochainLimitPathP = cong (CochainLimitIsoΣ .Iso.inv) ∘ ΣPathP
 
-  universalProperty : (∀ n → isSet (C .Ob (suc n))) → CochainLimit ≃ C .Ob 0
-  universalProperty isSetC = up-equiv where
+  universalProperty : CochainLimit ≃ C .Ob 0
+  universalProperty = up-equiv where
     open import Multiset.Util
 
     iter' : (x : C .Ob 0) (n : ℕ) → C .Ob n
@@ -129,12 +129,24 @@ module Colimit (C : Cochain ℓ) where
     aux l zero = refl
     aux l (suc n) = cong (C .ι n) (aux l n) ∙ sym (l .isCochainLimit n)
 
-    up-square : ∀ z n → Square
-      {- top -} refl
-      {- bot -} (isCochainLimit z n)
-      {- lft -} (aux z (suc n))
-      {- rgt -} (cong (C .ι n) (aux z n))
-    up-square z n = filler-comp-refl-top (cong (C .ι n) (aux z n)) (isCochainLimit z n) -- Idea: aux z (suc n) ≡ cong (C .ι n) (aux l n) ∙ sym (l .isCochainLimit n) by definition; build the canonical filler
+    module _ (z : CochainLimit) (n : ℕ) where
+      -- Idea: aux z (suc n) ≡ cong (C .ι n) (aux l n) ∙ sym (l .isCochainLimit n) by definition.
+      -- Build the canonical filler.
+      aux-filler : Square
+        (cong (C .ι n) (aux z n))
+        (aux z (suc n))
+        (refl {x = C .ι n (iter' (z .elements 0) n)})
+        (sym (isCochainLimit z n))
+      aux-filler = compPath-filler _ _
+
+      -- The above filler is almost what we want.
+      -- We simply need to rotate the sides of the square.
+      up-square : Square
+        {- top -} refl
+        {- bot -} (isCochainLimit z n)
+        {- lft -} (aux z (suc n))
+        {- rgt -} (cong (C .ι n) (aux z n))
+      up-square = λ i j → aux-filler (~ j) i
 
     up-equiv = isoToEquiv
       (iso
@@ -143,7 +155,6 @@ module Colimit (C : Cochain ℓ) where
         (λ _ → refl)
         (λ z → CochainLimitPathP
           ( funExt (aux z)
-          -- , isCochainLimitIsOfHLevelDep 1 isSetC (isLimIter (l .elements 0)) (l .isCochainLimit) (funExt (aux l))
           , funExt (λ n → up-square z n)
           )
         )
