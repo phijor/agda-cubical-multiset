@@ -5,7 +5,8 @@ open import Cubical.Foundations.Structure
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Isomorphism
-open import Cubical.Data.Nat.Base
+open import Cubical.Data.Nat.Base as ℕ
+  using (ℕ ; zero ; suc)
 open import Cubical.Data.Sigma
 open import Cubical.Reflection.RecordEquiv
 
@@ -21,6 +22,8 @@ record Chain (ℓ : Level) : Type (ℓ-suc ℓ) where
   field
     Ob : (n : ℕ) → Type ℓ
     π : ∀ n → Ob (suc n) → Ob n
+
+-- TODO: Can we define a shifted chain?
 
 -- A limit of a Chain C = (Ob, π) is a sequence of elements
 -- x₀ : Ob₀, x₁ : Ob₁, ... together with a proof that that
@@ -75,6 +78,90 @@ module Limit (C : Chain ℓ) where
 
   universalProperty : (A → ChainLimit) ≃ Cone A
   universalProperty = isoToEquiv (iso toCone ofCone (λ c → refl) λ f → refl)
+
+module FunctorChain
+  (F : Type ℓ → Type ℓ) (map : {X Y : Type ℓ} → (X → Y) → (F X → F Y))
+  (X₀ : Type ℓ) (init : F X₀ → X₀) where
+  open Chain
+
+  iterObj : (n : ℕ) → Type ℓ
+  iterObj zero = X₀
+  iterObj (suc n) = F (iterObj n)
+
+  iterInit : (n : ℕ) → iterObj (suc n) → iterObj n
+  iterInit zero = init
+  iterInit (suc n) = map (iterInit n)
+
+  iterated : Chain ℓ
+  iterated .Ob n = iterObj n
+  iterated .π n = iterInit n
+
+  open Limit iterated
+    using ()
+    renaming
+      ( ChainLimit to IteratedLimit
+      ; ChainLimitPathP to IteratedLimitPathP
+      ; ChainLimitPathPExt to IteratedLimitPathPExt
+      )
+    public
+
+  shifted : Chain ℓ
+  shifted .Ob n = F (iterated .Ob n)
+  shifted .π n = map (iterated .π n)
+
+  open Limit shifted
+    using ()
+    renaming
+      ( ChainLimit to ShiftedLimit
+      ; ChainLimitPathP to ShiftedLimitPathP
+      ; ChainLimitPathPExt to ShiftedLimitPathPExt
+      )
+    public
+
+  open ShiftedLimit
+    renaming
+      ( elements to shiftedElements
+      ; isChainLimit to isShiftedChainLimit
+      )
+    public
+
+  module _ (shiftLim : ShiftedLimit) where
+    open Limit using (ChainLimit)
+    open ChainLimit
+
+    shifted→iterated : IteratedLimit
+    shifted→iterated .elements = λ n → iterated .π n (shiftLim .elements n)
+    shifted→iterated .isChainLimit = λ n → cong (iterInit n) (shiftLim .isChainLimit n)
+
+  module _ (iterLim : IteratedLimit) where
+    open Limit using (ChainLimit)
+    open ChainLimit
+
+    iterated→shifted : ShiftedLimit
+    iterated→shifted .elements = λ n → iterLim .elements (suc n)
+    iterated→shifted .isChainLimit = λ n → iterLim .isChainLimit (suc n)
+
+  module _ where
+    open Iso
+    open Limit
+    open ChainLimit
+
+    open import Multiset.Util.Square using (kiteFiller)
+
+    shifted≅iterated : Iso IteratedLimit ShiftedLimit
+    shifted≅iterated .fun = iterated→shifted
+    shifted≅iterated .inv = shifted→iterated
+    shifted≅iterated .rightInv (lim _ isLim) =
+      ShiftedLimitPathPExt (isLim) (λ n → kiteFiller)
+    shifted≅iterated .leftInv (lim _ isLim) =
+      IteratedLimitPathPExt isLim (λ n → kiteFiller)
+
+    shifted≃iterated : IteratedLimit ≃ ShiftedLimit
+    shifted≃iterated = isoToEquiv shifted≅iterated
+
+  isLimitPreserving : Type ℓ
+  isLimitPreserving = F IteratedLimit ≃ ShiftedLimit
+
 
 record Cochain (ℓ : Level) : Type (ℓ-suc ℓ) where
   field
