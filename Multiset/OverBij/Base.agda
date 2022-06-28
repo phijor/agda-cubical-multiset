@@ -23,9 +23,15 @@ abstract
   ⟨Bij→FinSet⟩ = λ x → ⟨ Bij→FinSet x ⟩
 
 FMGpd : Type ℓ → Type ℓ
--- FMGpd X = Σ[ n ∈ Bij ] (⟨ Bij→FinSet n ⟩ → X)
 FMGpd X = Σ[ n ∈ Bij ] (⟨Bij→FinSet⟩ n → X)
 
+FMGpdPathP : ∀ {m n : Bij}
+  → (p : m ≡ n)
+  → {v : ⟨Bij→FinSet⟩ m → X}
+  → {w : ⟨Bij→FinSet⟩ n → X}
+  → PathP (λ i → ⟨Bij→FinSet⟩ (p i) → X) v w
+  → (m , v) ≡ (n , w)
+FMGpdPathP perm q = λ i → (perm i) , (q i)
 
 isGroupoidFMGpd : isGroupoid X → isGroupoid (FMGpd X)
 isGroupoidFMGpd gpdX = isGroupoidΣ isGroupoidBij (λ x → isGroupoidΠ λ _ → gpdX)
