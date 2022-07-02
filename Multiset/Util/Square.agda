@@ -2,8 +2,7 @@ module Multiset.Util.Square where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Path
-  using (isProp→SquareP ; compPathR→PathP∙∙)
-import Cubical.Foundations.GroupoidLaws as GroupoidLaws
+  using (isProp→SquareP)
 
 private
   variable
@@ -75,12 +74,28 @@ kiteFiller : {A : Type ℓ} {x y z : A}
   → {p : x ≡ y}
   → {q : y ≡ z}
   → Square p q p q
-kiteFiller {A = A} {x = x} {p = p} {q = q} = compPathR→PathP∙∙ p≡p∙∙q∙∙q⁻¹ where
-  -- TODO: Can this be expressed as a hcomp?
+kiteFiller {A = A} {x = x} {y = y} {p = p} {q = q} = λ i j → hcomp (faces i j) y where
 
-  p≡p∙∙q∙∙q⁻¹ : p ≡ p ∙∙ q ∙∙ sym q
-  p≡p∙∙q∙∙q⁻¹ =
-    p ≡⟨ GroupoidLaws.rUnit _ ⟩
-    p ∙ refl ≡⟨ cong (p ∙_) (sym (GroupoidLaws.rCancel _)) ⟩
-    (p ∙ q ∙ sym q) ≡⟨ sym (doubleCompPath≡compPath _ _ _) ⟩
-    (p ∙∙ q ∙∙ sym q) ∎
+  {-
+       i
+     ∙ - >         p
+    j|        *----+----*
+     v        |    |    |
+           ~p +---(3)   |
+         ~p   |         |
+    *----+----*---------*---------*
+    |    |    |         |         |
+  p |---(1)   |    y    |   (2)---| q
+    |         |         |    |    |
+    *---------*---------*----+----*
+              |         |    ~q
+              |   (4)---| ~q
+              |    |    |
+              *----+----*
+                   q
+  -}
+  faces : (i j k : I) → Partial (i ∨ ~ i ∨ j ∨ ~ j) A
+  faces i j k (i = i0) = p (j ∨ ~ k) -- (1)
+  faces i j k (i = i1) = q (j ∧ k)   -- (2)
+  faces i j k (j = i0) = p (i ∨ ~ k) -- (3)
+  faces i j k (j = i1) = q (i ∧ k)   -- (4)
