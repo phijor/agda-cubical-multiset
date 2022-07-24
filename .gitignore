@@ -1,6 +1,8 @@
 _build/
 MAlonzo
 
+*.agdai
+
 # Exclude local copies of references
 *.pdf
 *.djvu
