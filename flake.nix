@@ -30,6 +30,7 @@
           pname = "Multiset";
           version = "0.1.0";
           src = builtins.path { path = ./.; name = "agda-cubical-multiset"; };
+          everythingFile = "./Multiset/Index.lagda.md";
           buildInputs = [ cubical ];
 
           preConfigure = ''export AGDA_EXEC=agda'';
