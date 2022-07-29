@@ -350,170 +350,82 @@ isLimitPreservingBag = isoToEquiv αIso
 β = {! !}
 
 module Equiv where
-  open Limit
-    using (ChainLimitIsoΣ)
-
-  open ωBagOfTrees
-    renaming (elements to bags ; isChainLimit to isLimBags)
-
   open import Cubical.Reflection.StrictEquiv
    using (strictEquiv ; strictIsoToEquiv)
+
+  open import Multiset.Util.Trace as Trace
+    using (Trace ; step ; connect ; constTrace ; TraceIso ; start)
   
-  -- B(a) ≡ Idx a
-  -- Xₙ ≡ UnordedTree n
-  -- B(a) → Xₙ ≡ Vect Xₙ a
-  -- πₙ ≡ !^ n
-
-  -- ωBagOfTreesΣ′ : Type
-  -- ωBagOfTreesΣ′ = Σ[ w ∈ (∀ n → BagΣ (UnordedTree n)) ] (∀ n → map (!^ n) (w (suc n)) ≡ w n)
-
-  -- This is the type at step (8), but with the second and third Σ swapped.
-  CardFirst : Type
-  CardFirst =
-    Σ[ xs ∈ (ℕ → Bij) ] -- a
-    Σ[ ps ∈ (∀ n → [ Bij ∣ xs (suc n) ≡ xs n ]) ] -- p
-    Σ[ vs ∈ ((n : ℕ) → Vect (UnordedTree n) (xs n)) ]
+  TraceFirst-snd : Trace Bij → Type
+  TraceFirst-snd cardAt =
+    Σ[ vs ∈ ((n : ℕ) → Vect (UnordedTree n) (cardAt .step n)) ]
     ∀ (n : ℕ) →
-      PathP (λ i → Vect (UnordedTree n) (ps n i))
-        (!^ n ∘ vs (suc n))
+      PathP (λ i → Vect (UnordedTree n) (cardAt .connect n i))
         (vs n)
+        (!^ n ∘ vs (suc n))
 
-  fun₁ : ωBagOfTrees → CardFirst
-  fun₁ (lim bags isLimBags) = cardAt , constCardSuc , vects , vects-coh where
-    cardAt : ℕ → Bij
-    cardAt n = bags n .card
+  TraceFirst : Type
+  TraceFirst = Σ (Trace Bij) TraceFirst-snd
 
-    vects : ∀ n → Idx (cardAt n) → UnordedTree n
-    vects n = bags n .members
+  toTraceFirstIso : Iso ωBagOfTrees TraceFirst
+  toTraceFirstIso = go where
+    go : Iso _ _
+    fun go (lim elements isChainLimit) = trace , vects , vects-coh where
+      step' : ℕ → Bij
+      step' n = elements n .card
 
-    constCardSuc : ∀ n → [ Bij ∣ cardAt (suc n) ≡ cardAt n ]
-    constCardSuc n = cong card (isLimBags n)
+      connect' : ∀ n → step' n ≡ step' (suc n)
+      connect' n = cong card (sym (isChainLimit n))
 
-    vects-coh : ∀ n →
-        PathP (λ i → Vect (UnordedTree n) (constCardSuc n i))
-          (!^ n ∘ (vects (suc n)))
-          (vects n)
-    vects-coh n = cong members (isLimBags n)
+      trace : Trace Bij
+      trace = step' , connect'
 
-  inv₁ : CardFirst → ωBagOfTrees
-  inv₁ (cardAt , constCardSuc , vects , vects-coh) = lim bags′ isLimBags′ where
-    bags′ : ∀ n → Bag (UnordedTree n)
-    bags′ n = ⟅ vects n idx ∣ idx ∈ cardAt n ⟆
+      vects : (n : ℕ) → Vect (UnordedTree n) (step' n)
+      vects n = elements n .members
 
-    isLimBags′ : (n : ℕ) → map (!^ n) (bags′ (suc n)) ≡ bags′ n
-    isLimBags′ n = BagPathP (constCardSuc n) (vects-coh n)
+      vects-coh : ∀ n → PathP (λ i → Vect (UnordedTree n) (connect' n i)) (vects n) (λ idx → !^ n (vects (suc n) idx))
+      vects-coh n = cong members (sym (isChainLimit n))
+    inv go (trace , vects , vects-coh) = lim elements' isChainLimit' where
+      elements' : (n : ℕ) → Bag (UnordedTree n)
+      elements' n = ⟅ vects n idx ∣ idx ∈ trace .step n ⟆
 
-  iso₁ : Iso ωBagOfTrees CardFirst
-  iso₁ .fun = fun₁
-  iso₁ .inv = inv₁
-  iso₁ .leftInv _ = refl
-  iso₁ .rightInv _ = refl
+      isChainLimit' : ∀ n → map (!^ n) (elements' (suc n)) ≡ elements' n
+      isChainLimit' n = BagPathP (sym (trace .connect n)) (symP (vects-coh n))
+    rightInv go (trace , vects , vects-coh) = ΣPathP (refl , ΣPathP (refl {x = vects} , refl {x = vects-coh}))
+    leftInv go _ = {! !}
 
-  equiv₁ : ωBagOfTrees ≃ CardFirst
-  equiv₁ = strictIsoToEquiv iso₁
+  OneCard-snd : (card : Bij) → Type
+  OneCard-snd card =
+    Σ[ vects ∈ ((n : ℕ) → Vect (UnordedTree n) card) ]
+      ∀ (n : ℕ) →
+        [ Vect (UnordedTree n) card
+        ∣ (!^ n ∘ vects (suc n)) ≡ (vects n)
+        ]
 
-  module SomeColim where
-    open Cochain
+  OneCard : Type
+  OneCard = Σ[ card ∈ Bij ] (OneCard-snd card)
 
-    cochain' : Cochain _
-    cochain' .Ob n = Bij -- Vect (UnordedTree n) card₀
-    cochain' .ι n = λ x → x
+  iso₆′ : (card₀ : Bij) → Iso (TraceFirst-snd (constTrace card₀)) (OneCard-snd card₀)
+  iso₆′ card₀ = go where
+    go : Iso _ _
+    go .fun (vects , vects-coh) = vects , λ n → sym (vects-coh n)
+    go .inv (vects , vects-coh) = vects , λ n → sym (vects-coh n)
+    go .rightInv _ = refl
+    go .leftInv _ = refl
 
-    ColimT : Type
-    ColimT = Colimit.CochainLimit cochain'
+  iso₅′ : Iso (Σ Bij (TraceFirst-snd ∘ constTrace)) TraceFirst
+  iso₅′ = Σ.Σ-cong-iso-fst
+    {A = Bij} {A' = Trace Bij} {B = TraceFirst-snd}
+    (invIso TraceIso)
 
-    module Colimit' = Colimit cochain'
-    open Colimit'
-      using
-        ( CochainLimit
-        ; cotraceLimit
-        ; cotracePath
-        )
-      renaming
-        ( universalPropertyIso to ColimUP
-        )
+  iso₇′ : Iso (Σ Bij (TraceFirst-snd ∘ constTrace)) OneCard
+  iso₇′ = Σ.Σ-cong-iso-snd
+    {A = Bij}
+    {B = TraceFirst-snd ∘ constTrace}
+    {B' = OneCard-snd}
+    iso₆′
 
-    open CochainLimit
+  iso₈′ : Iso TraceFirst OneCard
+  iso₈′ = compIso (invIso iso₅′) iso₇′
 
-    ColimΣ-snd : (cl : ColimT) → Type
-    ColimΣ-snd cl =
-      Σ[ vs ∈ ((n : ℕ) → Vect (UnordedTree n) (cl .elements n)) ]
-        ∀ (n : ℕ) →
-          PathP (λ i → Vect (UnordedTree n) (cl .isCochainLimit n i))
-            (!^ n ∘ vs (suc n))
-            (vs n)
-
-    ColimΣ : Type _
-    ColimΣ = Σ[ cl ∈ ColimT ] (ColimΣ-snd cl)
-
-    ColimΣ-snd-cast : (card₀ : Bij)
-      → Iso
-        (ColimΣ-snd (cotraceLimit card₀))
-        (Σ[ vects ∈ (∀ n → Vect (UnordedTree n) card₀) ] (∀ n → (!^ n ∘ (vects (suc n))) ≡ vects n))
-    ColimΣ-snd-cast card₀ = go where
-      go : Iso _ _
-      go .fun (vects , vects-coh) = {! cotracePath!}
-      go .inv = {! !}
-      go .leftInv = {! !}
-      go .rightInv = {! !}
-
-    ColimΣUP : Iso (Σ[ card₀ ∈ Bij ] (ColimΣ-snd (ColimUP .inv card₀))) ColimΣ
-    ColimΣUP = Σ.Σ-cong-iso-fst {B = ColimΣ-snd} (invIso ColimUP)
-
-  fun₂ : CardFirst → SomeColim.ColimΣ
-  fun₂ (cardAt , constCardSuc , vects , vects-coh) = (Colimit.lim cardAt constCardSuc) , vects , vects-coh
-
-  iso₂ : Iso SomeColim.ColimΣ CardFirst
-  iso₂ = {! Σ.Σ-cong-iso {B = λ _ → Σ _ _} (Colimit.universalPropertyIso SomeColim.cochain') ? !}
-
-  -- OneCard : Type
-  -- OneCard =
-  --   Σ[ card ∈ Bij ] -- a
-  --     Σ[ vects ∈ ((n : ℕ) → Vect (UnordedTree n) card) ]
-  --       ∀ (n : ℕ) →
-  --         [ Vect (UnordedTree n) card
-  --         ∣ (!^ n ∘ vects (suc n))
-  --         ≡ (vects n)
-  --         ]
-
-  -- module SomeColim (card₀ : Bij) where
-  --   open Colimit using (CochainLimit)
-
-  --   open Cochain
-
-  --   cochain' : Cochain _
-  --   cochain' .Ob n = Vect (UnordedTree n) card₀
-  --   cochain' .ι n = {! !}
-
-  --   -- ColimC : Type
-  --   -- ColimC =
-  --   --   Σ[ card₀ ∈ Bij ]
-  --   --     CochainLimit 
-
-
-  -- fun₂ : CardFirst → OneCard
-  -- fun₂ (cardAt , constCardSuc , vects , vects-coh) = card₀ , vects′ , vects-coh′ where
-  --   card₀ : Bij
-  --   card₀ = cardAt 0
-
-  --   constCard₀ : ∀ n → cardAt n ≡ card₀
-  --   constCard₀ 0 = refl
-  --   constCard₀ (suc n) = step₁ ∙ step₂ where
-  --     step₁ : cardAt (suc n) ≡ cardAt n
-  --     step₁ = constCardSuc n
-
-  --     step₂ : cardAt n ≡ card₀
-  --     step₂ = constCard₀ n
-
-  --   castIdx : ∀ n → Idx card₀ → Idx (cardAt n)
-  --   castIdx n = subst⁻ Idx (constCard₀ n)
-
-  --   vects′ : (n : ℕ) → Vect (UnordedTree n) card₀
-  --   vects′ n = v where
-  --     v : Vect (UnordedTree n) card₀
-  --     v = vects n ∘ castIdx n
-
-  --   vects-coh′ : ∀ n → (!^ n ∘ vects′ (suc n)) ≡ (vects′ n)
-  --   vects-coh′ n = funExt goal where
-  --     goal : ∀ idx₀ → (!^ n (vects (suc n) (castIdx (suc n) idx₀))) ≡ vects n (castIdx n idx₀)
-  --     goal idx₀ = {! !}
+  -- TODO: Show that OneCard ≅ (Bag ωTree)
