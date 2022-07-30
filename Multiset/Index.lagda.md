@@ -16,4 +16,7 @@ open import Multiset.FiniteChoice
 open import Multiset.OverGroupoid
 open import Multiset.OverSet
 open import Multiset.OverBij
+
+open import Multiset.Experiments.Conjugate
+open import Multiset.Experiments.Equiv
 ```
