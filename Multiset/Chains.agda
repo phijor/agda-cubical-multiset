@@ -10,6 +10,8 @@ open import Cubical.Data.Nat.Base as ℕ
 open import Cubical.Data.Sigma
 open import Cubical.Reflection.RecordEquiv
 
+open Iso
+
 private
   variable
     ℓ ℓA : Level
@@ -76,8 +78,14 @@ module Limit (C : Chain ℓ) where
   ofCone : Cone A → A → ChainLimit
   ofCone (cone leg commutes) a = lim (λ n → leg n a) λ n → funExt⁻ (commutes n) a
 
+  universalPropertyIso : Iso (A → ChainLimit) (Cone A)
+  universalPropertyIso .fun = toCone
+  universalPropertyIso .inv = ofCone
+  universalPropertyIso .rightInv _ = refl
+  universalPropertyIso .leftInv _ = refl
+
   universalProperty : (A → ChainLimit) ≃ Cone A
-  universalProperty = isoToEquiv (iso toCone ofCone (λ c → refl) λ f → refl)
+  universalProperty = isoToEquiv universalPropertyIso
 
 module FunctorChain
   (F : Type ℓ → Type ℓ) (map : {X Y : Type ℓ} → (X → Y) → (F X → F Y))
@@ -142,7 +150,6 @@ module FunctorChain
     iterated→shifted .isChainLimit = λ n → iterLim .isChainLimit (suc n)
 
   module _ where
-    open Iso
     open Limit
     open ChainLimit
 
