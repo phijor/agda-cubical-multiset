@@ -237,117 +237,7 @@ module Zip (tree⁺ : ωBagOfTrees) where
 α⁻¹ : ωBagOfTrees → (Bag ωTree)
 α⁻¹ tree⁺ = Zip.zipped tree⁺
 
-α∘α⁻¹ : ∀ tree⁺ → α (α⁻¹ tree⁺) ≡ tree⁺
-α∘α⁻¹ tree⁺ = ω⁺TreePathP elemPath elemCoh where
-  open Limit.ChainLimit renaming (elements to bag)
-
-  open Zip tree⁺ using
-    ( isConstCard
-    ; zippedTrees
-    ; reIndex
-    )
-
-  elemPath : ∀ n → α (α⁻¹ tree⁺) .bag n ≡ tree⁺ .bag n
-  elemPath n =
-    α (α⁻¹ tree⁺) .bag n ≡⟨⟩
-    map (λ tree → tree .depth n) (α⁻¹ tree⁺) ≡⟨⟩
-    ⟅ idx₀ ↦ zippedTrees idx₀ n ⟆ ≡⟨ sym (BagPathP (isConstCard n) (reIndex n)) ⟩
-    tree⁺ .bag n ∎
-
-  open Unzip (α⁻¹ tree⁺) using
-    ( isChainLimitBags
-    )
-
-  elemCoh : ∀ n → PathP (λ i → map (!^ n) (elemPath (suc n) i) ≡ elemPath n i)
-    (isChainLimitBags n)
-    _
-  elemCoh n = {!  !}
-
-
-α⁻¹∘α : (trees : Bag ωTree) → α⁻¹ (α trees) ≡ trees
-α⁻¹∘α trees = BagPathPExt refl {! branchesPath!} where
-  open Limit.ChainLimit renaming
-    (elements to tree ; isChainLimit to treeCoh)
-
-  open module Zipα = Zip (α trees) using
-    ( idx₀Cast
-    ; idx₀CastPath
-    ; isConstCard
-    ; card₀
-    ; cardAt
-    ; zippedTree
-    ; zippedTrees
-    ; isChainLimitZippedTrees
-    )
-
-  -- TODO: This should follow from idx₀Path
-  idxPath′ : ∀ (n : ℕ) (ix : Idx (cardAt n)) → idx₀Cast n ix ≡ ix
-  idxPath′ n ix = {! !} -- idx₀CastPath {n = n} ix
-  -- idxPath′ zero ix = refl
-  -- idxPath′ (suc n) ix = idxPath (α trees) ix n ∙ idxPath′ n ix
-
-  foo : (idx : Idx (trees .card)) (n : ℕ) → UnordedTree n
-  foo idx n = trees .members idx .depth n
-
-  elementsExtP : ∀ (n : ℕ)
-    → PathP (λ i → Idx (isConstCard n i) → UnordedTree n)
-        (λ idx → foo idx n)
-        (λ idx → trees .members (idx₀Cast n idx) .depth n)
-  elementsExtP n = transport⁻Domain {p = cong Idx (isConstCard n)} (λ idx → trees .members idx .depth n)
-
-  elementsExtP' : ∀ (n : ℕ) (idx₀ : Idx card₀)
-    → subst⁻ (λ idx → Idx idx → UnordedTree n) (isConstCard n) (λ idx → trees .members (idx₀Cast n idx) .depth n) idx₀ ≡ trees .members idx₀ .depth n
-  elementsExtP' n idx₀ = goal where
-    goal = funExt⁻ (fromPathP (symP-fromGoal (elementsExtP n))) idx₀
-
-    _ = {! foo !}
-
-  lemma : ∀ (idx : _) (n : ℕ) →
-    subst⁻ (λ idx → Idx idx → UnordedTree n) (isConstCard n) (λ idx → foo (idx₀Cast n idx) n) idx
-      ≡ _ -- foo idx n
-  lemma idx n = {! substCommSlice _ (λ idx → Idx idx → UnordedTree n) _ (sym (isConstCard n))  !}
-
-  elementsExt : ∀ idx n → zippedTree idx .tree n ≡ trees .members idx .depth n
-  elementsExt idx n =
-    zippedTree idx .tree n ≡⟨⟩
-    -- map (λ tree → tree .depth n) trees .members (subst⁻ Idx (Zip.isConstCard (α trees) n) idx) ≡⟨⟩
-    map (λ tree → tree .depth n) trees .members (idx₀Cast n idx) ≡⟨⟩
-    trees .members (idx₀Cast n idx) .depth n ≡⟨ sym {! substCommSlice _ (λ idx → Idx idx → UnordedTree n) _ (sym (isConstCard n)) !} ⟩
-    subst⁻ (λ idx → Idx idx → UnordedTree n) (isConstCard n) (λ idx → trees .members (idx₀Cast n idx) .depth n) idx
-      ≡⟨ elementsExtP' n idx ⟩
-    trees .members idx .depth n ∎
-    -- {! transport⁻Domain (λ x → x .tree n) !}
-
-    -- congP () {! !} -- (idxPath′ n idx')
-
-  isChainLimitPath : ∀ idx₀ n →
-    PathP (λ i → !^ n (elementsExt idx₀ (suc n) i) ≡ elementsExt idx₀ n i)
-      (isChainLimitZippedTrees idx₀ n)
-      _
-  isChainLimitPath idx₀ n = compPathP' {!   !} {!   !}
-
-  branchesPathExt : ∀ (idx : Idx Zipα.card₀) → Zipα.zippedTree idx ≡ trees .members idx
-  branchesPathExt idx = ωTreePathP (elementsExt idx) {! !} -- ωTreePathP (elementsExt idx) (isChainLimitPath idx)
-
-  _ : (α⁻¹ (α trees)) .members ≡ zippedTree
-  _ = refl
-
-  branchesPath : (α⁻¹ (α trees)) .members ≡ trees .members
-  branchesPath = funExt branchesPathExt
-
 open Iso
-
-αIso : Iso (Bag ωTree) ωBagOfTrees
-αIso .fun = α
-αIso .inv = α⁻¹
-αIso .rightInv = α∘α⁻¹
-αIso .leftInv = α⁻¹∘α
-
-isLimitPreservingBag : BagChain.isLimitPreserving
-isLimitPreservingBag = isoToEquiv αIso
-
-β : ωBagOfTrees → (Bag ωTree)
-β = {! !}
 
 module Equiv where
   open import Cubical.Reflection.StrictEquiv
@@ -392,24 +282,23 @@ module Equiv where
       isChainLimit' : ∀ n → map (!^ n) (elements' (suc n)) ≡ elements' n
       isChainLimit' n = BagPathP (sym (trace .connect n)) (symP (vects-coh n))
     rightInv go (trace , vects , vects-coh) = ΣPathP (refl , ΣPathP (refl {x = vects} , refl {x = vects-coh}))
-    leftInv go _ = {! !}
+    leftInv go _ = refl
 
-  OneCard-snd : (card : Bij) → Type
-  OneCard-snd card =
-    Σ[ vects ∈ ((n : ℕ) → Vect (UnordedTree n) card) ]
-      ∀ (n : ℕ) →
-        [ Vect (UnordedTree n) card
-        ∣ (!^ n ∘ vects (suc n)) ≡ (vects n)
-        ]
+  vectChain : Bij → Chain ℓ-zero
+  vectChain card .Chain.Ob n = Vect (UnordedTree n) card
+  vectChain card .Chain.π n = !^ n ∘_
 
-  OneCard : Type
-  OneCard = Σ[ card ∈ Bij ] (OneCard-snd card)
+  VectLimit : (card : Bij) → Type
+  VectLimit card = Limit.ChainLimit (vectChain card)
 
-  iso₆′ : (card₀ : Bij) → Iso (TraceFirst-snd (constTrace card₀)) (OneCard-snd card₀)
-  iso₆′ card₀ = go where
+  VectLimitBag : Type
+  VectLimitBag = Σ[ card ∈ Bij ] (VectLimit card)
+
+  iso₆′ : (card : Bij) → Iso (TraceFirst-snd (constTrace card)) (VectLimit card)
+  iso₆′ card = go where
     go : Iso _ _
-    go .fun (vects , vects-coh) = vects , λ n → sym (vects-coh n)
-    go .inv (vects , vects-coh) = vects , λ n → sym (vects-coh n)
+    go .fun (vects , vects-coh) = lim vects (sym ∘ vects-coh)
+    go .inv (lim elements isChainLimit) = elements , sym ∘ isChainLimit
     go .rightInv _ = refl
     go .leftInv _ = refl
 
@@ -418,14 +307,40 @@ module Equiv where
     {A = Bij} {A' = Trace Bij} {B = TraceFirst-snd}
     (invIso TraceIso)
 
-  iso₇′ : Iso (Σ Bij (TraceFirst-snd ∘ constTrace)) OneCard
+  iso₇′ : Iso (Σ Bij (TraceFirst-snd ∘ constTrace)) VectLimitBag
   iso₇′ = Σ.Σ-cong-iso-snd
     {A = Bij}
     {B = TraceFirst-snd ∘ constTrace}
-    {B' = OneCard-snd}
+    {B' = VectLimit}
     iso₆′
 
-  iso₈′ : Iso TraceFirst OneCard
-  iso₈′ = compIso (invIso iso₅′) iso₇′
+  toVectLimitBag : Iso TraceFirst VectLimitBag
+  toVectLimitBag = compIso (invIso iso₅′) iso₇′
 
-  -- TODO: Show that OneCard ≅ (Bag ωTree)
+  -- TODO: Show that VectLimitBag ≅ Σ Bin _ ≅ (Bag ωTree)
+  toBagOfTrees : Iso VectLimitBag (Bag ωTree)
+  toBagOfTrees = go where
+    -- This is essentially the UP of limits of chains.
+    go : Iso _ _
+    go .fun (card , lim vects vects-coh) = ⟅ lim (λ n → vects n idx) (λ n → funExt⁻ (vects-coh n) idx) ∣ idx ∈ card ⟆
+    go .inv bagOfTrees =
+      ( bagOfTrees .card
+      , lim
+        (λ n idx → bagOfTrees .members idx .depth n)
+        (λ n → funExt λ idx → bagOfTrees .members idx .cut n)
+      )
+    go .rightInv _ = refl
+    go .leftInv _ = refl
+
+  β : Iso ωBagOfTrees (Bag ωTree)
+  β =
+    ωBagOfTrees  Iso⟨ toTraceFirstIso ⟩
+    TraceFirst   Iso⟨ toVectLimitBag ⟩
+    VectLimitBag Iso⟨ toBagOfTrees ⟩
+    Bag ωTree    ∎Iso
+
+  β⁻¹≡α : β .inv ≡ α
+  β⁻¹≡α = funExt λ trees → refl
+
+isLimitPreservingBag : BagChain.isLimitPreserving
+isLimitPreservingBag = isoToEquiv (invIso Equiv.β)
