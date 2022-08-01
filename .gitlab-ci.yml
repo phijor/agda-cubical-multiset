@@ -1,0 +1,11 @@
+image: nixos/nix
+
+stages:
+  - build
+
+compile:
+  stage: build
+  script:
+    - nix-build
+  artifacts:
+    untracked: true
