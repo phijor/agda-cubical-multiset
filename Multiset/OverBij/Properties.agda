@@ -50,10 +50,10 @@ open Limit using (lim)
 open module BagChain = FunctorChain Bag (OverBij.map) Unit (! (Bag Unit))
   using ()
   renaming
-    ( iterObj to UnordedTree
+    ( iterObj to UnorderedTree
     ; iterInit to !^
     ; IteratedLimit to ωTree -- Limit over the chain starting at Unit
-    ; ShiftedLimit to ωBagOfTrees -- Limit over the chain (lim (n ↦ Bag (UnordedTree n))
+    ; ShiftedLimit to ωBagOfTrees -- Limit over the chain (lim (n ↦ Bag (UnorderedTree n))
     -- ; isShiftedChainLimit to isω⁺Tree
     ; IteratedLimitPathPExt to ωTreePathP
     ; ShiftedLimitPathPExt to ω⁺TreePathP
@@ -88,7 +88,7 @@ of depth n, obtained by mapping the "cut at depth n"-function
 over the input bag.
 -}
 module Unzip (trees : Bag ωTree) where
-  bagAt : (n : ℕ) → Bag (UnordedTree n)
+  bagAt : (n : ℕ) → Bag (UnorderedTree n)
   bagAt n = map (λ tree → tree .depth n) trees
 
   isChainLimitBags : (n : ℕ) → map (!^ n) (bagAt (suc n)) ≡ bagAt n
@@ -120,7 +120,7 @@ module Zip (tree⁺ : ωBagOfTrees) where
   open ωBagOfTrees
     renaming (elements to step ; isChainLimit to stepCoh)
 
-  _ : (n : ℕ) → Bag (UnordedTree n)
+  _ : (n : ℕ) → Bag (UnorderedTree n)
   _ = tree⁺ .step
 
   -- Each step in the chain is a bag of a certain cardinality.
@@ -142,13 +142,13 @@ module Zip (tree⁺ : ωBagOfTrees) where
   isConstCard' m n = isConstCard m ∙ sym (isConstCard n)
 
   -- We can index the bag at step n to obtain a tree of depth n.
-  treesAt : (n : ℕ) → (Idx (cardAt n) → UnordedTree n)
+  treesAt : (n : ℕ) → (Idx (cardAt n) → UnorderedTree n)
   treesAt n = tree⁺ .step n .members
 
   -- These trees are related to eachother.  Chopping of the last
   -- level of a tree at step n+1 yields the corresponding tree of
   -- at the same index in step n.
-  cutCoh : ∀ n → PathP (λ i → Idx (isConstCardSuc n i) → UnordedTree n)
+  cutCoh : ∀ n → PathP (λ i → Idx (isConstCardSuc n i) → UnorderedTree n)
     (!^ n ∘ treesAt (suc n)) (treesAt n)
   cutCoh n = cong members (tree⁺ .stepCoh n)
 
@@ -208,7 +208,7 @@ module Zip (tree⁺ : ωBagOfTrees) where
     idxPath n = idxCastSucPath idx₀ -- symP (subst⁻-filler Idx (isConstCardSuc n) (idxAt n))
 
     -- We use idxAt to get a tree of depth n from the nᵗʰ bag:
-    zippedTrees : (n : ℕ) → UnordedTree n
+    zippedTrees : (n : ℕ) → UnorderedTree n
     zippedTrees n = treesAt n (idxAt n)
 
     -- TODO: Same as above, can we get rid of this and use isConstCard directly?
@@ -226,7 +226,7 @@ module Zip (tree⁺ : ωBagOfTrees) where
     zippedTree .isChainLimit = isChainLimitZippedTrees
 
   reIndex : ∀ n
-    → PathP (λ i → Idx (isConstCard n i) → UnordedTree n)
+    → PathP (λ i → Idx (isConstCard n i) → UnorderedTree n)
       (treesAt n)
       (λ idx₀ → treesAt n (idx₀Cast n idx₀))
   reIndex n = transport⁻Domain (treesAt n)
@@ -248,9 +248,9 @@ module Equiv where
   
   TraceFirst-snd : Trace Bij → Type
   TraceFirst-snd cardAt =
-    Σ[ vs ∈ ((n : ℕ) → Vect (UnordedTree n) (cardAt .step n)) ]
+    Σ[ vs ∈ ((n : ℕ) → Vect (UnorderedTree n) (cardAt .step n)) ]
     ∀ (n : ℕ) →
-      PathP (λ i → Vect (UnordedTree n) (cardAt .connect n i))
+      PathP (λ i → Vect (UnorderedTree n) (cardAt .connect n i))
         (vs n)
         (!^ n ∘ vs (suc n))
 
@@ -270,13 +270,13 @@ module Equiv where
       trace : Trace Bij
       trace = step' , connect'
 
-      vects : (n : ℕ) → Vect (UnordedTree n) (step' n)
+      vects : (n : ℕ) → Vect (UnorderedTree n) (step' n)
       vects n = elements n .members
 
-      vects-coh : ∀ n → PathP (λ i → Vect (UnordedTree n) (connect' n i)) (vects n) (λ idx → !^ n (vects (suc n) idx))
+      vects-coh : ∀ n → PathP (λ i → Vect (UnorderedTree n) (connect' n i)) (vects n) (λ idx → !^ n (vects (suc n) idx))
       vects-coh n = cong members (sym (isChainLimit n))
     inv go (trace , vects , vects-coh) = lim elements' isChainLimit' where
-      elements' : (n : ℕ) → Bag (UnordedTree n)
+      elements' : (n : ℕ) → Bag (UnorderedTree n)
       elements' n = ⟅ vects n idx ∣ idx ∈ trace .step n ⟆
 
       isChainLimit' : ∀ n → map (!^ n) (elements' (suc n)) ≡ elements' n
@@ -285,7 +285,7 @@ module Equiv where
     leftInv go _ = refl
 
   vectChain : Bij → Chain ℓ-zero
-  vectChain card .Chain.Ob n = Vect (UnordedTree n) card
+  vectChain card .Chain.Ob n = Vect (UnorderedTree n) card
   vectChain card .Chain.π n = !^ n ∘_
 
   VectLimit : (card : Bij) → Type
