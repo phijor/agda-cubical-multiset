@@ -7,6 +7,8 @@ open import Cubical.Foundations.Structure
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function using (_∘_)
 
+open import Cubical.Functions.FunExtEquiv using (funExtDep)
+
 open import Cubical.Data.Sigma as Σ
 open import Cubical.Data.Nat as ℕ
   using (ℕ)
