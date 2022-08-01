@@ -35,3 +35,10 @@ module _ {ℓ' : Level} {Y : ⊥ → Type ℓ'} where
 
   Π⊥≡elim : (v : (k : ⊥) → Y k) → Empty.elim ≡ v
   Π⊥≡elim v _ ()
+
+the-syntax : (A : Type ℓ) → (a : A) → A
+the-syntax _ a = a
+
+infix 0 the-syntax
+
+syntax the-syntax A a = a ∶ A
