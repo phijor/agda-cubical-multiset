@@ -21,6 +21,7 @@ open import Multiset.Util.Square using (kiteFiller)
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Isomorphism
+  renaming (compIso to infixl 20 _∙≅_)
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Path
 open import Cubical.Foundations.Transport
@@ -96,9 +97,6 @@ module Unzip (trees : Bag ωTree) where
 
   unzipped : ωBagOfTrees
   unzipped = lim bagAt isChainLimitBags
-
-α : (Bag ωTree) → ωBagOfTrees
-α trees = Unzip.unzipped trees
 
 {- Zipping
 
@@ -234,18 +232,23 @@ module Zip (tree⁺ : ωBagOfTrees) where
   zipped : Bag ωTree
   zipped = ⟅ zippedTree idx₀ ∣ idx₀ ∈ card₀ ⟆
 
-α⁻¹ : ωBagOfTrees → (Bag ωTree)
-α⁻¹ tree⁺ = Zip.zipped tree⁺
-
 open Iso
 
-module Equiv where
+zipUnzipIso : Iso ωBagOfTrees (Bag ωTree)
+zipUnzipIso =
+  ωBagOfTrees  Iso⟨ toTraceFirstIso ⟩
+  TraceFirst   Iso⟨ toVectLimitBag ⟩
+  Σ Bij VectLimit Iso⟨ toBagOfTrees ⟩
+  Bag ωTree    ∎Iso where
+
+  open Limit
+
   open import Cubical.Reflection.StrictEquiv
-   using (strictEquiv ; strictIsoToEquiv)
+    using (strictEquiv ; strictIsoToEquiv)
 
   open import Multiset.Util.Trace as Trace
     using (Trace ; step ; connect ; constTrace ; TraceIso ; start)
-  
+
   TraceFirst-snd : Trace Bij → Type
   TraceFirst-snd cardAt =
     Σ[ vs ∈ ((n : ℕ) → Vect (UnorderedTree n) (cardAt .step n)) ]
@@ -291,9 +294,6 @@ module Equiv where
   VectLimit : (card : Bij) → Type
   VectLimit card = Limit.ChainLimit (vectChain card)
 
-  VectLimitBag : Type
-  VectLimitBag = Σ[ card ∈ Bij ] (VectLimit card)
-
   iso₆′ : (card : Bij) → Iso (TraceFirst-snd (constTrace card)) (VectLimit card)
   iso₆′ card = go where
     go : Iso _ _
@@ -307,18 +307,17 @@ module Equiv where
     {A = Bij} {A' = Trace Bij} {B = TraceFirst-snd}
     (invIso TraceIso)
 
-  iso₇′ : Iso (Σ Bij (TraceFirst-snd ∘ constTrace)) VectLimitBag
+  iso₇′ : Iso (Σ Bij (TraceFirst-snd ∘ constTrace)) (Σ Bij VectLimit)
   iso₇′ = Σ.Σ-cong-iso-snd
     {A = Bij}
     {B = TraceFirst-snd ∘ constTrace}
     {B' = VectLimit}
     iso₆′
 
-  toVectLimitBag : Iso TraceFirst VectLimitBag
-  toVectLimitBag = compIso (invIso iso₅′) iso₇′
+  toVectLimitBag : Iso TraceFirst (Σ Bij VectLimit)
+  toVectLimitBag = invIso iso₅′ ∙≅ iso₇′
 
-  -- TODO: Show that VectLimitBag ≅ Σ Bin _ ≅ (Bag ωTree)
-  toBagOfTrees : Iso VectLimitBag (Bag ωTree)
+  toBagOfTrees : Iso (Σ Bij VectLimit) (Bag ωTree)
   toBagOfTrees = go where
     -- This is essentially the UP of limits of chains.
     go : Iso _ _
@@ -332,15 +331,11 @@ module Equiv where
     go .rightInv _ = refl
     go .leftInv _ = refl
 
-  β : Iso ωBagOfTrees (Bag ωTree)
-  β =
-    ωBagOfTrees  Iso⟨ toTraceFirstIso ⟩
-    TraceFirst   Iso⟨ toVectLimitBag ⟩
-    VectLimitBag Iso⟨ toBagOfTrees ⟩
-    Bag ωTree    ∎Iso
-
-  β⁻¹≡α : β .inv ≡ α
-  β⁻¹≡α = funExt λ trees → refl
+zipUnzipIsoInv≡unzipped : zipUnzipIso .inv ≡ Unzip.unzipped
+zipUnzipIsoInv≡unzipped = refl
 
 isLimitPreservingBag : BagChain.isLimitPreserving
-isLimitPreservingBag = isoToEquiv (invIso Equiv.β)
+isLimitPreservingBag = isoToEquiv (invIso zipUnzipIso)
+
+bagLimitIso : Iso ωTree (Bag ωTree)
+bagLimitIso = ωBagOfTrees≅ωTree ∙≅ zipUnzipIso
