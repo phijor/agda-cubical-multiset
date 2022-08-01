@@ -11,6 +11,8 @@ open import Multiset.Chains
 open import Multiset.Limits
 open import Multiset.Tree
 
+open import Multiset.Algebras.Base
+
 open import Multiset.FiniteChoice
 
 open import Multiset.OverGroupoid
