@@ -48,17 +48,19 @@ private
 
 open Limit using (lim)
 
-open module BagChain = FunctorChain Bag (OverBij.map) Unit (! (Bag Unit))
+open module BagChain = FunctorChain {ℓ = ℓ-zero} Bag (OverBij.map) Unit (! (Bag Unit))
   using ()
   renaming
     ( iterObj to UnorderedTree
     ; iterInit to !^
+    ; iterated to bagChain
     ; IteratedLimit to ωTree -- Limit over the chain starting at Unit
     ; ShiftedLimit to ωBagOfTrees -- Limit over the chain (lim (n ↦ Bag (UnorderedTree n))
     -- ; isShiftedChainLimit to isω⁺Tree
     ; IteratedLimitPathPExt to ωTreePathP
     ; ShiftedLimitPathPExt to ω⁺TreePathP
-    )
+    ; shifted≅iterated to ωBagOfTrees≅ωTree
+    ) public
 
 open ωTree
   renaming
