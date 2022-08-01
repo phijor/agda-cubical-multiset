@@ -5,7 +5,12 @@ stages:
 
 compile:
   stage: build
+  variables:
+    CACHIX_CACHE_NAME: phijor
+  before_script:
+    - nix-env --install --attr nixpkgs.cachix
+    - cachix use "$CACHIX_CACHE_NAME"
   script:
-    - nix-build
+    - cachix watch-exec "$CACHIX_CACHE_NAME" nix-build
   artifacts:
     untracked: true
