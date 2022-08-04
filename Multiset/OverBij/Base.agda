@@ -29,6 +29,9 @@ abstract
   Idx : Bij → Type ℓ-zero
   Idx = λ x → ⟨ Bij→FinSet x ⟩
 
+  Idx≡⟨Bij→FinSet⟩ : ∀ x → Idx x ≡ ⟨ Bij→FinSet x ⟩
+  Idx≡⟨Bij→FinSet⟩ x = refl
+
   unIdx : {n : ℕ} → Idx (obj n) → Fin n
   unIdx idx = idx
 

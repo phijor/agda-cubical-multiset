@@ -324,8 +324,8 @@ module FMSet-OverBij where
     BijFinSetIso = equivToIso Bij≃FinSet
 
     abstract
-    Vect-⟨Bij→FinSet⟩-Iso : (x : Bij) → Iso (Vect ωTree x) (⟨ Bij→FinSet x ⟩ → ωTree)
-    Vect-⟨Bij→FinSet⟩-Iso x = pathToIso (cong (λ X → X → ωTree) (Idx≡⟨Bij→FinSet⟩ x))
+      Vect-⟨Bij→FinSet⟩-Iso : (x : Bij) → Iso (Vect ωTree x) (⟨ Bij→FinSet x ⟩ → ωTree)
+      Vect-⟨Bij→FinSet⟩-Iso x = pathToIso (cong (λ X → X → ωTree) (Idx≡⟨Bij→FinSet⟩ x))
 
     step =
       (ωTree)               Iso⟨ bagLimitIso ⟩
