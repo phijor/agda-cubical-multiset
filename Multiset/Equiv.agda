@@ -153,8 +153,14 @@ open Iso
   (λ v → refl)
   v
 
+𝕄S-∥𝕄G∥₂-Iso : Iso (𝕄S X) (∥ 𝕄G X ∥₂)
+𝕄S-∥𝕄G∥₂-Iso .fun = 𝕄S→∥𝕄G∥₂
+𝕄S-∥𝕄G∥₂-Iso .inv = ∥𝕄G∥₂→𝕄S
+𝕄S-∥𝕄G∥₂-Iso .rightInv = ∥𝕄G∥₂→𝕄S→∥𝕄G∥₂
+𝕄S-∥𝕄G∥₂-Iso .leftInv = 𝕄S→∥𝕄G∥₂→𝕄S
+
 𝕄S≃∥𝕄G∥₂ : 𝕄S X ≃ ∥ 𝕄G X ∥₂
-𝕄S≃∥𝕄G∥₂ = isoToEquiv (iso 𝕄S→∥𝕄G∥₂ ∥𝕄G∥₂→𝕄S ∥𝕄G∥₂→𝕄S→∥𝕄G∥₂ 𝕄S→∥𝕄G∥₂→𝕄S)
+𝕄S≃∥𝕄G∥₂ = isoToEquiv 𝕄S-∥𝕄G∥₂-Iso
 
 -- Idempotency of 𝕄S on set truncations:
 requot : ∀ {n} → (Fin n → ∥ X ∥₂) → ((Fin n → X) /₂ SymmetricAction n)
@@ -226,8 +232,14 @@ requot-comp {X = X} {n = n} = FiniteChoice.elimₙ-comp {B = λ _ → (Fin n →
   lemma = SQ.elimProp {P = λ v → 𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S (n , v)) .snd ≡ v}
     (λ _ → SQ.squash/ _ _) step v
 
+𝕄S∘∥-∥₂-𝕄S-Iso : Iso (𝕄S ∥ X ∥₂) (𝕄S X)
+𝕄S∘∥-∥₂-𝕄S-Iso .fun = 𝕄S∘∥-∥₂→𝕄S
+𝕄S∘∥-∥₂-𝕄S-Iso .inv = 𝕄S→𝕄S∘∥-∥₂
+𝕄S∘∥-∥₂-𝕄S-Iso .rightInv = 𝕄S→𝕄S∘∥-∥₂→𝕄S
+𝕄S∘∥-∥₂-𝕄S-Iso .leftInv = 𝕄S∘∥-∥₂→𝕄S→𝕄S∘∥-∥₂
+
 𝕄S∘∥-∥₂≃𝕄S : 𝕄S ∥ X ∥₂ ≃ 𝕄S X
-𝕄S∘∥-∥₂≃𝕄S = isoToEquiv (iso 𝕄S∘∥-∥₂→𝕄S 𝕄S→𝕄S∘∥-∥₂ 𝕄S→𝕄S∘∥-∥₂→𝕄S 𝕄S∘∥-∥₂→𝕄S→𝕄S∘∥-∥₂)
+𝕄S∘∥-∥₂≃𝕄S = isoToEquiv 𝕄S∘∥-∥₂-𝕄S-Iso
 
 module HIT where
   open import Cubical.HITs.FiniteMultiset as FMSet
@@ -275,3 +287,48 @@ module HIT where
 
   FMSet≃FMSet∥∥₂ : FMSet X ≃ FMSet ∥ X ∥₂
   FMSet≃FMSet∥∥₂ = isoToEquiv FMSet≅FMSet∥∥₂
+
+module FMSet-OverBij where
+  open import Cubical.Foundations.Isomorphism
+    using
+      ( invIso
+      ; _Iso⟨_⟩_
+      ; _∎Iso
+      )
+  open import Cubical.Foundations.Structure
+  open import Cubical.Foundations.Transport
+    using (pathToIso)
+
+  open import Multiset.Bij
+  open import Multiset.OverBij.Base as OverBij
+    using
+      ( Bag
+      ; Vect
+      ; BagIsoΣ
+      ; Idx≡⟨Bij→FinSet⟩
+      )
+  open import Multiset.OverBij.Properties as OverBij
+    using
+      ( ωTree
+      ; bagLimitIso
+      )
+
+  FMSetPreservesSetTruncTree : Iso (𝕄S ∥ ωTree ∥₂) ∥ ωTree ∥₂
+  FMSetPreservesSetTruncTree =
+    (𝕄S ∥ ωTree ∥₂)   Iso⟨ 𝕄S∘∥-∥₂-𝕄S-Iso ⟩
+    (𝕄S ωTree)        Iso⟨ 𝕄S-∥𝕄G∥₂-Iso ⟩
+    (∥ 𝕄G ωTree ∥₂)   Iso⟨ ST.setTruncIso (invIso step) ⟩
+    (∥ ωTree ∥₂)      ∎Iso where
+
+    BijFinSetIso : Iso Bij (FinSet ℓ-zero)
+    BijFinSetIso = equivToIso Bij≃FinSet
+
+    abstract
+    Vect-⟨Bij→FinSet⟩-Iso : (x : Bij) → Iso (Vect ωTree x) (⟨ Bij→FinSet x ⟩ → ωTree)
+    Vect-⟨Bij→FinSet⟩-Iso x = pathToIso (cong (λ X → X → ωTree) (Idx≡⟨Bij→FinSet⟩ x))
+
+    step =
+      (ωTree)               Iso⟨ bagLimitIso ⟩
+      (Bag ωTree)           Iso⟨ BagIsoΣ ⟩
+      (Σ Bij (Vect ωTree))  Iso⟨ Σ.Σ-cong-iso BijFinSetIso Vect-⟨Bij→FinSet⟩-Iso ⟩
+      (𝕄G ωTree)            ∎Iso

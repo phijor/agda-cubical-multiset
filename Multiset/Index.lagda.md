@@ -19,6 +19,8 @@ open import Multiset.OverGroupoid
 open import Multiset.OverSet
 open import Multiset.OverBij
 
+open import Multiset.Equiv
+
 open import Multiset.Experiments.Conjugate
 open import Multiset.Experiments.Equiv
 ```
