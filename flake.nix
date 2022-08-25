@@ -6,12 +6,31 @@
     };
     flake-utils.url = github:numtide/flake-utils;
     nixpkgs.url = github:NixOS/nixpkgs/nixpkgs-unstable;
+    # cornelis.url = github:isovector/cornelis;
+    cornelis.url = path:/home/phijor/usr/src/nvim/cornelis;
   };
 
-  outputs = { self, nixpkgs, flake-compat, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-compat, flake-utils, cornelis, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
+        agda-overlay = self: super: {
+          Agda = super.Agda.overrideAttrs (old: {
+            patches = (old.patches or []) ++ [
+              (super.fetchpatch {
+                url = "https://github.com/agda/agda/commit/c15b484129e55d62cbab17550286cd7d2403e133.patch";
+                sha256 = "0000000000000000000000000000000000000000000000000000";
+              })
+
+              (super.fetchpatch {
+                url = "https://github.com/agda/agda/commit/56de2d51cfbdee8d67091a4f168022028c0b3f1f.patch";
+                sha256 = "0000000000000000000000000000000000000000000000000000";
+              })
+            ];
+          });
+        };
+
         pkgs = import nixpkgs {
+          overlays = [ agda-overlay ];
           inherit system;
         };
         inherit (pkgs) agdaPackages;
@@ -43,16 +62,18 @@
             platforms = pkgs.lib.platforms.unix;
           };
         };
+        cornelis-pkg = cornelis.packages.${system}.cornelis;
       in
       {
         packages = {
           inherit multiset;
+          cornelis = cornelis-pkg;
           default = multiset;
         };
 
         devShells.default = pkgs.mkShell {
           inputsFrom = [ multiset ];
-          packages = [ ];
+          packages = [ cornelis-pkg ];
         };
 
         defaultPackage = self.packages.default;
