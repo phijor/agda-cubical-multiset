@@ -6,15 +6,15 @@
     };
     flake-utils.url = github:numtide/flake-utils;
     nixpkgs.url = github:NixOS/nixpkgs/nixpkgs-unstable;
-    # cornelis.url = github:isovector/cornelis;
-    cornelis.url = path:/home/phijor/usr/src/nvim/cornelis;
+    cornelis.url = github:phijor/cornelis/custom;
+    cornelis.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, flake-compat, flake-utils, cornelis, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         agda-overlay = self: super: {
-          Agda = super.Agda.overrideAttrs (old: {
+          agdaWithPackages = super.agdaWithPackages.overrideAttrs (old: {
             patches = (old.patches or []) ++ [
               (super.fetchpatch {
                 url = "https://github.com/agda/agda/commit/c15b484129e55d62cbab17550286cd7d2403e133.patch";
