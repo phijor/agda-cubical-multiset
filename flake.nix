@@ -58,9 +58,6 @@
           inputsFrom = [ multiset ];
           packages = [ cornelis-pkg ];
         };
-
-        defaultPackage = self.packages.default;
-        devShell = self.devShells.default;
       }
     );
 }
