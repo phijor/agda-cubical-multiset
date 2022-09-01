@@ -13,24 +13,7 @@
   outputs = { self, nixpkgs, flake-compat, flake-utils, cornelis, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        agda-overlay = self: super: {
-          haskellPackages = super.haskellPackages.override {
-            overrides = hsself: hssuper: {
-              Agda = hssuper.Agda.overrideAttrs (old: {
-                patches = (old.patches or []) ++ [
-                  (super.fetchpatch {
-                    name = "0001-use-prettyShow-instead-of-show-for-JSON-solveAll.patch";
-                    url = "https://github.com/agda/agda/commit/c15b484129e55d62cbab17550286cd7d2403e133.patch";
-                    sha256 = "sha256-kIDSb0e63juA3yu/S5j7sDZMONUJImE96a0u+5I177c=";
-                  })
-                ];
-              });
-            };
-          };
-        };
-
         pkgs = import nixpkgs {
-          overlays = [ agda-overlay ];
           inherit system;
         };
         inherit (pkgs) agdaPackages;
