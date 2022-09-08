@@ -7,6 +7,7 @@ open import Cubical.Foundations.Function
     ( _∘_
     ; const
     )
+open import Cubical.Foundations.Equiv
 
 open import Cubical.HITs.SetTruncation as ST
   using
@@ -97,3 +98,18 @@ map2IdRight : ∀ {ℓw} {W : Type ℓw}
   → (w : ∥ W ∥₂)
   → map2 (λ x w → x) x w ≡ x
 map2IdRight = ST.elim2 (λ _ _ → ST.isSetPathImplicit) (λ _ _ → refl)
+
+setTruncEquiv : {A : Type ℓ} {B : Type ℓ'}
+  → A ≃ B
+  → ∥ A ∥₂ ≃ ∥ B ∥₂
+setTruncEquiv {A = A} {B = B} e = ST.map (equivFun e) , is-equiv where
+  center : ∥ B ∥₂ → ∥ A ∥₂
+  center = ST.map (invEq e)
+
+  contr : ∀ ∣b∣ → ST.map (equivFun e) (ST.map (invEq e) ∣b∣) ≡ ∣b∣
+  contr = ST.elim
+    (λ ∣b∣ → isProp→isSet (isSetSetTrunc (ST.map (equivFun e) (ST.map (invEq e) ∣b∣)) ∣b∣))
+    (λ a → cong ∣_∣₂ (secEq e a))
+
+  is-equiv : isEquiv (ST.map (equivFun e))
+  is-equiv .equiv-proof = λ { ∣b∣ → (center ∣b∣ , contr ∣b∣) , {! ΣPathP!} }

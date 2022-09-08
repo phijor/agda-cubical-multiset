@@ -9,6 +9,7 @@ open import Cubical.Foundations.HLevels
     ( isOfHLevelDep
     ; isOfHLevel→isOfHLevelDep
     ; isPropDep→isSetDep
+    ; isSetΠ
     )
 
 -- Finite multisets of a type, a.k.a. the free commutative monoid
@@ -31,7 +32,7 @@ data M {ℓ : Level} (X : Type ℓ) : Type ℓ where
 -- -- set truncation
   trunc : isSet (M X)
 
-unit' : {X : Type} → (m : M X) → m ⊕ ε ≡ m
+unit' : ∀ {ℓ} → {X : Type ℓ} → (m : M X) → m ⊕ ε ≡ m
 unit' m = (comm m ε) ∙ (unit m)
 
 open M
@@ -69,7 +70,7 @@ map f = rec trunc ε (η ∘ f) _⊕_ unit assoc comm
 
 -- Elimination into a family of sets.
 elim : {A : M X → Type ℓ'}
-  → (setA : isOfHLevelDep 2 A)
+  → (setA : ∀ xs → isSet (A xs))
   → (∅ : A ε)
   → (singleton : (x : X) → A (η x))
   → (_∪_ : {m n : M X} → A m → A n → A (m ⊕ n))
@@ -78,6 +79,9 @@ elim : {A : M X → Type ℓ'}
   → (∪-comm : ∀ {m n} (a : A m) (b : A n) → PathP (λ i → A (comm m n i)) (a ∪ b) (b ∪ a))
   → (m : M X) → A m
 elim {X = X} {A = A} setA Ø singleton _∪_ ∪-unit ∪-assoc ∪-comm = go where
+  setA' : isOfHLevelDep 2 A
+  setA' = isOfHLevel→isOfHLevelDep 2 setA
+
   go : (m : M X) → A m
   go (η x) = singleton x
   go ε = Ø
@@ -85,14 +89,14 @@ elim {X = X} {A = A} setA Ø singleton _∪_ ∪-unit ∪-assoc ∪-comm = go wh
   go (unit m i) = ∪-unit (go m) i
   go (assoc m n k i) = ∪-assoc (go m) (go n) (go k) i
   go (comm m n i) = ∪-comm (go m) (go n) i
-  go (trunc m n p q i j) = setA (go m) (go n) (cong go p) (cong go q) (trunc m n p q) i j
+  go (trunc m n p q i j) = setA' (go m) (go n) (cong go p) (cong go q) (trunc m n p q) i j
 
 -- Induction principle.
 --
 -- Given a family `P` of properties over `M X`, we can show `P(m)` for
 -- any `m ∈ M X` provided that:
 -- ∙ Pη : P holds for all singleton multisets
--- ∙ Pε : P holds for the empy multiset
+-- ∙ Pε : P holds for the empty multiset
 -- ∙ ∨ : P holds for the union of multisets if it holds for its factors
 ind : {X : Type ℓ} {P : M X → Type ℓ'}
   → (propP : ∀ m → isProp (P m))
@@ -101,7 +105,7 @@ ind : {X : Type ℓ} {P : M X → Type ℓ'}
   → (_∨_ : {m n : M X} → (p : P m) → (q : P n) → P (m ⊕ n))
   → (m : M X) → P m
 ind {X = X} {P = P} propP ⊤ singleton _∨_ =
-  elim (isPropDep→isSetDep propDepP) ⊤ singleton _∨_ ∨-unit ∨-assoc ∨-comm where
+  elim (λ m → isProp→isSet (propP m)) ⊤ singleton _∨_ ∨-unit ∨-assoc ∨-comm where
     propDepP : isOfHLevelDep 1 P
     propDepP = isOfHLevel→isOfHLevelDep 1 propP {a0 = _}
 
@@ -117,8 +121,56 @@ ind {X = X} {P = P} propP ⊤ singleton _∨_ =
       PathP (λ i → P (comm m n i)) (p ∨ q) (q ∨ p)
     ∨-comm p q = isProp→PathP (λ i → propP (comm _ _ i)) _ _
 
+mapComp : ∀ {ℓ″ ℓ‴} {Y : Type ℓ″} {Z : Type ℓ‴}
+  → ∀ {xs : M X}
+  → (g : Y → Z)
+  → (f : X → Y)
+  → map g (map f xs) ≡ map (g ∘ f) xs
+mapComp {xs = xs} g f = ind {P = λ xs → map g (map f xs) ≡ map (g ∘ f) xs} (λ xs → isSetM _ _)
+  (refl {x = ε})
+  (λ x → refl {x = η (g (f x))})
+  (λ {xs ys} mapComp-xs mapComp-ys → cong₂ _⊕_ mapComp-xs mapComp-ys)
+  xs
+
+mapId : ∀ (xs : M X)
+  → map (λ x → x) xs ≡ xs
+mapId = ind (λ xs → isSetM _ _) refl (λ _ → refl) λ mapId-xs mapId-ys → cong₂ _⊕_ mapId-xs mapId-ys
+
+-- indPath : {X : Type ℓ} {Y : Type ℓ'}
+--   → {P : {xs ys : M X} → xs ≡ ys}
+--   → (∀ ys → P {ε} ys)
+--   → (∀ ys → P {ε} ys)
+--   → (xs : M X) → ys ≡ ys'
+
 _∷_ : X → M X → M X
 x ∷ m = η x ⊕ m
 
+infixr 7 _∷_
+
 _∷ʳ_ : M X → X → M X
 m ∷ʳ x = m ⊕ η x
+
+∷-swap : ∀ (x y : X) xs → x ∷ y ∷ xs ≡ y ∷ x ∷ xs
+∷-swap x y xs =
+  x ∷ y ∷ xs       ≡⟨⟩
+  η x ⊕ (η y ⊕ xs) ≡⟨ assoc _ _ _ ⟩
+  (η x ⊕ η y) ⊕ xs ≡⟨ cong (_⊕ xs) (comm _ _) ⟩
+  (η y ⊕ η x) ⊕ xs ≡⟨ sym (assoc _ _ _) ⟩
+  η y ⊕ (η x ⊕ xs) ≡⟨⟩
+  y ∷ x ∷ xs ∎
+
+∷-swap-split≡ : ∀ {ℓ} {X : Type ℓ} {x y : X} {xs ys zs : M X}
+  → (xs ≡ y ∷ zs)
+  → (x ∷ zs ≡ ys)
+  → x ∷ xs ≡ y ∷ ys
+∷-swap-split≡ {x = x} {y} {xs} {ys} {zs} xs-split ys-split =
+  x ∷ xs ≡⟨ cong (x ∷_) xs-split ⟩
+  x ∷ y ∷ zs ≡⟨ ∷-swap x y zs ⟩
+  y ∷ x ∷ zs ≡⟨ cong (y ∷_) ys-split ⟩
+  y ∷ ys ∎
+  
+module _ where
+  open import Cubical.Data.Nat as ℕ using (ℕ)
+
+  count : (♯_ : X → ℕ) → M X → ℕ
+  count ♯_ = rec ℕ.isSetℕ 0 ♯_ ℕ._+_ (λ _ → refl) ℕ.+-assoc ℕ.+-comm

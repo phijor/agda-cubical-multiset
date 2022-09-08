@@ -18,6 +18,7 @@ private
   variable
     ℓ ℓ' : Level
     A : Type ℓ
+    B : A → Type ℓ'
     x y z : A
 
 -- Path composition, but using dependent path composition
@@ -66,3 +67,17 @@ infixr 4 [_∣_≡_]
 
 [_∣_≡_] : ∀ {ℓ} → (A : Type ℓ) → (x y : A) → Type ℓ
 [ A ∣ x ≡ y ] = x ≡ y
+
+substDomain : ∀ {ℓ''} {C : Type ℓ''}
+  → {x₀ x₁ : A}
+  → (f : B x₀ → C)
+  → (p : x₀ ≡ x₁)
+  → subst (λ x → B x → C) p f ≡ λ x → f (subst⁻ B p x)
+substDomain {B = B} {C = C} f p = funExt λ x₁ → transportRefl {A = C} (f (subst⁻ B p x₁))
+
+subst⁻Domain : ∀ {ℓ''} {C : Type ℓ''}
+  → {x₀ x₁ : A}
+  → (f : B x₁ → C)
+  → (p : x₀ ≡ x₁)
+  → subst⁻ (λ x → B x → C) p f ≡ λ x → f (subst B p x)
+subst⁻Domain {B = B} {C = C} f p = funExt λ x₁ → transportRefl {A = C} (f (subst B p x₁))

@@ -15,6 +15,7 @@ open import Multiset.Algebras.Base
 
 open import Multiset.FiniteChoice
 
+open import Multiset.Inductive
 open import Multiset.OverGroupoid
 open import Multiset.OverSet
 open import Multiset.OverBij

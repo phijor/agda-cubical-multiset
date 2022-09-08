@@ -5,6 +5,7 @@ open import Cubical.Foundations.Structure
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Isomorphism
+open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat.Base as ℕ
   using (ℕ ; zero ; suc)
 open import Cubical.Data.Sigma
@@ -49,6 +50,16 @@ module Limit (C : Chain ℓ) where
 
   open ChainLimit
 
+  isOfHLevelChainLimit : ∀ n
+    → (∀ k → isOfHLevel n (C .Ob k))
+    → isOfHLevel n ChainLimit
+  isOfHLevelChainLimit n hlev = isOfHLevelRetractFromIso n 
+    ChainLimitIsoΣ
+    (isOfHLevelΣ n
+      (isOfHLevelΠ n hlev)
+      (λ el → isOfHLevelΠ n λ k → isOfHLevelPath n (hlev k) _ _)
+    )
+
   ChainLimitPathP : {l₀ l₁ : ChainLimit}
     → (Σ[ elements≡ ∈ ((l₀ .elements) ≡ (l₁ .elements)) ] PathP (λ i → IsChainLimit (elements≡ i)) (l₀ .isChainLimit) (l₁ .isChainLimit))
     → l₀ ≡ l₁
@@ -59,6 +70,14 @@ module Limit (C : Chain ℓ) where
     → (isChainLimit≡ : ∀ n → PathP (λ i → C .π n (elements≡ (suc n) i) ≡ elements≡ n i) (l₀ .isChainLimit n) (l₁ .isChainLimit n))
     → l₀ ≡ l₁
   ChainLimitPathPExt elements≡ isChainLimit≡ = λ i → lim (λ n → elements≡ n i) (λ n → isChainLimit≡ n i)
+
+  isSet→ChainLimitPathExt : (setCh : ∀ k → isSet (C .Ob k))
+    → {l₀ l₁ : ChainLimit}
+    → (∀ n → l₀ .elements n ≡ l₁ .elements n)
+    → l₀ ≡ l₁
+  isSet→ChainLimitPathExt setCh elements≡ = ChainLimitPathPExt elements≡ set-coh where
+    set-coh : ∀ n → Square _ _ _ _
+    set-coh n = isSet→isSet' (setCh n) _ _ _ (elements≡ n)
 
   record Cone (A : Type ℓA) : Type (ℓ-max ℓ ℓA) where
     constructor cone
@@ -86,6 +105,14 @@ module Limit (C : Chain ℓ) where
 
   universalProperty : (A → ChainLimit) ≃ Cone A
   universalProperty = isoToEquiv universalPropertyIso
+
+mapLimit : {C D : Chain ℓ}
+  → (f : (n : ℕ) → (C .Chain.Ob n) → (D .Chain.Ob n))
+  → Limit.ChainLimit C
+  → Limit.ChainLimit D
+mapLimit f (Limit.lim elements isChainLimit) = Limit.lim
+  (λ n → f n (elements n))
+  λ n → {! cong f!}
 
 module FunctorChain
   (F : Type ℓ → Type ℓ) (map : {X Y : Type ℓ} → (X → Y) → (F X → F Y))

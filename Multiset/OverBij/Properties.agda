@@ -171,13 +171,14 @@ module Zip (tree⁺ : ωBagOfTrees) where
     → PathP (λ i → Idx (isConstCard n i)) (idx₀Cast n idx₀) idx₀
   idx₀CastPath {n = n} idx₀ = symP (subst⁻-filler Idx (isConstCard n) idx₀)
 
+  -- TODO: Yellow soup.
   idxCastSucPath : {n : ℕ} (idx₀ : Idx card₀)
     → PathP (λ i → Idx (isConstCardSuc n i)) (idx₀Cast (suc n) idx₀) (idx₀Cast n idx₀)
-  idxCastSucPath {n = n} idx₀ = compPathP' castToZero castFromZero where
-    castToZero : _
+  idxCastSucPath {n = n} idx₀ = compPathP' {p = isConstCardSuc (suc n)} {q = {! sym (isConstCard n) !}} castToZero castFromZero where
+    castToZero : PathP (λ i → Idx (isConstCard (suc n) i)) (idx₀Cast (suc n) idx₀) idx₀
     castToZero = idx₀CastPath {n = suc n} idx₀
 
-    castFromZero : _
+    castFromZero : PathP (λ i → Idx (sym (isConstCard n) i)) idx₀ (idx₀Cast n idx₀)
     castFromZero = symP (idx₀CastPath {n = n} idx₀)
 
   -- cutCohExt' : ∀ n (idx₀ : Idx card₀)
@@ -238,10 +239,10 @@ open Iso
 
 zipUnzipIso : Iso ωBagOfTrees (Bag ωTree)
 zipUnzipIso =
-  ωBagOfTrees  Iso⟨ toTraceFirstIso ⟩
-  TraceFirst   Iso⟨ toVectLimitBag ⟩
+  ωBagOfTrees     Iso⟨ toTraceFirstIso ⟩
+  TraceFirst      Iso⟨ toVectLimitBag ⟩
   Σ Bij VectLimit Iso⟨ toBagOfTrees ⟩
-  Bag ωTree    ∎Iso where
+  Bag ωTree       ∎Iso where
 
   open Limit
 

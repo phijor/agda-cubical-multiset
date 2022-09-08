@@ -17,9 +17,12 @@ open import Multiset.OverGroupoid as OverGroupoid
 
 import Multiset.FiniteChoice as FiniteChoice
 
-open import Multiset.Util using (Π⊥≡elim ; isPropΠ⊥ ; ua→cong ; ua→PathP)
-import Multiset.Util.SetTruncation as STExt
-open STExt using (∣_∣₂∗)
+open import Multiset.Util using (Π⊥≡elim ; isPropΠ⊥ ; ua→PathP)
+open import Multiset.Util.SetTruncation as STExt
+  using
+    ( ∣_∣₂∗
+    ; setTruncEquiv
+    )
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
@@ -289,6 +292,8 @@ module HIT where
   FMSet≃FMSet∥∥₂ = isoToEquiv FMSet≅FMSet∥∥₂
 
 module FMSet-OverBij where
+  open import Cubical.Foundations.Equiv.Properties
+    using (preCompEquiv)
   open import Cubical.Foundations.Isomorphism
     using
       ( invIso
@@ -299,13 +304,16 @@ module FMSet-OverBij where
   open import Cubical.Foundations.Transport
     using (pathToIso)
 
+  -- open import Multiset.Util.Sigma
+  --   using (Σ-cong-equiv)
+
   open import Multiset.Bij
   open import Multiset.OverBij.Base as OverBij
     using
       ( Bag
       ; Vect
       ; BagIsoΣ
-      ; Idx≡⟨Bij→FinSet⟩
+      ; ⟨Bij→FinSet⟩≃Idx
       )
   open import Multiset.OverBij.Properties as OverBij
     using
@@ -313,22 +321,22 @@ module FMSet-OverBij where
       ; bagLimitIso
       )
 
-  FMSetPreservesSetTruncTree : Iso (𝕄S ∥ ωTree ∥₂) ∥ ωTree ∥₂
-  FMSetPreservesSetTruncTree =
-    (𝕄S ∥ ωTree ∥₂)   Iso⟨ 𝕄S∘∥-∥₂-𝕄S-Iso ⟩
-    (𝕄S ωTree)        Iso⟨ 𝕄S-∥𝕄G∥₂-Iso ⟩
-    (∥ 𝕄G ωTree ∥₂)   Iso⟨ ST.setTruncIso (invIso step) ⟩
-    (∥ ωTree ∥₂)      ∎Iso where
-
-    BijFinSetIso : Iso Bij (FinSet ℓ-zero)
-    BijFinSetIso = equivToIso Bij≃FinSet
+  FMSetFixSetTruncTree : (𝕄S ∥ ωTree ∥₂) ≃ ∥ ωTree ∥₂
+  FMSetFixSetTruncTree =
+    (𝕄S ∥ ωTree ∥₂)   ≃⟨ isoToEquiv 𝕄S∘∥-∥₂-𝕄S-Iso ⟩
+    (𝕄S ωTree)        ≃⟨ isoToEquiv 𝕄S-∥𝕄G∥₂-Iso ⟩
+    (∥ 𝕄G ωTree ∥₂)   ≃⟨ setTruncEquiv (invEquiv step) ⟩
+    (∥ ωTree ∥₂)      ■ where
 
     abstract
-      Vect-⟨Bij→FinSet⟩-Iso : (x : Bij) → Iso (Vect ωTree x) (⟨ Bij→FinSet x ⟩ → ωTree)
-      Vect-⟨Bij→FinSet⟩-Iso x = pathToIso (cong (λ X → X → ωTree) (Idx≡⟨Bij→FinSet⟩ x))
+      Vect≃⟨Bij→FinSet⟩ : (x : Bij) → (Vect ωTree x) ≃ (⟨ Bij→FinSet x ⟩ → ωTree)
+      Vect≃⟨Bij→FinSet⟩ x = preCompEquiv (⟨Bij→FinSet⟩≃Idx x)
 
+    step : ωTree ≃ (𝕄G ωTree)
     step =
-      (ωTree)               Iso⟨ bagLimitIso ⟩
-      (Bag ωTree)           Iso⟨ BagIsoΣ ⟩
-      (Σ Bij (Vect ωTree))  Iso⟨ Σ.Σ-cong-iso BijFinSetIso Vect-⟨Bij→FinSet⟩-Iso ⟩
-      (𝕄G ωTree)            ∎Iso
+      (ωTree)               ≃⟨ isoToEquiv bagLimitIso ⟩
+      (Bag ωTree)           ≃⟨ isoToEquiv BagIsoΣ ⟩
+      -- TODO: Use a version of Σ-cong-equiv that does not compute the inverse of
+      -- Bij≃FinSet using isoToEquiv.
+      (Σ Bij (Vect ωTree))  ≃⟨ {! Σ-cong-equiv Bij≃FinSet Vect≃⟨Bij→FinSet⟩ !} ⟩
+      (𝕄G ωTree)            ■
