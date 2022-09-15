@@ -11,8 +11,9 @@ open import Cubical.Data.Sigma as Sigma using (_×_)
 
 private
   variable
-    ℓ : Level
+    ℓ ℓ' : Level
     A : Type ℓ
+    B : Type ℓ'
 
 
 Path→cong : ∀ {ℓ ℓ' ℓ''} {A : (i : I) → Type ℓ}
@@ -50,3 +51,5 @@ syntax the-syntax A a = a ∶ A
 
 infixr 80 !_
 
+isInjective : (f : A → B) → Type _
+isInjective f = ∀ x y → f x ≡ f y → x ≡ y

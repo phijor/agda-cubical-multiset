@@ -1,5 +1,7 @@
 module Multiset.Inductive.Base where
 
+open import Multiset.Prelude
+
 open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
@@ -168,7 +170,32 @@ m ∷ʳ x = m ⊕ η x
   x ∷ y ∷ zs ≡⟨ ∷-swap x y zs ⟩
   y ∷ x ∷ zs ≡⟨ cong (y ∷_) ys-split ⟩
   y ∷ ys ∎
+
+_++_ : M X → M X → M X
+_++_ {X = X} = rec {A = M X → M X} (isSetΠ (λ ys → isSetM)) (λ ys → ys) _∷_ (λ xs++_ ys++_ → xs++_ ∘ ys++_) unit* assoc* comm*
+  where
+    unit* : ∀ (xs++_) → (λ ys → xs++ ys) ≡ xs++_
+    unit* _ = refl
+
+    assoc* : ∀ xs++_ ys++_ zs++_ → _
+    assoc* _ _ _ = refl
+
+    comm* : ∀ xs++_ ys++_ → (xs++_ ∘ ys++_) ≡ (ys++_ ∘ xs++_)
+    comm* xs++_ ys++_ = funExt $ ind (λ zs → isSetM _ _) {! !} {! !} {! !}
   
+∷-elim : {B : M X → Type ℓ'}
+  → (setB : ∀ m → isSet (B m))
+  → (nil : B ε)
+  → (cons : (x : X) → {xs : M X} → B xs → B (x ∷ xs))
+  → (swap : (x y : X) → {xs : M X} → {b : B xs} → PathP (λ i → B (∷-swap x y xs i)) (cons x (cons y b)) (cons y (cons x b)))
+  → (xs : M X) → B xs
+∷-elim {B = B} setB nil cons swap = elim setB nil η* {! !} {! !} {! !} {! !} where
+  η* : ∀ x → B (η x)
+  η* x = subst B (unit' (η x)) (cons x nil)
+
+  _⊕*_ : ∀ {xs ys} → B xs → B ys → B (xs ⊕ ys)
+  b-xs ⊕* b-ys = {! !}
+
 module _ where
   open import Cubical.Data.Nat as ℕ using (ℕ)
 

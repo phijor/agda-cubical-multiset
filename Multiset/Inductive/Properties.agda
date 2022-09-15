@@ -544,17 +544,24 @@ map-η′ {X = X} {f = f} = M.ind {P = P} isPropP
     _ = {! PT.rec ?  !}
 
 module _ where
-  open import Cubical.Data.Vec.Base
+  open import Cubical.Data.Vec.Base as Vec
 
   fromVec : ∀ {n} → Vec X n → M X
   fromVec [] = ε
   fromVec (x Vec.∷ xs) = x M.∷ (fromVec xs)
 
--- M-Σ : ∀ {ℓ ℓ'} {A : Type ℓ} {B : A → Type ℓ'}
---   → M A
---   → (∀ a → M (B a))
---   → M (Σ A B)
--- M-Σ as bs = map (λ a → {! map (a ,_) (bs a) !}) as
+  to∥Vec∥₁ : (xs : M X) → ∥ Vec X (sizeof xs) ∥₁
+  to∥Vec∥₁ = ind (λ xs → isPropPropTrunc) (∣ [] ∣₁) (λ x → ∣ x Vec.∷ Vec.[] ∣₁) (PT.map2 Vec._++_)
+
+module _ where
+  open import Multiset.OverSet as FMSet
+    using (FMSet)
+
+  toFMSet : M X → FMSet X
+  toFMSet = M.elim (λ xs → FMSet.isSetFMSet) FMSet.[] FMSet.[_] FMSet._++_ {! !} {! !} {! !}
+
+  fromFMSet : FMSet X → M X
+  fromFMSet = FMSet.∷-elim (λ xs → isSetM) ε (λ x → x ∷_) λ x y {_} {xs} → ∷-swap x y xs
 
 module Choice where
 

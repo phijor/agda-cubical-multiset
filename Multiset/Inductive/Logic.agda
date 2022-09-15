@@ -535,7 +535,7 @@ module _ {ℓ} {X : Type ℓ} where
     empty* ys p = ≡ε→isEmpty $ sym p
 
     singl* : ∀ x ys → η x ≡ ys → η x ≈ ys
-    singl* x ys p = {! !}
+    singl* x = M.ind {P = λ ys → η x ≡ ys → η x ≈ ys} (λ ys → isProp≈ _ ys) (lift ∘ η≢ε) {! !} {! !}
 
     union* : ∀ {xs₁ xs₂}
       → (∀ ys → xs₁ ≡ ys → xs₁ ≈ ys)

@@ -85,10 +85,10 @@ isSetSymmQuot : ∀ {n} → isSet ((Fin n → X) /₂ SymmetricAction n)
 isSetSymmQuot = squash/₂
 
 private
-  [_] : {n : ℕ} → (v : Fin n → X) → (Fin n → X) /₂ SymmetricAction n
-  [_] = [_]₂ {R = SymmetricAction _}
+  [_]∼ : {n : ℕ} → (v : Fin n → X) → (Fin n → X) /₂ SymmetricAction n
+  [_]∼ = [_]₂ {R = SymmetricAction _}
 
-eq/∼ : ∀ {sz} {v w : Fin sz → X} → v ∼ w → [ v ] ≡ [ w ]
+eq/∼ : ∀ {sz} {v w : Fin sz → X} → v ∼ w → [ v ]∼ ≡ [ w ]∼
 eq/∼ rel = eq/₂ _ _ rel
 
 
@@ -128,13 +128,13 @@ module _ {ℓ} {X : Type ℓ} (n : ℕ) where
   isEffective-∼ : isEffective _∼ₙ_
   isEffective-∼ = SQ.isEquivRel→isEffective isPropValued-∼ isEquivRel-∼
 
-  effective : ∀ {v w : Fin n → X} → [ v ] ≡ [ w ] → v ∼ₙ w
+  effective : ∀ {v w : Fin n → X} → [ v ]∼ ≡ [ w ]∼ → v ∼ₙ w
   effective {v} {w} = invIsEq (isEffective-∼ v w)
 
 isPermutationInvariantˡ : ∀ {n : ℕ}
   → (v : Fin n → X)
   → (σ : Fin n ≃ Fin n)
-  → [ v ∘ equivFun σ ] ≡ [ v ]
+  → [ v ∘ equivFun σ ]∼ ≡ [ v ]∼
 isPermutationInvariantˡ {X = X} {n = n} v σ = eq/₂ (v ∘ equivFun σ) v ∣ σ , ua→ rel ∣₁ where
   rel : (k : Fin n) → v (equivFun σ k) ≡ v (equivFun σ k)
   rel k = refl
@@ -142,8 +142,8 @@ isPermutationInvariantˡ {X = X} {n = n} v σ = eq/₂ (v ∘ equivFun σ) v ∣
 isPermutationInvariant : ∀ {m n : ℕ}
   → {v w : Fin m → X}
   → (e : Fin n ≃ Fin m)
-  → [ v ] ≡ [ w ]
-  → [ v ∘ equivFun e ] ≡ [ w ∘ equivFun e ]
+  → [ v ]∼ ≡ [ w ]∼
+  → [ v ∘ equivFun e ]∼ ≡ [ w ∘ equivFun e ]∼
 isPermutationInvariant {X = X} {m = m} {n = n} {v} {w} e [v]≡[w] = eq/₂ (v ∘ equivFun e) (w ∘ equivFun e) rel' where
   rel : v ∼ w
   rel = effective m [v]≡[w]
@@ -176,27 +176,27 @@ private
 substComm[] : ∀ {m n : ℕ}
   → (p : m ≡ n)
   → (v : Fin m → X)
-  → subst (PVect X) p [ v ] ≡ [ v ∘ subst⁻ Fin p ]
+  → subst (PVect X) p [ v ]∼ ≡ [ v ∘ subst⁻ Fin p ]∼
 substComm[] {X = X} p v = step₁ ∙ step₂ where
-  step₁ : subst (PVect X) p [ v ] ≡ [ subst (λ sz → Fin sz → X) p v ]
-  step₁ = substCommSlice′ {A = ℕ} (λ sz → Fin sz → X) (PVect X) (λ _ → [_]) p v
+  step₁ : subst (PVect X) p [ v ]∼ ≡ [ subst (λ sz → Fin sz → X) p v ]∼
+  step₁ = substCommSlice′ {A = ℕ} (λ sz → Fin sz → X) (PVect X) (λ _ → [_]∼) p v
 
-  step₂ : [ subst (λ sz → Fin sz → X) p v ] ≡ [ v ∘ subst⁻ Fin p ]
-  step₂ = cong [_] (subst⁻Domain v (sym p))
+  step₂ : [ subst (λ sz → Fin sz → X) p v ]∼ ≡ [ v ∘ subst⁻ Fin p ]∼
+  step₂ = cong [_]∼ (subst⁻Domain v (sym p))
 
 fromPathP[] : ∀ {m n : ℕ}
   → (p : m ≡ n)
   → (v : Fin m → X)
   → (w : Fin n → X)
-  → PathP (λ i → PVect X (p i)) [ v ] [ w ]
-  → [ v ] ≡ [ w ∘ (subst Fin p) ]
+  → PathP (λ i → PVect X (p i)) [ v ]∼ [ w ]∼
+  → [ v ]∼ ≡ [ w ∘ (subst Fin p) ]∼
 fromPathP[] p v w q = fromPathP⁻ q ∙ substComm[] (sym p) w
   
 effectiveDep : ∀ {m n : ℕ}
   → (p : m ≡ n)
   → (v : Fin m → X)
   → (w : Fin n → X)
-  → PathP (λ i → PVect X (p i)) [ v ] [ w ]
+  → PathP (λ i → PVect X (p i)) [ v ]∼ [ w ]∼
   → v ∼ (w ∘ (subst Fin p))
 effectiveDep {m = m} p v w q = effective m (fromPathP[] p v w q)
 
@@ -232,6 +232,12 @@ elimProp : ∀ {ℓ'} {P : FMSet X → Type ℓ'}
   → (xs : FMSet X) → P xs
 elimProp {P = P} propP ps = elimSet {B = P} (isProp→isSet ∘ propP) ps (λ {sz} v w r → isProp→PathP (λ i → propP (sz , eq/₂ v w r i)) (ps v) (ps w))
 
+-- elimProp2 : ∀ {ℓ'} {P : (xs ys : FMSet X) → Type ℓ'}
+--   → (∀ xs ys → isProp (P xs ys))
+--   → (ps : ∀ {sz₁ sz₂} → (xs : Fin sz₁ → X) (ys : Fin sz₂ → X) → P (sz₁ , [ xs ]₂) (sz₂ , [ ys ]₂))
+--   → (xs ys : FMSet X) → P xs ys
+-- elimProp2 {P = P} propP ps = elimProp {P = λ xs → ∀ ys → P xs ys} (λ xs → isPropΠ λ ys → propP xs ys) λ {sz} xs → elimProp {P = λ ys → P (sz , [ xs ]₂) ys} (λ ys → propP _ ys) {! !}
+
 rec : ∀ {ℓ'} {A : Type ℓ'}
   → isSet A
   → (as : ∀ {sz} → (Fin sz → X) → A)
@@ -240,12 +246,15 @@ rec : ∀ {ℓ'} {A : Type ℓ'}
 rec setA as as-rel (n , v) = SQ.rec setA as as-rel v
 
 module _ {ℓx ℓy} {X : Type ℓx} {Y : Type ℓy} where
-  map : (f : X → Y) → FMSet X → FMSet Y
-  map f (sz , v) = sz , SQ.rec isSetSetQuotient (λ v → [ f ∘ v ]₂) well-defined v where
+  map-members : ∀ {sz} → (f : X → Y) → PVect X sz → PVect Y sz
+  map-members {sz = sz} f = SQ.rec isSetSetQuotient (λ v → [ f ∘ v ]₂) well-defined where
     well-defined : ∀ v w → _
     well-defined v w =
       PT.elim (λ _ → isSetSetQuotient [ f ∘ v ]₂ [ f ∘ w ]₂)
         ((λ { (σ , p) → eq/₂ _ _ ∣ σ , Path→cong f p ∣₁ }))
+
+  map : (f : X → Y) → FMSet X → FMSet Y
+  map f (sz , v) = sz , map-members f v
 
   map-β : ∀ {n} f (v : Fin n → X) → map f (n , [ v ]₂) ≡ (n , [ f ∘ v ]₂)
   map-β v f = refl
@@ -261,6 +270,9 @@ mapComp g f = elimProp (λ xs → isSetFMSet _ _) (λ xs → refl)
 
 [] : FMSet X
 [] = 0 , [ Empty.elim ]₂
+
+[_] : X → FMSet X
+[ x ] = 1 , [ (λ _ → x) ]∼
 
 private
   _∷ᶠ_ : ∀ {n} → (x : X) → (xs : Fin n → X) → Fin (suc n) → X
@@ -363,5 +375,33 @@ FMSetContr≃ℕ {X = X} contrX = Sigma.Σ-contractSnd contrMembers/∼ where
 
   well-defined : ∀ {sz} (v w : Fin sz → X) (r : v ∼ w)
     → PathP (λ i → B (sz , eq/₂ v w r i)) (fun v) (fun w)
-  well-defined {zero} v w r = isProp→PathP (λ i → {!   !}) (fun v) (fun w)
-  well-defined {suc sz} v w r = {! !}
+  well-defined {zero} v w = PT.elim (λ r p q → isSet→SquareP (λ i j → setB _) p q _ _) {! subst-filler (λ v → B (0 , [ v ]₂)) (Π⊥≡elim v) nil !}
+  well-defined {suc sz} v w = PT.elim (λ r p q → isSet→SquareP (λ i j → setB _) p q _ _) {! !}
+
+∷-elimProp : ∀ {P : FMSet X → Type ℓ'}
+  → (propP : ∀ xs → isProp (P xs))
+  → (nil : P [])
+  → (cons : (x : X) → {xs : FMSet X} → P xs → P (x ∷ xs))
+  → (m : FMSet X) → P m
+∷-elimProp {P = P} propP nil cons = ∷-elim {B = P} (isProp→isSet ∘ propP) nil cons comm where
+  comm = λ x y {xs} {p} → isProp→PathP (λ i → propP _) (cons x (cons y p)) (cons y (cons x p))
+
+_++_ : FMSet X → FMSet X → FMSet X
+_++_ = ∷-elim (λ xs → isSetΠ λ ys → isSetFMSet)
+  (λ ys → ys)
+  (λ x xs++_ ys → x ∷ (xs++ ys))
+  λ x y {xs} {xs++_} → funExt (∷-comm x y ∘ xs++_)
+
+
+map-head : ∀ {ℓ'} {Y : Type ℓ'} {x} {xs}
+  → (f : X → Y)
+  → map f (x ∷ xs) ≡ f x ∷ map f xs
+map-head {x = x} {xs = xs} f = FMSetPathP (refl {x = suc (size xs)}) {! !}
+  -- ∷-elimProp {P = λ xs → map f (x ∷ xs) ≡ f x ∷ map f xs} (λ xs → isSetFMSet _ _) nil* {! !} xs where
+  -- nil* : ⟅ [ f ∘ Sum.rec (λ _ → x) Empty.elim ]₂ ⟆ ≡ ⟅ [ Sum.rec (λ _ → f x) (f ∘ Empty.elim) ]₂ ⟆
+  -- nil* = FMSetPath _ _ ∣ idEquiv _ , ua→ (Sum.elim (λ _ → refl {x = f x}) Empty.elim) ∣₁
+
+  -- cons* : ∀ y {ys}
+  --   → map f (y ∷ ys) ≡ f y ∷ map f ys
+  --   → map f (x ∷ y ∷ ys) ≡ f x ∷ map f (y ∷ ys)
+  -- cons* y {ys} indH-ys = {! !}

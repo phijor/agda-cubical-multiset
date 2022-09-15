@@ -26,6 +26,9 @@ record Chain (ℓ : Level) : Type (ℓ-suc ℓ) where
     Ob : (n : ℕ) → Type ℓ
     π : ∀ n → Ob (suc n) → Ob n
 
+shift : Chain ℓ → Chain ℓ
+shift (chain Ob π) = chain (Ob ∘ suc) (π ∘ suc)
+
 -- TODO: Can we define a shifted chain?
 
 -- A limit of a Chain C = (Ob, π) is a sequence of elements
