@@ -19,7 +19,7 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Data.Unit as Unit using (Unit ; tt)
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sigma as Sigma
-open import Cubical.Data.Sum as Sum using (_⊎_)
+open import Cubical.Data.Sum as Sum using (_⊎_ ; inl ; inr)
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Bool.Base as Bool
   using (Bool ; if_then_else_ ; true ; false)
@@ -48,12 +48,15 @@ isSetUnorderedTree : ∀ {n} → isSet (UnorderedTree n)
 isSetUnorderedTree {zero} = Unit.isSetUnit
 isSetUnorderedTree {suc n} = isSetM
 
+limitPath : ∀ {lim₁ lim₂} → (∀ n → lim₁ .ωTree.elements n ≡ lim₂ .ωTree.elements n) → lim₁ ≡ lim₂
+limitPath = Limit.isSet→ChainLimitPathExt iterated (λ k → isSetUnorderedTree {k})
+
 shiftedLimitPath : ∀ {shlim₁ shlim₂} → (∀ n → shlim₁ .shωTree.elements n ≡ shlim₂ .shωTree.elements n) → shlim₁ ≡ shlim₂
 shiftedLimitPath = Limit.isSet→ChainLimitPathExt shifted (λ k → isSetM)
 
 module _ {ℓ ℓ′ : Level} {A : Type ℓ} {B : A → Type ℓ′} where
-  unzipDep : M ((x : A) → B x) → (x : A) → M (B x)
-  unzipDep = M.rec (isSetΠ λ x → isSetM) ε* η* _⊕*_ unit* assoc* comm* where
+  zipDep : M ((x : A) → B x) → (x : A) → M (B x)
+  zipDep = M.rec (isSetΠ λ x → isSetM) ε* η* _⊕*_ unit* assoc* comm* where
     ε* : ∀ x → M (B x)
     ε* = λ _ → ε
 
@@ -81,73 +84,141 @@ module _ where
   cut : (n : ℕ) → ωTree → UnorderedTree n
   cut n l = l .elements n
 
-  unzip₁ : M ωTree → ∀ n → M (UnorderedTree n)
-  unzip₁ xs = unzipDep (map elements xs)
+  zip₁ : M ωTree → ∀ n → M (UnorderedTree n)
+  zip₁ xs = zipDep (map elements xs)
 
-  unzip₁-islim : (xs : M ωTree) → IsChainLimit BagChain.shifted (unzip₁ xs)
-  unzip₁-islim = ind {P = λ xs → IsChainLimit shifted (unzip₁ xs)}
+  zip₁-islim : (xs : M ωTree) → IsChainLimit BagChain.shifted (zip₁ xs)
+  zip₁-islim = ind {P = λ xs → IsChainLimit shifted (zip₁ xs)}
     (λ xs → isPropΠ λ n → isSetM _ _)
-    (λ n → refl {x = ε}) singl* union* where
+    empty* singl* union* where
 
-    singl* : (x : ωTree) → ∀ n → map (!^ n) (unzip₁ (η x) (suc n)) ≡ unzip₁ (η x) n
+    empty* : ∀ n → ε ≡ ε
+    empty* _ = refl
+
+    singl* : (x : ωTree) → ∀ n → map (!^ n) (zip₁ (η x) (suc n)) ≡ zip₁ (η x) n
     singl* x n = cong η (x .isChainLimit n)
     
     union*
       : ∀ {xs ys : M ωTree}
-      → IsChainLimit shifted (unzip₁ xs)
-      → IsChainLimit shifted (unzip₁ ys)
-      → IsChainLimit shifted (unzip₁ (xs ⊕ ys))
+      → IsChainLimit shifted (zip₁ xs)
+      → IsChainLimit shifted (zip₁ ys)
+      → IsChainLimit shifted (zip₁ (xs ⊕ ys))
     union* indH-xs indH-ys n = cong₂ _⊕_ (indH-xs n) (indH-ys n)
 
-unzip : M ωTree → shωTree
-unzip xs .shωTree.elements = unzip₁ xs
-unzip xs .shωTree.isChainLimit = unzip₁-islim xs
+zip : M ωTree → shωTree
+zip xs .shωTree.elements = zip₁ xs
+zip xs .shωTree.isChainLimit = zip₁-islim xs
+
+infixr 6 _⊎₁_
+_⊎₁_ : ∀ {ℓ ℓ'} → (A : Type ℓ) → (B : Type ℓ') → Type (ℓ-max ℓ ℓ')
+A ⊎₁ B = ∥ A ⊎ B ∥₁
+
+data Pair {ℓ} {A : Type ℓ} : Type ℓ where
+  ⟨_,_⟩ : (a b : A) → Pair
+  comm-⟨,⟩ : ∀ a b → ⟨ a , b ⟩ ≡ ⟨ b , a ⟩
+
+-- module _ {ℓ} {A : Type ℓ} where
+--   PairPath→Perm : ∀ {p₁ p₂ : Pair A} → p₁ ≡ p₂ → Σ[ σ ∈ Bool → A ] σ 
 
 module _ {ℓ} {X : Type ℓ} where
-  pair : X → X → M X
-  pair x y = η x ⊕ η y
+  ⟅_,_⟆ : X → X → M X
+  ⟅ x , y ⟆ = η x ⊕ η y
 
-  ⟨_,_⟩≡_ : X → X → M X → Type _
-  ⟨ x , y ⟩≡ zs = {! !}
+  ⟅_,_⟆≡⟅_,_⟆ : (x y z w : X) → Type _
+  ⟅ x , y ⟆≡⟅ z , w ⟆ = ∥ ((x ≡ z) × (y ≡ w)) ⊎ ((x ≡ w) × (y ≡ z)) ∥₁
 
-  ⟨_,_⟩≡⟨_,_⟩ : (x y z w : X) → Type _
-  ⟨ x , y ⟩≡⟨ z , w ⟩ = ∥ ((x ≡ z) × (y ≡ w)) ⊎ ((x ≡ w) × (y ≡ z)) ∥₁
+  ⟅,⟆-comm : ∀ x y → ⟅ x , y ⟆ ≡ ⟅ y , x ⟆
+  ⟅,⟆-comm x y = comm (η x) (η y)
 
-  ⟨,⟩≡⟨,⟩→Path : ∀ {x y z w} → ⟨ x , y ⟩≡⟨ z , w ⟩ → pair x y ≡ pair z w
-  ⟨,⟩≡⟨,⟩→Path {x} {y} {z} {w} = PT.rec (isSetM _ _) (Sum.elim left right) where
-    left : ((x ≡ z) × (y ≡ w)) → pair x y ≡ pair z w
-    left (p , q) = cong₂ pair p q
+  -- ⟨,⟩≡⟨,⟩→Path : ∀ {x y z w} → ⟨ x , y ⟩≡⟨ z , w ⟩ → ⟅ x , y ⟆ ≡ ⟅ z , w ⟆
+  -- ⟨,⟩≡⟨,⟩→Path {x} {y} {z} {w} = PT.rec (isSetM _ _) (Sum.elim left right) where
+  --   left : ((x ≡ z) × (y ≡ w)) → pair x y ≡ pair z w
+  --   left (p , q) = cong₂ pair p q
 
-    right : ((x ≡ w) × (y ≡ z)) → pair x y ≡ pair z w
-    right (p , q) = cong₂ pair p q ∙ comm _ _
+  --   right : ((x ≡ w) × (y ≡ z)) → pair x y ≡ pair z w
+  --   right (p , q) = cong₂ pair p q ∙ comm _ _
 
-  Path→⟨,⟩≡⟨,⟩ : ∀ {x y z w} → pair x y ≡ pair z w → ⟨ x , y ⟩≡⟨ z , w ⟩
-  Path→⟨,⟩≡⟨,⟩ p = {! !}
+  -- Path→⟨,⟩≡⟨,⟩ : ∀ {x y z w} → pair x y ≡ pair z w → ⟨ x , y ⟩≡⟨ z , w ⟩
+  -- Path→⟨,⟩≡⟨,⟩ p = {! !}
 
 Complete : Type _
-Complete = {x₁ x₂ y₁ y₂ : ωTree}
-  → (ys₁ ys₂ : ℕ → ωTree)
-  → (p : ∀ n → pair (ys₁ n) (ys₂ n) ≡ pair y₁ y₂)
-  → (q₁ : ∀ n → cut n x₁ ≡ cut n (ys₁ n))
-  → (q₂ : ∀ n → cut n x₂ ≡ cut n (ys₂ n))
-  → pair x₁ x₂ ≡ pair y₁ y₂
+Complete = {x y₁ y₂ : ωTree}
+  → (ys : ℕ → ωTree)
+  → (p : ∀ n → (ys n ≡ y₁) ⊎ (ys n ≡ y₂))
+  → (q : ∀ n → cut n x ≡ cut n (ys n))
+  → (x ≡ y₁) ⊎₁ (x ≡ y₂)
 
 isPropComplete : isProp Complete
 isPropComplete =
-  isPropImplicitΠ2 λ _ _ → isPropImplicitΠ2 λ _ _ → isPropΠ5 λ _ _ _ _ _ → isSetM _ _
+  isPropImplicitΠ2 λ _ _ → isPropImplicitΠ λ _ → isPropΠ3 λ _ _ _ → PT.isPropPropTrunc
 
-unzip-inj⇒complete : isInjective unzip → Complete
-unzip-inj⇒complete inj {x₁} {x₂} {y₁} {y₂} ys₁ ys₂ p q₁ q₂ =
-  inj (pair x₁ x₂) (pair y₁ y₂)
-  (shiftedLimitPath goal) where
+zip-inj⇒complete : isInjective zip → Complete
+zip-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
 
-  goal : ∀ n → unzip₁ (pair x₁ x₂) n ≡ unzip₁ (pair y₁ y₂) n
-  goal n =
-    unzip₁ (pair x₁ x₂) n                 ≡⟨⟩
-    pair (cut n x₁)      (cut n x₂)       ≡⟨ cong₂ pair (q₁ n) (q₂ n) ⟩
-    pair (cut n $ ys₁ n) (cut n $ ys₂ n)  ≡⟨⟩
-    unzip₁ (pair (ys₁ n) (ys₂ n)) n       ≡⟨ cong (λ xs → unzip₁ xs n) (p n) ⟩
-    unzip₁ (pair y₁ y₂)           n       ∎
+  diag : (ℕ → ωTree) → (n : ℕ) → UnorderedTree n
+  diag z n = cut n (z n)
+
+  ysᶜ : ℕ → ωTree
+  ysᶜ n = Sum.elim (λ ysₙ≡y₁ → y₂) (λ ysₙ≡y₂ → y₁) (p n)
+
+  pᶜ : ∀ n → (ysᶜ n ≡ y₂) ⊎ (ysᶜ n ≡ y₁)
+  pᶜ n = Sum.elim inr inl (p n)
+
+  p∧pᶜ : ∀ n → ⟅ ys n , ysᶜ n ⟆ ≡ ⟅ y₁ , y₂ ⟆
+  p∧pᶜ n with p n
+  ... | inl ysₙ≡y₁ = cong ⟅_, y₂ ⟆ ysₙ≡y₁
+  ... | inr ysₙ≡y₂ = cong ⟅_, y₁ ⟆ ysₙ≡y₂ ∙ ⟅,⟆-comm y₂ y₁
+
+  open ωTree using (elements) renaming (isChainLimit to isωTree)
+
+  diag-ysᶜ-islim-alternating : ∀ {n} {a b : ωTree}
+    → (ys n ≡ a)
+    → (ys (suc n) ≡ b)
+    → !^ n (cut (suc n) a) ≡ cut n b
+  diag-ysᶜ-islim-alternating {n = n} {a} {b} ysₙ≡a ysₙ₊₁≡b =
+    !^ n (cut (suc n) a)   ≡⟨ a .isωTree n ⟩
+    cut n a                ≡⟨ cong (cut n) (sym ysₙ≡a) ⟩
+    diag ys n              ≡⟨ sym (q n) ⟩
+    cut n x                ≡⟨ sym (x .isωTree n) ⟩
+    !^ n (cut (suc n) x)   ≡⟨ cong (!^ n) (q (suc n)) ⟩
+    !^ n (diag ys (suc n)) ≡⟨ cong (!^ n ∘ cut (suc n)) ysₙ₊₁≡b ⟩
+    !^ n (cut (suc n) b)   ≡⟨ b .isωTree n ⟩
+    cut n b ∎
+
+  diag-ysᶜ-islim : ∀ n → !^ n (diag ysᶜ (suc n)) ≡ diag ysᶜ n
+  diag-ysᶜ-islim n with (p (suc n)) | (p n)
+  ... | inl ysₙ₊₁≡y₁ | inl ysₙ≡y₁ = y₂ .isωTree n
+  ... | inl ysₙ₊₁≡y₁ | inr ysₙ≡y₂ = diag-ysᶜ-islim-alternating ysₙ≡y₂ ysₙ₊₁≡y₁
+  ... | inr ysₙ₊₁≡y₂ | inl ysₙ≡y₁ = diag-ysᶜ-islim-alternating ysₙ≡y₁ ysₙ₊₁≡y₂
+  ... | inr ysₙ₊₁≡y₂ | inr ysₙ≡y₂ = y₁ .isωTree n
+
+  xᶜ : ωTree
+  xᶜ .ωTree.elements = diag ysᶜ
+  xᶜ .ωTree.isChainLimit = diag-ysᶜ-islim
+
+  qᶜ : ∀ n → cut n xᶜ ≡ diag ysᶜ n
+  qᶜ n with p n
+  ... | inl _ = refl
+  ... | inr _ = refl
+
+  D∧Dᶜ : zip ⟅ x , xᶜ ⟆ ≡ zip ⟅ y₁ , y₂ ⟆
+  D∧Dᶜ = shiftedLimitPath λ n →
+    zip₁ ⟅ x , xᶜ ⟆ n ≡⟨⟩
+    ⟅ cut n x , cut n xᶜ ⟆ ≡⟨ cong₂ ⟅_,_⟆ (q n) (qᶜ n) ⟩
+    ⟅ diag ys n , diag ysᶜ n ⟆ ≡⟨⟩
+    zip₁ ⟅ ys n , ysᶜ n ⟆ n ≡⟨ cong (λ z → zip₁ z n) (p∧pᶜ n) ⟩
+    zip₁ ⟅ y₁   , y₂    ⟆ n ∎
+
+  d∧dᶜ : ⟅ x , xᶜ ⟆ ≡ ⟅ y₁ , y₂ ⟆
+  d∧dᶜ = inj ⟅ x , xᶜ ⟆ ⟅ y₁ , y₂ ⟆ D∧Dᶜ
+
+  goal : ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
+  goal = PT.rec PT.isPropPropTrunc (Sum.elim (PT.map inl) (PT.map inr)) x∈⟅y₁,y₂⟆ where
+    x∈⟅x,xᶜ⟆ : x ∈ ⟅ x , xᶜ ⟆
+    x∈⟅x,xᶜ⟆ = ∣ inl ∣ refl {x = x} ∣₁ ∣₁
+
+    x∈⟅y₁,y₂⟆ : x ∈ ⟅ y₁ , y₂ ⟆
+    x∈⟅y₁,y₂⟆ = subst (x ∈_) d∧dᶜ x∈⟅x,xᶜ⟆
 
 long : (n : ℕ) → UnorderedTree n
 long zero = tt
@@ -183,213 +254,10 @@ sequence a x y with a 0
 ... | true = λ n → y
 ... | false = λ { 0 → x ; (suc n) → sequence (a ∘ suc) x y n }
 
-unzip-complete⇒LLPO : Complete → LLPO
-unzip-complete⇒LLPO complete a true? = PT.map {! !} (Path→⟨,⟩≡⟨,⟩ $ complete {! !} {! !} {! !} {! !} {! !}) where
+zip-complete⇒LLPO : Complete → LLPO
+zip-complete⇒LLPO complete a true? = PT.map {! !} {! !} where
   longs₁ : ℕ → ωTree
   longs₁ = sequence a long-tree (long?-tree a)
 
   longs₂ : ℕ → ωTree
   longs₂ = sequence a (long?-tree a) long-tree
-
--- unzip : M ωTree → ωMTree
--- unzip = M.rec isSetωMTree ε* η* union* unit* assoc* comm* where
---   open Limit
--- 
---   open ChainLimit
--- 
---   isSetM' : ∀ {X} → isSet' (M X)
---   isSetM' = isSet→isSet' isSetM
--- 
---   ε* : ωMTree
---   ε* = lim (λ _ → ε) (λ _ → refl {x = ε})
--- 
---   η* : ωTree → ωMTree
---   η* (lim elements isChainLimit) = lim
---     (λ n → η (elements n))
---     λ n → cong η (isChainLimit n)
--- 
---   union* : ωMTree → ωMTree → ωMTree
---   union* (lim e₁ islim₁) (lim e₂ islim₂) = lim
---     (λ n → e₁ n ⊕ e₂ n)
---     (λ n → cong₂ _⊕_ (islim₁ n) (islim₂ n))
--- 
---   unit* : ∀ t → union* ε* t ≡ t
---   unit* t = ChainLimitPathP _ (unit-ext , funExt λ n → isSetM' _ _ _ _) where
---     unit-ext : (λ n → ε ⊕ t .elements n) ≡ t .elements
---     unit-ext = funExt λ n → unit _
--- 
---   assoc* : ∀ a b c → union* a (union* b c) ≡ union* (union* a b) c
---   assoc* a b c = ChainLimitPathP _ (assoc-ext , funExt λ n → isSetM' _ _ _ _) where
---     assoc-ext : (λ n → _ ⊕ (_ ⊕ _)) ≡ (λ n → (_ ⊕ _) ⊕ _)
---     assoc-ext = funExt λ n → assoc _ _ _
--- 
---   comm* : ∀ a b → union* a b ≡ union* b a
---   comm* a b = ChainLimitPathP _ (comm-ext , funExt (λ n → isSetM' _ _ _ _)) where
---     comm-ext : (union* a b) .elements ≡ (union* b a) .elements
---     comm-ext = funExt λ n → comm _ _
--- 
--- open Limit.ChainLimit
--- 
--- module _ where
---   open Limit using (lim)
---   unzip-ε : unzip ε ≡ lim (λ _ → ε) _
---   unzip-ε = refl
--- 
---   unzip-η : ∀ {t : ωTree} → unzip (η t) ≡ Limit.lim (η ∘ t .elements) _
---   unzip-η = refl
--- 
--- hasTrace : (xs₀ : M Unit) → (el : (n : ℕ) → M (UnorderedTree n)) → Type _
--- hasTrace xs₀ el = ∀ n → M.map !_ (el n) ≡ xs₀
--- 
--- isPropHasTrace : ∀ {xs₀} {el} → isProp (hasTrace xs₀ el)
--- isPropHasTrace = isPropΠ λ n → isSetM _ _
--- 
--- limitHasTrace : (lim : ωMTree) → hasTrace (lim .elements 0) (lim .elements)
--- limitHasTrace (Limit.lim el islim) zero = M.mapId (el 0)
--- limitHasTrace (Limit.lim el islim) (suc n) =
---     M.map (!_)               (el (suc n))   ≡⟨⟩
---     M.map (!_ ∘ !^ n)        (el (suc n))   ≡⟨ mapComp !_ (!^ n) ⟩
---     M.map (!_) (M.map (!^ n) (el (suc n)))  ≡⟨ cong (M.map !_) (islim n) ⟩
---     M.map (!_) (el n)                       ≡⟨ limitHasTrace _ n ⟩
---     el 0 ∎
--- 
--- contrFiberFromHasTrace : ∀ (xs₀ : M Unit) (lim : ωMTree) → Type _
--- contrFiberFromHasTrace xs₀ lim = hasTrace xs₀ (lim .elements) → isContr (fiber unzip lim)
--- 
--- isEquivToωMTree : isEquiv (unzip)
--- isEquivToωMTree .equiv-proof lim =
---   M.ind {P = λ xs → (lim : ωMTree) → contrFiberFromHasTrace xs lim}
---     (λ xs → isPropΠ2 λ lim tr → isPropIsContr)
---     empty* singl* union*
---     (lim .elements 0) lim (limitHasTrace lim) where
--- 
---     open Limit using (isSet→ChainLimitPathExt)
--- 
---     LimInMPath = isSet→ChainLimitPathExt _ (λ n → isSetM)
---     LimInMPath′ = isSet→ChainLimitPathExt (BagChain.iterated)
---       ( λ { 0 → Unit.isSetUnit
---           ; (suc n) → isSetM
---           })
--- 
---     _ = {! Σ≡Prop (λ xs → isSetωMTree (unzip xs) _) !}
--- 
---     empty* : ∀ lim → hasTrace ε (lim .elements) → isContr (fiber unzip lim)
---     empty* lim tr = (ε , LimInMPath (sym ∘ all-empty)) , contrFiber where
---       all-empty : ∀ n → lim .elements n ≡ ε
---       all-empty n = map-ε (lim .elements n) (tr n)
--- 
---       contrFiber : ∀ y → (ε , _) ≡ y
---       contrFiber (ys , unzip-ys≡lim) = Σ≡Prop (λ ys → isSetωMTree (unzip ys) lim) ε≡ys where
---         ε≡ys : ε ≡ ys
---         ε≡ys = M.ind {P = λ ys → unzip ys ≡ lim → ε ≡ ys}
---           (λ ys → isPropΠ λ h → isSetM _ _)
---           (λ h → refl {x = ε}) singl* union* ys unzip-ys≡lim where
---             singl* : ∀ x → unzip (η x) ≡ lim → ε ≡ η x
---             singl* x h = Empty.elim $ η≢ε contra where
---               contra : η _ ≡ ε
---               contra =
---                 η _             ≡⟨ cong (λ l → l .elements 0) h ⟩
---                 lim .elements 0 ≡⟨ all-empty 0 ⟩
---                 ε ∎
--- 
---             union* : ∀ {xs₁ xs₂}
---               → (unzip xs₁ ≡ lim → ε ≡ xs₁)
---               → (unzip xs₂ ≡ lim → ε ≡ xs₂)
---               → (unzip (xs₁ ⊕ xs₂) ≡ lim → ε ≡ (xs₁ ⊕ xs₂))
---             union* {xs₁} {xs₂} indH-xs₁ indH-xs₂ h =
---               sym $ subst-ε⊕ε≡ε (sym $ indH-xs₁ unzip-xs₁≡lim) (sym $ indH-xs₂ unzip-xs₂≡lim) where
---               ⊕-empty : ∀ n → (unzip xs₁ .elements n) ⊕ (unzip xs₂ .elements n) ≡ ε
---               ⊕-empty n = cong (λ l → l .elements n) h ∙ all-empty n
--- 
---               unzip-xs₁-empty : ∀ n → unzip xs₁ .elements n ≡ ε
---               unzip-xs₁-empty n = no-zero-divisorsˡ (⊕-empty n)
--- 
---               unzip-xs₂-empty : ∀ n → unzip xs₂ .elements n ≡ ε
---               unzip-xs₂-empty n = no-zero-divisorsʳ (⊕-empty n)
--- 
---               unzip-xs₁≡lim : unzip xs₁ ≡ lim
---               unzip-xs₁≡lim = LimInMPath λ n → unzip-xs₁-empty n ∙ (sym $ all-empty n)
--- 
---               unzip-xs₂≡lim : unzip xs₂ ≡ lim
---               unzip-xs₂≡lim = LimInMPath λ n → unzip-xs₂-empty n ∙ (sym $ all-empty n)
--- 
---     singl* : ∀ (⋆ : Unit) lim → hasTrace (η ⋆) (lim .elements) → isContr (fiber unzip lim)
---     singl* tt lim tr = (η extracted-tree , LimInMPath (snd ∘ all-singl)) , contrFiber where
---       all-singl : ∀ n → isSingleton (lim .elements n)
---       all-singl n = map⁻¹-isSingleton (lim .elements n) (tt , sym (tr n))
--- 
---       islim-singletons′ : ∀ n → η (!^ n $ all-singl (suc n) .fst) ≡ η (all-singl n .fst)
---       islim-singletons′ n =
---         η (!^ n $ all-singl (suc n) .fst)         ≡⟨⟩
---         (!^ (suc n)) (η $ all-singl (suc n) .fst) ≡⟨ cong (!^ (suc n)) (all-singl (suc n) .snd) ⟩
---         (!^ (suc n)) (lim .elements (suc n))      ≡⟨ lim .isChainLimit n ⟩
---         lim .elements n                           ≡⟨ sym $ all-singl n .snd ⟩
---         η (all-singl n .fst) ∎
--- 
---       islim-singletons : ∀ n → !^ n (all-singl (suc n) .fst) ≡ all-singl n .fst
---       islim-singletons = η-injective isSetUnorderedTree ∘ islim-singletons′
--- 
---       extracted-tree : ωTree
---       extracted-tree = Limit.lim (fst ∘ all-singl) (islim-singletons)
--- 
---       contrFiber : ∀ y → (η extracted-tree , _) ≡ y
---       contrFiber (ys , unzip-ys≡lim) = Σ≡Prop (λ ys → isSetωMTree (unzip ys) lim) ηt≡ys where
---         all-singl-subst : ∀ {lim′} → lim′ ≡ lim → ∀ n → isSingleton (lim′ .elements n)
---         all-singl-subst {lim′} p = subst (λ lim′ → ∀ n → isSingleton (lim′ .elements n)) (sym p) all-singl
--- 
---         ηt≡ys : η extracted-tree ≡ ys
---         ηt≡ys = ind {P = λ ys → unzip ys ≡ lim → η extracted-tree ≡ ys} (λ ys → isPropΠ λ _ → isSetM _ _)
---           empty** singl** {! !} ys unzip-ys≡lim where
---             empty** : unzip ε ≡ lim → η extracted-tree ≡ ε
---             empty** h = Empty.rec (¬isSingleton-ε contra) where
---               isSingleton-unzip₀ : isSingleton (unzip ε .elements 0)
---               isSingleton-unzip₀ = all-singl-subst h 0
---               
---               contra : isSingleton ε
---               contra = subst (λ ys → isSingleton (ys .elements 0)) unzip-ε isSingleton-unzip₀
--- 
---             singl** : ∀ (x : ωTree) → unzip (η x) ≡ lim → η extracted-tree ≡ η x
---             singl** x h = cong η extracted-tree≡x where
---               extracted-tree≡x : extracted-tree ≡ x
---               extracted-tree≡x = LimInMPath′ λ n →
---                 extracted-tree .elements n ≡⟨⟩
---                 isSingletonElement (all-singl n) ≡⟨ sym $ cong (isSingletonElement) {! subst-filler (λ l → ∀ n → isSingleton (l .elements n)) (sym h) all-singl !} ⟩
---                 isSingletonElement (all-singl-subst h n) ≡⟨ η-injective _ $ isSingletonProof (all-singl-subst h n) ⟩
---                 x .elements n ∎
--- 
---     union* : ∀ {xs₀ ys₀}
---       → (∀ lim-xs → contrFiberFromHasTrace xs₀ lim-xs)
---       → (∀ lim-ys → contrFiberFromHasTrace ys₀ lim-ys)
---       → ∀ lim → contrFiberFromHasTrace (xs₀ ⊕ ys₀) lim
---     union* indH-xs indH-ys lim tr = ({! !} , {! !}) , {! !} where
---       all-unions : ∀ n → {! exitence of a split !}
---       all-unions = {! !}
---       
--- to-MωTree : ωMTree → M ωTree
--- to-MωTree lim =
---   M.elim {A = λ xs → (lim : ωMTree) → hasTrace xs (lim .elements) → M ωTree}
---     (λ xs → isSetΠ2 λ lim h → isSetM)
---     empty* {! !} {! !}
---     {! !} {! !} {! !}
---     (lim .elements 0) lim (limitHasTrace lim) where
--- 
---     empty* : ∀ lim → hasTrace ε (lim .elements) → M ωTree
---     empty* lim tr = ε
--- 
---     singl* : ∀ x lim → hasTrace (η x) (lim .elements) → M ωTree
---     singl* x lim tr = η (Limit.lim (λ n → {! !}) {! !}) where
---       all-singl : ∀ n → _
---       all-singl = {! map-η !}
---       
--- 
--- 
--- preservesLimits : BagChain.isLimitPreserving
--- preservesLimits = unzip , is-equiv where
---   center : ∀ t → fiber unzip t
---   center t = {! !} , {! !}
--- 
---   contrFiber : ∀ t → isContr (fiber unzip t)
---   contrFiber t = {! !} , {! !}
--- 
---   is-equiv : isEquiv unzip
---   is-equiv .equiv-proof = contrFiber
