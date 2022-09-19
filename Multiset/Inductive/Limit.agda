@@ -1,7 +1,7 @@
 module Multiset.Inductive.Limit where
 
 open import Multiset.Prelude
-open import Multiset.Util using (!_ ; isInjective)
+open import Multiset.Util using (!_ ; isInjective ; isSurjective)
 
 open import Multiset.Inductive.Base as M
 open import Multiset.Inductive.Properties as M
@@ -22,7 +22,7 @@ open import Cubical.Data.Sigma as Sigma
 open import Cubical.Data.Sum as Sum using (_⊎_ ; inl ; inr)
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Bool.Base as Bool
-  using (Bool ; if_then_else_ ; true ; false)
+  using (Bool ; if_then_else_ ; true ; false ; _and_ ; not)
 
 open import Cubical.Relation.Nullary
 
@@ -109,16 +109,17 @@ zip : M ωTree → shωTree
 zip xs .shωTree.elements = zip₁ xs
 zip xs .shωTree.isChainLimit = zip₁-islim xs
 
+isSurjectiveZip : isSurjective zip
+isSurjectiveZip sh = unzipped , unzipped-proof where
+  unzipped : M ωTree
+  unzipped = {! !}
+
+  unzipped-proof : zip unzipped ≡ sh
+  unzipped-proof = {! !}
+
 infixr 6 _⊎₁_
 _⊎₁_ : ∀ {ℓ ℓ'} → (A : Type ℓ) → (B : Type ℓ') → Type (ℓ-max ℓ ℓ')
 A ⊎₁ B = ∥ A ⊎ B ∥₁
-
-data Pair {ℓ} {A : Type ℓ} : Type ℓ where
-  ⟨_,_⟩ : (a b : A) → Pair
-  comm-⟨,⟩ : ∀ a b → ⟨ a , b ⟩ ≡ ⟨ b , a ⟩
-
--- module _ {ℓ} {A : Type ℓ} where
---   PairPath→Perm : ∀ {p₁ p₂ : Pair A} → p₁ ≡ p₂ → Σ[ σ ∈ Bool → A ] σ 
 
 module _ {ℓ} {X : Type ℓ} where
   ⟅_,_⟆ : X → X → M X
@@ -130,33 +131,24 @@ module _ {ℓ} {X : Type ℓ} where
   ⟅,⟆-comm : ∀ x y → ⟅ x , y ⟆ ≡ ⟅ y , x ⟆
   ⟅,⟆-comm x y = comm (η x) (η y)
 
-  -- ⟨,⟩≡⟨,⟩→Path : ∀ {x y z w} → ⟨ x , y ⟩≡⟨ z , w ⟩ → ⟅ x , y ⟆ ≡ ⟅ z , w ⟆
-  -- ⟨,⟩≡⟨,⟩→Path {x} {y} {z} {w} = PT.rec (isSetM _ _) (Sum.elim left right) where
-  --   left : ((x ≡ z) × (y ≡ w)) → pair x y ≡ pair z w
-  --   left (p , q) = cong₂ pair p q
-
-  --   right : ((x ≡ w) × (y ≡ z)) → pair x y ≡ pair z w
-  --   right (p , q) = cong₂ pair p q ∙ comm _ _
-
-  -- Path→⟨,⟩≡⟨,⟩ : ∀ {x y z w} → pair x y ≡ pair z w → ⟨ x , y ⟩≡⟨ z , w ⟩
-  -- Path→⟨,⟩≡⟨,⟩ p = {! !}
+diag : (ℕ → ωTree) → (n : ℕ) → UnorderedTree n
+diag z n = cut n (z n)
 
 Complete : Type _
 Complete = {x y₁ y₂ : ωTree}
   → (ys : ℕ → ωTree)
   → (p : ∀ n → (ys n ≡ y₁) ⊎ (ys n ≡ y₂))
-  → (q : ∀ n → cut n x ≡ cut n (ys n))
+  → (q : ∀ n → cut n x ≡ diag ys n)
   → (x ≡ y₁) ⊎₁ (x ≡ y₂)
 
 isPropComplete : isProp Complete
 isPropComplete =
   isPropImplicitΠ2 λ _ _ → isPropImplicitΠ λ _ → isPropΠ3 λ _ _ _ → PT.isPropPropTrunc
 
+open ωTree using (elements) renaming (isChainLimit to isωTree)
+
 zip-inj⇒complete : isInjective zip → Complete
 zip-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
-
-  diag : (ℕ → ωTree) → (n : ℕ) → UnorderedTree n
-  diag z n = cut n (z n)
 
   ysᶜ : ℕ → ωTree
   ysᶜ n = Sum.elim (λ ysₙ≡y₁ → y₂) (λ ysₙ≡y₂ → y₁) (p n)
@@ -168,8 +160,6 @@ zip-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
   p∧pᶜ n with p n
   ... | inl ysₙ≡y₁ = cong ⟅_, y₂ ⟆ ysₙ≡y₁
   ... | inr ysₙ≡y₂ = cong ⟅_, y₁ ⟆ ysₙ≡y₂ ∙ ⟅,⟆-comm y₂ y₁
-
-  open ωTree using (elements) renaming (isChainLimit to isωTree)
 
   diag-ysᶜ-islim-alternating : ∀ {n} {a b : ωTree}
     → (ys n ≡ a)
@@ -201,16 +191,16 @@ zip-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
   ... | inl _ = refl
   ... | inr _ = refl
 
-  D∧Dᶜ : zip ⟅ x , xᶜ ⟆ ≡ zip ⟅ y₁ , y₂ ⟆
-  D∧Dᶜ = shiftedLimitPath λ n →
+  zip-diags-pair-path : zip ⟅ x , xᶜ ⟆ ≡ zip ⟅ y₁ , y₂ ⟆
+  zip-diags-pair-path = shiftedLimitPath λ n →
     zip₁ ⟅ x , xᶜ ⟆ n ≡⟨⟩
     ⟅ cut n x , cut n xᶜ ⟆ ≡⟨ cong₂ ⟅_,_⟆ (q n) (qᶜ n) ⟩
     ⟅ diag ys n , diag ysᶜ n ⟆ ≡⟨⟩
     zip₁ ⟅ ys n , ysᶜ n ⟆ n ≡⟨ cong (λ z → zip₁ z n) (p∧pᶜ n) ⟩
     zip₁ ⟅ y₁   , y₂    ⟆ n ∎
 
-  d∧dᶜ : ⟅ x , xᶜ ⟆ ≡ ⟅ y₁ , y₂ ⟆
-  d∧dᶜ = inj ⟅ x , xᶜ ⟆ ⟅ y₁ , y₂ ⟆ D∧Dᶜ
+  diags-pair-path : ⟅ x , xᶜ ⟆ ≡ ⟅ y₁ , y₂ ⟆
+  diags-pair-path = inj ⟅ x , xᶜ ⟆ ⟅ y₁ , y₂ ⟆ zip-diags-pair-path
 
   goal : ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
   goal = PT.rec PT.isPropPropTrunc (Sum.elim (PT.map inl) (PT.map inr)) x∈⟅y₁,y₂⟆ where
@@ -218,7 +208,7 @@ zip-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
     x∈⟅x,xᶜ⟆ = ∣ inl ∣ refl {x = x} ∣₁ ∣₁
 
     x∈⟅y₁,y₂⟆ : x ∈ ⟅ y₁ , y₂ ⟆
-    x∈⟅y₁,y₂⟆ = subst (x ∈_) d∧dᶜ x∈⟅x,xᶜ⟆
+    x∈⟅y₁,y₂⟆ = subst (x ∈_) diags-pair-path x∈⟅x,xᶜ⟆
 
 long : (n : ℕ) → UnorderedTree n
 long zero = tt
@@ -249,15 +239,46 @@ long?-tree : (a : ℕ → Bool) → ωTree
 long?-tree a .ωTree.elements = long? a
 long?-tree a .ωTree.isChainLimit = long?-istree a
 
-sequence : (a : ℕ → Bool) (x y : ωTree) → ℕ → ωTree
-sequence a x y with a 0
+sequence′ : (a : ℕ → Bool) (x y : ωTree) → (even? : Bool) → ℕ → ωTree
+sequence′ a x y even? with (a 0) and even?
 ... | true = λ n → y
-... | false = λ { 0 → x ; (suc n) → sequence (a ∘ suc) x y n }
+... | false = λ { 0 → x ; (suc n) → sequence′ (a ∘ suc) x y (not even?) n }
+
+sequence′-either : (a : ℕ → Bool) (x y : ωTree) (even? : Bool)
+  → ∀ n → (sequence′ a x y even? n ≡ x) ⊎ (sequence′ a x y even? n ≡ y)
+sequence′-either a x y even? with (a 0 and even?)
+... | true = λ n → inr (refl {x = y})
+... | false =
+  λ { zero → inl (refl {x = x})
+    ; (suc n) → sequence′-either (a ∘ suc) x y (not even?) n
+    }
+
+sequence : (a : ℕ → Bool) (x y : ωTree) → ℕ → ωTree
+sequence a x y = sequence′ a x y true
+
+sequence-either : (a : ℕ → Bool) (x y : ωTree)
+  → ∀ n → (sequence a x y n ≡ x) ⊎ (sequence a x y n ≡ y)
+sequence-either a x y = sequence′-either a x y true
+
+sequence-odd : (a : ℕ → Bool) (x y : ωTree)
+  → ∀ n → isOddT n → sequence a x y n ≡ x
+sequence-odd a x y with a 0
+... | true = {! !}
+... | false = {! !}
 
 zip-complete⇒LLPO : Complete → LLPO
-zip-complete⇒LLPO complete a true? = PT.map {! !} {! !} where
-  longs₁ : ℕ → ωTree
-  longs₁ = sequence a long-tree (long?-tree a)
+zip-complete⇒LLPO complete a true? = PT.map (Sum.map-⊎ {! !} ?)
+  (complete {x = longs-diag} {y₁ = long-tree} {y₂ = long?-tree a} longs (sequence-either a _ _) λ n → refl {x = diag longs n})
+  where
 
-  longs₂ : ℕ → ωTree
-  longs₂ = sequence a (long?-tree a) long-tree
+  longs : ℕ → ωTree
+  longs = sequence a long-tree (long?-tree a)
+
+  longs-diag : ωTree
+  longs-diag .elements = diag longs
+  longs-diag .isωTree n = {! !}
+
+  case₁ : longs-diag ≡ long-tree → ∀ n → isEvenT n → a n ≡ false
+  case₁ p n with a n
+  ... | false = λ _ → refl
+  ... | true = {! cong (cut n) p!}

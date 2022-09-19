@@ -53,3 +53,6 @@ infixr 80 !_
 
 isInjective : (f : A → B) → Type _
 isInjective f = ∀ x y → f x ≡ f y → x ≡ y
+
+isSurjective : (f : A → B) → Type _
+isSurjective {B = B} f = (b : B) → fiber f b
