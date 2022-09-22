@@ -150,3 +150,20 @@ sizeof≡0→ε {X = X} = ind ((λ m → isPropΠ (λ _ → isSetM m ε))) Pε P
 -- sizeof-1→η {X} {assoc m m₁ m₂ i} eq = {!   !}
 -- sizeof-1→η {X} {comm m m₁ i} eq = {!   !}
 -- sizeof-1→η {X} {trunc m m₁ x y i i₁} eq = {!   !}
+
+map-id : ∀ {ℓ} {X : Type ℓ} (s : M X)
+  → map (λ x → x) s ≡ s
+map-id =
+  ind (λ _ → isSetM _ _)
+      refl
+      (λ _ → refl)
+      (λ ih1 ih2 → cong₂ _⊕_ ih1 ih2)
+
+map-comp : ∀ {ℓ ℓ' ℓ''} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''}
+  → (g : Y → Z) (f : X → Y) (s : M X)
+  → map g (map f s) ≡ map (λ x → g (f x)) s
+map-comp g f =
+  ind (λ _ → isSetM _ _)
+      refl
+      (λ _ → refl)
+      (λ ih1 ih2 → cong₂ _⊕_ ih1 ih2)
