@@ -1,0 +1,343 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{bussproofs}
+
+\usepackage{textcomp}
+\usepackage{newunicodechar}
+
+\usepackage{todonotes}
+
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%
+
+\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
+\newunicodechar{→}{\ensuremath{\mathrel{\mathnormal\to}}}
+\newunicodechar{∀}{\ensuremath{\mathnormal\forall}}
+\newunicodechar{∃}{\ensuremath{\mathop{\mathnormal\exists\/}}}
+\newunicodechar{≃}{\mathbin{\mathnormal\simeq}}
+
+\DeclareMathOperator{\Chain}{ch}
+\DeclareMathOperator{\Shift}{sh}
+\DeclareMathOperator{\Lim}{Lim}
+\DeclareMathOperator{\Type}{Type}
+\DeclareMathOperator{\Fin}{Fin}
+
+\newcommand*{\Where}{\ensuremath{\mathpunct{.}}}
+
+\newcommand*{\M}{\ensuremath{\mathsf{M}}}
+
+\newcommand*{\SetTrunc}[1]{\ensuremath{{\lVert #1 \rVert}_2}}
+\newcommand*{\SetTruncCon}[1][\textunderscore]{\ensuremath{{\lvert #1 \rvert}_2}}
+\newcommand*{\SetQuot}{\ensuremath{\mathbin{/_{\!2}}}}
+
+\newcommand*{\LLPO}{LLPO}
+
+\usepackage{latex/agda}
+
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment
+  {code}{Verbatim}
+  {}
+\begin{document}
+%
+\title{Final Coalgebra of the Finite Bag Functor}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{%
+    Philipp Joram\inst{1}\orcidID{0000-0002-0448-7907} \and
+    Niccolò Veltri\inst{1}\orcidID{0000-0002-7230-3436}%
+}
+%
+\authorrunning{P. Joram et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Department of Software Science, Tallinn University of Technology, Estonia}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+The abstract should briefly summarize the contents of the paper in
+150--250 words.
+
+\keywords{First keyword  \and Second keyword \and Another keyword.}
+\end{abstract}
+
+\section{Introduction}
+
+\section{Type Theory and Cubical Agda}
+
+\section{The Finite Bag Functor}
+
+The action of the bag functor on a type $X$ can be encoded as higher inductive
+types in various ways, two of which we present here.
+The first is as the type of lists set-quotiented by an \emph{up to permutation}-relation,
+the second being the free commutative monoid on $X$.
+
+
+\subsection{As a HIT}
+
+\newcommand*{\Empty}{\mathsf{\varepsilon}}
+\newcommand*{\Singl}{\operatorname{\mathsf{\eta}}}
+\newcommand*{\Union}{\mathbin{\oplus}}
+\newcommand*{\Var}[1]{\mathit{#1}}
+\newcommand*{\Op}[1]{\operatorname{\mathsf{#1}}}
+
+
+Given a type $X$, the free commutative monoid $(\M X, \Union, \Empty)$ is
+defined as the higher inductive type induced by the following rules:
+\begin{itemize}
+  \item Point constructors:
+    \begin{center}
+      \hspace*{\fill}
+        \AxiomC{$\vphantom{X}$}
+        \UnaryInfC{$\Empty : \M{X}$}
+        \DisplayProof
+      \hfill
+        \AxiomC{$x : X$}
+        \UnaryInfC{$\Singl x : \M X$}
+        \DisplayProof
+      \hfill
+        \hspace{10pt}
+        \AxiomC{$xs, ys : \M X$}
+        \UnaryInfC{$\Var{xs} \Union \Var{ys} : \M X$}
+        \DisplayProof
+      \hspace*{\fill}
+    \end{center}
+  \item Monoid axioms and commutativity:
+    \begin{center}
+      \hspace*{\fill}
+        \AxiomC{$\Var{xs} : \M X$}
+        \UnaryInfC{$\mathsf{unit} : \Empty \Union \Var{xs} = \Var{xs}$}
+        \DisplayProof
+      \hfill
+        \AxiomC{$\Var{xs}, \Var{ys}, \Var{xs} : \M X$}
+        \UnaryInfC{
+          $\mathsf{assoc} : \Var{xs}\Union(\Var{ys}\Union\Var{zs}) = (\Var{xs}\Union\Var{ys})\Union\Var{zs}$
+        }
+        \DisplayProof
+      \hspace*{\fill}
+      \\[6pt]
+      \hspace*{\fill}
+        \AxiomC{$\Var{xs}, \Var{ys} : \M X$}
+        \UnaryInfC{
+          $\mathsf{comm} : \Var{xs}\Union\Var{ys} = \Var{ys}\Union\Var{xs}$
+        }
+        \DisplayProof
+      \hspace*{\fill}
+    \end{center}
+  \item set truncation:
+    \begin{center}
+      \hspace*{\fill}
+        \AxiomC{$\Var{xs}, \Var{ys} : \M X$}
+        \AxiomC{$p, q : \Var{xs} = \Var{ys}$}
+        \BinaryInfC{
+          $\mathsf{trunc} : p = q$
+        }
+        \DisplayProof
+      \hspace*{\fill}
+    \end{center}
+\end{itemize}
+
+\subsection{As a Set Quotient}
+
+\newcommand*{\FMSet}{\operatorname{\mathsf{FMSet}}}
+\newcommand*{\FMGpd}{\operatorname{\mathsf{FMGpd}}}
+
+\begin{definition}
+  The type of finite multisets over a type $X$ is the type
+  \begin{align*}
+    \FMSet X
+      \mathbin{=_{\mathrm{df}}}
+      \sum\,\Var{sz} : ℕ\Where
+        (\Fin \Var{sz} \to X) \mathbin{/_{\!2}} \mathrel{\sim},
+  \end{align*}
+  where $\sim$ is the proposition-valued relation defined as
+  \begin{align*}
+    \textunderscore\sim\textunderscore &: ∀ \{n\}\Where (v\, w : \Fin n → X) → \Type \\
+    v \sim w &\mathrel{=_{\mathsf{df}}}
+      ∃ \sigma : \Fin n ≃ \Fin n \Where
+        \operatorname{\mathsf{PathP}} (\lambda i\Where \operatorname{ua}(\sigma)\, i → X)\, v\, w
+  \end{align*}
+\end{definition}
+
+\subsubsection{Finite Choice for Sets}
+
+\begin{lemma}
+  Set truncation distributes over finite families of types.
+  For any $n : ℕ$ and type family $Y : \Fin n \to \Type$,
+  there is an equivalence
+  \[
+    \Op{box} :
+    ((k : \Fin n) → \SetTrunc{\mathop{Y\/} k})
+    ≃
+    {\SetTrunc{(k : \Fin n) → \mathop{Y\/} k}}
+  \]
+\end{lemma}
+
+\begin{definition}
+  The principle of finite choice can be defined in terms of $\Op{box}$:
+  \begin{align*}
+    \Op{elim}_{\Op{fin}} &: \forall n\Where \\
+      &\to \{B : (\Fin n \to \SetTrunc{X}) \to \Type\} \\
+      &\to (\forall v\Where \operatorname{isSet} (B\, v)) \\
+      &\to ((\mathsf{choice} : \Fin n \to X) \to B\, (\SetTruncCon{} \circ \mathsf{choice})) \\
+      &\to (v : \Fin n \to \SetTrunc{X}) \to B\, v)
+  \end{align*}
+  It is defined by applying $\mathsf{choice}$ to the term obtained from
+  set-truncation elimination on $\operatorname{box} v$.
+  It comes with a computational rule
+  \begin{align*}
+    \Op{elim}^\beta_{\Op{fin}} : (v : \Fin n → X)
+      → \Op{elim}_{\Op{fin}} (\SetTruncCon{} \circ v) = \operatorname{\mathsf{choice}} v
+  \end{align*}
+\end{definition}
+
+\begin{theorem}
+  Finite multisets are invariant under set-truncation:
+  \begin{equation}
+    \FMSet \SetTrunc{X} ≃ \FMSet X
+  \end{equation}
+\end{theorem}
+\begin{proof}
+  \begin{enumerate}
+    \item Inverse is given by $\operatorname{map} \SetTruncCon{} : \FMSet X → \FMSet \SetTrunc{X}$.
+    \item Define the inverse by using
+      \[
+        \Op{requot} : ∀ \{n\}\Where
+          (\Fin n → \SetTrunc{X})
+          → (\Fin n → X) \SetQuot{} {\sim_n},
+      \]
+      defined via $\Op{elim}_{\Op{fin}}$.
+  \end{enumerate}
+\end{proof}
+
+\subsection{As a Groupoid}
+Definition as a $\Sigma$-type,
+but indexed by a groupoid instead
+of FinSet.
+
+\begin{itemize}
+    \item Compare large/small definition.
+\end{itemize}
+\begin{definition}
+  \begin{align*}
+    \FMGpd X
+      \mathbin{=_{\mathrm{df}}}
+      \sum\,\Var{x} : \operatorname{\mathsf{Bij}}\Where
+        \langle x \rangle \to X,
+  \end{align*}
+\end{definition}
+
+
+In general, $\FMSet X$ is at least a groupoid.
+
+\begin{theorem}
+  Set-truncating a bag yields a finite multiset.
+  For any type $X$,
+  \[
+    \SetTrunc{\FMGpd X} ≃ \FMSet X
+  \]
+\end{theorem}
+
+\section{The Final Coalgebra}
+
+Describe limits in general.
+Maybe compare final coalgebras and corecursive algebras which are fixpoints.
+
+\subsection{Final Coalgebras as an $\omega$-Limit in Set}
+
+\todo[inline]{%
+    Surjectivity works (under the assumption of countable(?) choice).
+}
+
+\begin{theorem}
+    Injectivity of the limit-preservation map
+    \[
+        \operatorname{pres}_{\Lim (\Chain \M)}\colon
+            \M (\Lim (\Chain \M))
+            \to
+            \Lim (\Shift(\Chain\M))
+    \]
+    implies \LLPO.
+\end{theorem}
+
+\todo[inline]{%
+    Think about the converse statement,
+    does \LLPO already imply injectivity?
+}
+
+\subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}
+
+\subsection{Truncating the Groupoid Construction}
+
+Compare the set-truncation of the groupoid construction
+and the set-level definition.
+
+\begin{itemize}
+    \item
+        Show that the set-truncation of the limit in
+        groupoids stays a fixpoint for the set-level functor.
+    \item
+        \emph{(Unproven)}
+        Only assuming the (full) axiom of choice this is the
+        largest fixpoint, i.e.\@ yields a final coalgebra.
+\end{itemize}
+
+\section{Discussion: Alternatives}
+\subsection{Outlook: Generalization to Analytic Functors}
+
+\begin{itemize}
+    \item Hint at a definition of analytic functors using
+        the above definitions (pick a subgroupoid of Bij etc.)
+    \item Question:
+        Does this definition \emph{weakly preserve pullbacks}?
+        This would be the classical definition.
+\end{itemize}
+
+\subsection{Using Coinductive Types?}
+
+\begin{itemize}
+    \item It is not clear that Agda's coinductive types
+        interacts well with HITs.
+    \item This might not work with the groupoid-definition:
+        Either we use HITs (possibly inconsistent, for the small Bij),
+        or the construction ends up being too large.
+    \item
+        Another approach: Quotient the (entire) final coalgebra of lists.
+\end{itemize}
+
+\section{Conclusions}
+
+%
+% the environments 'definition', 'lemma', 'proposition', 'corollary',
+% 'remark', and 'example' are defined in the LLNCS documentclass as well.
+%
+\subsubsection{Acknowledgements}
+
+\nocite{*}
+
+\bibliographystyle{splncs04}
+\bibliography{Multiset}
+\end{document}
