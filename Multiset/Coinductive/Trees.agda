@@ -22,6 +22,17 @@ open isEquivRel
 
 -- Stuff about lists
 
+-- mapList preserves identity and composition
+mapListId : ∀{ℓ}{X : Type ℓ} (xs : List X)
+  → mapList (λ x → x) xs ≡ xs
+mapListId [] = refl
+mapListId (x ∷ xs) = cong (_ ∷_) (mapListId xs)
+
+mapListComp : ∀{ℓ}{X Y Z : Type ℓ}{g : Y → Z}{f : X → Y} (xs : List X)
+  → mapList g (mapList f xs) ≡ mapList (g ∘ f) xs
+mapListComp [] = refl
+mapListComp (x ∷ xs) = cong (_ ∷_) (mapListComp xs)
+
 -- list membership
 infix 21 _∈_
 data _∈_ {ℓ}{X : Type ℓ} (x : X) : List X → Type ℓ where
@@ -332,11 +343,56 @@ record ExtEq (i : Size) (t₁ t₂ : Tree ∞) : Type where
     subtreesE : {j : Size< i} → Relator (ExtEq j) (subtrees t₁) (subtrees t₂)
 open ExtEq public
 
+mapDRelator' : ∀{ℓ}{X Y : Type ℓ}
+  → {R : X → X → Type ℓ} {S : Y → Y → Type ℓ}
+  → {f : X → Y}
+  → (∀ {x x'} → R x x' → S (f x) (f x'))
+  → ∀ {xs xs'}
+  → DRelator R xs xs'
+  → DRelator S (mapList f xs) (mapList f xs')
+mapDRelator' fRel nil = nil
+mapDRelator' fRel (cons p) =
+  cons (∥map∥ (λ { (x , r , m , p')
+                     → _ , fRel r , ∈mapList m , subst (DRelator _ _) (remove-mapList m) (mapDRelator' fRel p')
+                })
+              p)
+
 mapDRelator : {X : Type} {R S : X → X → Type} {xs ys : List X}
   → (∀ {x y} → R x y → S x y) 
   → DRelator R xs ys → DRelator S xs ys
-mapDRelator rs nil = nil
-mapDRelator rs (cons p) = cons (∥map∥ (λ { (y , r , m , p') → y , rs r , m , mapDRelator rs p' }) p)
+mapDRelator rs p =
+  subst2 (DRelator _) (mapListId _) (mapListId _) (mapDRelator' {f = λ x → x} rs p)
+
+mapListRel-fun : ∀{ℓ}{X Y : Type ℓ}
+  → {R : Y → Y → Type ℓ} 
+  → {f g : X → Y}
+  → (∀ x → R (f x) (g x))
+  → ∀ xs
+  → ListRel R (mapList f xs) (mapList g xs)
+mapListRel-fun rfg [] = []
+mapListRel-fun rfg (x ∷ xs) = rfg x ∷ mapListRel-fun rfg xs
+
+mapRelator' : ∀{ℓ}{X Y : Type ℓ}
+  → {R : X → X → Type ℓ} {S : Y → Y → Type ℓ}
+  → {f : X → Y}
+  → (∀ {x x'} → R x x' → S (f x) (f x'))
+  → ∀ {xs xs'}
+  → Relator R xs xs'
+  → Relator S (mapList f xs) (mapList f xs')
+mapRelator' fRel (p , q) = mapDRelator' fRel p , mapDRelator' fRel q
+
+mapRelator-fun : ∀{ℓ}{X Y : Type ℓ}
+  → {R : Y → Y → Type ℓ}
+  → (∀{x y} → R x y → R y x)
+  → {f g : X → Y}
+  → (∀ x → R (f x) (g x))
+  → ∀ xs
+  → Relator R (mapList f xs) (mapList g xs)
+mapRelator-fun symR rfg xs = ListRel→Relator symR (mapListRel-fun rfg xs)
+
+mapM : ∀{X Y} (f : X → Y) → M X → M Y
+mapM f = recQ squash/ (λ xs → [ mapList f xs ])
+  λ xs ys rs → eq/ _ _ (mapRelator' (cong f) rs)
 
 subtreesE-1 : ∀ {ts ts'} → Relator (ExtEq ∞) ts ts' → ExtEq ∞ (subtrees-1 ts) (subtrees-1 ts')
 subtreesE (subtreesE-1 r) = (mapDRelator (λ x → x) (r .fst)) , mapDRelator (λ x → x) (r .snd)
@@ -368,6 +424,8 @@ isEquivRelExtEq =
 -- the final coalgebra of the bag functor as quotient of trees
 νM : Type
 νM = Tree ∞ / ExtEq ∞
+
+
 
 toListRel : {X : Type} {R : X → X → Type}
   → (∀ x → R x x)
@@ -630,14 +688,65 @@ module _ (θInv : ∀ A {B} (R : B → B → Type) → (A → B / R) → [ A ⇒
   anaM c = anaM' (θ1Inv c)
 
 
--- -- the anamorphism is a coalgebra morphism
---   anaMEq' : {X : Type} (c : [ X ⇒M X ])
---     → ∀ x → νM→MνM (anaM' c x) ≡ map (anaM' c) (θ1 c x)
---   anaMEq' =
---     elimProp (λ _ → isPropΠ (λ _ → squash/ _ _))
---       (λ c x → cong [_] (mapListComp (c x)))
--- 
---   anaMEq : {X : Type} (c : X → M X)
---     → ∀ x → ξ (anaM c x) ≡ mapM (anaM c) (c x)
---   anaMEq c x =
---     anaMEq' (θ1Inv c) x ∙ cong (λ f → mapM (anaM c) (f x)) (sectionθ1 c)
+-- the anamorphism is a coalgebra morphism
+  anaMEq' : {X : Type} (c : [ X ⇒M X ])
+    → ∀ x → νM→MνM (anaM' c x) ≡ mapM (anaM' c) (θ1 c x)
+  anaMEq' = elimPropQ (λ _ → isPropΠ (λ _ → squash/ _ _)) 
+     (λ c x → cong [_] (mapListComp (c x)))
+
+  anaMEq : {X : Type} (c : X → M X)
+    → ∀ x → νM→MνM (anaM c x) ≡ mapM (anaM c) (c x)
+  anaMEq c x =
+    anaMEq' (θ1Inv c) x ∙ cong (λ f → mapM (anaM c) (f x)) (sectionθ1 c)
+
+  anaTreeRel : ∀ {X} {R : X → X → Type}
+    → (c : X → List X) (cRel : ∀ {x y} → R x y → Relator R (c x) (c y))
+    → (j : Size)
+    → ∀ {x y} → R x y
+    → ExtEq j (anaTree c ∞ x) (anaTree c ∞ y)
+  subtreesE (anaTreeRel c cRel j r) {k} = mapRelator' (anaTreeRel c cRel k) (cRel r)
+
+
+  anaMUniq''' : {X : Type} (Xset : isSet X) (c : X → List X)
+    → (f : X → Tree ∞) 
+    → (feq : ∀ x → Relator (ExtEq ∞) (subtrees (f x)) (mapList f (c x)))
+    → ∀ s x → ExtEq s (f x) (anaTree c ∞ x)
+  subtreesE (anaMUniq''' Xset c f feq s x) {s'} =
+    transDRelator (transExtEq s') (feq x .fst) (mapRelator-fun (symExtEq s') (anaMUniq''' Xset c f feq s') (c x) .fst) ,
+    transDRelator (transExtEq s') (mapRelator-fun (symExtEq s') (anaMUniq''' Xset c f feq s') (c x) .snd) (feq x .snd)
+
+  anaMUniq'' : {X : Type} (Xset : isSet X) (c : X → List X)
+    → (f : [ X ⇒νM]) (feq : ∀ x → νM→MνM (θ2 f x) ≡ mapM (θ2 f) [ c x ])
+    → ∀ x → θ2 f x ≡ anaM' [ c ] x
+  anaMUniq'' Xset c =
+    elimPropQ
+      (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → squash/ _ _)))
+      (λ f feq x → eq/ _ _
+        (anaMUniq''' Xset c f
+                     (λ y → effectiveRelator isPropExtEq isEquivRelExtEq
+                       (subst (Relator _≡_ (mapList [_] (subtrees (f y))))
+                              (sym (mapListComp (c y)))
+                              (effective (isPropRelator _) (isEquivRelRelator (equivRel (λ _ → refl) (λ _ _ → sym) (λ _ _ _ → _∙_))) _ _ (feq y))))
+                     _ x))
+          
+  anaMUniq' : {X : Type} (Xset : isSet X) (c : [ X ⇒M X ])
+    → (f : X → νM) (feq : ∀ x → νM→MνM (f x) ≡ mapM f (θ1 c x))
+    → ∀ x → f x ≡ anaM' c x
+  anaMUniq' Xset =
+    elimPropQ
+      (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → squash/ _ _))))
+      (λ c f feq x →
+         (λ i → sym (sectionθ2 f) i x)
+         ∙ anaMUniq'' Xset c (θ2Inv f)
+                          (λ y → (λ i → νM→MνM (sectionθ2 f i y) )
+                                  ∙ feq y
+                                  ∙ cong (λ g → [ mapList g (c y) ]) (sym (sectionθ2 f)))
+                          x)
+
+  anaMUniq : {X : Type} (Xset : isSet X) (c : X → M X)
+    → (f : X → νM) (feq : ∀ x → νM→MνM (f x) ≡ mapM f (c x))
+    → f ≡ anaM c
+  anaMUniq Xset c f feq = funExt λ x → 
+    anaMUniq' Xset (θ1Inv c) f
+      (λ y → feq y ∙ λ i → mapM f (sectionθ1 c (~ i) y))
+      x
