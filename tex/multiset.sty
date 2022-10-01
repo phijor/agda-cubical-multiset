@@ -1,0 +1,67 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{multiset}[2022/10/01 Package for a multiset-in-agda paper]
+
+\RequirePackage{kvoptions}
+
+\DeclareBoolOption{debug}{%
+    \def\thmt@debug{\typeout}%
+}
+
+\DeclareDefaultOption{\PackageWarning{multiset}{Unknown ‘\CurrentOption’}}
+
+\ProcessKeyvalOptions*
+
+\RequirePackage{amsmath}
+\RequirePackage{amsfonts}
+
+\RequirePackage{newunicodechar}
+
+\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
+\newunicodechar{→}{\ensuremath{\mathrel{\mathnormal\to}}}
+\newunicodechar{∀}{\ensuremath{\mathnormal\forall}}
+\newunicodechar{∃}{\ensuremath{\mathop{\mathnormal\exists\/}}}
+\newunicodechar{≃}{\mathbin{\mathnormal\simeq}}
+
+\DeclareMathOperator{\Chain}{ch}
+\DeclareMathOperator{\Shift}{sh}
+\DeclareMathOperator{\Lim}{Lim}
+\DeclareMathOperator{\Type}{Type}
+\DeclareMathOperator{\Fin}{Fin}
+
+\newcommand*{\Empty}{\mathsf{\varepsilon}}
+\newcommand*{\Singl}{\operatorname{\mathsf{\eta}}}
+\newcommand*{\Union}{\mathbin{\oplus}}
+\newcommand*{\Var}[1]{\mathit{#1}}
+\newcommand*{\Op}[1]{\operatorname{\mathsf{#1}}}
+
+\newcommand*{\DefEq}{\ensuremath{\mathbin{=_\mathsf{df}}}}
+
+\DeclareMathOperator{\FMSet}{\mathsf{FMSet}}
+\DeclareMathOperator{\FMGpd}{\mathsf{FMGpd}}
+
+
+\newcommand*{\Where}{\ensuremath{\mathpunct{.}}}
+
+\newcommand*{\N}{\ensuremath{\mathbb{N}}}
+
+\newcommand*{\M}{\ensuremath{\mathsf{M}}}
+
+\newcommand*{\SetTrunc}[1]{\ensuremath{{\lVert #1 \rVert}_2}}
+\newcommand*{\SetTruncCon}[1][\mathunderscore]{\ensuremath{{\lvert #1 \rvert}_2}}
+\newcommand*{\SetQuot}{\ensuremath{\mathbin{/_{\!2}}}}
+
+\newcommand*{\LLPO}{LLPO}
+
+\title{Final Coalgebra of the Finite Bag Functor}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{%
+    Philipp Joram\inst{1}\orcidID{0000-0002-0448-7907} \and
+    Niccolò Veltri\inst{1}\orcidID{0000-0002-7230-3436}%
+}
+%
+\authorrunning{P. Joram et al.}
+\institute{Department of Software Science, Tallinn University of Technology, Estonia}
