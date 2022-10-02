@@ -124,15 +124,14 @@ ind {X = X} {P = P} propP ⊤ singleton _∨_ =
     ∨-comm p q = isProp→PathP (λ i → propP (comm _ _ i)) _ _
 
 mapComp : ∀ {ℓ″ ℓ‴} {Y : Type ℓ″} {Z : Type ℓ‴}
-  → ∀ {xs : M X}
   → (g : Y → Z)
   → (f : X → Y)
-  → map g (map f xs) ≡ map (g ∘ f) xs
-mapComp {xs = xs} g f = ind {P = λ xs → map g (map f xs) ≡ map (g ∘ f) xs} (λ xs → isSetM _ _)
+  → (xs : M X)
+  → map (g ∘ f) xs ≡ map g (map f xs)
+mapComp g f = ind {P = λ xs → map (g ∘ f) xs ≡ map g (map f xs)} (λ xs → isSetM _ _)
   (refl {x = ε})
   (λ x → refl {x = η (g (f x))})
   (λ {xs ys} mapComp-xs mapComp-ys → cong₂ _⊕_ mapComp-xs mapComp-ys)
-  xs
 
 mapId : ∀ (xs : M X)
   → map (λ x → x) xs ≡ xs
@@ -170,18 +169,6 @@ m ∷ʳ x = m ⊕ η x
   x ∷ y ∷ zs ≡⟨ ∷-swap x y zs ⟩
   y ∷ x ∷ zs ≡⟨ cong (y ∷_) ys-split ⟩
   y ∷ ys ∎
-
-_++_ : M X → M X → M X
-_++_ {X = X} = rec {A = M X → M X} (isSetΠ (λ ys → isSetM)) (λ ys → ys) _∷_ (λ xs++_ ys++_ → xs++_ ∘ ys++_) unit* assoc* comm*
-  where
-    unit* : ∀ (xs++_) → (λ ys → xs++ ys) ≡ xs++_
-    unit* _ = refl
-
-    assoc* : ∀ xs++_ ys++_ zs++_ → _
-    assoc* _ _ _ = refl
-
-    comm* : ∀ xs++_ ys++_ → (xs++_ ∘ ys++_) ≡ (ys++_ ∘ xs++_)
-    comm* xs++_ ys++_ = funExt $ ind (λ zs → isSetM _ _) {! !} {! !} {! !}
   
 ∷-elim : {B : M X → Type ℓ'}
   → (setB : ∀ m → isSet (B m))
@@ -189,7 +176,7 @@ _++_ {X = X} = rec {A = M X → M X} (isSetΠ (λ ys → isSetM)) (λ ys → ys)
   → (cons : (x : X) → {xs : M X} → B xs → B (x ∷ xs))
   → (swap : (x y : X) → {xs : M X} → {b : B xs} → PathP (λ i → B (∷-swap x y xs i)) (cons x (cons y b)) (cons y (cons x b)))
   → (xs : M X) → B xs
-∷-elim {B = B} setB nil cons swap = elim setB nil η* {! !} {! !} {! !} {! !} where
+∷-elim {B = B} setB nil cons swap = elim setB nil η* _⊕*_ {! !} {! !} {! !} where
   η* : ∀ x → B (η x)
   η* x = subst B (unit' (η x)) (cons x nil)
 

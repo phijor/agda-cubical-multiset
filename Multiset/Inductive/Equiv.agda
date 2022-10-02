@@ -1,7 +1,7 @@
 module Multiset.Inductive.Equiv where
 
 open import Multiset.Prelude
-open import Multiset.Inductive.Base as M
+open import Multiset.Inductive.Base as M hiding (_++_)
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
