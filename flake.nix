@@ -6,11 +6,9 @@
     };
     flake-utils.url = github:numtide/flake-utils;
     nixpkgs.url = github:NixOS/nixpkgs/nixpkgs-unstable;
-    cornelis.url = github:phijor/cornelis/custom;
-    cornelis.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, flake-compat, flake-utils, cornelis, ... }:
+  outputs = { self, nixpkgs, flake-compat, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -45,18 +43,15 @@
             platforms = pkgs.lib.platforms.unix;
           };
         };
-        cornelis-pkg = cornelis.packages.${system}.cornelis;
       in
       {
         packages = {
           inherit multiset;
-          cornelis = cornelis-pkg;
           default = multiset;
         };
 
         devShells.default = pkgs.mkShell {
           inputsFrom = [ multiset ];
-          packages = [ cornelis-pkg ];
         };
       }
     );
