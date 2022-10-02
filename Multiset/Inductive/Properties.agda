@@ -572,3 +572,20 @@ module Choice where
   countable {A = A} setA f = {! !} where
     setA' : isOfHLevelDep 2 A
     setA' = isOfHLevel→isOfHLevelDep 2 setA
+
+map-id : ∀ {ℓ} {X : Type ℓ} (s : M X)
+  → map (λ x → x) s ≡ s
+map-id =
+  ind (λ _ → isSetM _ _)
+      refl
+      (λ _ → refl)
+      (λ ih1 ih2 → cong₂ _⊕_ ih1 ih2)
+
+map-comp : ∀ {ℓ ℓ' ℓ''} {X : Type ℓ} {Y : Type ℓ'} {Z : Type ℓ''}
+  → (g : Y → Z) (f : X → Y) (s : M X)
+  → map g (map f s) ≡ map (λ x → g (f x)) s
+map-comp g f =
+  ind (λ _ → isSetM _ _)
+      refl
+      (λ _ → refl)
+      (λ ih1 ih2 → cong₂ _⊕_ ih1 ih2)
