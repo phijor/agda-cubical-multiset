@@ -11,8 +11,11 @@
 
 \ProcessKeyvalOptions*
 
+\RequirePackage{xparse}
 \RequirePackage{amsmath}
 \RequirePackage{amsfonts}
+\RequirePackage{stmaryrd} % for \{l,r}bag
+\RequirePackage{doi} % Links to DOI in bibliography
 
 \RequirePackage{newunicodechar}
 
@@ -27,6 +30,7 @@
 \DeclareMathOperator{\Lim}{Lim}
 \DeclareMathOperator{\Type}{Type}
 \DeclareMathOperator{\Fin}{Fin}
+\DeclareMathOperator{\Sym}{\mathfrak{S}}
 
 \newcommand*{\Empty}{\mathsf{\varepsilon}}
 \newcommand*{\Singl}{\operatorname{\mathsf{\eta}}}
@@ -39,6 +43,11 @@
 \DeclareMathOperator{\FMSet}{\mathsf{FMSet}}
 \DeclareMathOperator{\FMGpd}{\mathsf{FMGpd}}
 
+\DeclareMathOperator{\FinSet}{\mathsf{FinSet}}
+\DeclareMathOperator{\Bij}{\mathsf{Bij}}
+\DeclareMathOperator{\Idx}{\mathsf{Idx}}
+
+\newcommand*{\UU}{\ensuremath{\mathcal{U}}}
 
 \newcommand*{\Where}{\ensuremath{\mathpunct{.}}}
 
@@ -46,11 +55,21 @@
 
 \newcommand*{\M}{\ensuremath{\mathsf{M}}}
 
+\newcommand*{\Bag}[1][\mathunderscore]{\ensuremath{\lbag #1 \rbag}}
+
 \newcommand*{\SetTrunc}[1]{\ensuremath{{\lVert #1 \rVert}_2}}
 \newcommand*{\SetTruncCon}[1][\mathunderscore]{\ensuremath{{\lvert #1 \rvert}_2}}
 \newcommand*{\SetQuot}{\ensuremath{\mathbin{/_{\!2}}}}
 
+\NewDocumentCommand{\BinRel}{ m O{\mathunderscore} O{\mathunderscore} }{%
+    \ensuremath{#2 \mathrel{#1} #3}
+}
+
+\newcommand*{\SymmetricAction}[1]{\BinRel{\sim_{#1}}}
+
 \newcommand*{\LLPO}{LLPO}
+\newcommand*{\True}{\ensuremath{\mathsf{true}}}
+\newcommand*{\False}{\ensuremath{\mathsf{false}}}
 
 \title{Final Coalgebra of the Finite Bag Functor}
 %

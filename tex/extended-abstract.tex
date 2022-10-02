@@ -7,46 +7,52 @@
 
   \maketitle
 
-  \section{Contributions}
+  \section{Introduction}
 
   In this work, we explore possible definitions of the finite bag functor in
   the setting of Homotopy Type Theory, and investigate they admit a final
   coalgebra.
   A finite bag (or multiset) functor $\M$ takes a type $X$ to the type of finite
   collections of terms of $X$.
-  In contrast to the finite powerset functor, these collections may contain
-  multiple occurrences of a term $x : X$.
-  A coalgebra of $\M$ is a map \linebreak[4] ${\alpha : \M X → X}$.
+  In contrast to the finite powerset functor, these collections distinguish
+  multiple occurrences of identical terms, e.g.\@ $\Bag[1, 2, 1] : \M X$.
+  A coalgebra of $\M$ is a map ${\alpha : X → \M X}$.
   Coalgebras and coalgebra maps form a category, and a final coalgebra
-  $\omega : \M V_\omega → V_\omega$ defines a greatest fix point
-  $\M V_\omega ≃ V_\omega$.
+  $\omega : V_\omega → \M V_\omega$ defines a greatest fixpoint
+  $V_\omega ≃ \M V_\omega$.
 
-  In a classical setting, a bag functor is an instance of an \emph{analytic}
-  functor, i.e.\@ one that preserves countable filtered limits%
-    \todo{Is that true? Remember to have an offline copy of the nLab at hand on the next flight},
-  and from this it follows that the limit of the chain
+  A bag functor is an instance of an \emph{analytic} functor \cite{Joyal1986}.
+  A set-valued functor $F$ is analytic if it is naturally isomorphic to
   \[
-    1 \xleftarrow{!} {\M 1}
-      \xleftarrow{\M(!)} {\M^2 1}
-      \xleftarrow{\M^2(!)} {\M^3 1}
-      \xleftarrow{\hphantom{\M^3(!)}}
+    F(X) \cong \sum_{n : \N} \tfrac{X^n}{G(n)}
+  \]
+  where $G(n)$ is a subgroup of the symmetric group $\Sym(s)$ acting
+  on the projections of the $n$-fold cartesian product $X^n$.
+  In the case of a bag functor, $G(n)$ is the full permutation group $\Sym(n)$.
+  In a classical setting, the final coalgebra of such a functor $F$ is obtained
+  from the $\omega^{\operatorname{\mathbf{op}}}$-chain \cite[{3.3.13}]{Adamek2021}
+  \[
+    1 \xleftarrow{!} {F 1}
+      \xleftarrow{F(!)} {F^2 1}
+      \xleftarrow{F^2(!)} {F^3 1}
+      \xleftarrow{F^3(!)}
       \cdots
   \]
-  always exists and forms a final coalgebra.\todo{Is this \cite{Worrell2005}?}
-
   In a more constructive environment such as Homotopy Type Theory however,
   it is not immediately obvious whether this still holds.
-  For one, there exist two definitions of analytic functors that are
-  immediately shown to be equivalent in a classical setting:
-  the aforementioned one as a limit-preserving functor, and the other as
-  functor presented as
-  \[
-    F(X) ≃ \sum_{n : \N} \tfrac{X^n}{G(n)}
-  \]
-  where $G(n)$ is some group acting on the projections of the $n$-fold
-  cartesian product $X^n$.
-  In the case of a (the) bag functor, $G(n)$ is the full permutation group on
-  $n$ elements.
+
+  \section{Contributions}
+
+  In this work we give multiple plausible definitions of bag functors in an univalent setting.
+  We show that the set-valued candidates are not adequate, as they imply non-constructive principles (Theorem \ref{thm:InjPresImpliesLLPO}).
+  Instead, we follow \cite{Kock2012} and provide a groupoid-valued definition $\FMGpd$ which
+  admits a (homotopy) limit of the $\omega^{\operatorname{\mathbf{op}}}$-chain.
+  We conclude by comparing these definitions and their final coalgebras.
+
+  We formalized our work in \emph{cubical Agda}.
+  \todo[inline]{
+    What exactly should we say about the formalization?
+  }
 
   \subsection{Finite Bags in Sets}
   In a first attempt, we define
@@ -60,19 +66,17 @@
   $v, w : \Fin \Var{sz} → X$ iff there merely exists a permutation $\sigma$
   such that $v \circ \sigma = w$.
   We show that this definition enjoys a few desirable properties.
-  First and foremost, it is a set regardless of the homotopy level of $X$.
-  Secondly, it is invariant under set-truncation, i.e.
+  In particular $\FMSet{X}$ is indeed a set, regardless of the homotopy level of $X$.
+  Additionally, $\FMSet$ is invariant under set-truncation, i.e.
   $\FMSet \SetTrunc{X} ≃ \FMSet X$.
-  In this sense, $\FMSet$ behaves like a functor of sets,
-  which poses a problem when attempting to construct a final coalgebra from the
-  above mentioned chain:
-  Since $(\mathunderscore\sim_{\Var{sz}\mathunderscore})$ encodes permutations
-  of multisets as property instead of data,
-  proving preservation of limits has to perform propositional induction on
-  countably many terms at once.
-  More precisely, we prove the following theorem internally to the system:
+  We proceed to prove that this poses a problem when attempting to construct a final coalgebra from the chain mentioned above:
+  The relation $(\SymmetricAction{\Var{sz}}[{}][{}])$ encodes
+  permutations of multisets as property instead of data,
+  thus making it impossible to recover information about all terms in a chain
+  when proving preservation of limits.
+  More precisely, we prove the following theorem in the language of HoTT:
 
-  \begin{theorem}
+  \begin{theorem}\label{thm:InjPresImpliesLLPO}
     Injectivity of the limit-preservation map
     \[
         \operatorname{pres}_{\Lim (\Chain \M)}\colon
@@ -87,24 +91,25 @@
     but I state it here for the $\N$-indexed definition.
     Either say both are equivalent or prove it for the other definition.
   }
-
   \LLPO{} is a weaker version of the law of the excluded middle, and not
   provable from intuitionistic axioms alone.
-  It states that for any sequence of boolean values $a_0, a_1, a_2, \ldots$
-  that is $\mathsf{true}$ at most once, one can decide whether $a_k$ is
-  $\mathsf{false}$ for all even $k$, respectively $\mathsf{false}$ for all odd
-  $k$.
+  It states that for any (infinite) stream of boolean values that yields $\True$
+  at most once, one can decide whether all even or all odd positions are $\False$.
 
   \subsection{Finite Bags in Groupoids}
 
-  To remedy the above situation, we give a second type of definition.
-  This time, the bag functor will treat identifications of bags as data,
-  hereby forcing each type of bags to have the homotopy level of at least a
-  groupoid.
+  To remedy the situation, we introduce a bag functor that treats identifications of bags as data.
+  Let $\FinSet$ be the type of all types merely equivalent to some $\Fin k$.
+  We define for any type $X$ the type
+  \[
+    \FMGpd X \DefEq
+      \sum_{A : \FinSet} A → X
+  \]
+  Since $\FinSet$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
   We argue that this is the correct perspective on bags in HoTT, and substantiate the claim by the following theorem:
 
   \begin{theorem}
-    The chain
+    The $\omega^{\mathbf{op}}$-chain
     \[
       1 \xleftarrow{!} {\FMGpd 1}
         \xleftarrow{\FMGpd(!)} {\FMGpd^2 1}
@@ -112,9 +117,27 @@
         \xleftarrow{\hphantom{\FMGpd^3(!)}}
         \cdots
     \]
-    stabilizes in $\omega$ many steps and yields an equivalence of groupoids
-    $\FMGpd V_\omega ≃ V_\omega$.
+    has a limit and yields an equivalence of groupoids
+    $V_\omega ≃ \FMGpd V_\omega$.
   \end{theorem}
+  %
+  In particular, this limit induces a fixpoint $\SetTrunc{V_\omega} ≃ \FMSet{\SetTrunc{V_\omega}}$.
+
+  \todo[inline]{%
+    Did we show which of these are actually final coalgebras?
+    Being a fixpoint alone doesn't mean much.
+  }
+
+  While we usually suppress any size-related issues, they play a crucial r\^{o}le in the formalization.
+  Since $\FinSet$ is itself a large type compared to the types it ranges over,
+  the iteration $\lambda n\Where \FMGpd^n 1$ is not typeable in any universe of fixed size.
+  We work around this issue by implementing $\Bij$ as introduced in \cite{Finster2021},
+  which is a small type in the base universe, equivalent to $\FinSet$.
+
+  \section{Future Work}
+
+  \section*{Acknowledgments}
+  This work was supported by the Estonian Research Council grant PSG749.
 
 \bibliographystyle{splncs04}
 \bibliography{Multiset}
