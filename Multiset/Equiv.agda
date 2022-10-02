@@ -165,85 +165,6 @@ open Iso
 𝕄S≃∥𝕄G∥₂ : 𝕄S X ≃ ∥ 𝕄G X ∥₂
 𝕄S≃∥𝕄G∥₂ = isoToEquiv 𝕄S-∥𝕄G∥₂-Iso
 
--- Idempotency of 𝕄S on set truncations:
-requot : ∀ {n} → (Fin n → ∥ X ∥₂) → ((Fin n → X) /₂ SymmetricAction n)
-requot {X = X} {n = n} = FiniteChoice.elimₙ {B = λ _ → (Fin n → X) /₂ SymmetricAction n} (λ _ → SQ.squash/) [_]₂
-
-requot-comp : ∀ {n} → (v : Fin n → X) → requot ∣ v ∣₂∗ ≡ [ v ]₂
-requot-comp {X = X} {n = n} = FiniteChoice.elimₙ-comp {B = λ _ → (Fin n → X) /₂ SymmetricAction n} (λ _ → SQ.squash/) [_]₂
-
-𝕄S∘∥-∥₂→𝕄S : 𝕄S ∥ X ∥₂ → 𝕄S X
-𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = n , SQ.rec (SQ.squash/) requot well-defined v where
-  open FiniteChoice
-
-  module _ {v w : Fin n → X} where
-    module _ {σ : Fin n ≃ Fin n} (p : ua→PathP σ ∣ v ∣₂∗ ∣ w ∣₂∗) where
-      mereEqPointwise : (k : Fin n) → ∥ v k ≡ w (equivFun σ k) ∥
-      mereEqPointwise k = ST.PathIdTrunc₀Iso .fun (ua→⁻ p k)
-
-      chosenEq : ∥ ((k : Fin n) → v k ≡ w (equivFun σ k)) ∥
-      chosenEq = equivFun (choice≃Fin _) mereEqPointwise
-
-      chosenPath : ∥ ua→PathP σ v w ∥
-      chosenPath = PT.map ua→ chosenEq
-
-    liftRel : (Σ[ σ ∈ Fin n ≃ Fin n ] ua→PathP σ ∣ v ∣₂∗ ∣ w ∣₂∗) → v ∼ w
-    liftRel (σ , p) = PT.map (σ ,_) (chosenPath p)
-
-    lift[_]₂ : ∣ v ∣₂∗ ∼ ∣ w ∣₂∗ → Path ((Fin n → X) /₂ SymmetricAction n) [ v ]₂ [ w ]₂
-    lift[_]₂ v∼w = PT.rec (OverSet.isSetSymmQuot _ _) (eq/₂ v w ∘ liftRel) v∼w
-
-  well-defined : ∀ v w → SymmetricAction n v w → requot v ≡ requot w
-  well-defined = elim2ₙ (λ _ _ → isSetΠ (λ _ → isProp→isSet (OverSet.isSetSymmQuot _ _)))
-    λ v w v∼w →
-      requot ∣ v ∣₂∗ ≡⟨ requot-comp v ⟩
-      [ v ]₂         ≡⟨ lift[ v∼w ]₂ ⟩
-      [ w ]₂         ≡⟨ sym (requot-comp w) ⟩
-      requot ∣ w ∣₂∗ ∎
-
-𝕄S→𝕄S∘∥-∥₂ : 𝕄S X → 𝕄S ∥ X ∥₂
-𝕄S→𝕄S∘∥-∥₂ (n , [v]) = n , SQ.rec SQ.squash/ go well-defined [v] where
-  go : (Fin n → X) → (Fin n → ∥ X ∥₂) /₂ SymmetricAction n
-  go v = [ ∣_∣₂ ∘ v ]₂
-
-  module _ (v w : Fin n → X) (v∼w : v ∼ w) where
-    well-defined : go v ≡ go w
-    well-defined = SQ.eq/ (∣_∣₂ ∘ v) (∣_∣₂ ∘ w) (OverSet.∼cong ∣_∣₂ v∼w)
-
-𝕄S→𝕄S∘∥-∥₂→𝕄S : (xs : 𝕄S X) → 𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ xs) ≡ xs
-𝕄S→𝕄S∘∥-∥₂→𝕄S {X = X} (n , v) = ΣPathP (refl , lemma) where
-  lemma : (𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ (n , v))) .snd ≡ v
-  lemma = SQ.elimProp {P = λ v → 𝕄S∘∥-∥₂→𝕄S (𝕄S→𝕄S∘∥-∥₂ (n , v)) .snd ≡ v}
-    (λ _ → SQ.squash/ _ _)
-    (FiniteChoice.elimₙ-comp {B = λ _ → (Fin n → X) /₂ SymmetricAction n}
-      (λ _ → SQ.squash/)
-      [_]₂
-    )
-    v
-
-𝕄S∘∥-∥₂→𝕄S→𝕄S∘∥-∥₂ : (xs : 𝕄S ∥ X ∥₂) → 𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S xs) ≡ xs
-𝕄S∘∥-∥₂→𝕄S→𝕄S∘∥-∥₂ {X = X} (n , v) = ΣPathP (refl , lemma) where
-  step : (v : Fin n → ∥ X ∥₂) → 𝕄S→𝕄S∘∥-∥₂ (n , requot v) .snd ≡ [ v ]₂
-  step = FiniteChoice.elimₙ {B = λ v → 𝕄S→𝕄S∘∥-∥₂ (n , requot v) .snd ≡ [ v ]₂}
-    (λ _ → isProp→isSet (OverSet.isSetSymmQuot _ _))
-    λ v →
-      𝕄S→𝕄S∘∥-∥₂ (n , requot ∣ v ∣₂∗) .snd ≡⟨ cong (λ - → 𝕄S→𝕄S∘∥-∥₂ (n , -) .snd) (requot-comp v) ⟩
-      𝕄S→𝕄S∘∥-∥₂ (n , [ v ]₂) .snd         ≡⟨⟩
-      [ (λ k → ∣ v k ∣₂) ]₂ ∎
-
-  lemma : (𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S (n , v))) .snd ≡ v
-  lemma = SQ.elimProp {P = λ v → 𝕄S→𝕄S∘∥-∥₂ (𝕄S∘∥-∥₂→𝕄S (n , v)) .snd ≡ v}
-    (λ _ → SQ.squash/ _ _) step v
-
-𝕄S∘∥-∥₂-𝕄S-Iso : Iso (𝕄S ∥ X ∥₂) (𝕄S X)
-𝕄S∘∥-∥₂-𝕄S-Iso .fun = 𝕄S∘∥-∥₂→𝕄S
-𝕄S∘∥-∥₂-𝕄S-Iso .inv = 𝕄S→𝕄S∘∥-∥₂
-𝕄S∘∥-∥₂-𝕄S-Iso .rightInv = 𝕄S→𝕄S∘∥-∥₂→𝕄S
-𝕄S∘∥-∥₂-𝕄S-Iso .leftInv = 𝕄S∘∥-∥₂→𝕄S→𝕄S∘∥-∥₂
-
-𝕄S∘∥-∥₂≃𝕄S : 𝕄S ∥ X ∥₂ ≃ 𝕄S X
-𝕄S∘∥-∥₂≃𝕄S = isoToEquiv 𝕄S∘∥-∥₂-𝕄S-Iso
-
 module HIT where
   open import Cubical.HITs.FiniteMultiset as FMSet
     using
@@ -323,7 +244,7 @@ module FMSet-OverBij where
 
   FMSetFixSetTruncTree : (𝕄S ∥ ωTree ∥₂) ≃ ∥ ωTree ∥₂
   FMSetFixSetTruncTree =
-    (𝕄S ∥ ωTree ∥₂)   ≃⟨ isoToEquiv 𝕄S∘∥-∥₂-𝕄S-Iso ⟩
+    (𝕄S ∥ ωTree ∥₂)   ≃⟨ isoToEquiv OverSet.STInvarianceIso ⟩
     (𝕄S ωTree)        ≃⟨ isoToEquiv 𝕄S-∥𝕄G∥₂-Iso ⟩
     (∥ 𝕄G ωTree ∥₂)   ≃⟨ setTruncEquiv (invEquiv step) ⟩
     (∥ ωTree ∥₂)      ■ where

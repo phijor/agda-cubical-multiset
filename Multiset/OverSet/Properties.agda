@@ -59,6 +59,7 @@ open import Cubical.HITs.SetQuotients as SQ
 open import Cubical.HITs.PropositionalTruncation as PT
   using
     ( ∣_∣₁
+    ; ∥_∥₁
     )
 
 open import Cubical.Relation.Binary.Base using (module BinaryRelation)
@@ -405,3 +406,80 @@ map-head {x = x} {xs = xs} f = FMSetPathP (refl {x = suc (size xs)}) {! !}
   --   → map f (y ∷ ys) ≡ f y ∷ map f ys
   --   → map f (x ∷ y ∷ ys) ≡ f x ∷ map f (y ∷ ys)
   -- cons* y {ys} indH-ys = {! !}
+
+module STInvariance {ℓ} {X : Type ℓ} where
+  open import Multiset.FiniteChoice
+
+  open import Multiset.Util using (ua→PathP)
+  open import Multiset.Util.SetTruncation as STExt
+    using ( ∣_∣₂∗)
+
+  open import Cubical.Data.FinSet.FiniteChoice as FinSet
+    using (choice≃Fin)
+  open import Cubical.HITs.PropositionalTruncation as ST
+    hiding (map ; rec)
+  open import Cubical.HITs.SetTruncation as ST
+    hiding (map ; rec)
+  open import Cubical.HITs.SetQuotients as SQ
+    hiding (rec ; elimProp)
+
+  open Iso
+
+  requot : ∀ {n} → (Fin n → ∥ X ∥₂) → ((Fin n → X) /₂ SymmetricAction n)
+  requot {n = n} = elimₙ {B = λ _ → (Fin n → X) /₂ SymmetricAction n} (λ _ → isSetSetQuotient) [_]₂
+
+  requot-comp : ∀ {n} → (v : Fin n → X) → requot ∣ v ∣₂∗ ≡ [ v ]₂
+  requot-comp {n = n} = elimₙ-comp {B = λ _ → (Fin n → X) /₂ SymmetricAction n} (λ _ → isSetSetQuotient) [_]₂
+
+  requot-pres∼ : ∀ {n} (v w : Fin n → ∥ X ∥₂) → v ∼ w → requot v ≡ requot w
+  requot-pres∼ = elim2ₙ (λ _ _ → isSetΠ (λ _ → isProp→isSet (isSetSymmQuot _ _)))
+      λ v w v∼w →
+        requot ∣ v ∣₂∗ ≡⟨ requot-comp v ⟩
+        [ v ]₂         ≡⟨ lift[ v∼w ]₂ ⟩
+        [ w ]₂         ≡⟨ sym (requot-comp w) ⟩
+        requot ∣ w ∣₂∗ ∎
+    where module _ {n} {v w : Fin n → X} where
+      module _ {σ : Fin n ≃ Fin n} (p : ua→PathP σ ∣ v ∣₂∗ ∣ w ∣₂∗) where
+        mereEqPointwise : (k : Fin n) → ∥ v k ≡ w (equivFun σ k) ∥₁
+        mereEqPointwise k = ST.PathIdTrunc₀Iso .fun (ua→⁻ p k)
+
+        chosenEq : ∥ ((k : Fin n) → v k ≡ w (equivFun σ k)) ∥₁
+        chosenEq = equivFun (choice≃Fin _) mereEqPointwise
+
+        chosenPath : ∥ ua→PathP σ v w ∥₁
+        chosenPath = PT.map ua→ chosenEq
+
+      liftRel : (Σ[ σ ∈ Fin n ≃ Fin n ] ua→PathP σ ∣ v ∣₂∗ ∣ w ∣₂∗) → v ∼ w
+      liftRel (σ , p) = PT.map (σ ,_) (chosenPath p)
+
+      lift[_]₂ : ∣ v ∣₂∗ ∼ ∣ w ∣₂∗ → Path ((Fin n → X) /₂ SymmetricAction n) [ v ]₂ [ w ]₂
+      lift[_]₂ = PT.rec (isSetSymmQuot _ _) (eq/₂ v w ∘ liftRel)
+
+  toSetTrunc : FMSet X → FMSet ∥ X ∥₂
+  toSetTrunc = map ∣_∣₂
+
+  fromSetTrunc : FMSet ∥ X ∥₂ → FMSet X
+  fromSetTrunc = rec isSetFMSet
+    (λ {sz} v → sz , requot v)
+    (λ {sz} v w v∼w → cong (sz ,_) (requot-pres∼ v w v∼w))
+
+  sectionFromTo : ∀ xs → fromSetTrunc (toSetTrunc xs) ≡ xs
+  sectionFromTo = elimProp {P = λ xs → fromSetTrunc (toSetTrunc xs) ≡ xs}
+    (λ xs → isSetFMSet _ xs)
+    (λ {sz} v → FMSetPathP (refl {x = sz}) (requot-comp v))
+
+  retractFromTo : ∀ xs → toSetTrunc (fromSetTrunc xs) ≡ xs
+  retractFromTo = elimProp {P = λ xs → toSetTrunc (fromSetTrunc xs) ≡ xs}
+    (λ xs → isSetFMSet _ xs)
+    λ {sz} v → FMSetPathP (refl {x = sz}) (membersPath v) where
+    membersPath : ∀ {sz} (v : Fin sz → ∥ X ∥₂) → toSetTrunc (fromSetTrunc (sz , [ v ]₂)) .members ≡ [ v ]₂
+    membersPath {sz} = elimₙ (λ _ → isProp→isSet (isSetSetQuotient _ _))
+      λ v → cong (λ w → toSetTrunc (sz , w) .members) (requot-comp v)
+
+  STInvarianceIso : Iso (FMSet ∥ X ∥₂) (FMSet X)
+  STInvarianceIso .fun = fromSetTrunc
+  STInvarianceIso .inv = toSetTrunc
+  STInvarianceIso .rightInv = sectionFromTo
+  STInvarianceIso .leftInv = retractFromTo
+
+open STInvariance using (STInvarianceIso) public
