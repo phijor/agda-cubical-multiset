@@ -1,9 +1,21 @@
-\documentclass[a4paper]{llncs}
+\documentclass{easychair}
 
 \usepackage{multiset}
 \usepackage{todonotes}
+\usepackage{thmtools}
+
+\declaretheorem{theorem}
 
 \begin{document}
+  \title{Final Coalgebra of the Finite Bag Functor}
+  \titlerunning{Final Coalgebra of the Finite Bag Functor}
+  \author{%
+      Philipp Joram\inst{1} \and
+      Niccolò Veltri\inst{1}%
+  }
+  %
+  \authorrunning{P. Joram et al.}
+  \institute{Department of Software Science, Tallinn University of Technology, Estonia}
 
   \maketitle
 
@@ -39,19 +51,25 @@
       \cdots
   \]
   In a more constructive environment such as Homotopy Type Theory however,
-  it is not immediately obvious whether this still holds.
+  it is not immediately obvious whether this still holds or not.
 
   \section{Contributions}
 
   In this work we give multiple plausible definitions of bag functors in an univalent setting.
-  We show that the set-valued candidates are not adequate, as they imply non-constructive principles (Theorem \ref{thm:InjPresImpliesLLPO}).
+  We show that the set-valued candidates are not adequate to define such limits,
+  as they imply non-constructive principles (Theorem \ref{thm:InjPresImpliesLLPO}).
   Instead, we follow \cite{Kock2012} and provide a groupoid-valued definition $\FMGpd$ which
-  admits a (homotopy) limit of the $\omega^{\operatorname{\mathbf{op}}}$-chain.
+  admits a (homotopy) limit of the $\omega^{\operatorname{\mathbf{op}}}$-chain (Theorem \ref{thm:FMGpdLim}).
   We conclude by comparing these definitions and their final coalgebras.
 
-  We formalized our work in \emph{cubical Agda}.
-  \todo[inline]{
-    What exactly should we say about the formalization?
+  We formalized our work in \emph{Cubical Agda} \cite{Vezzosi2019},
+  which is a particular implementation of Homotopy Type Theory
+  with support the univalence principle (as a consequence of the theory)
+  and for higher inductive types.
+  \todo[inline]{%
+    Show $\SetQuot{}$ or $\SetTrunc{}$,%
+    explain what sets and groupoids are.%
+    Make sure we only refer to these terms in that way%
   }
 
   \subsection{Finite Bags in Sets}
@@ -62,77 +80,92 @@
       \sum\Var{sz} : ℕ\Where
         (\Fin \Var{sz} \to X) \SetQuot \mathrel{\sim_\Var{sz}},
   \end{align*}
-  where $(\mathunderscore\sim_{\Var{sz}}\mathunderscore)$ relates
+  where $(\SymmetricAction{\Var{sz}}[][])$ relates
   $v, w : \Fin \Var{sz} → X$ iff there merely exists a permutation $\sigma$
   such that $v \circ \sigma = w$.
   We show that this definition enjoys a few desirable properties.
   In particular $\FMSet{X}$ is indeed a set, regardless of the homotopy level of $X$.
   Additionally, $\FMSet$ is invariant under set-truncation, i.e.
   $\FMSet \SetTrunc{X} ≃ \FMSet X$.
+  The type of finite bags can equivalently defined as the free commutative monoid on $X$
+  \cite{Choudhury2021}, which can directly be expressed as a higher inductive type.
+
   We proceed to prove that this poses a problem when attempting to construct a final coalgebra from the chain mentioned above:
-  The relation $(\SymmetricAction{\Var{sz}}[{}][{}])$ encodes
+  The relation $(\SymmetricAction{\Var{sz}}[][])$ encodes
   permutations of multisets as property instead of data,
   thus making it impossible to recover information about all terms in a chain
   when proving preservation of limits.
   More precisely, we prove the following theorem in the language of HoTT:
 
   \begin{theorem}\label{thm:InjPresImpliesLLPO}
-    Injectivity of the limit-preservation map
+    The limit-preservation map
     \[
-        \operatorname{pres}_{\Lim (\Chain \M)}\colon
-            \M (\Lim (\Chain \M))
+        \operatorname{pres}\colon
+            \FMSet (\lim_{n < \omega} \FMSet^n 1)
             \to
-            \Lim (\Shift(\Chain\M))
+            \lim_{n < \omega} (\FMSet^{n+1} 1)
     \]
-    implies the \emph{lesser limited principle of omniscience}, \LLPO.
+    is surjective,
+    but its injectivity implies the \emph{lesser limited principle of omniscience}, \LLPO.
   \end{theorem}
-  \todo[inline]{%
-    We prove this for the HIT-definition,
-    but I state it here for the $\N$-indexed definition.
-    Either say both are equivalent or prove it for the other definition.
-  }
-  \LLPO{} is a weaker version of the law of the excluded middle, and not
+  \LLPO{} \cite[{Ch.\@ 1}]{Bridges1987} is a weaker version of the law of the excluded middle, and not
   provable from intuitionistic axioms alone.
   It states that for any (infinite) stream of boolean values that yields $\True$
   at most once, one can decide whether all even or all odd positions are $\False$.
+  In particular, the classical construction of the final coalgebra for $\FMSet$
+  cannot be replicated in our constructive setting without assumption of classical principles.
 
   \subsection{Finite Bags in Groupoids}
 
   To remedy the situation, we introduce a bag functor that treats identifications of bags as data.
-  Let $\FinSet$ be the type of all types merely equivalent to some $\Fin k$.
+  Let $\FinSet$ be the type of all types merely equivalent to some $\Fin k$:
+  \[
+    \FinSet \DefEq
+      \ldots
+  \]
   We define for any type $X$ the type
   \[
     \FMGpd X \DefEq
       \sum_{A : \FinSet} A → X
   \]
   Since $\FinSet$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
-  We argue that this is the correct perspective on bags in HoTT, and substantiate the claim by the following theorem:
-
-  \begin{theorem}
-    The $\omega^{\mathbf{op}}$-chain
-    \[
-      1 \xleftarrow{!} {\FMGpd 1}
-        \xleftarrow{\FMGpd(!)} {\FMGpd^2 1}
-        \xleftarrow{\FMGpd^2(!)} {\FMGpd^3 1}
-        \xleftarrow{\hphantom{\FMGpd^3(!)}}
-        \cdots
-    \]
-    has a limit and yields an equivalence of groupoids
-    $V_\omega ≃ \FMGpd V_\omega$.
-  \end{theorem}
-  %
-  In particular, this limit induces a fixpoint $\SetTrunc{V_\omega} ≃ \FMSet{\SetTrunc{V_\omega}}$.
-
-  \todo[inline]{%
-    Did we show which of these are actually final coalgebras?
-    Being a fixpoint alone doesn't mean much.
-  }
 
   While we usually suppress any size-related issues, they play a crucial r\^{o}le in the formalization.
-  Since $\FinSet$ is itself a large type compared to the types it ranges over,
-  the iteration $\lambda n\Where \FMGpd^n 1$ is not typeable in any universe of fixed size.
-  We work around this issue by implementing $\Bij$ as introduced in \cite{Finster2021},
-  which is a small type in the base universe, equivalent to $\FinSet$.
+  Notice that $\FinSet$ is a large type compared to the types it ranges over,
+  but it admits small axiomatization as a HIT $\Bij$ as introduced in \cite{Finster2021}:
+  \[
+    \text{inference rules for $\Bij$}
+  \]
+
+  We argue that this is the correct perspective on bags in Homotopy Type Theory,
+  and substantiate the claim by the following theorem:
+
+  \begin{theorem}\label{thm:FMGpdLim}
+    Let $L_{\FMGpd} \DefEq \lim_{n < \omega} \FMGpd^n 1$.
+    The limit-preservation map $\operatorname{pres}$ is an equivalence of groupoids.
+    In particular, the limit $L_{\FMGpd}$ is a fixpoint of $\FMGpd$ and the final coalgebra.
+  \end{theorem}
+
+  The proof of this is a direct consequence of \cite{Ahrens2015}, since $\FMGpd$ is
+  now a polynomial functor in groupoids.
+  The existence of $L_{\FMGpd}$ requires $\FMGpd$ to be defined in terms of $\Bij$,
+  otherwise it is not typeable in a universe of fixed size.
+
+  \todo[inline]{%
+    Where does your work using coinductive datatypes go?
+  }
+
+  \subsection{Comparison}
+
+  By identifying the higher structure of $\FMGpd$, we recover $\FMSet$:
+  \begin{theorem}
+    For any type $X$, there is an equivalence $\SetTrunc{\FMGpd X} ≃ \FinSet X$.
+  \end{theorem}
+  Here, $\SetTrunc{\Blank}$ is the \emph{set-truncation} operation which collapses
+  higher paths to produce a type of the homotopy level of a set.
+  One might wonder if the final coalgebra in groupoids can be used to define a final coalgebra also in sets.
+  Indeed, $\FMSet$ has a fixpoint $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$.
+  To further show that this is the final coalgebra seems to require the (full) axiom of choice.
 
   \section{Future Work}
 
