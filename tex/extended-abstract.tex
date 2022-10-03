@@ -11,7 +11,7 @@
   \titlerunning{Final Coalgebra of the Finite Bag Functor}
   \author{%
       Philipp Joram\inst{1} \and
-      Niccolò Veltri\inst{1}%
+      Niccol{\`o} Veltri\inst{1}%
   }
   %
   \authorrunning{P. Joram et al.}
@@ -19,52 +19,79 @@
 
   \maketitle
 
-  \section{Introduction}
+  %\section{Introduction}
 
-  In this work, we explore possible definitions of the finite bag functor in
-  the setting of Homotopy Type Theory, and investigate they admit a final
-  coalgebra.
-  A finite bag (or multiset) functor $\M$ takes a type $X$ to the type of finite
-  collections of terms of $X$.
-  In contrast to the finite powerset functor, these collections distinguish
-  multiple occurrences of identical terms, e.g.\@ $\Bag[1, 2, 1] : \M X$.
-  A coalgebra of $\M$ is a map ${\alpha : X → \M X}$.
-  Coalgebras and coalgebra maps form a category, and a final coalgebra
-  $\omega : V_\omega → \M V_\omega$ defines a greatest fixpoint
-  $V_\omega ≃ \M V_\omega$.
+  The powerset and multiset (or bag) functor, delivering the set of
+  subsets (resp. multisubsets) of a given set, are fundamental tool in
+  the behavioural analysis of nondeterministic systems. Such as a
+  system can be described as a coalgebra $c : S \to F\, S$, with $F$
+  being either powerset or bag functor, associating to each state $s :
+  S$ the collection $c \, x$ of reachable states. When $F$ is the the
+  bag functor, a state $x$ can reach another state $y$ in multiple
+  ways, specified by the multiplicity of $y$ in $c\,x$. One can also
+  study systems with finite reachable states and employ finite
+  variants of the powerset and bag functor.  The finite bag functor
+  takes a set $X$ to the set of finite collections of elements of
+  $X$.  In contrast to the finite powerset functor, these collections
+  distinguish multiple occurrences of identical elements, e.g.\@ $\Bag[1,
+    2, 1]$ is a bag with an element 1 with multiplicity 2.
+  
+  The behavior of a finitely nondeterministic system starting from a
+  given initial state $x : S$ is fully captured by the final coalgebra
+  of the collection functor $F$, whose elements are non-wellfounded
+  trees obtained by iteratively running the coalgebra $c$ on $x$. In
+  recent work \cite{Veltri2021}, we considered various constructions
+  of the final coalgebra in the setting of Homotopy Type Theory
+  (HoTT). In this work, we explore possible definitions of the finite
+  bag functor in HoTT and investigate wheather they admit a final coalgebra.
 
-  A bag functor is an instance of an \emph{analytic} functor \cite{Joyal1986}.
-  A set-valued functor $F$ is analytic if it is naturally isomorphic to
-  \[
-    F(X) \cong \sum_{n : \N} \tfrac{X^n}{G(n)}
-  \]
-  where $G(n)$ is a subgroup of the symmetric group $\Sym(s)$ acting
-  on the projections of the $n$-fold cartesian product $X^n$.
-  In the case of a bag functor, $G(n)$ is the full permutation group $\Sym(n)$.
-  In a classical setting, the final coalgebra of such a functor $F$ is obtained
-  from the $\omega^{\operatorname{\mathbf{op}}}$-chain \cite[{3.3.13}]{Adamek2021}
-  \[
+%%     A coalgebra of $\M$ is a map ${\alpha : X → \M
+%%     X}$.  Coalgebras and coalgebra maps form a category, and a final
+%%   coalgebra $\omega : V_\omega → \M V_\omega$ defines a greatest
+%%   fixpoint $V_\omega ≃ \M V_\omega$.
+%% 
+%%   A bag functor is an instance of an \emph{analytic} functor \cite{Joyal1986}.
+%%   A set-valued functor $F$ is analytic if it is naturally isomorphic to
+%%   \[
+%%     F(X) \cong \sum_{n : \N} \tfrac{X^n}{G(n)}
+%%   \]
+%%   where $G(n)$ is a subgroup of the symmetric group $\Sym(s)$ acting
+%%   on the projections of the $n$-fold cartesian product $X^n$.
+%%   In the case of a bag functor, $G(n)$ is the full permutation group $\Sym(n)$.
+
+  In classical set theory, the final coalgebra of the finite bag
+  functor $F$ is obtained as the limit of the
+  $\omega^{\operatorname{\mathbf{op}}}$-chain
+  \cite[{Ch. 3.3.13}]{Adamek2021}
+  \begin{equation}\label{eq:chain}
     1 \xleftarrow{!} {F 1}
       \xleftarrow{F(!)} {F^2 1}
       \xleftarrow{F^2(!)} {F^3 1}
       \xleftarrow{F^3(!)}
       \cdots
-  \]
-  In a more constructive environment such as Homotopy Type Theory however,
-  it is not immediately obvious whether this still holds or not.
+  \end{equation}
+  where $F^n 1$ is the $n$-th iteration of the functor $F$ on the
+  singleton set 1, and $F^n(!)$ is the $n$-th iteration of the
+  functorial action of $F$ on the unique function ! targeting the set
+  1. In a constructive environment such as HoTT, however, it is not
+  immediately obvious whether this construction still produces the
+  final coalgebra or not.
 
-  \section{Contributions}
+%  \subsection{Contributions}
 
-  In this work we give multiple plausible definitions of bag functors in an univalent setting.
-  We show that the set-valued candidates are not adequate to define such limits,
-  as they imply non-constructive principles (Theorem \ref{thm:InjPresImpliesLLPO}).
-  Instead, we follow \cite{Kock2012} and provide a groupoid-valued definition $\FMGpd$ which
-  admits a (homotopy) limit of the $\omega^{\operatorname{\mathbf{op}}}$-chain (Theorem \ref{thm:FMGpdLim}).
-  We conclude by comparing these definitions and their final coalgebras.
+  In this work we give multiple plausible definitions of finite bag
+  functors in an univalent setting. We show that the set-valued
+  candidates are not adequate for constructing the final coalgebra as
+  the limit of the chain (\ref{eq:chain}), as they imply
+  non-constructive principles (Theorem \ref{thm:InjPresImpliesLLPO}).
+  Instead, we follow \cite{Kock2012} and provide a groupoid-valued
+  definition $\FMGpd$ which admits a final coalgebra built as the
+  (homotopy) limit of (\ref{eq:chain}) (Theorem \ref{thm:FMGpdLim}).  We
+  conclude by comparing these definitions and their final coalgebras.
 
   We formalized our work in \emph{Cubical Agda} \cite{Vezzosi2019},
   which is a particular implementation of Homotopy Type Theory
-  with support the univalence principle (as a consequence of the theory)
+  with support for the univalence principle (``equivalence of types is equivalent to equality of types'', which is a provable theorem in Cubical Agda)
   and for higher inductive types.
   \todo[inline]{%
     Show $\SetQuot{}$ or $\SetTrunc{}$,%
@@ -72,7 +99,7 @@
     Make sure we only refer to these terms in that way%
   }
 
-  \subsection{Finite Bags in Sets}
+  \subsection*{Finite Bags in Sets}
   In a first attempt, we define
   \begin{align*}
     \FMSet X
@@ -115,7 +142,7 @@
   In particular, the classical construction of the final coalgebra for $\FMSet$
   cannot be replicated in our constructive setting without assumption of classical principles.
 
-  \subsection{Finite Bags in Groupoids}
+  \subsection*{Finite Bags in Groupoids}
 
   To remedy the situation, we introduce a bag functor that treats identifications of bags as data.
   Let $\FinSet$ be the type of all types merely equivalent to some $\Fin k$:
@@ -155,7 +182,7 @@
     Where does your work using coinductive datatypes go?
   }
 
-  \subsection{Comparison}
+  \subsection*{Comparison}
 
   By identifying the higher structure of $\FMGpd$, we recover $\FMSet$:
   \begin{theorem}
@@ -167,7 +194,7 @@
   Indeed, $\FMSet$ has a fixpoint $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$.
   To further show that this is the final coalgebra seems to require the (full) axiom of choice.
 
-  \section{Future Work}
+%  \section{Future Work}
 
   \section*{Acknowledgments}
   This work was supported by the Estonian Research Council grant PSG749.
