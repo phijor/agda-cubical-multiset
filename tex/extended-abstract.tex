@@ -14,38 +14,40 @@
   \title{Final Coalgebra of the Finite Bag Functor}
   \titlerunning{Final Coalgebra of the Finite Bag Functor}
   \author{%
-      Philipp Joram\inst{1} \and
-      Niccol{\`o} Veltri\inst{1}%
+      Philipp Joram \and
+      Niccol{\`o} Veltri
   }
   %
-  \authorrunning{P. Joram et al.}
+  \authorrunning{P. Joram and N. Veltri}
   \institute{Department of Software Science, Tallinn University of Technology, Estonia}
 
   \maketitle
 
   The powerset and multiset (or bag) functor, delivering the set of
-  subsets (resp. multisubsets) of a given set, are fundamental tool in
-  the behavioural analysis of nondeterministic systems. Such as a
-  system can be described as a coalgebra $c : S \to F\, S$, with $F$
-  being either powerset or bag functor, associating to each state $s :
-  S$ the collection $c \, x$ of reachable states. When $F$ is the the
-  bag functor, a state $x$ can reach another state $y$ in multiple
-  ways, specified by the multiplicity of $y$ in $c\,x$. One can also
-  study systems with finite reachable states and employ finite
-  variants of the powerset and bag functor.  The finite bag functor
-  takes a set $X$ to the set of finite collections of elements of
-  $X$.  In contrast to the finite powerset functor, these collections
-  distinguish multiple occurrences of identical elements, e.g.\@ $\Bag[1,
-    2, 1]$ is a bag with an element 1 with multiplicity 2.
+  subsets (resp. multisubsets) of a given set, are fundamental
+  mathematical tools in the behavioural analysis of nondeterministic
+  systems. Such systems can be described as coalgebras $c : S \to
+  F\, S$, with $F$ being either powerset or bag functor, associating
+  to each state $s : S$ the collection $c \, x$ of reachable
+  states. When $F$ is the the bag functor, a state $x$ can reach
+  another state $y$ in multiple ways, specified by the multiplicity of
+  $y$ in $c\,x$. One can also study systems with finite reachable
+  states and employ finite variants of the powerset and bag functor.
+  The finite bag functor takes a set $X$ to the set of finite
+  bags of elements of $X$.  In contrast to the finite powerset
+  functor, these collections distinguish multiple occurrences of
+  identical elements, e.g.\@ $\{1, 2, 1\}$ is a bag with containing an element
+  1 with multiplicity 2.
   
   The behavior of a finitely nondeterministic system starting from a
   given initial state $x : S$ is fully captured by the final coalgebra
   of the collection functor $F$, whose elements are non-wellfounded
   trees obtained by iteratively running the coalgebra $c$ on $x$. In
   recent work \cite{Veltri2021}, we considered various constructions
-  of the final coalgebra in the setting of Homotopy Type Theory
-  (HoTT). In this work, we explore possible definitions of the finite
-  bag functor in HoTT and investigate wheather they admit a final coalgebra.
+  of the final coalgebra of the finite powerset functor in the setting
+  of Homotopy Type Theory (HoTT). In this work, we explore possible
+  definitions of the finite bag functor in HoTT and investigate
+  wheather they admit a final coalgebra.
 
   In classical set theory, the final coalgebra of the finite bag
   functor $F$ is obtained as the limit of the
@@ -61,31 +63,31 @@
   where $F^n 1$ is the $n$-th iteration of the functor $F$ on the
   singleton set 1, and $F^n(!)$ is the $n$-th iteration of the
   functorial action of $F$ on the unique function $!$ targeting the set
-  $1$. In a constructive environment such as HoTT, however, it is not
+  $1$. In a constructive environment such as HoTT, it is not
   immediately obvious whether this construction still produces the
   final coalgebra or not.
 
-  In this work we give multiple plausible definitions of finite bag
-  functors in an univalent setting. We show that the set-valued
-  candidates are not adequate for constructing the final coalgebra as
-  the limit of the chain (\ref{eq:chain}), as they imply
-  non-constructive principles (Theorem \ref{thm:InjPresImpliesLLPO}).
-  Instead, we follow \cite{Kock2012} and provide a groupoid-valued
-  definition $\FMGpd$ which admits a final coalgebra built as the
-  (homotopy) limit of (\ref{eq:chain}) (Theorem \ref{thm:FMGpdLim}).  We
-  conclude by comparing these definitions and their final coalgebras.
+%%   We start by giving multiple plausible definitions of finite bag
+%%   functors in an univalent setting. We show that the set-valued
+%%   candidates are not adequate for constructing the final coalgebra as
+%%   the limit of the chain (\ref{eq:chain}), as they imply
+%%   non-constructive principles (Theorem \ref{thm:InjPresImpliesLLPO}).
+%%   Instead, we follow \cite{Kock2012} and provide a groupoid-valued
+%%   definition which admits a final coalgebra built as the
+%%   (homotopy) limit of (\ref{eq:chain}) (Theorem \ref{thm:FMGpdLim}).  We
+%%   conclude by comparing these definitions and their final coalgebras.
 
   We formalized our work in \emph{Cubical Agda} \cite{Vezzosi2019},
   which is a particular implementation of Homotopy Type Theory
   with support for the univalence principle (\enquote{equivalence of types is equivalent to equality of types}, which is a provable theorem in Cubical Agda)
-  and for higher inductive types.
+  and higher inductive types.
   A distinguishing feature of Homotopy Type Theory is that the identity type on a type $A$
-  is no longer inductively defined as in Martin-L{\"o}f Type Type.
+  is no longer inductively defined as in Martin-L{\"o}f Type Type (MLTT).
   In particular, for proofs of identification $p, q : a =_A b$, the iterated identity type
   $p =_{a =_A b} q$ might be inhabited by more than one term, which in turn might have non-trivial
   identity type and so on.
-  One says that $A$ has \emph{homotopy level} $n$ if $n$-th iterated identity type is trivial.
-  We explicitly name the first instances of this hierarchy, and say that $A$ is\ldots
+  One says that $A$ has \emph{homotopy level} $n$ if the $n$-th iterated identity type is trivial.
+  We explicitly name the first instances of this hierarchy, and say that $A$ is:
   \begin{itemize}
     \item ($n = 1$) a \emph{proposition}, if
       $\IsProp A \DefEq ∀ (a , b : A)\Where a = b$ is inhabited,
@@ -117,13 +119,13 @@
       \hspace*{\fill}
     \end{center}
   \end{definition}
-  This type is a \enquote{higher} inductive type since the rule $\operatorname{squash}_2$ mentions $x = y$ in its premise.
+  This type is a \enquote{higher} inductive type since the rule $\operatorname{squash}_2$ produces an identification $p = q$ instead of an element of $\SetTrunc{A}$.
   By definition, $\operatorname{squash}_2 : \IsSet \SetTrunc{A}$.
   Similarly, higher inductive types allow us to model quotient types,
   in particular set-quotients:
 
   \begin{definition}
-    Given $A : \Type$ and a binary relation $(\sim) : A → A → \Type$,
+    Given $A : \Type$ and a binary relation $(\sim) : A \to A \to \Type$,
     the \emph{set-quotient} of $A$ by $(\sim)$ is given by rules
     \begin{center}
       \hspace*{\fill}
@@ -148,7 +150,6 @@
     \end{center}
     and forms a set by $\operatorname{squash/}_{\!2}$.
   \end{definition}
-
   Similarly, the \emph{propositional truncation} of $A$ is the higher inductive type $\PropTrunc{A}$
   with a constructor $\PropTruncCon : A → \PropTrunc{A}$
   and a rule $\operatorname{squash}_1 : \IsProp \PropTrunc{A}$.
@@ -158,48 +159,59 @@
   \begin{align*}
     \FMSet X
       \DefEq{}
-      \sum\Var{sz} : ℕ\Where
-        (\SetQuot[(\Fin \Var{sz} \to X)][\sim_\Var{sz}]),
+      \sum\Var{k} : ℕ\Where
+        \SetQuot[(\Fin \Var{k} \to X)][\sim_\Var{sz}],
   \end{align*}
-  where $(\SymmetricAction{\Var{sz}}[][])$ relates
+  where $\Fin \Var{k}$ is the type of numbers $<k$ and $(\SymmetricAction{\Var{sz}}[][])$ relates
   $v, w : \Fin \Var{sz} → X$ iff there merely exists a permutation $\sigma$
-  such that $v \circ \sigma = w$.
-  We show that this definition enjoys a few desirable properties.
-  In particular $\FMSet{X}$ is indeed a set, regardless of the homotopy level of $X$.
+  such that $v \circ \sigma = w$. So a finite bag consists of a number $k$ (its size) and an equivalence class of $k$-elements of $X$, where the relation $(\SymmetricAction{\Var{sz}}[][])$ expresses that the order of the elements does not matter. 
+  %We show that this definition enjoys a few desirable properties.
+  $\FMSet{X}$ is a set, regardless of the homotopy level of $X$.
   Additionally, $\FMSet$ is invariant under set-truncation, i.e.
   $\FMSet \SetTrunc{X} ≃ \FMSet X$.
-  The type of finite bags can equivalently defined as the free commutative monoid on $X$
+  The type of finite bags can equivalently be defined as the free commutative monoid on $X$
   \cite{Choudhury2021}, which can directly be expressed as a higher inductive type.
 
-  We proceed to prove that this poses a problem when attempting to construct a final coalgebra from the chain mentioned above:
-  The relation $(\SymmetricAction{\Var{sz}}[][])$ encodes
-  permutations of multisets as property instead of data,
-  thus making it impossible to recover information about all terms in a chain
-  when proving preservation of limits.
-  More precisely, we prove the following theorem in the language of HoTT:
+  Trying to construct the final coalgebra of $\FMSet$ as the limit of
+  the chain (\ref{eq:chain}) (as traditionally done in a classical
+  methatheory) is problematic. The first step in the construction
+  would be showing that $\FMSet$ preserves $\omega$-limits. In the
+  case of the chain (\ref{eq:chain}) can be reduced to show that the
+  map $ \operatorname{pres}\colon \FMSet (\lim_{n < \omega} \FMSet^n
+  1) \to \lim_{n < \omega} (\FMSet^{n+1} 1)$, defined via the
+  universal property of the limit, is an equivalence of types. This is not the case in HoTT, since the latter is an inherently non-constructive principle::
 
   \begin{theorem}\label{thm:InjPresImpliesLLPO}
-    The limit-preservation map
-    \[
-        \operatorname{pres}\colon
+    The function %limit-preservation map 
+        $\operatorname{pres}\colon
             \FMSet (\lim_{n < \omega} \FMSet^n 1)
             \to
-            \lim_{n < \omega} (\FMSet^{n+1} 1)
-    \]
+            \lim_{n < \omega} (\FMSet^{n+1} 1)$
     is surjective,
     but its injectivity implies the \emph{lesser limited principle of omniscience}, \LLPO.
   \end{theorem}
-  \LLPO{} \cite[{Ch.\@ 1}]{Bridges1987} is a weaker version of the law of the excluded middle, and not
-  provable from intuitionistic axioms alone.
-  It states that for any (infinite) stream of boolean values that yields $\True$
-  at most once, one can decide whether all even or all odd positions are $\False$.
-  In particular, the classical construction of the final coalgebra for $\FMSet$
-  cannot be replicated in our constructive setting without assumption of classical principles.
+  \LLPO{} \cite[{Ch.\@ 1}]{Bridges1987} is a weak version of the law
+  of the excluded middle, and it is not provable from intuitionistic
+  axioms alone.  It states that for any infinite stream of boolean
+  values that yields $\True$ in at most one position, one can decide
+  whether all even or all odd positions are $\False$.
+
+  The non-constructive nature of the injectivity of
+  $\operatorname{pres}$ can be attributed to the fact that the
+  relation $(\SymmetricAction{\Var{sz}}[][])$ encodes permutations of
+  multisets as property instead of data, and this makes it impossible
+  to recover information about all terms in the chain.
+
+  We conclude from Theorem \ref{thm:InjPresImpliesLLPO} that the
+  classical construction of the final coalgebra for $\FMSet$ cannot be
+  replicated in our constructive setting without assumption of
+  classical principles. This was also already the case for the finite
+  powerset functor \cite{Veltri2021}.
 
   \subsection*{Finite Bags in Groupoids}
 
   To remedy the situation, we introduce a bag functor that treats identifications of bags as data.
-  Recall the type of \emph{finite sets}, defined as
+  Define the type of \emph{finite sets} as
   \[
     \FinSet \DefEq
       \sum Y : \Type\Where
@@ -207,9 +219,9 @@
         \PropTrunc{Y ≃ \Fin k},
   \]
   i.e.\@ the type of all types merely equivalent to some $\Fin k$.
-  While we usually suppress any size-related issues, they play a crucial r\^{o}le in the formalization.
+  While in this abstract we suppress any size-related issues (all the definitions and theorem given so far can be made universe-polymorphic), they play a crucial r\^{o}le in the formalization.
   Notice that $\FinSet$ is a large type compared to the types it ranges over,
-  but it admits small axiomatization as a HIT $\Bij$ as introduced in \cite{Finster2021}.
+  but it admits a small axiomatization as a HIT $\Bij$ as introduced in \cite{Finster2021}.
   The rules are the following (plus one stating that $\Bij$ is a groupoid):
   \begin{center}
     \small
@@ -250,29 +262,32 @@
   where $\langle\_\rangle : \Bij → \Type$ obtains the type corresponding to $x : \Bij$ from the
   equivalence $\Bij ≃ \FinSet$.
   Since $\FinSet$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
-  We argue that this is the correct perspective on bags in Homotopy Type Theory,
-  and substantiate the claim by the following theorem:
+  By identifying the higher structure of $\FMGpd$, we recover $\FMSet$:
+  \begin{theorem}
+    For any type $X$, there is an equivalence $\SetTrunc{\FMGpd X} ≃
+    \FinSet X$.
+  \end{theorem}
+
+  
+  Following \cite{Kock2012}, we argue that this is the correct perspective on bags in Homotopy Type Theory,
+  and substantiate the claim by the following unproblematic construction of the final coalgebra of $\FMGpd$:
 
   \begin{theorem}\label{thm:FMGpdLim}
     Let $L_{\FMGpd} \DefEq \lim_{n < \omega} \FMGpd^n 1$.
     The limit-preservation map $\operatorname{pres}$ is an equivalence of groupoids.
-    In particular, the limit $L_{\FMGpd}$ is a fixpoint of $\FMGpd$ and the final coalgebra.
+    In particular, the limit $L_{\FMGpd}$ is a fixpoint of $\FMGpd$ and its final coalgebra.
   \end{theorem}
-
-  The proof of this is a direct consequence of \cite{Ahrens2015}, since $\FMGpd$ is
-  now a polynomial functor in groupoids.
-  The existence of $L_{\FMGpd}$ requires $\FMGpd$ to be defined in terms of $\Bij$,
+  This theorem is a direct consequence of a general result by Ahrens
+  et al. \cite{Ahrens2015}, since $\FMGpd$ is a polynomial functor in
+  groupoids, and all polynomial functors admit a final coalgebra in
+  HoTT, independently of the their homotopy level.  The existence of
+  $L_{\FMGpd}$ requires $\FMGpd$ to be defined in terms of $\Bij$,
   otherwise it is not typeable in a universe of fixed size.
 
-  \subsection*{Comparison}
+%  \subsection*{Comparison}
 
-  By identifying the higher structure of $\FMGpd$, we recover $\FMSet$:
-  \begin{theorem}
-    For any type $X$, there is an equivalence $\SetTrunc{\FMGpd X} ≃ \FinSet X$.
-  \end{theorem}
-  One might wonder if the final coalgebra in groupoids can be used to define a final coalgebra also in sets.
-  Indeed, $\FMSet$ has a fixpoint $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$.
-  Further showing that this is the final coalgebra seems to require the (full) axiom of choice.
+  One might wonder whether the final coalgebra in groupoids can be used to define a final coalgebra also in sets.
+  We are able to show that the set-truncation of the groupoid-limit \SetTrunc{L_{\FMGpd}} is a fixpoint of $\FMSet$, i.e. $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$. But further showing that this is the final coalgebra of the set-based bag functor $\FMSet$ seems to require the full axiom of choice.
 
   \section*{Acknowledgments}
   This work was supported by the Estonian Research Council grant PSG749.
