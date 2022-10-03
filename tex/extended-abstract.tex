@@ -2,9 +2,13 @@
 
 \usepackage{multiset}
 \usepackage{todonotes}
+
 \usepackage{thmtools}
+\usepackage{bussproofs}
+\usepackage{csquotes}
 
 \declaretheorem{theorem}
+\declaretheorem{definition}
 
 \begin{document}
   \title{Final Coalgebra of the Finite Bag Functor}
@@ -18,8 +22,6 @@
   \institute{Department of Software Science, Tallinn University of Technology, Estonia}
 
   \maketitle
-
-  %\section{Introduction}
 
   The powerset and multiset (or bag) functor, delivering the set of
   subsets (resp. multisubsets) of a given set, are fundamental tool in
@@ -45,20 +47,6 @@
   (HoTT). In this work, we explore possible definitions of the finite
   bag functor in HoTT and investigate wheather they admit a final coalgebra.
 
-%%     A coalgebra of $\M$ is a map ${\alpha : X → \M
-%%     X}$.  Coalgebras and coalgebra maps form a category, and a final
-%%   coalgebra $\omega : V_\omega → \M V_\omega$ defines a greatest
-%%   fixpoint $V_\omega ≃ \M V_\omega$.
-%% 
-%%   A bag functor is an instance of an \emph{analytic} functor \cite{Joyal1986}.
-%%   A set-valued functor $F$ is analytic if it is naturally isomorphic to
-%%   \[
-%%     F(X) \cong \sum_{n : \N} \tfrac{X^n}{G(n)}
-%%   \]
-%%   where $G(n)$ is a subgroup of the symmetric group $\Sym(s)$ acting
-%%   on the projections of the $n$-fold cartesian product $X^n$.
-%%   In the case of a bag functor, $G(n)$ is the full permutation group $\Sym(n)$.
-
   In classical set theory, the final coalgebra of the finite bag
   functor $F$ is obtained as the limit of the
   $\omega^{\operatorname{\mathbf{op}}}$-chain
@@ -72,12 +60,10 @@
   \end{equation}
   where $F^n 1$ is the $n$-th iteration of the functor $F$ on the
   singleton set 1, and $F^n(!)$ is the $n$-th iteration of the
-  functorial action of $F$ on the unique function ! targeting the set
-  1. In a constructive environment such as HoTT, however, it is not
+  functorial action of $F$ on the unique function $!$ targeting the set
+  $1$. In a constructive environment such as HoTT, however, it is not
   immediately obvious whether this construction still produces the
   final coalgebra or not.
-
-%  \subsection{Contributions}
 
   In this work we give multiple plausible definitions of finite bag
   functors in an univalent setting. We show that the set-valued
@@ -91,13 +77,81 @@
 
   We formalized our work in \emph{Cubical Agda} \cite{Vezzosi2019},
   which is a particular implementation of Homotopy Type Theory
-  with support for the univalence principle (``equivalence of types is equivalent to equality of types'', which is a provable theorem in Cubical Agda)
+  with support for the univalence principle (\enquote{equivalence of types is equivalent to equality of types}, which is a provable theorem in Cubical Agda)
   and for higher inductive types.
-  \todo[inline]{%
-    Show $\SetQuot{}$ or $\SetTrunc{}$,%
-    explain what sets and groupoids are.%
-    Make sure we only refer to these terms in that way%
-  }
+  A distinguishing feature of Homotopy Type Theory is that the identity type on a type $A$
+  is no longer inductively defined as in Martin-L{\"o}f Type Type.
+  In particular, for proofs of identification $p, q : a =_A b$, the iterated identity type
+  $p =_{a =_A b} q$ might be inhabited by more than one term, which in turn might have non-trivial
+  identity type and so on.
+  One says that $A$ has \emph{homotopy level} $n$ if $n$-th iterated identity type is trivial.
+  We explicitly name the first instances of this hierarchy, and say that $A$ is\ldots
+  \begin{itemize}
+    \item ($n = 1$) a \emph{proposition}, if
+      $\IsProp A \DefEq ∀ (a , b : A)\Where a = b$ is inhabited,
+    \item ($n = 2$) a \emph{set}, if
+      $\IsSet A \DefEq ∀ (a, b : A)\Where \IsProp(a = b)$ is inhabited,
+    \item ($n = 3$) a \emph{groupoid}, if
+      $\IsGpd A \DefEq ∀ (a, b : A)\Where \IsSet(a = b)$ is inhabited.
+  \end{itemize}
+  We stress that, when mentioning \enquote{sets} or \enquote{groupoids}, we always refer to these definitions.
+
+  In ordinary MLTT, the principle of uniqueness of identity proofs (UIP) implies that all types are sets.
+  This is not true for arbitrary types in Homotopy Type Theory.
+  Using \emph{higher inductive types}, one can obtain a set from any type:
+  \begin{definition}
+    For any type $A$, the set-truncation $\SetTrunc{A}$ is the type inductively defined by
+    \begin{center}
+      \hspace*{\fill}
+        \AxiomC{$a : A$}
+        \UnaryInfC{
+          $\SetTruncCon[a] : \SetTrunc{A}$
+        }
+        \DisplayProof
+      \hfill
+        \AxiomC{$x, y : \SetTrunc{A}$}
+        \AxiomC{$p, q : x = y$}
+        \RightLabel{$\operatorname{squash}_2$}
+        \BinaryInfC{$p = q$}
+        \DisplayProof
+      \hspace*{\fill}
+    \end{center}
+  \end{definition}
+  This type is a \enquote{higher} inductive type since the rule $\operatorname{squash}_2$ mentions $x = y$ in its premise.
+  By definition, $\operatorname{squash}_2 : \IsSet \SetTrunc{A}$.
+  Similarly, higher inductive types allow us to model quotient types,
+  in particular set-quotients:
+
+  \begin{definition}
+    Given $A : \Type$ and a binary relation $(\sim) : A → A → \Type$,
+    the \emph{set-quotient} of $A$ by $(\sim)$ is given by rules
+    \begin{center}
+      \hspace*{\fill}
+        \AxiomC{$a : A$}
+        \UnaryInfC{
+          $\SetQuotCon[a] : \SetQuot[A][\sim]$
+        }
+        \DisplayProof
+      \hfill
+        \AxiomC{$a, b : A$}
+        \AxiomC{$r : a \sim b$}
+        \RightLabel{$\operatorname{eq/}_{\!2}$}
+        \BinaryInfC{$\SetQuotCon[a] = \SetQuotCon[b]$}
+        \DisplayProof
+      \hfill
+        \AxiomC{$x, y : \SetQuot[A][\sim]$}
+        \AxiomC{$p, q : x = y$}
+        \RightLabel{$\operatorname{squash/}_{\!2}$}
+        \BinaryInfC{$p = q$}
+        \DisplayProof
+      \hspace*{\fill}
+    \end{center}
+    and forms a set by $\operatorname{squash/}_{\!2}$.
+  \end{definition}
+
+  Similarly, the \emph{propositional truncation} of $A$ is the higher inductive type $\PropTrunc{A}$
+  with a constructor $\PropTruncCon : A → \PropTrunc{A}$
+  and a rule $\operatorname{squash}_1 : \IsProp \PropTrunc{A}$.
 
   \subsection*{Finite Bags in Sets}
   In a first attempt, we define
@@ -105,7 +159,7 @@
     \FMSet X
       \DefEq{}
       \sum\Var{sz} : ℕ\Where
-        (\Fin \Var{sz} \to X) \SetQuot \mathrel{\sim_\Var{sz}},
+        (\SetQuot[(\Fin \Var{sz} \to X)][\sim_\Var{sz}]),
   \end{align*}
   where $(\SymmetricAction{\Var{sz}}[][])$ relates
   $v, w : \Fin \Var{sz} → X$ iff there merely exists a permutation $\sigma$
@@ -145,25 +199,57 @@
   \subsection*{Finite Bags in Groupoids}
 
   To remedy the situation, we introduce a bag functor that treats identifications of bags as data.
-  Let $\FinSet$ be the type of all types merely equivalent to some $\Fin k$:
+  Recall the type of \emph{finite sets}, defined as
   \[
     \FinSet \DefEq
-      \ldots
+      \sum Y : \Type\Where
+        \sum k : \N\Where
+        \PropTrunc{Y ≃ \Fin k},
   \]
-  We define for any type $X$ the type
-  \[
-    \FMGpd X \DefEq
-      \sum_{A : \FinSet} A → X
-  \]
-  Since $\FinSet$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
-
+  i.e.\@ the type of all types merely equivalent to some $\Fin k$.
   While we usually suppress any size-related issues, they play a crucial r\^{o}le in the formalization.
   Notice that $\FinSet$ is a large type compared to the types it ranges over,
-  but it admits small axiomatization as a HIT $\Bij$ as introduced in \cite{Finster2021}:
-  \[
-    \text{inference rules for $\Bij$}
-  \]
+  but it admits small axiomatization as a HIT $\Bij$ as introduced in \cite{Finster2021}.
+  The rules are the following (plus one stating that $\Bij$ is a groupoid):
+  \begin{center}
+    \small
+    \hspace*{\fill}
+      \AxiomC{$n : \N$}
+      \UnaryInfC{
+        $\Obj n : \Bij$
+      }
+      \DisplayProof
+    \hfill
+      \AxiomC{$m, n : \N$}
+      \AxiomC{$\alpha : \Fin m ≃ \Fin n$}
+      \RightLabel{$\Hom$}
+      \BinaryInfC{$\Obj m = \Obj n$}
+      \DisplayProof
+    \hfill
+      \AxiomC{$n : \N$}
+      \UnaryInfC{$\Hom (\operatorname{id}_{\Fin n}) = \Refl$}
+      \DisplayProof
+    \hspace*{\fill}
+    \\[1em]
+    \hspace*{\fill}
+      \AxiomC{$m, n, o : \N$}
+      \AxiomC{$\alpha : \Fin m ≃ \Fin n$}
+      \AxiomC{$\beta : \Fin n ≃ \Fin o$}
+      \TrinaryInfC{$\Hom(\beta \circ \alpha) = \Hom \alpha \bullet \Hom \beta$}
+      \DisplayProof
+    \hspace*{\fill}
+  \end{center}
+  Here, $\operatorname{id}$ is the identity-equivalence, $(\circ)$ composition of equivalences,
+  $\Refl : \Obj n = \Obj n$ a reflexivity proof of identity and $(\bullet)$ is transitivity of $(=)$.
 
+  With this in mind, we define for any type $X$ the type
+  \[
+    \FMGpd X \DefEq
+      \sum x : \Bij\Where \langle x \rangle → X,
+  \]
+  where $\langle\_\rangle : \Bij → \Type$ obtains the type corresponding to $x : \Bij$ from the
+  equivalence $\Bij ≃ \FinSet$.
+  Since $\FinSet$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
   We argue that this is the correct perspective on bags in Homotopy Type Theory,
   and substantiate the claim by the following theorem:
 
@@ -178,23 +264,15 @@
   The existence of $L_{\FMGpd}$ requires $\FMGpd$ to be defined in terms of $\Bij$,
   otherwise it is not typeable in a universe of fixed size.
 
-  \todo[inline]{%
-    Where does your work using coinductive datatypes go?
-  }
-
   \subsection*{Comparison}
 
   By identifying the higher structure of $\FMGpd$, we recover $\FMSet$:
   \begin{theorem}
     For any type $X$, there is an equivalence $\SetTrunc{\FMGpd X} ≃ \FinSet X$.
   \end{theorem}
-  Here, $\SetTrunc{\Blank}$ is the \emph{set-truncation} operation which collapses
-  higher paths to produce a type of the homotopy level of a set.
   One might wonder if the final coalgebra in groupoids can be used to define a final coalgebra also in sets.
   Indeed, $\FMSet$ has a fixpoint $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$.
-  To further show that this is the final coalgebra seems to require the (full) axiom of choice.
-
-%  \section{Future Work}
+  Further showing that this is the final coalgebra seems to require the (full) axiom of choice.
 
   \section*{Acknowledgments}
   This work was supported by the Estonian Research Council grant PSG749.

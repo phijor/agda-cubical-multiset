@@ -40,12 +40,22 @@
 
 \newcommand*{\DefEq}{\ensuremath{\mathbin{=_\mathsf{df}}}}
 
+\DeclareMathOperator{\Refl}{\mathsf{refl}}
+
 \DeclareMathOperator{\FMSet}{\mathsf{FMSet}}
 \DeclareMathOperator{\FMGpd}{\mathsf{FMGpd}}
 
 \DeclareMathOperator{\FinSet}{\mathsf{FinSet}}
+
 \DeclareMathOperator{\Bij}{\mathsf{Bij}}
+\DeclareMathOperator{\Obj}{\mathsf{obj}}
+\DeclareMathOperator{\Hom}{\mathsf{hom}}
+
 \DeclareMathOperator{\Idx}{\mathsf{Idx}}
+
+\DeclareMathOperator{\IsProp}{\mathsf{isProp}}
+\DeclareMathOperator{\IsSet}{\mathsf{isSet}}
+\DeclareMathOperator{\IsGpd}{\mathsf{isGroupoid}}
 
 \newcommand*{\UU}{\ensuremath{\mathcal{U}}}
 
@@ -59,13 +69,20 @@
 
 \newcommand*{\Bag}[1][\Blank]{\ensuremath{\lbag #1 \rbag}}
 
+\NewDocumentCommand{\Trunc}{m m}{\ensuremath{{\lVert #2 \rVert}_{#1}}}
+\NewDocumentCommand{\TruncCon}{m m}{\ensuremath{{\lvert #2 \rvert}_{#1}}}
+
+\newcommand*{\PropTrunc}[1]{\Trunc{1}{#1}}
+\newcommand*{\PropTruncCon}[1][\Blank]{\TruncCon{1}{#1}}
+
 \newcommand*{\SetTrunc}[1]{\ensuremath{{\lVert #1 \rVert}_2}}
 \newcommand*{\SetTruncCon}[1][\Blank]{\ensuremath{{\lvert #1 \rvert}_2}}
-\newcommand*{\SetQuot}{\ensuremath{\mathbin{/_{\!2}}}}
 
 \NewDocumentCommand{\BinRel}{ m O{\Blank} O{\Blank} }{%
     \ensuremath{#2 \mathrel{#1} #3}
 }
+\NewDocumentCommand{\SetQuot}{ O{\Blank} O{\Blank}}{\BinRel{/_{\!2}}[#1][#2]}
+\NewDocumentCommand{\SetQuotCon}{ O{\Blank} }{\ensuremath{{[#1]}_2}}
 
 \newcommand*{\SymmetricAction}[1]{\BinRel{\sim_{#1}}}
 
