@@ -30,6 +30,11 @@ mapListComp : ∀{ℓ}{X Y Z : Type ℓ}{g : Y → Z}{f : X → Y} (xs : List X)
 mapListComp [] = refl
 mapListComp (x ∷ xs) = cong (_ ∷_) (mapListComp xs)
 
+mapList++ : ∀{ℓ}{X Y : Type ℓ} {f : X → Y} (xs : List X) {ys : List X}
+  → mapList f (xs ++ ys) ≡ mapList f xs ++ mapList f ys
+mapList++ [] = refl
+mapList++ (x ∷ xs) = cong (_ ∷_) (mapList++ xs)
+
 -- list membership
 infix 21 _∈_
 data _∈_ {ℓ}{X : Type ℓ} (x : X) : List X → Type ℓ where
