@@ -33,6 +33,18 @@
           everythingFile = "./Multiset/Index.lagda.md";
           buildInputs = [ cubical ];
 
+          buildPhase = ''
+            runHook preBuild
+
+            # Build all modules
+            agda ./Multiset/Index.lagda.md
+
+            # Build all modules using extra flags
+            agda ./Multiset/Coinductive.agda
+
+            runHook postBuild
+          '';
+
           preConfigure = ''export AGDA_EXEC=agda'';
           LC_ALL = "en_US.UTF-8";
           nativeBuildInputs = [ pkgs.glibcLocales ];
