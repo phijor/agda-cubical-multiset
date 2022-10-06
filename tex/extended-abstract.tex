@@ -29,7 +29,7 @@
   systems. Such systems can be described as coalgebras $c : S \to
   F\, S$, with $F$ being either powerset or bag functor, associating
   to each state $s : S$ the collection $c \, x$ of reachable
-  states. When $F$ is the the bag functor, a state $x$ can reach
+  states. When $F$ is the bag functor, a state $x$ can reach
   another state $y$ in multiple ways, specified by the multiplicity of
   $y$ in $c\,x$. One can also study systems with finite reachable
   states and employ finite variants of the powerset and bag functor.
@@ -67,22 +67,12 @@
   immediately obvious whether this construction still produces the
   final coalgebra or not.
 
-%%   We start by giving multiple plausible definitions of finite bag
-%%   functors in an univalent setting. We show that the set-valued
-%%   candidates are not adequate for constructing the final coalgebra as
-%%   the limit of the chain (\ref{eq:chain}), as they imply
-%%   non-constructive principles (Theorem \ref{thm:InjPresImpliesLLPO}).
-%%   Instead, we follow \cite{Kock2012} and provide a groupoid-valued
-%%   definition which admits a final coalgebra built as the
-%%   (homotopy) limit of (\ref{eq:chain}) (Theorem \ref{thm:FMGpdLim}).  We
-%%   conclude by comparing these definitions and their final coalgebras.
-
   We formalized our work in \emph{Cubical Agda} \cite{Vezzosi2019},
   which is a particular implementation of Homotopy Type Theory
   with support for the univalence principle (\enquote{equivalence of types is equivalent to equality of types}, which is a provable theorem in Cubical Agda)
   and higher inductive types.
   A distinguishing feature of Homotopy Type Theory is that the identity type on a type $A$
-  is no longer inductively defined as in Martin-L{\"o}f Type Type (MLTT).
+  is no longer inductively defined as in Martin-L{\"o}f Type Theory (MLTT).
   In particular, for proofs of identification $p, q : a =_A b$, the iterated identity type
   $p =_{a =_A b} q$ might be inhabited by more than one term, which in turn might have non-trivial
   identity type and so on.
@@ -165,7 +155,6 @@
   where $\Fin \Var{k}$ is the type of numbers $<k$ and $(\SymmetricAction{\Var{sz}}[][])$ relates
   $v, w : \Fin \Var{sz} → X$ iff there merely exists a permutation $\sigma$
   such that $v \circ \sigma = w$. So a finite bag consists of a number $k$ (its size) and an equivalence class of $k$-elements of $X$, where the relation $(\SymmetricAction{\Var{sz}}[][])$ expresses that the order of the elements does not matter. 
-  %We show that this definition enjoys a few desirable properties.
   $\FMSet{X}$ is a set, regardless of the homotopy level of $X$.
   Additionally, $\FMSet$ is invariant under set-truncation, i.e.
   $\FMSet \SetTrunc{X} ≃ \FMSet X$.
@@ -174,7 +163,7 @@
 
   Trying to construct the final coalgebra of $\FMSet$ as the limit of
   the chain (\ref{eq:chain}) (as traditionally done in a classical
-  methatheory) is problematic. The first step in the construction
+  metatheory) is problematic. The first step in the construction
   would be showing that $\FMSet$ preserves $\omega$-limits. In the
   case of the chain (\ref{eq:chain}) can be reduced to show that the
   map $ \operatorname{pres}\colon \FMSet (\lim_{n < \omega} \FMSet^n
@@ -182,7 +171,7 @@
   universal property of the limit, is an equivalence of types. This is not the case in HoTT, since the latter is an inherently non-constructive principle::
 
   \begin{theorem}\label{thm:InjPresImpliesLLPO}
-    The function %limit-preservation map 
+    The function 
         $\operatorname{pres}\colon
             \FMSet (\lim_{n < \omega} \FMSet^n 1)
             \to
@@ -264,8 +253,7 @@
   Since $\FinSet$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
   By identifying the higher structure of $\FMGpd$, we recover $\FMSet$:
   \begin{theorem}
-    For any type $X$, there is an equivalence $\SetTrunc{\FMGpd X} ≃
-    \FinSet X$.
+    For any type $X$, there is an equivalence $\SetTrunc{\FMGpd X} ≃ \FMSet X$.
   \end{theorem}
 
   
@@ -283,8 +271,6 @@
   HoTT, independently of the their homotopy level.  The existence of
   $L_{\FMGpd}$ requires $\FMGpd$ to be defined in terms of $\Bij$,
   otherwise it is not typeable in a universe of fixed size.
-
-%  \subsection*{Comparison}
 
   One might wonder whether the final coalgebra in groupoids can be used to define a final coalgebra also in sets.
   We are able to show that the set-truncation of the groupoid-limit \SetTrunc{L_{\FMGpd}} is a fixpoint of $\FMSet$, i.e. $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$. But further showing that this is the final coalgebra of the set-based bag functor $\FMSet$ seems to require the full axiom of choice.
