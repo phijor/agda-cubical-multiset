@@ -5,7 +5,7 @@ open import Multiset.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function
 
-import Cubical.Data.Sigma as Sigma
+open import Cubical.Data.Sigma as Sigma
   using (_×_)
 
 private
