@@ -13,7 +13,7 @@ open BinaryRelation
 open isEquivRel
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum as Sum
-open import Multiset.Coinductive.ListStuff
+open import Multiset.Coinductive.ListStuff hiding (M)
 
 -- ====================================================================
 
@@ -91,10 +91,15 @@ transP : {A : Type} {xs ys zs : List A}
 transP stop qs = qs
 transP (perm ps) qs = perm (transP ps qs)
 
-revP : {A : Type} {xs ys : List A}
-  → Perm xs ys → Perm ys xs 
-revP stop = stop
-revP (perm ps) = transP (revP ps) (perm stop)
+infixr 30 _∙ₚ_
+_∙ₚ_ = transP
+
+invP : {A : Type} {xs ys : List A}
+  → Perm xs ys → Perm ys xs
+invP stop = stop
+invP (perm ps) = transP (invP ps) (perm stop)
+
+_⁻ᵖ = invP
 
 substP : {A : Type} {xs ys : List A} → xs ≡ ys → Perm xs ys
 substP {xs = xs} eq = subst (Perm xs) eq stop
@@ -104,23 +109,40 @@ congPerm : {A : Type} {x : A} {xs ys : List A}
 congPerm stop = stop
 congPerm {x = x} (perm {xs = xs} ps) = perm {xs = x ∷ xs} (congPerm ps)
 
-appendP : {A : Type} (xs : List A) {ys zs : List A}
-  → Perm ys zs → Perm (xs ++ ys) (xs ++ zs)
-appendP [] ps = ps
-appendP (x ∷ xs) ps = congPerm (appendP xs ps)
+reflP : {A : Type} → (xs : List A) → Perm xs xs
+reflP [] = stop
+reflP (x ∷ xs) = congPerm {x = x} (reflP xs)
 
-append2P : {A : Type} {xs ys zs : List A}
+prependP : {A : Type} (xs : List A) {ys zs : List A}
+  → Perm ys zs → Perm (xs ++ ys) (xs ++ zs)
+prependP [] ps = ps
+prependP (x ∷ xs) ps = congPerm (prependP xs ps)
+
+appendP : {A : Type} {xs ys zs : List A}
   → Perm xs ys → Perm (xs ++ zs) (ys ++ zs)
-append2P stop = stop
-append2P {zs = zs} (perm {xs = xs}{ys} ps) =
+appendP stop = stop
+appendP {zs = zs} (perm {xs = xs}{ys} ps) =
   transP (substP (++-assoc xs _ _))
          (perm {ys = ys ++ zs} (transP (substP (sym (++-assoc xs _ _)))
-                                       (append2P ps)))
+                                       (appendP ps)))
 
 moveHeadP : {A : Type} (x : A) (xs : List A) {ys : List A}
   → Perm (x ∷ xs ++ ys) (xs ++ x ∷ ys)
 moveHeadP x [] = stop
 moveHeadP x (y ∷ xs) = perm {xs = []} (congPerm (moveHeadP x xs))
+
+commP : {A : Type} → (xs ys : List A)
+  → Perm (xs ++ ys) (ys ++ xs)
+commP xs [] = substP (++-unit-r xs)
+commP xs (y ∷ ys) = goal where
+  indH : Perm (xs ++ ys) (ys ++ xs)
+  indH = commP xs ys
+
+  lem : Perm (y ∷ xs ++ ys) (y ∷ ys ++ xs)
+  lem = congPerm indH
+
+  goal : Perm (xs ++ y ∷ ys) (y ∷ ys ++ xs)
+  goal = (moveHeadP y xs {ys = ys} ⁻ᵖ) ∙ₚ lem
 
 mapP : {A B : Type} (f : A → B) {xs ys : List A}
   → Perm xs ys → Perm (List.map f xs) (List.map f ys)
@@ -137,14 +159,98 @@ mapP f {ys = zs} (perm {xs = xs} ps) =
 Mset : Type → Type
 Mset A = List A / Perm
 
+isSetMset : ∀ {A} → isSet (Mset A)
+isSetMset = squash/
+
+elimMset : ∀ {ℓ} {A : Type} {B : Mset A → Type ℓ}
+  → (∀ xs → isSet (B xs))
+  → ([_]* : (as : List A) → B [ as ])
+  → (∀ xs ys → (p : Perm xs ys) → PathP (λ i → B (eq/ xs ys p i)) [ xs ]* [ ys ]*)
+  → (xs : Mset A) → B xs
+elimMset {A = A} {B = B} setB [_]* well-defined = go where
+  setB' : isOfHLevelDep 2 B
+  setB' = isOfHLevel→isOfHLevelDep 2 setB
+
+  go : (xs : Mset A) → B xs
+  go [ as ] = [ as ]*
+  go (eq/ xs ys r i) = well-defined xs ys r i
+  go (squash/ xs ys p q i j) = setB' (go xs) (go ys) (cong go p) (cong go q) (squash/ xs ys p q) i j
+
+elimPropMset : ∀ {ℓ} {A : Type} {P : Mset A → Type ℓ}
+  → (∀ xs → isProp (P xs))
+  → (P[_] : (as : List A) → P [ as ])
+  → (xs : Mset A) → P xs
+elimPropMset {P = P} propP P[_] = elimMset {B = P}
+  (λ xs → isProp→isSet (propP xs))
+  P[_]
+  (λ as bs p → isProp→PathP (λ i → propP (eq/ as bs p i)) P[ as ] P[ bs ])
+
+elimProp2Mset : ∀ {ℓ} {A A' : Type} {P : Mset A → Mset A' → Type ℓ}
+  → (∀ xs ys → isProp (P xs ys))
+  → (P[_,_] : (as : List A) → (bs : List A') → P [ as ] [ bs ])
+  → (xs : Mset A) → (ys : Mset A') → P xs ys
+elimProp2Mset propP P[_,_] = elimPropMset
+  (λ xs → isPropΠ λ ys → propP xs ys)
+  (λ as → elimPropMset (λ bs → propP [ as ] bs) P[ as ,_])
+
+recMset : ∀ {ℓ} {A : Type} {B : Type ℓ}
+  → (isSet B)
+  → ([_]* : List A → B)
+  → (∀ xs ys → (p : Perm xs ys) → [ xs ]* ≡ [ ys ]*)
+  → Mset A → B
+recMset setB = elimMset (λ _ → setB)
+
+rec2Mset : ∀ {ℓ} {A A' : Type} {B : Type ℓ}
+  → (isSet B)
+  → (_*_ : List A → List A' → B)
+  → (∀ {zs} xs ys → (p : Perm xs ys) → xs * zs ≡ ys * zs)
+  → (∀ {zs} xs ys → (p : Perm xs ys) → zs * xs ≡ zs * ys)
+  → Mset A → Mset A' → B
+rec2Mset {A = A} {A' = A'} {B = B} setB _*_ wd₁ wd₂ = recMset (isSetΠ (λ _ → setB)) rec' well-defined where
+  rec' : List A → Mset A' → B
+  rec' = λ as → recMset setB (as *_) wd₂
+
+  well-defined : (as bs : List A) → Perm as bs → rec' as ≡ rec' bs
+  well-defined as bs p = funExt (elimPropMset (λ xs → setB (rec' as xs) (rec' bs xs)) λ _ → wd₁ as bs p)
+
 mapMset : {A B : Type} (f : A → B) → Mset A → Mset B
-mapMset f [ xs ] = [ List.map f xs ]
-mapMset f (eq/ xs ys r i) =
-  eq/ (List.map f xs) (List.map f ys) (mapP f r) i
-mapMset f (squash/ xs ys p q i j) =
-  squash/ (mapMset f xs) (mapMset f ys)
-          (λ k → mapMset f (p k)) (λ k → mapMset f (q k))
-          i j
+mapMset f = recMset
+  isSetMset
+  ([_] ∘ List.map f)
+  (λ xs ys p → eq/ _ _ (mapP f p))
+
+-- ====================================================================
+--
+-- Mset forms a commutative monoid under concatenation.
+--
+-- Unitality and associativity of concatenation are lifted from Lists,
+-- commutativity follows the permutation of (xs ++ ys) into (ys ++ xs).
+module _ {A : Type} where
+  emptyMset : Mset A
+  emptyMset = [ [] ]
+
+  singleton : A → Mset A
+  singleton x = [ x ∷ [] ]
+
+  concat : Mset A → Mset A → Mset A
+  concat = rec2Mset isSetMset (λ as bs → [ as ++ bs ]) wd₁ wd₂ where
+    wd₁ : ∀ {cs} as bs → Perm as bs → [ as ++ cs ] ≡ [ bs ++ cs ]
+    wd₁ as bs p = eq/ _ _ (appendP p)
+
+    wd₂ : ∀ {cs} as bs → Perm as bs → [ cs ++ as ] ≡ [ cs ++ bs ]
+    wd₂ {cs} as bs p = eq/ _ _ (prependP cs p)
+
+  concat-unitˡ : (xs : Mset A) → concat emptyMset xs ≡ xs
+  concat-unitˡ = elimPropMset (λ xs → isSetMset _ xs) (λ as → refl {x = [ as ]})
+
+  concat-comm : (xs ys : Mset A) → concat xs ys ≡ concat ys xs
+  concat-comm = elimProp2Mset (λ xs ys → isSetMset _ _) comm where
+    comm : (as bs : List A) → [ as ++ bs ] ≡ [ bs ++ as ]
+    comm as bs = eq/ _ _ (commP as bs)
+
+  concat-assoc : (xs ys zs : Mset A) → concat xs (concat ys zs) ≡ concat (concat xs ys) zs
+  concat-assoc = elimPropMset (λ xs → isPropΠ2 λ ys zs → isSetMset _ _)
+    λ as → elimProp2Mset (λ _ _ → isSetMset _ _) λ bs cs → cong [_] (sym (++-assoc as bs cs))
 
 -- ====================================================================
 
@@ -260,14 +366,14 @@ module Sorting {A : Type} (setA : isSet A)
   sortP : (xs acc : List A) → Perm (acc ++ xs) (sort xs acc)
   sortP [] acc = substP (++-unit-r acc)
   sortP (x ∷ xs) acc =
-    transP (revP (moveHeadP x acc))
-            (transP (append2P {zs = xs} (insertP x acc))
+    transP (invP (moveHeadP x acc))
+            (transP (appendP {zs = xs} (insertP x acc))
                      (sortP xs (insert x acc)))
 
   sortMset-section : ∀ xs → [ sortMset xs ] ≡ xs
   sortMset-section =
     SQ.elimProp (λ _ → squash/ _ _)
-      (λ xs → eq/ _ _ (revP (sortP xs [])))
+      (λ xs → eq/ _ _ (invP (sortP xs [])))
 
 -- Knowing a permutation between xs and ys, we build another one by
 -- first sorting xs and then un-sorting ys. This is a constant function.
@@ -276,13 +382,13 @@ module Sorting {A : Type} (setA : isSet A)
   canonicalP xs ys σ =
     transP (sortP xs [])
             (transP (substP (sort-eq/ σ))
-                    (revP (sortP ys [])))
+                    (invP (sortP ys [])))
 
   canonicalP-const : (xs ys : List A) (σ Φ : Perm xs ys)
     → canonicalP xs ys σ ≡ canonicalP xs ys Φ
   canonicalP-const xs ys σ Φ =
     cong (transP (sortP xs []))
-         (cong (λ z → transP z (revP (sortP ys [])))
+         (cong (λ z → transP z (invP (sortP ys [])))
                (cong substP (isOfHLevelList 0 setA _ _ _ _)))
 
 
