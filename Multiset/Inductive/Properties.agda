@@ -545,13 +545,16 @@ map-η′ {X = X} {f = f} = M.ind {P = P} isPropP
 
 module _ where
   open import Cubical.Data.Vec.Base as Vec
+  open import Cubical.Data.List.Base as List
 
   fromVec : ∀ {n} → Vec X n → M X
-  fromVec [] = ε
-  fromVec (x Vec.∷ xs) = x M.∷ (fromVec xs)
+  fromVec = Vec.foldr M._∷_ ε
 
   to∥Vec∥₁ : (xs : M X) → ∥ Vec X (sizeof xs) ∥₁
   to∥Vec∥₁ = ind (λ xs → isPropPropTrunc) (∣ [] ∣₁) (λ x → ∣ x Vec.∷ Vec.[] ∣₁) (PT.map2 Vec._++_)
+
+  fromList : List X → M X
+  fromList = List.foldr M._∷_ ε
 
 module _ where
   open import Multiset.OverSet as FMSet
