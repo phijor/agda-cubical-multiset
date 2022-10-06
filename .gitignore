@@ -1,6 +1,8 @@
 _build/
 MAlonzo
 
+# Agda
+*.agda~
 *.agdai
 
 # Exclude local copies of references
@@ -10,3 +12,13 @@ MAlonzo
 # JabRef backup/temporary files
 *.bak
 *.sav.tmp
+html/
+result
+
+# TeX files
+**/_target/
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
