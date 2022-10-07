@@ -13,21 +13,6 @@
 
 \usepackage{todonotes}
 
-% Used for displaying a sample figure. If possible, figure files should
-% be included in EPS format.
-%
-% If you use the hyperref package, please uncomment the following two lines
-% to display URLs in blue roman font according to Springer's eBook style:
-%\usepackage{color}
-%\renewcommand\UrlFont{\color{blue}\rmfamily}
-%
-
-\usepackage{latex/agda}
-
-\usepackage{fancyvrb}
-\DefineVerbatimEnvironment
-  {code}{Verbatim}
-  {}
 \begin{document}
 
 \title{Final Coalgebra of the Finite Bag Functor}
@@ -147,6 +132,20 @@ defined as the higher inductive type induced by the following rules:
   \end{align*}
 \end{definition}
 
+\begin{definition}
+  The recursion principle for $\FMSet X$ is the function
+  \begin{align*}
+    \Rec{\FMSet}
+      &: \{A : \Type\} → \IsSet{A} \\
+      &→ (\Op{as} : \{n : ℕ\} → (v : \Fin n → X) → A) \\
+      &→ (∀ n\Where (v, w : \Fin n → X) → v \sim_n w → \Op{as} v = \Op{as} w) \\
+      &→ \FMSet X → A
+  \end{align*}
+  defined from the recursion principle of set-quotients.
+  Similarly, we define the induction principle $\operatorname{elim}_{\FMSet}$ for
+  a dependent type family $B : \FMSet X → \Type$ of sets.
+\end{definition}
+
 \subsubsection{Finite Choice for Sets}
 
 \begin{lemma}
@@ -207,24 +206,30 @@ we define a type of lists with \enquote{more identifications}.
 Since all constructions based on this type have to be homotopy coherent,
 they will automatically respect these extra data,
 making them invariant under permutation for free.
+We define a type family $\Bag : \Type → \Type$,
+and substantiate these claims by first showing its set-truncation is $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
+and later by constructing its final coalgebra (\cref{ssec:FMGpdLim}, \cref{thm:FMGpdLim}).
 
-We start by defining a type family $\Bag : \Type → \Type$,
-and substantiate the above claims by first showing its set-truncation is $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
-and in \cref{ssec:FMGpdLim} by constructing its final coalgebra (\cref{thm:FMGpdLim}).
+First, recall one way of defining \enquote{finite} sets in HoTT:
 
-
-\begin{itemize}
-    \item Compare large/small definition.
-\end{itemize}
 \begin{definition}
-  A small (\enquote{sm{\aa}l}) type:
-  \begin{align*}
-    \Bag X
-      \mathbin{=_{\mathrm{df}}}
-      \sum\,\Var{x} : \operatorname{\mathsf{Bij}}\Where
-        \langle x \rangle \to X,
-  \end{align*}
+  A type $Y$ is called \emph{(Bishop-) finite} if
+  \[
+    \Op{isFinSet} Y \DefEq
+      \sum (n : ℕ)\Where \PropTrunc{Y ≃ \Fin n}
+  \]
+  holds,
+  and we denote the collection of such types by
+  \[
+    \Op{FinSet} \DefEq
+      \sum (Y : \Type)\Where \Op{isFinSet} Y
+  \]
 \end{definition}
+
+It is easy to show that $\Op{isFinSet}$ is a proposition and that any type satisfying the predicate is a set.
+Similarly, one shows that $\Op{FinSet}$ forms a groupoid.
+Note that $\Op{FinSet}$ is a \emph{large} type, i.e. it lives in the successor universe of the types that it ranges over.
+From this, we can define a \enquote{tote}, which we think of as as finite collections of things in $X$:
 \begin{definition}
   A large type, $\Tote : \Type_\ell → \Type_{\ell + 1}$:
   \begin{align*}
@@ -234,15 +239,88 @@ and in \cref{ssec:FMGpdLim} by constructing its final coalgebra (\cref{thm:FMGpd
   \end{align*}
 \end{definition}
 
+In general, $\Tote X$ is at least a groupoid.
+
 \begin{proposition}
-  If $X$ is a groupoid, then $\Bag X$ is a groupoid.
+  If $X$ is a groupoid, then $\Tote X$ is a groupoid.
 \end{proposition}
 \begin{proof}
   By assumption $X$ is a groupoid,
-  so the function type $\langle x \rangle → X$ is a groupoid
-  for any $x : \Bij$.
+  so the function type $\langle Y \rangle → X$ is a groupoid
+  for any $Y : \FinSet$.
   By construction $\Bij$ is a groupoid, therefore the entire $\Sigma$-type is a groupoid.
 \end{proof}
+
+Note that $\Tote$ is again a large type family.
+This makes it unsuitable for iteration, as the assignment $(\lambda n\Where \Tote^n \mathsf{1})$
+of $n$-fold applications of the family is not typeable in a universe of bounded size.
+We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ that avoids this issue, following \cite{Finster2021}.
+
+\todo[inline]{%
+  Relating $\Tote$ back to finite multisets:
+}
+
+\begin{theorem}\label{thm:FMSetOfFMGpdTrunc}
+  Set-truncating a tote yields a finite multiset.
+  For any type $X$,
+  \[
+    \SetTrunc{\Tote X} ≃ \FMSet X
+  \]
+\end{theorem}
+\begin{proof}
+  The proof proceeds by constructing an explicit isomorphism $\FMSet X \cong \SetTrunc{\Tote X}$.
+  The forward function is straight forward, while the inverse function has to be carefully defined with the
+  homotopy levels of the involved types in mind.
+
+  \newcommand*{\ToTote}{\operatorname{\mathsf{toTote}}}
+
+  To construct the map $\FMSet X → \SetTrunc{\Tote X}$, by the induction principle
+  $\Elim{\FMSet}$, it is enough to give a function
+  $f : \forall \{\Var{sz}\}\Where (\Fin \Var{sz} → X) → \SetTrunc{\Tote X}$
+  and to show that it respects $(\sim)$.
+  Let $f(v) \DefEq \SetTruncCon[(\Fin \Var{sz} , v)]$, since $\Fin \Var{sz}$ is obviously a finite set.
+  To prove that $v \sim w$ implies $f(v) = f(w)$, we note that the conclusion is a proposition,
+  thus by induction on $v \sim w$ obtain a permutation $\sigma$ such that $r : v \circ \sigma = w$.
+  We conclude that
+  \[
+    p \DefEq
+      \operatorname{\mathsf{\Sigma PathP}}\, (\mathsf{ua}\, \sigma)\, r : (\Fin\Var{sz} , v) = (\Fin\Var{sz}, w),
+  \]
+  which implies $f(v) = f(w)$ by applying $\SetTruncCon$ to $p$.
+
+  To define the inverse $\SetTrunc{\Tote X} → \FMSet X$,
+  by set-truncation elimination it is enough to provide
+  \begin{align*}
+    g : \Tote{X} &→ \FMSet X \\
+    g\, (Y, \Var{sz}, e, v) &\DefEq (\Var{sz} , g')
+  \end{align*}
+  where $Y$ is a finite set of size $\Var{sz}$ with $e : \PropTrunc{Y ≃ \Fin\Var{sz}}$ and $v : Y → X$.
+  We would like to use a composition $\Fin\Var{sz} → Y → X$ to find
+  $g' : \SetQuot[(\Fin\Var{sz} → X)][\mathord{\sim}]$,
+  but one cannot do so because $e$ is propositionally truncated.
+  Using induction directly on $e$ cannot work, since $g'$ lives in a set.
+  We can however show that
+  \begin{align*}
+    &\operatorname{\mathsf{from-equiv}} : (Y ≃ \Fin\Var{sz}) → \SetQuot[(\Fin\Var{sz} → X)][\mathord{\sim}] \\
+    &\operatorname{\mathsf{from-equiv}} \alpha \DefEq \SetQuotCon[v \circ \alpha]
+  \end{align*}
+  is \emph{weakly-constant} in the sense of \cite{Kraus2017} to obtain $g'$ from $e$ using the elimination
+  principle of \cite[{Corollary~2}]{Capriotti2015}.
+
+  Proving that $g$ is a right-inverse of $f$ is straight forward.
+  Proving that it is a left-inverse reduces to showing that $v \circ \alpha \sim v$ for any $v : Y → X$ and $\alpha : \Fin n ≃ Y$.
+\end{proof}
+
+\begin{definition}\label{def:Bag}
+  A small type:
+  \begin{align*}
+    \Bag X
+      \mathbin{=_{\mathrm{df}}}
+      \sum\,\Var{x} : \operatorname{\mathsf{Bij}}\Where
+        \langle x \rangle \to X,
+  \end{align*}
+  We abbreviate ${\lbag v \rbag} \DefEq (x, v) : \Bag X$ if $x$ can be inferred from context.
+\end{definition}
 
 \paragraph{Comparing $\Op{List}$ and $\Bag$}\todo{Fit this comparison in somewhere}
 Note that $\Bag$ is somewhat analogous to $\Op{List}$:
@@ -250,30 +328,6 @@ Given a type $A$ and a family $B$ over it, they both match ${\sum (a : A)\Where 
 we have $A = ℕ$ and $B = \Fin$ for $\Op{List}$,
 and $A = \Bij$ and $B = \langle\_\rangle$ for $\Bag$.
 In particular, $\SetTrunc{\Bij} ≃ ℕ$.
-
-In general, $\FMSet X$ is at least a groupoid.
-
-\begin{theorem}\label{thm:FMSetOfFMGpdTrunc}
-  Set-truncating a bag yields a finite multiset.
-  For any type $X$,
-  \[
-    \SetTrunc{\Bag X} ≃ \FMSet X
-  \]
-\end{theorem}
-\begin{proof}
-  We prove the result for $\Tote$, and later transport it to $\Bag$.
-  The proof proceeds by constructing an explicit isomorphism $\SetTrunc{\Tote X} \cong \FMSet X$.
-  To construct the map $\FMSet X → \SetTrunc{\Tote X}$, by the induction principle for
-  $\FMSet$,\todo{Define this earlier!} it is enough to give a function
-  $f : \forall \{\Var{sz}\}\Where (\Fin \Var{sz} → X) → \SetTrunc{\Tote X}$
-  and to show that it respects $(\sim)$.
-  Let $f(v) \DefEq \SetTruncCon[(\Fin \Var{sz} , v)]$, since $\Fin \Var{sz}$ is obviously a finite set.
-  To prove that $v \sim w$ implies $f(v) = f(w)$, we note that the conclusion is a proposition,
-  thus we can assume a permutation $v \circ \sigma = w$ to construct \ldots
-  \todo[inline]{%
-    CONTINUE HERE.
-  }
-\end{proof}
 
 \subsection{As lists up to permutation}
 

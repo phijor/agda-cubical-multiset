@@ -20,6 +20,7 @@
 
 \RequirePackage{xparse}
 \RequirePackage{amsmath}
+\RequirePackage{amsthm}
 
 \RequirePackage{amsfonts}
 \RequirePackage{stmaryrd} % for \{l,r}bag
@@ -68,6 +69,9 @@
 \DeclareMathOperator{\Hom}{\mathsf{hom}}
 
 \DeclareMathOperator{\Idx}{\mathsf{Idx}}
+
+\NewDocumentCommand{\Rec}{m}{\Op{rec}_{#1}}
+\NewDocumentCommand{\Elim}{m}{\Op{elim}_{#1}}
 
 \DeclareMathOperator{\IsProp}{\mathsf{isProp}}
 \DeclareMathOperator{\IsSet}{\mathsf{isSet}}
