@@ -156,32 +156,32 @@
 
 \let\oldauthor=\author
 \renewcommand
-	{\author}
-	[1]
-	{%
-		\ifauthorundefined
-			\oldauthor{#1}
-			\authorundefinedfalse
-		\else
-			\PackageWarning{easychair}{Another use of author ignored}
-		\fi
-	}
+    {\author}
+    [1]
+    {%
+        \ifauthorundefined
+            \oldauthor{#1}
+            \authorundefinedfalse
+        \else
+            \PackageWarning{easychair}{Another use of author ignored}
+        \fi
+    }
 
 \newif\iftitleundefined
 \titleundefinedtrue
 
 \let\oldtitle=\title
 \renewcommand
-	{\title}
-	[1]
-	{
-		\iftitleundefined
-			\oldtitle{#1}
-			\titleundefinedfalse
-		\else
-			\PackageWarning{easychair}{Another use of title ignored}
-		\fi
-	}
+    {\title}
+    [1]
+    {
+        \iftitleundefined
+            \oldtitle{#1}
+            \titleundefinedfalse
+        \else
+            \PackageWarning{easychair}{Another use of title ignored}
+        \fi
+    }
 
 
 %
@@ -204,22 +204,22 @@
 
 \def\titlerunning#1
 {
-	\iftitlerunningundefined
-		\gdef\@titleRunning{#1}
-		\titlerunningundefinedfalse
-	\else
-		\PackageWarning{easychair}{Another use of titlerunning ignored}
-	\fi
+    \iftitlerunningundefined
+        \gdef\@titleRunning{#1}
+        \titlerunningundefinedfalse
+    \else
+        \PackageWarning{easychair}{Another use of titlerunning ignored}
+    \fi
 }
 
 \def\authorrunning#1
 {
-	\ifauthorrunningundefined
-		\gdef\@authorRunning{#1}
-		\authorrunningundefinedfalse
-	\else
-		\PackageWarning{easychair}{Another use of authorrunning ignored}
-	\fi
+    \ifauthorrunningundefined
+        \gdef\@authorRunning{#1}
+        \authorrunningundefinedfalse
+    \else
+        \PackageWarning{easychair}{Another use of authorrunning ignored}
+    \fi
 }
 
 %
@@ -358,12 +358,12 @@
 %
 
 \ifthesis
-	\LoadClass[\@PaperFormat,\@PaperOrientation,\@ColumnCount,\@BaseFontSize,twoside]{report}
-	\RequirePackage{makeidx}
+    \LoadClass[\@PaperFormat,\@PaperOrientation,\@ColumnCount,\@BaseFontSize,twoside]{report}
+    \RequirePackage{makeidx}
 \else
-	% We are an article (more customized later)
-	\LoadClass[\@PaperFormat,\@PaperOrientation,\@ColumnCount,\@BaseFontSize,twoside]{article}
-	%\LoadClass[\@PaperFormat,\@PaperOrientation,\@ColumnCount,\@BaseFontSize]{article}
+    % We are an article (more customized later)
+    \LoadClass[\@PaperFormat,\@PaperOrientation,\@ColumnCount,\@BaseFontSize,twoside]{article}
+    %\LoadClass[\@PaperFormat,\@PaperOrientation,\@ColumnCount,\@BaseFontSize]{article}
 \fi
 
 % Require UTF8 encoding, per Andrei Voronkov, to accomodate
@@ -394,16 +394,16 @@
 
 % Pick "Times Roman" as a base font unless explicitly told not to
 \ifnotimes
-	\ifwithtimes
-		\PackageWarning{easychair}{Cannot really use 'notimes' and 'withtimes' together}
-		\PackageWarning{easychair}{Defaulting to 'notimes'...}
-	\else
-		\PackageWarning{easychair}{'notimes' has been deprecated as it is the default in 2.0}
-	\fi
+    \ifwithtimes
+        \PackageWarning{easychair}{Cannot really use 'notimes' and 'withtimes' together}
+        \PackageWarning{easychair}{Defaulting to 'notimes'...}
+    \else
+        \PackageWarning{easychair}{'notimes' has been deprecated as it is the default in 2.0}
+    \fi
 \else
-	\ifwithtimes
-		\RequirePackage{mathptmx}
-	\fi
+    \ifwithtimes
+        \RequirePackage{mathptmx}
+    \fi
 \fi
 
 % Pick "Helvetica" as a "Sans-Serif" font
@@ -444,33 +444,33 @@
 \setlength{\footskip}{\@FootSkipSize}
 
 \ifletterpaper
-	\immediate\write10{easychair: Selecting letter paper margin sizes.}
- 	\RequirePackage[%
+    \immediate\write10{easychair: Selecting letter paper margin sizes.}
+    \RequirePackage[%
                 papersize={8.5in,11in},
                 total={145mm,224mm},
                 centering,
                 twoside,
-		includeheadfoot]{geometry}
+        includeheadfoot]{geometry}
 \fi
 \ifafourpaper
-	\immediate\write10{easychair: Selecting A4 paper margin sizes.}
- 	\RequirePackage[%
+    \immediate\write10{easychair: Selecting A4 paper margin sizes.}
+    \RequirePackage[%
                 papersize={210mm,297mm},
                 total={145mm,224mm},
                 centering,
                 twoside,
-		includeheadfoot]{geometry}
+        includeheadfoot]{geometry}
 \fi
 
 \ifcustompaper
-	\immediate\write10{easychair: Selecting custom paper margin sizes.}
-	\RequirePackage[%
+    \immediate\write10{easychair: Selecting custom paper margin sizes.}
+    \RequirePackage[%
                 papersize={189mm,246mm},
                 total={145mm,224mm},
                 top=9mm,
                 left=24mm,
                 twoside,
-		includeheadfoot]{geometry}
+        includeheadfoot]{geometry}
         \headHeightSize{12.0pt}
         \headSepSize{16.0pt}
         \footSkipSize{26pt}
@@ -491,12 +491,12 @@
 
 % e.g.
 % \volumeinfo
-%		{J. Bloe}   % editor(s)      #1
-%		{1}         % No. of editors #2
-%		{LICS 2008} % event title    #3
-%		{1}         % volume number  #4
-%		{4}         % issue          #5
-%		{134}       % start page     #6
+%       {J. Bloe}   % editor(s)      #1
+%       {1}         % No. of editors #2
+%       {LICS 2008} % event title    #3
+%       {1}         % volume number  #4
+%       {4}         % issue          #5
+%       {134}       % start page     #6
 
 \def\@EasyFontStyle{\footnotesize}
 \newcommand{\headfootstyle}[1]{\def\@EasyFontStyle{#1}}
@@ -504,31 +504,31 @@
 \def\@EasyVolumeInfo{}
 
 \ifthesis
-	\newcommand{\volumeinfo}[6]
-		{\PackageWarning{easychair}{Cannot use volumeinfo with 'thesis' option. Ignoring...}}
+    \newcommand{\volumeinfo}[6]
+        {\PackageWarning{easychair}{Cannot use volumeinfo with 'thesis' option. Ignoring...}}
 \else
-	\newcommand{\volumeinfo}[6]{%
-		\ifvolumeundefined
-	%		\def\@makefntext##1{\noindent ##1}%
-			\def\@EasyEdsNames{#1}%
-			\def\@EasyEds{ed.}%
-			\def\@EasyEvent{#3}%
-			\def\@EasyVolume{}%
-			\def\@EasyIssue{}%
-			\def\@EasyFirstPage{#6}%
-			\ifnum #2>1 \gdef\@EasyEds{eds.}\fi%
-			\ifnum #4>0 \gdef\@EasyVolume{; Volume #4}\fi%
-			\ifnum #5>0 \gdef\@EasyIssue{, issue: #5} \fi%
-	%		\footnotetext[0]{\sf \@EasyEdsNames (\@EasyEds); \@EasyEvent\@EasyVolume\@EasyIssue, pp. #6-\pageref*{LastPage}}%
-	%		\def\@EasyVolumeInfo{\footnotesize{\sf\@EasyEdsNames~(\@EasyEds); \@EasyEvent\@EasyVolume\@EasyIssue, pp. \@EasyFirstPage--\pageref*{LastPage}}}%
-			\def\@EasyVolumeInfo{\@EasyFontStyle\@EasyEdsNames~(\@EasyEds); \@EasyEvent\@EasyVolume\@EasyIssue, pp. \@EasyFirstPage--\pageref*{LastPage}}%
-			%\def\@makefntext##1{\noindent\@makefnmark##1}%
-			\setcounter{page}{\@EasyFirstPage}
-			\volumeundefinedfalse
-		\else
-			{\PackageWarning{easychair}{May not redefine volumeinfo}}
-		\fi
-	}
+    \newcommand{\volumeinfo}[6]{%
+        \ifvolumeundefined
+    %       \def\@makefntext##1{\noindent ##1}%
+            \def\@EasyEdsNames{#1}%
+            \def\@EasyEds{ed.}%
+            \def\@EasyEvent{#3}%
+            \def\@EasyVolume{}%
+            \def\@EasyIssue{}%
+            \def\@EasyFirstPage{#6}%
+            \ifnum #2>1 \gdef\@EasyEds{eds.}\fi%
+            \ifnum #4>0 \gdef\@EasyVolume{; Volume #4}\fi%
+            \ifnum #5>0 \gdef\@EasyIssue{, issue: #5} \fi%
+    %       \footnotetext[0]{\sf \@EasyEdsNames (\@EasyEds); \@EasyEvent\@EasyVolume\@EasyIssue, pp. #6-\pageref*{LastPage}}%
+    %       \def\@EasyVolumeInfo{\footnotesize{\sf\@EasyEdsNames~(\@EasyEds); \@EasyEvent\@EasyVolume\@EasyIssue, pp. \@EasyFirstPage--\pageref*{LastPage}}}%
+            \def\@EasyVolumeInfo{\@EasyFontStyle\@EasyEdsNames~(\@EasyEds); \@EasyEvent\@EasyVolume\@EasyIssue, pp. \@EasyFirstPage--\pageref*{LastPage}}%
+            %\def\@makefntext##1{\noindent\@makefnmark##1}%
+            \setcounter{page}{\@EasyFirstPage}
+            \volumeundefinedfalse
+        \else
+            {\PackageWarning{easychair}{May not redefine volumeinfo}}
+        \fi
+    }
 \fi
 
 \def\@EventInfo{}
@@ -553,40 +553,40 @@
 
 \fancyhead{}
 %\ifdebug
-%	\iftwosided
-%		\fancyhead[RE]{\overline{\@titleRunning}}
-%		\fancyhead[RO]{\overline{\@authorRunning}}
-%	\else
-%		\fancyhead[LO,LE]{\begin{math}\overline{\mbox{\@titleRunning}}\end{math}}
-%		\fancyhead[RO,RE]{\begin{math}\overline{\mbox{\@authorRunning}}\end{math}}
-%	\fi
+%   \iftwosided
+%       \fancyhead[RE]{\overline{\@titleRunning}}
+%       \fancyhead[RO]{\overline{\@authorRunning}}
+%   \else
+%       \fancyhead[LO,LE]{\begin{math}\overline{\mbox{\@titleRunning}}\end{math}}
+%       \fancyhead[RO,RE]{\begin{math}\overline{\mbox{\@authorRunning}}\end{math}}
+%   \fi
 %\else
-	\iftwosided
-		\fancyhead[RE]{{\@EasyFontStyle\@titleRunning}}
-		\fancyhead[RO]{{\@EasyFontStyle\@authorRunning}}
-	\else
-		\fancyhead[LO,LE]{{\@EasyFontStyle\@titleRunning}}
-		\fancyhead[RO,RE]{{\@EasyFontStyle\@authorRunning}}
-	\fi
+    \iftwosided
+        \fancyhead[RE]{{\@EasyFontStyle\@titleRunning}}
+        \fancyhead[RO]{{\@EasyFontStyle\@authorRunning}}
+    \else
+        \fancyhead[LO,LE]{{\@EasyFontStyle\@titleRunning}}
+        \fancyhead[RO,RE]{{\@EasyFontStyle\@authorRunning}}
+    \fi
 %\fi
 
 \fancyfoot{}
 \ifodd\c@page
-	\fancyfoot[LO]{{\@EasyFontStyle\@VolumeInfo}}
-	\fancyfoot[RE]{{\@EasyFontStyle\@EventInfo}}
+    \fancyfoot[LO]{{\@EasyFontStyle\@VolumeInfo}}
+    \fancyfoot[RE]{{\@EasyFontStyle\@EventInfo}}
 \else
-	\fancyfoot[RE]{{\@EasyFontStyle\@VolumeInfo}}
-	\fancyfoot[LO]{{\@EasyFontStyle\@EventInfo}}
+    \fancyfoot[RE]{{\@EasyFontStyle\@VolumeInfo}}
+    \fancyfoot[LO]{{\@EasyFontStyle\@EventInfo}}
 \fi
 \ifodd\c@page
-	\fancyfoot[RO]{{\normalsize\thepage}}
-	\fancyfoot[LE]{{\normalsize\thepage}}
+    \fancyfoot[RO]{{\normalsize\thepage}}
+    \fancyfoot[LE]{{\normalsize\thepage}}
 \else
-	\fancyfoot[LE]{{\normalsize\thepage}}
-	\fancyfoot[RO]{{\normalsize\thepage}}
+    \fancyfoot[LE]{{\normalsize\thepage}}
+    \fancyfoot[RO]{{\normalsize\thepage}}
 \fi
-	\renewcommand{\headrulewidth}{0pt}
-	\renewcommand{\footrulewidth}{0pt}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
 %\fi
 
 % Suppress the default date, per Geoff
@@ -596,11 +596,11 @@
 \fancypagestyle{plain}{%
 \fancyhf{} % clear all header and footer fields
 \ifodd\c@page
-	\fancyfoot[L]{\@EasyVolumeInfo{}}%
-	\fancyfoot[R]{}
+    \fancyfoot[L]{\@EasyVolumeInfo{}}%
+    \fancyfoot[R]{}
 \else
-	\fancyfoot[R]{\@EasyVolumeInfo}%
-	\fancyfoot[L]{}
+    \fancyfoot[R]{\@EasyVolumeInfo}%
+    \fancyfoot[L]{}
 \fi
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}}
@@ -622,15 +622,15 @@
              \fi}%
    %%
   \newpage
-	\null
+    \null
   % Facelift a bit the title and make it bold, per Geoff
-	\vspace{-1cm}
-	\begin{center}%
-		\let\footnote\thanks%
-		\ifwithtimes
-			{\LARGE{\@title}\par}
-		\else
-			{\LARGE\@title\par}
+    \vspace{-1cm}
+    \begin{center}%
+        \let\footnote\thanks%
+        \ifwithtimes
+            {\LARGE{\@title}\par}
+        \else
+            {\LARGE\@title\par}
                  \fi
                  \vskip \baselineskip
                  \@date
@@ -644,7 +644,7 @@
                \noindent\ignorespaces
                \@author\vskip.35cm}}
                {\small\institutename}
-	\end{center}%
+    \end{center}%
 }
 
 \ifEPiCfinal
@@ -724,50 +724,50 @@
 \let\endoldthebibliography=\endthebibliography
 \renewenvironment{thebibliography}[1]
 {
-	\small
-	\begin{oldthebibliography}{#1}
-		\setlength{\parskip}{2pt}
-		\setlength{\itemsep}{0pt}
+    \small
+    \begin{oldthebibliography}{#1}
+        \setlength{\parskip}{2pt}
+        \setlength{\itemsep}{0pt}
 }
 {
-	\end{oldthebibliography}
+    \end{oldthebibliography}
 }
 
 \ifdebug
-	\ifverbose
-		\RequirePackage[colorgrid,pscoord]{eso-pic}%
-	\else
-		\RequirePackage[pscoord]{eso-pic}
-		\newcommand\ShowFramePicture{%
-		  \begingroup
-		    \color{red}
-		    \AtTextLowerLeft{\framebox(\LenToUnit{\textwidth},\LenToUnit{\textheight}){}}%
-		    \AtTextUpperLeft{\put(0,\LenToUnit{\headsep}){\framebox(\LenToUnit{\textwidth},\LenToUnit{\headheight}){}}}%
-		    \AtTextLowerLeft{\put(0,\LenToUnit{-\footskip}){\framebox(\LenToUnit{\textwidth},\LenToUnit{\headheight}){}}}%
-		  \endgroup
-		}
-		\AddToShipoutPicture{\ShowFramePicture}
-	\fi
-	%\RequirePackage[a4,cam,center]{crop}%
-	%\RequirePackage[cam,center]{crop}%
+    \ifverbose
+        \RequirePackage[colorgrid,pscoord]{eso-pic}%
+    \else
+        \RequirePackage[pscoord]{eso-pic}
+        \newcommand\ShowFramePicture{%
+          \begingroup
+            \color{red}
+            \AtTextLowerLeft{\framebox(\LenToUnit{\textwidth},\LenToUnit{\textheight}){}}%
+            \AtTextUpperLeft{\put(0,\LenToUnit{\headsep}){\framebox(\LenToUnit{\textwidth},\LenToUnit{\headheight}){}}}%
+            \AtTextLowerLeft{\put(0,\LenToUnit{-\footskip}){\framebox(\LenToUnit{\textwidth},\LenToUnit{\headheight}){}}}%
+          \endgroup
+        }
+        \AddToShipoutPicture{\ShowFramePicture}
+    \fi
+    %\RequirePackage[a4,cam,center]{crop}%
+    %\RequirePackage[cam,center]{crop}%
 \fi
 
 \ifframe
-	\ifverbose
-		\RequirePackage[colorgrid,pscoord]{eso-pic}%
-	\else
-		\RequirePackage[pscoord]{eso-pic}
-		\newcommand\ShowBlueFrame{%
-		  \begingroup
-		    \color{blue}
+    \ifverbose
+        \RequirePackage[colorgrid,pscoord]{eso-pic}%
+    \else
+        \RequirePackage[pscoord]{eso-pic}
+        \newcommand\ShowBlueFrame{%
+          \begingroup
+            \color{blue}
                     % odd page
-%		    \AtTextLowerLeft{\put(\LenToUnit{-23.6mm},\LenToUnit{-21.8mm}){\framebox(\LenToUnit{188.3mm},\LenToUnit{245.4mm}){}}}%
+%           \AtTextLowerLeft{\put(\LenToUnit{-23.6mm},\LenToUnit{-21.8mm}){\framebox(\LenToUnit{188.3mm},\LenToUnit{245.4mm}){}}}%
                     % even page
-%		    \AtTextLowerLeft{\put(\LenToUnit{-19.6mm},\LenToUnit{-21.8mm}){\framebox(\LenToUnit{188.3mm},\LenToUnit{245.4mm}){}}}%
-		  \endgroup
-		}
-		\AddToShipoutPicture{\ShowBlueFrame}
-	\fi
+%           \AtTextLowerLeft{\put(\LenToUnit{-19.6mm},\LenToUnit{-21.8mm}){\framebox(\LenToUnit{188.3mm},\LenToUnit{245.4mm}){}}}%
+          \endgroup
+        }
+        \AddToShipoutPicture{\ShowBlueFrame}
+    \fi
 \fi
 
 % \geometry{papersize={170mm,240mm},total={124mm,185mm}}
@@ -776,49 +776,49 @@
 %% various participation and affiliation options.
 
 \newcommand
-	{\indexedperson}
-	[3]
-	{\index{#2!#1}\index{#1}\index{#1!#3}}
+    {\indexedperson}
+    [3]
+    {\index{#2!#1}\index{#1}\index{#1!#3}}
 
 \newcommand
-	{\indexedauthor}
-	[1]
-	{\indexedperson{#1}{Authors}{Author}}
+    {\indexedauthor}
+    [1]
+    {\indexedperson{#1}{Authors}{Author}}
 
 \newcommand
-	{\indexededitor}
-	[1]
-	{\indexedperson{#1}{Editors}{Editor}}
+    {\indexededitor}
+    [1]
+    {\indexedperson{#1}{Editors}{Editor}}
 
 \newcommand
-	{\indexedpcmember}
-	[1]
-	{\indexedperson{#1}{PC Members}{PC Member}}
+    {\indexedpcmember}
+    [1]
+    {\indexedperson{#1}{PC Members}{PC Member}}
 
 \newcommand
-	{\indexedreviewer}
-	[1]
-	{\indexedperson{#1}{Reviewers}{Reviewer}}
+    {\indexedreviewer}
+    [1]
+    {\indexedperson{#1}{Reviewers}{Reviewer}}
 
 \newcommand
-	{\indexedorganizer}
-	[1]
-	{\indexedperson{#1}{Organizers}{Organizer}}
+    {\indexedorganizer}
+    [1]
+    {\indexedperson{#1}{Organizers}{Organizer}}
 
 \newcommand
-	{\indexedwebmaster}
-	[1]
-	{\indexedperson{#1}{Webmasters}{Webmaster}}
+    {\indexedwebmaster}
+    [1]
+    {\indexedperson{#1}{Webmasters}{Webmaster}}
 
 \newcommand
-	{\indexedaffiliation}
-	[2]
-	{\indexedperson{#1}{#2}{#2}}
+    {\indexedaffiliation}
+    [2]
+    {\indexedperson{#1}{#2}{#2}}
 
 \newcommand
-	{\indexedsupervisor}
-	[2]
-	{\indexedperson{#1}{}{Supervisor: #2}\indexedperson{#2}{Supervisors}{Supervisor}}
+    {\indexedsupervisor}
+    [2]
+    {\indexedperson{#1}{}{Supervisor: #2}\indexedperson{#2}{Supervisors}{Supervisor}}
 
 \endinput
 

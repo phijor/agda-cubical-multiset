@@ -2,4 +2,4 @@
 
 $pdf_mode = 1;
 $out_dir = '_target';
-@default_files = ('Multiset.tex');
+@default_files = ('extended-abstract.tex');
