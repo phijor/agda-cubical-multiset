@@ -30,17 +30,16 @@ open import Cubical.HITs.FiniteMultiset as HeadPList
 -- inveres, show that they preserve the monoid multiplication.   --
 -- ============================================================= --
 
-module _ {X : Type} where
-Perm1ToMPath : ∀ {x y : X} {xs ys : List X}
+Perm1ToMPath : ∀ {x y : X} (xs ys : List X)
   → M.fromList (xs ++ x ∷ y ∷ ys) ≡ M.fromList (xs ++ y ∷ x ∷ ys)
-Perm1ToMPath {xs = []} {ys} = M.assoc _ _ _ ∙∙ cong (_⊕ M.fromList ys) (M.comm _ _) ∙∙ sym (M.assoc _ _ _)
-Perm1ToMPath {xs = x ∷ xs} = cong (x M.∷_) Perm1ToMPath
+Perm1ToMPath [] ys = M.assoc _ _ _ ∙∙ cong (_⊕ M.fromList ys) (M.comm _ _) ∙∙ sym (M.assoc _ _ _)
+Perm1ToMPath (x ∷ xs) ys = cong (x M.∷_) (Perm1ToMPath xs ys)
 
 PermToMPath : ∀ {xs ys : List X}
   → Perm xs ys
   → M.fromList xs ≡ M.fromList ys
 PermToMPath stop = refl
-PermToMPath (perm ps) = Perm1ToMPath ∙ PermToMPath ps
+PermToMPath (perm {xs = xs} ps) = Perm1ToMPath xs _ ∙ PermToMPath ps
 
 MToPList : M X → PList X
 MToPList = M.rec isSetPList
