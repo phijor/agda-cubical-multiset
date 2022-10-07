@@ -5,19 +5,11 @@
 \documentclass[runningheads]{llncs}
 %
 \usepackage[T1]{fontenc}
-% T1 fonts will be used to generate the final print and online PDFs,
-% so please use T1 fonts in your manuscript whenever possible.
-% Other font encondings may result in incorrect characters.
-%
 \usepackage{multiset}
 
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{amsfonts}
 \usepackage{bussproofs}
 
 \usepackage{textcomp}
-\usepackage{newunicodechar}
 
 \usepackage{todonotes}
 
@@ -57,6 +49,17 @@ The abstract should briefly summarize the contents of the paper in
 \end{abstract}
 
 \section{Introduction}
+
+\subsection{Notation}
+\begin{itemize}
+  \item Definitional equality: $\DefEq$
+  \item propositional equality (paths): $=$
+  \item Binders: always in the form of $\mathsf{Q} (x : X)\Where \langle\mathsf{expr}\rangle$,
+    i.e. $\sum (n : \N)\Where n * n = 2$.
+    Binders extend as far right as possible.
+  \item $\exists$ for \emph{mere existence}, i.e. $\PropTrunc{\sum (\mathunderscore)\Where X}$.
+  \item dependent paths: $\PathP{} (\lambda i\Where \mathunderscore)\, \mathunderscore\, \mathunderscore$
+\end{itemize}
 
 \section{Type Theory and Cubical Agda}
 
@@ -140,7 +143,7 @@ defined as the higher inductive type induced by the following rules:
     \textunderscore\sim\textunderscore &: ∀ \{n\}\Where (v\, w : \Fin n → X) → \Type \\
     v \sim w &\mathrel{=_{\mathsf{df}}}
       ∃ \sigma : \Fin n ≃ \Fin n \Where
-        \operatorname{\mathsf{PathP}} (\lambda i\Where \operatorname{ua}(\sigma)\, i → X)\, v\, w
+        \PathP{} (\lambda i\Where \operatorname{ua}(\sigma)\, i → X)\, v\, w
   \end{align*}
 \end{definition}
 
@@ -176,7 +179,7 @@ defined as the higher inductive type induced by the following rules:
   \end{align*}
 \end{definition}
 
-\begin{theorem}
+\begin{theorem}\label{thm:FMSetSetTruncInvariant}
   Finite multisets are invariant under set-truncation:
   \begin{equation}
     \FMSet \SetTrunc{X} ≃ \FMSet X
@@ -196,31 +199,86 @@ defined as the higher inductive type induced by the following rules:
 \end{proof}
 
 \subsection{As a Groupoid}
-Definition as a $\Sigma$-type,
-but indexed by a groupoid instead
-of FinSet.
+Following \cite{Kock2012}, we argue the correct perspective on bags in Homotopy Type Theory
+is to define them as groupoids instead of sets.
+The rationale is that identifications of bags are permutations, and these should inherently be treated as \emph{data}.
+Instead of viewing bags as quotients of lists, thereby \enquote{forgetting} about the permutations,
+we define a type of lists with \enquote{more identifications}.
+Since all constructions based on this type have to be homotopy coherent,
+they will automatically respect these extra data,
+making them invariant under permutation for free.
+
+We start by defining a type family $\Bag : \Type → \Type$,
+and substantiate the above claims by first showing its set-truncation is $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
+and in \cref{ssec:FMGpdLim} by constructing its final coalgebra (\cref{thm:FMGpdLim}).
+
 
 \begin{itemize}
     \item Compare large/small definition.
 \end{itemize}
 \begin{definition}
+  A small (\enquote{sm{\aa}l}) type:
   \begin{align*}
-    \FMGpd X
+    \Bag X
       \mathbin{=_{\mathrm{df}}}
       \sum\,\Var{x} : \operatorname{\mathsf{Bij}}\Where
         \langle x \rangle \to X,
   \end{align*}
 \end{definition}
+\begin{definition}
+  A large type, $\Tote : \Type_\ell → \Type_{\ell + 1}$:
+  \begin{align*}
+    \Tote X
+      \mathbin{=_{\mathrm{df}}}
+      \sum\,\Var{B} : \operatorname{FinSet}\Where B \to X,
+  \end{align*}
+\end{definition}
 
+\begin{proposition}
+  If $X$ is a groupoid, then $\Bag X$ is a groupoid.
+\end{proposition}
+\begin{proof}
+  By assumption $X$ is a groupoid,
+  so the function type $\langle x \rangle → X$ is a groupoid
+  for any $x : \Bij$.
+  By construction $\Bij$ is a groupoid, therefore the entire $\Sigma$-type is a groupoid.
+\end{proof}
+
+\paragraph{Comparing $\Op{List}$ and $\Bag$}\todo{Fit this comparison in somewhere}
+Note that $\Bag$ is somewhat analogous to $\Op{List}$:
+Given a type $A$ and a family $B$ over it, they both match ${\sum (a : A)\Where B(a) → X}$:
+we have $A = ℕ$ and $B = \Fin$ for $\Op{List}$,
+and $A = \Bij$ and $B = \langle\_\rangle$ for $\Bag$.
+In particular, $\SetTrunc{\Bij} ≃ ℕ$.
 
 In general, $\FMSet X$ is at least a groupoid.
 
-\begin{theorem}
+\begin{theorem}\label{thm:FMSetOfFMGpdTrunc}
   Set-truncating a bag yields a finite multiset.
   For any type $X$,
   \[
-    \SetTrunc{\FMGpd X} ≃ \FMSet X
+    \SetTrunc{\Bag X} ≃ \FMSet X
   \]
+\end{theorem}
+\begin{proof}
+  We prove the result for $\Tote$, and later transport it to $\Bag$.
+  The proof proceeds by constructing an explicit isomorphism $\SetTrunc{\Tote X} \cong \FMSet X$.
+  To construct the map $\FMSet X → \SetTrunc{\Tote X}$, by the induction principle for
+  $\FMSet$,\todo{Define this earlier!} it is enough to give a function
+  $f : \forall \{\Var{sz}\}\Where (\Fin \Var{sz} → X) → \SetTrunc{\Tote X}$
+  and to show that it respects $(\sim)$.
+  Let $f(v) \DefEq \SetTruncCon[(\Fin \Var{sz} , v)]$, since $\Fin \Var{sz}$ is obviously a finite set.
+  To prove that $v \sim w$ implies $f(v) = f(w)$, we note that the conclusion is a proposition,
+  thus we can assume a permutation $v \circ \sigma = w$ to construct \ldots
+  \todo[inline]{%
+    CONTINUE HERE.
+  }
+\end{proof}
+
+\subsection{As lists up to permutation}
+
+\begin{theorem}
+  For any $X$, the types $\FMSet X$, $\M X$ and $\operatorname{PList} X$ are equivalent.
 \end{theorem}
 
 \section{The Final Coalgebra}
@@ -234,38 +292,57 @@ Maybe compare final coalgebras and corecursive algebras which are fixpoints.
     Surjectivity works (under the assumption of countable(?) choice).
 }
 
-\begin{theorem}
-    Injectivity of the limit-preservation map
-    \[
-        \operatorname{pres}_{\Lim (\Chain \M)}\colon
-            \M (\Lim (\Chain \M))
+  \begin{theorem}\label{thm:InjPresImpliesLLPO}
+    The function 
+        $\operatorname{pres}\colon
+            \FMSet (\lim_{n < \omega} \FMSet^n 1)
             \to
-            \Lim (\Shift(\Chain\M))
-    \]
-    implies \LLPO.
-\end{theorem}
+            \lim_{n < \omega} (\FMSet^{n+1} 1)$
+    is surjective,
+    but its injectivity implies the \emph{lesser limited principle of omniscience}, \LLPO.
+  \end{theorem}
 
 \todo[inline]{%
     Think about the converse statement,
-    does \LLPO already imply injectivity?
+    does {\LLPO} already imply injectivity?
 }
 
-\subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}
+\subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
+
+\begin{theorem}\label{thm:FMGpdLim}
+  Let $L_{\Bag} \DefEq \lim_{n < \omega} \Bag^n 1$.
+  The limit-preservation map $\operatorname{pres}$ is an equivalence of groupoids.
+  In particular, the limit $L_{\Bag}$ is a fixpoint of $\Bag$ and its final coalgebra.
+\end{theorem}
 
 \subsection{Truncating the Groupoid Construction}
 
 Compare the set-truncation of the groupoid construction
 and the set-level definition.
 
-\begin{itemize}
-    \item
-        Show that the set-truncation of the limit in
-        groupoids stays a fixpoint for the set-level functor.
-    \item
-        \emph{(Unproven)}
-        Only assuming the (full) axiom of choice this is the
-        largest fixpoint, i.e.\@ yields a final coalgebra.
-\end{itemize}
+\begin{theorem}\label{thm:FMSetFixpointOfTrunc}
+  The set-truncation of $\Lim{\Bag}$ is a fixpoint of $\FMSet$, i.e.\@
+  there is an equivalence $\FMSet \SetTrunc{\Lim{\Bag}} ≃ \SetTrunc{\Lim{\Bag}}$.
+\end{theorem}
+\begin{proof}
+  The equivalence is obtained from the composition
+  \begin{align}
+    \FMSet \SetTrunc{\Lim{\Bag}}
+      &≃ \FMSet \Lim{\Bag}          \Step{thm:FMSetFixpointOfTrunc:step1} \\
+      &≃ \SetTrunc{\Bag \Lim{\Bag}} \Step{thm:FMSetFixpointOfTrunc:step2} \\
+      &≃ \SetTrunc{\Lim{\Bag}}      \Step{thm:FMSetFixpointOfTrunc:step3}
+  \end{align}
+  where \eqref{thm:FMSetFixpointOfTrunc:step1} is invariance of $\FMSet$ under set-truncation
+  (\cref{thm:FMSetSetTruncInvariant}),
+  \cref{thm:FMSetFixpointOfTrunc:step2} is \cref{thm:FMSetOfFMGpdTrunc}
+  and \eqref{thm:FMSetFixpointOfTrunc:step3} follows since $\Lim{\Bag}$ is a limit (\cref{thm:FMGpdLim}).
+\end{proof}
+
+Note that the above fixpoint is not necessarily the \emph{largest} fixpoint.
+\todo[inline,caption={Choice for largest fixpoint}]{%
+  \emph{(Unproven)}
+  Only assuming the (full) axiom of choice this is the case, i.e.\@ yields a final coalgebra.
+  }
 
 \section{Discussion: Alternatives}
 \subsection{Outlook: Generalization to Analytic Functors}
@@ -292,10 +369,6 @@ and the set-level definition.
 
 \section{Conclusions}
 
-%
-% the environments 'definition', 'lemma', 'proposition', 'corollary',
-% 'remark', and 'example' are defined in the LLNCS documentclass as well.
-%
 \subsubsection{Acknowledgements}
 
 \nocite{*}

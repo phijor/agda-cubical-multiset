@@ -11,14 +11,24 @@
 
 \ProcessKeyvalOptions*
 
-\RequirePackage{xparse}
-\RequirePackage{amsmath}
-\RequirePackage{amsfonts}
-\RequirePackage{stmaryrd} % for \{l,r}bag
-\RequirePackage{doi} % Links to DOI in bibliography
+% LaTeX package loading is a mess.
+% Shout-out to hyperref for being particularly obtuse.
+% See: https://texblog.net/hyperref/
 
 \RequirePackage[utf8]{inputenc}
 \RequirePackage{newunicodechar}
+
+\RequirePackage{xparse}
+\RequirePackage{amsmath}
+
+\RequirePackage{amsfonts}
+\RequirePackage{stmaryrd} % for \{l,r}bag
+
+\RequirePackage[colorlinks]{hyperref}
+\RequirePackage{doi} % Links to DOI in bibliography
+
+\RequirePackage{csquotes}
+\RequirePackage[capitalize]{cleveref} % Load last because... duh, LaTeX.
 
 \newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
 \newunicodechar{→}{\ensuremath{\mathrel{\mathnormal\to}}}
@@ -28,7 +38,6 @@
 
 \DeclareMathOperator{\Chain}{ch}
 \DeclareMathOperator{\Shift}{sh}
-\DeclareMathOperator{\Lim}{Lim}
 \DeclareMathOperator{\Type}{Type}
 \DeclareMathOperator{\Fin}{Fin}
 \DeclareMathOperator{\Sym}{\mathfrak{S}}
@@ -42,9 +51,15 @@
 \newcommand*{\DefEq}{\ensuremath{\mathbin{=_\mathsf{df}}}}
 
 \DeclareMathOperator{\Refl}{\mathsf{refl}}
+\DeclareMathOperator{\PathP}{\mathsf{PathP}}
 
 \DeclareMathOperator{\FMSet}{\mathsf{FMSet}}
-\DeclareMathOperator{\FMGpd}{\mathsf{FMGpd}}
+\DeclareMathOperator{\Bag}{\mathsf{Bag}}
+\newcommand*{\FMGpd}{%
+    \PackageWarning{multiset}{Use \\Bag, dummy!}%
+    \Bag
+}
+\DeclareMathOperator{\Tote}{\mathsf{Tote}}
 
 \DeclareMathOperator{\FinSet}{\mathsf{FinSet}}
 
@@ -57,6 +72,8 @@
 \DeclareMathOperator{\IsProp}{\mathsf{isProp}}
 \DeclareMathOperator{\IsSet}{\mathsf{isSet}}
 \DeclareMathOperator{\IsGpd}{\mathsf{isGroupoid}}
+
+\NewDocumentCommand{\Lim}{m}{L_{#1}}
 
 \newcommand*{\UU}{\ensuremath{\mathcal{U}}}
 
@@ -90,3 +107,8 @@
 \newcommand*{\LLPO}{LLPO}
 \newcommand*{\True}{\ensuremath{\mathsf{true}}}
 \newcommand*{\False}{\ensuremath{\mathsf{false}}}
+
+\crefname{step}{step}{steps}
+\creflabelformat{step}{(#2#1#3)}
+
+\NewDocumentCommand{\Step}{m}{\label[step]{#1}}
