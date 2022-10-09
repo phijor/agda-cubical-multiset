@@ -25,7 +25,7 @@
 \RequirePackage{amsfonts}
 \RequirePackage{stmaryrd} % for \{l,r}bag
 
-\RequirePackage[colorlinks]{hyperref}
+\PassOptionsToPackage{colorlinks}{hyperref}
 \RequirePackage{doi} % Links to DOI in bibliography
 
 \RequirePackage{csquotes}
@@ -88,8 +88,6 @@
 \newcommand*{\M}{\ensuremath{\mathsf{M}}}
 
 \newcommand*{\Blank}{\ensuremath{\mathord{\_}}}
-
-\newcommand*{\Bag}[1][\Blank]{\ensuremath{\lbag #1 \rbag}}
 
 \NewDocumentCommand{\Trunc}{m m}{\ensuremath{{\lVert #2 \rVert}_{#1}}}
 \NewDocumentCommand{\TruncCon}{m m}{\ensuremath{{\lvert #2 \rvert}_{#1}}}
