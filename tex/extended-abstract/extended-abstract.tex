@@ -28,15 +28,15 @@
   mathematical tools in the behavioural analysis of nondeterministic
   systems. Such systems can be described as coalgebras $c : S \to
   F\, S$, with $F$ being either powerset or bag functor, associating
-  to each state $s : S$ the collection $c \, x$ of reachable
+  to each state $x : S$ the collection $c \, x$ of reachable
   states. When $F$ is the bag functor, a state $x$ can reach
   another state $y$ in multiple ways, specified by the multiplicity of
-  $y$ in $c\,x$. One can also study systems with finite reachable
-  states and employ finite variants of the powerset and bag functor.
+  $y$ in $c\,x$. In practice one often studies systems with finite reachable
+  states and employs finite variants of the powerset and bag functor.
   The finite bag functor takes a set $X$ to the set of finite
   bags of elements of $X$.  In contrast to the finite powerset
   functor, these collections distinguish multiple occurrences of
-  identical elements, e.g.\@ $\{1, 2, 1\}$ is a bag with containing an element
+  identical elements, e.g.\@ $\{1, 2, 1\}$ is a bag containing an element
   1 with multiplicity 2.
   
   The behavior of a finitely nondeterministic system starting from a
@@ -158,8 +158,7 @@
   $\FMSet{X}$ is a set, regardless of the homotopy level of $X$.
   Additionally, $\FMSet$ is invariant under set-truncation, i.e.
   $\FMSet \SetTrunc{X} ≃ \FMSet X$.
-  The type of finite bags can equivalently be defined as the free commutative monoid on $X$
-  \cite{Choudhury2021}, which can directly be expressed as a higher inductive type.
+  The type of finite bags can equivalently be defined as the free commutative monoid on $X$, which can be directly expressed as a higher inductive type \cite{Choudhury2021}.
 
   Trying to construct the final coalgebra of $\FMSet$ as the limit of
   the chain (\ref{eq:chain}) (as traditionally done in a classical
@@ -177,7 +176,7 @@
             \to
             \lim_{n < \omega} (\FMSet^{n+1} 1)$
     is surjective,
-    but its injectivity implies the \emph{lesser limited principle of omniscience}, \LLPO.
+    but its injectivity is equivalent to the \emph{lesser limited principle of omniscience}, \LLPO.
   \end{theorem}
   \LLPO{} \cite[{Ch.\@ 1}]{Bridges1987} is a weak version of the law
   of the excluded middle, and it is not provable from intuitionistic
@@ -194,13 +193,13 @@
   We conclude from Theorem \ref{thm:InjPresImpliesLLPO} that the
   classical construction of the final coalgebra for $\FMSet$ cannot be
   replicated in our constructive setting without assumption of
-  classical principles. This was also already the case for the finite
-  powerset functor \cite{Veltri2021}.
+  classical principles. This is analogous to the case of the finite
+  powerset functor, which we know to be suffering from similar issues \cite{Veltri2021}.
 
   \subsection*{Finite Bags in Groupoids}
 
   To remedy the situation, we introduce a bag functor that treats identifications of bags as data.
-  Define the type of \emph{finite sets} as
+  Define the type of \emph{(Bishop) finite sets} as
   \[
     \FinSet \DefEq
       \sum Y : \Type\Where
@@ -210,8 +209,8 @@
   i.e.\@ the type of all types merely equivalent to some $\Fin k$.
   While in this abstract we suppress any size-related issues (all the definitions and theorem given so far can be made universe-polymorphic), they play a crucial r\^{o}le in the formalization.
   Notice that $\FinSet$ is a large type compared to the types it ranges over,
-  but it admits a small axiomatization as a HIT $\Bij$ as introduced in \cite{Finster2021}.
-  The rules are the following (plus one stating that $\Bij$ is a groupoid):
+  but it admits a small axiomatization as a higher inductive type $\Bij$, originally introduced in \cite{Finster2021}.
+  Its introduction rules are the following (plus one stating that $\Bij$ is a groupoid):
   \begin{center}
     \small
     \hspace*{\fill}
@@ -243,7 +242,7 @@
   Here, $\operatorname{id}$ is the identity-equivalence, $(\circ)$ composition of equivalences,
   $\Refl : \Obj n = \Obj n$ a reflexivity proof of identity and $(\bullet)$ is transitivity of $(=)$.
 
-  With this in mind, we define for any type $X$ the type
+  With this in mind, we define, for any type $X$, the type
   \[
     \FMGpd X \DefEq
       \sum x : \Bij\Where \langle x \rangle → X,
