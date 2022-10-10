@@ -103,14 +103,13 @@
       \hfill
         \AxiomC{$x, y : \SetTrunc{A}$}
         \AxiomC{$p, q : x = y$}
-        \RightLabel{$\operatorname{squash}_2$}
-        \BinaryInfC{$p = q$}
+        \BinaryInfC{$\SetTruncSquash : p = q$}
         \DisplayProof
       \hspace*{\fill}
     \end{center}
   \end{definition}
-  This type is a \enquote{higher} inductive type since the rule $\operatorname{squash}_2$ produces an identification $p = q$ instead of an element of $\SetTrunc{A}$.
-  By definition, $\operatorname{squash}_2 : \IsSet \SetTrunc{A}$.
+  This type is a \enquote{higher} inductive type since the rule $\SetTruncSquash$ produces an identification $p = q$ instead of an element of $\SetTrunc{A}$.
+  By definition, $\SetTruncSquash : \IsSet \SetTrunc{A}$.
   Similarly, higher inductive types allow us to model quotient types,
   in particular set-quotients:
 
@@ -127,22 +126,20 @@
       \hfill
         \AxiomC{$a, b : A$}
         \AxiomC{$r : a \sim b$}
-        \RightLabel{$\operatorname{eq/}_{\!2}$}
-        \BinaryInfC{$\SetQuotCon[a] = \SetQuotCon[b]$}
+        \BinaryInfC{$\operatorname{\mathsf{eq/}}_{\!\mathsf{2}} : \SetQuotCon[a] = \SetQuotCon[b]$}
         \DisplayProof
       \hfill
         \AxiomC{$x, y : \SetQuot[A][\sim]$}
         \AxiomC{$p, q : x = y$}
-        \RightLabel{$\operatorname{squash/}_{\!2}$}
-        \BinaryInfC{$p = q$}
+        \BinaryInfC{$\SetQuotSquash : p = q$}
         \DisplayProof
       \hspace*{\fill}
     \end{center}
-    and forms a set by $\operatorname{squash/}_{\!2}$.
+    and forms a set by $\SetQuotSquash$.
   \end{definition}
   Similarly, the \emph{propositional truncation} of $A$ is the higher inductive type $\PropTrunc{A}$
   with a constructor $\PropTruncCon : A → \PropTrunc{A}$
-  and a rule $\operatorname{squash}_1 : \IsProp \PropTrunc{A}$.
+  and a rule $\PropTruncSquash : \IsProp \PropTrunc{A}$.
 
   \subsection*{Finite Bags in Sets}
   In a first attempt, we define
@@ -207,7 +204,7 @@
         \PropTrunc{Y ≃ \Fin k},
   \]
   i.e.\@ the type of all types merely equivalent to some $\Fin k$.
-  While in this abstract we suppress any size-related issues (all the definitions and theorem given so far can be made universe-polymorphic), they play a crucial r\^{o}le in the formalization.
+  While in this abstract we suppress any size-related issues (all the definitions and theorems given so far can be made universe-polymorphic), they play a crucial r\^{o}le in the formalization.
   Notice that $\FinSet$ is a large type compared to the types it ranges over,
   but it admits a small axiomatization as a higher inductive type $\Bij$, originally introduced in \cite{Finster2021}.
   Its introduction rules are the following (plus one stating that $\Bij$ is a groupoid):
@@ -222,8 +219,7 @@
     \hfill
       \AxiomC{$m, n : \N$}
       \AxiomC{$\alpha : \Fin m ≃ \Fin n$}
-      \RightLabel{$\Hom$}
-      \BinaryInfC{$\Obj m = \Obj n$}
+      \BinaryInfC{$\Hom : \Obj m = \Obj n$}
       \DisplayProof
     \hfill
       \AxiomC{$n : \N$}

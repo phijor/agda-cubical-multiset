@@ -89,20 +89,26 @@
 
 \newcommand*{\Blank}{\ensuremath{\mathord{\_}}}
 
-\NewDocumentCommand{\Trunc}{m m}{\ensuremath{{\lVert #2 \rVert}_{#1}}}
-\NewDocumentCommand{\TruncCon}{m m}{\ensuremath{{\lvert #2 \rvert}_{#1}}}
+\NewDocumentCommand{\Trunc}{m m}{\ensuremath{{\lVert #2 \rVert}_{\mathsf{#1}}}}
+\NewDocumentCommand{\TruncCon}{m m}{\ensuremath{{\lvert #2 \rvert}_{\mathsf{#1}}}}
+\NewDocumentCommand{\TruncSquash}{m}{\ensuremath{\Op{squash}_{\mathsf{#1}}}}
 
-\newcommand*{\PropTrunc}[1]{\Trunc{1}{#1}}
-\newcommand*{\PropTruncCon}[1][\Blank]{\TruncCon{1}{#1}}
+\NewDocumentCommand{\PropTrunc}{ m }{\Trunc{1}{#1}}
+\NewDocumentCommand{\PropTruncCon}{ O{\Blank} }{\TruncCon{1}{#1}}
+\NewDocumentCommand{\PropTruncSquash}{}{\TruncSquash{1}}
 
-\newcommand*{\SetTrunc}[1]{\ensuremath{{\lVert #1 \rVert}_2}}
-\newcommand*{\SetTruncCon}[1][\Blank]{\ensuremath{{\lvert #1 \rvert}_2}}
+\NewDocumentCommand{\SetTrunc}{ m }{\Trunc{2}{#1}}
+\NewDocumentCommand{\SetTruncCon}{ O{\Blank} }{\TruncCon{2}{#1}}
+\NewDocumentCommand{\SetTruncSquash}{}{\TruncSquash{2}}
 
 \NewDocumentCommand{\BinRel}{ m O{\Blank} O{\Blank} }{%
     \ensuremath{#2 \mathrel{#1} #3}
 }
-\NewDocumentCommand{\SetQuot}{ O{\Blank} O{\Blank}}{\BinRel{/_{\!2}}[#1][#2]}
-\NewDocumentCommand{\SetQuotCon}{ O{\Blank} }{\ensuremath{{[#1]}_2}}
+\NewDocumentCommand{\SquashOp}{m}{\mathop{\mathsf{/_{\! #1}}}}
+
+\NewDocumentCommand{\SetQuot}{ O{\Blank} O{\Blank}}{#1 \SquashOp{2} #2}
+\NewDocumentCommand{\SetQuotCon}{ O{\Blank} }{\ensuremath{{[#1]}_{\mathsf{2}}}}
+\NewDocumentCommand{\SetQuotSquash}{}{\operatorname{\mathsf{squash/}_{\!\mathsf{2}}}}
 
 \newcommand*{\SymmetricAction}[1]{\BinRel{\sim_{#1}}}
 
