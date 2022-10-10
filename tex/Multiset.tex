@@ -142,7 +142,7 @@ defined as the higher inductive type induced by the following rules:
       &→ \FMSet X → A
   \end{align*}
   defined from the recursion principle of set-quotients.
-  Similarly, we define the induction principle $\operatorname{elim}_{\FMSet}$ for
+  Similarly, we define the induction principle $\Op{elim}_{\FMSet}$ for
   a dependent type family $B : \FMSet X → \Type$ of sets.
 \end{definition}
 
@@ -165,7 +165,7 @@ defined as the higher inductive type induced by the following rules:
   \begin{align*}
     \Op{elim}_{\Op{fin}} &: \forall n\Where \\
       &\to \{B : (\Fin n \to \SetTrunc{X}) \to \Type\} \\
-      &\to (\forall v\Where \operatorname{isSet} (B\, v)) \\
+      &\to (\forall v\Where \IsSet (B\, v)) \\
       &\to ((\mathsf{choice} : \Fin n \to X) \to B\, (\SetTruncCon{} \circ \mathsf{choice})) \\
       &\to (v : \Fin n \to \SetTrunc{X}) \to B\, v)
   \end{align*}
@@ -229,7 +229,7 @@ First, recall one way of defining \enquote{finite} sets in HoTT:
 It is easy to show that $\Op{isFinSet}$ is a proposition and that any type satisfying the predicate is a set.
 Similarly, one shows that $\Op{FinSet}$ forms a groupoid.
 Note that $\Op{FinSet}$ is a \emph{large} type, i.e. it lives in the successor universe of the types that it ranges over.
-From this, we can define a \enquote{tote}, which we think of as as finite collections of things in $X$:
+From this, we can define a \enquote{tote}, which we think of as a finite collections of things in $X$:
 \begin{definition}
   A large type, $\Tote : \Type_\ell → \Type_{\ell + 1}$:
   \begin{align*}
