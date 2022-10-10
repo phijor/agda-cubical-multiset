@@ -162,13 +162,13 @@
   metatheory) is problematic. The first step in the construction
   would be showing that $\FMSet$ preserves $\omega$-limits. In the
   case of the chain (\ref{eq:chain}) can be reduced to show that the
-  map $ \operatorname{pres}\colon \FMSet (\lim_{n < \omega} \FMSet^n
+  map $ \Op{pres}\colon \FMSet (\lim_{n < \omega} \FMSet^n
   1) \to \lim_{n < \omega} (\FMSet^{n+1} 1)$, defined via the
   universal property of the limit, is an equivalence of types. This is not the case in HoTT, since the latter is an inherently non-constructive principle:
 
   \begin{theorem}\label{thm:InjPresImpliesLLPO}
     The function 
-        $\operatorname{pres}\colon
+        $\Op{pres}\colon
             \FMSet (\lim_{n < \omega} \FMSet^n 1)
             \to
             \lim_{n < \omega} (\FMSet^{n+1} 1)$
@@ -182,7 +182,7 @@
   whether all even or all odd positions are $\False$.
 
   The non-constructive nature of the injectivity of
-  $\operatorname{pres}$ can be attributed to the fact that the
+  $\Op{pres}$ can be attributed to the fact that the
   relation $(\SymmetricAction{\Var{sz}}[][])$ encodes permutations of
   multisets as property instead of data, and this makes it impossible
   to recover information about all terms in the chain.
@@ -257,7 +257,7 @@
 
   \begin{theorem}\label{thm:FMGpdLim}
     Let $L_{\FMGpd} \DefEq \lim_{n < \omega} \FMGpd^n 1$.
-    The limit-preservation map $\operatorname{pres}$ is an equivalence of groupoids.
+    The limit-preservation map $\Op{pres}$ is an equivalence of groupoids.
     In particular, the limit $L_{\FMGpd}$ is a fixpoint of $\FMGpd$ and its final coalgebra.
   \end{theorem}
   This theorem is a direct consequence of a general result by Ahrens
