@@ -3,9 +3,7 @@
 
 \RequirePackage{kvoptions}
 
-\DeclareBoolOption{debug}{%
-    \def\thmt@debug{\typeout}%
-}
+\DeclareBoolOption{debug}
 
 \DeclareDefaultOption{\PackageWarning{multiset}{Unknown ‘\CurrentOption’}}
 
@@ -15,16 +13,20 @@
 % Shout-out to hyperref for being particularly obtuse.
 % See: https://texblog.net/hyperref/
 
+\RequirePackage{amsfonts}
+\RequirePackage{stmaryrd} % for \{l,r}bag
+
 \RequirePackage[utf8]{inputenc}
-\RequirePackage{newunicodechar}
+\RequirePackage[T1]{fontenc}
+
+\ifmultiset@debug
+    \PassOptionsToPackage{verbose}{newunicodechar}
+\fi
+\RequirePackage{newunicodechar}[2018/04/08]
 
 \RequirePackage{xparse}
 \RequirePackage{mathtools}
 \RequirePackage{amsmath}
-\RequirePackage{amsthm}
-
-\RequirePackage{amsfonts}
-\RequirePackage{stmaryrd} % for \{l,r}bag
 
 \PassOptionsToPackage{colorlinks}{hyperref}
 \RequirePackage{doi} % Links to DOI in bibliography
@@ -34,7 +36,7 @@
 
 \newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
 \newunicodechar{→}{\ensuremath{\mathrel{\mathnormal\to}}}
-\newunicodechar{∀}{\ensuremath{\mathnormal\forall}}
+\newunicodechar{∀}{\ensuremath{\mathnormal\forall\/}}
 \newunicodechar{∃}{\ensuremath{\mathop{\mathnormal\exists\/}}}
 \newunicodechar{≃}{\mathbin{\mathnormal\simeq}}
 
@@ -60,6 +62,7 @@
 
 \DeclareMathOperator{\FMSet}{\mathsf{FMSet}}
 \DeclareMathOperator{\Bag}{\mathsf{Bag}}
+\DeclarePairedDelimiter{\BagCon}{\lbag}{\rbag}
 \newcommand*{\FMGpd}{%
     \PackageWarning{multiset}{Use \\Bag, dummy!}%
     \Bag
@@ -86,6 +89,7 @@
 \DeclareMathOperator{\IsGpd}{\mathsf{isGroupoid}}
 
 \NewDocumentCommand{\Lim}{m}{L_{#1}}
+\DeclareMathOperator{\Bang}{!}
 
 \newcommand*{\UU}{\ensuremath{\mathcal{U}}}
 

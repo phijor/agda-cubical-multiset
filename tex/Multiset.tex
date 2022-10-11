@@ -1,11 +1,8 @@
 \documentclass[runningheads]{llncs}
 
-\usepackage[T1]{fontenc}
-\usepackage{multiset}
+\usepackage[debug]{multiset}
 
 \usepackage{bussproofs}
-
-\usepackage{textcomp}
 
 \usepackage{todonotes}
 
@@ -13,8 +10,8 @@
 
 \title{Final Coalgebra of the Finite Bag Functor}
 \author{%
-    Philipp Joram\inst{1}\orcidID{0000-0002-0448-7907} \and
-    Niccolò Veltri\inst{1}\orcidID{0000-0002-7230-3436}%
+    Philipp Joram\orcidID{0000-0002-0448-7907} \and
+    Niccolò Veltri\orcidID{0000-0002-7230-3436}%
 }
 %
 \authorrunning{P. Joram et al.}
@@ -42,7 +39,7 @@ The abstract should briefly summarize the contents of the paper in
   \item dependent paths: $\PathP{} (\lambda i\Where \mathunderscore)\, \mathunderscore\, \mathunderscore$
   \item eliminators and co.:
     For any $F : \Type → \Type$, write
-    $\Elim_{F}$, $\Rec_{F}$ and $\Map_{F}$
+    $\Elim{F}$, $\Rec{F}$ and $\Map{F}$
     for the (dependent) eliminator, recursor and action on maps.
 \end{itemize}
 
@@ -125,7 +122,6 @@ defined as the higher inductive type induced by the following rules:
   \end{align*}
   where $\sim$ is the proposition-valued relation defined as
   \begin{align*}
-    \textunderscore\sim\textunderscore &: ∀ \{n\}\Where (v\, w : \Fin n → X) → \Type \\
     v \sim w &\mathrel{=_{\mathsf{df}}}
       ∃ \sigma : \Fin n ≃ \Fin n \Where
         \PathP{} (\lambda i\Where \operatorname{ua}(\sigma)\, i → X)\, v\, w
@@ -164,7 +160,7 @@ defined as the higher inductive type induced by the following rules:
   The dependent case is analogous.
   The function underlying the equivalence is defined by induction on $n$.
   For $n = 0$ we have $\Fin 0 ≃ \bot$,
-  so $\Op{box} \DefEq \SetTruncCon[\Elim{\bot}]$.
+  so $\Op{box} \DefEq (\lambda \Blank\Where \SetTruncCon[\Elim{\bot}])$.
   In the inductive step, we lift the \enquote{cons} operation
   $
     (\Cons) : X → (\Fin n → X) → (\Fin{} (1 + n) → X)
@@ -176,7 +172,7 @@ defined as the higher inductive type induced by the following rules:
     &\Op{unbox} \bar{v}\, k \DefEq \Map{\SetTrunc{\Blank}} (\lambda v\Where v\, k)\, \bar{v}
   \end{align*}
   is a two-sided inverse of $\Op{box}$.
-  The proof boils down to the fact that $\Map{\SetTrunc{\Blank}}$ is functorial.
+  The proof uses the fact that $\Map{\SetTrunc{\Blank}}$ is functorial.
 \end{proof}
 
 \begin{definition}
@@ -229,6 +225,12 @@ making them invariant under permutation for free.
 We define a type family $\Bag : \Type → \Type$,
 and substantiate these claims by first showing its set-truncation is $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
 and later by constructing its final coalgebra (\cref{ssec:FMGpdLim}, \cref{thm:FMGpdLim}).
+
+\todo[inline]{%
+  We should cite \cite{Piceghello2021} here.
+  He defines the free symmetric monoidal groupoid on a type
+  as a HITs (\enquote{s-lists}).
+}
 
 First, recall one way of defining \enquote{finite} sets in HoTT:
 
@@ -293,27 +295,28 @@ We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ 
   The forward direction is unproblematic, while the inverse function has to be carefully defined with the
   homotopy levels of the involved types in mind.
 
-  \newcommand*{\ToTote}{\operatorname{\mathsf{toTote}}}
+  \newcommand*{\ToTote}{\Op{toTote}}
+  \newcommand*{\ToFMSet}{\Op{toFMSet}}
 
-  To construct the map $\FMSet X → \SetTrunc{\Tote X}$, by the induction principle
+  To construct $\ToTote : \FMSet X → \SetTrunc{\Tote X}$, by the induction principle
   $\Elim{\FMSet}$, it is enough to give a function
   $f : \forall \{\Var{sz}\}\Where (\Fin \Var{sz} → X) → \SetTrunc{\Tote X}$
   and to show that it respects $(\sim)$.
   Let $f(v) \DefEq \SetTruncCon[(\Fin \Var{sz} , v)]$, since $\Fin \Var{sz}$ is obviously a finite set.
   To prove that $v \sim w$ implies $f(v) = f(w)$, we note that the conclusion is a proposition,
   thus by induction on $v \sim w$ obtain a permutation $\sigma$ such that $r : v \circ \sigma = w$.
-  We conclude that
-  \[
-    p \DefEq
-      \operatorname{\mathsf{\Sigma PathP}}\, (\mathsf{ua}\, \sigma)\, r : (\Fin\Var{sz} , v) = (\Fin\Var{sz}, w),
-  \]
-  which implies $f(v) = f(w)$ by applying $\SetTruncCon$ to $p$.
+  By univalence, $\Op{ua} \sigma : \Fin \Var{sz} = \Fin \Var{sz}$,
+  and transporting $r$ along this path yields
+  $
+    p : (\Fin\Var{sz} , v) = (\Fin\Var{sz}, w)
+  $.
+  Then $\Op{cong} \SetTruncCon\, p : f(v) = f(w)$ as desired.
 
-  To define the inverse $\SetTrunc{\Tote X} → \FMSet X$,
-  by set-truncation elimination it is enough to provide
+  In the other direction $\ToFMSet : \SetTrunc{\Tote X} → \FMSet X$
+  is define by set-truncation elimination, and it is enough to provide
   \begin{align*}
-    g : \Tote{X} &→ \FMSet X \\
-    g\, (Y, \Var{sz}, e, v) &\DefEq (\Var{sz} , g')
+    &g : \Tote{X} → \FMSet X \\
+    &g\, (Y, \Var{sz}, e, v) \DefEq (\Var{sz} , g')
   \end{align*}
   where $Y$ is a finite set of size $\Var{sz}$ with $e : \PropTrunc{Y ≃ \Fin\Var{sz}}$ and $v : Y → X$.
   We would like to use a composition $\Fin\Var{sz} → Y → X$ to find
@@ -327,9 +330,8 @@ We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ 
   \end{align*}
   is \emph{weakly-constant} in the sense of \cite{Kraus2017} to obtain $g'$ from $e$ using the elimination
   principle of \cite[{Corollary~2}]{Capriotti2015}.
-
-  Proving that $g$ is a right-inverse of $f$ is straight forward.
-  Proving that it is a left-inverse reduces to showing that $v \circ \alpha \sim v$ for any $v : Y → X$ and $\alpha : \Fin n ≃ Y$.
+  Proving $\ToFMSet \circ \ToTote = \Op{id}$ is straightforward.
+  Proving $\ToTote \circ \ToFMSet = \Op{id}$ reduces to showing that $v \circ \alpha \sim v$ for any $v : Y → X$ and $\alpha : \Fin n ≃ Y$.
 \end{proof}
 
 \begin{definition}\label{def:Bag}
@@ -340,14 +342,14 @@ We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ 
       \sum\,\Var{x} : \operatorname{\mathsf{Bij}}\Where
         \langle x \rangle \to X,
   \end{align*}
-  We abbreviate ${\lbag v \rbag} \DefEq (x, v) : \Bag X$ if $x$ can be inferred from context.
+  We abbreviate $\BagCon{v} \DefEq (x, v) : \Bag X$ if $x$ can be inferred from context.
 \end{definition}
 
 \paragraph{Comparing $\Op{List}$ and $\Bag$}\todo{Fit this comparison in somewhere}
 Note that $\Bag$ is somewhat analogous to $\Op{List}$:
 Given a type $A$ and a family $B$ over it, they both match ${\sum (a : A)\Where B(a) → X}$:
 we have $A = ℕ$ and $B = \Fin$ for $\Op{List}$,
-and $A = \Bij$ and $B = \langle\_\rangle$ for $\Bag$.
+and $A = \Bij$ and $B = \BagCon{\Blank}$ for $\Bag$.
 In particular, $\SetTrunc{\Bij} ≃ ℕ$.
 
 \subsection{As lists up to permutation}
@@ -361,26 +363,106 @@ In particular, $\SetTrunc{\Bij} ≃ ℕ$.
 Describe limits in general.
 Maybe compare final coalgebras and corecursive algebras which are fixpoints.
 
-\subsection{Final Coalgebras as an $\omega$-Limit in Set}
+\subsection{Final Coalgebras as an \ensuremath{\omega}-Limit in Set}
 
 \todo[inline]{%
     Surjectivity works (under the assumption of countable(?) choice).
 }
 
-  \begin{theorem}\label{thm:InjPresImpliesLLPO}
-    The function 
-        $\operatorname{pres}\colon
-            \FMSet (\lim_{n < \omega} \FMSet^n 1)
-            \to
-            \lim_{n < \omega} (\FMSet^{n+1} 1)$
-    is surjective,
-    but its injectivity implies the \emph{lesser limited principle of omniscience}, \LLPO.
-  \end{theorem}
+\begin{theorem}\label{thm:InjPresImpliesLLPO}
+  The function
+  $\Op{pres}\colon
+      \FMSet (\lim_{n < \omega} \FMSet^n 1)
+      \to
+      \lim_{n < \omega} (\FMSet^{n+1} 1)$
+  is surjective,
+  but its injectivity is equivalent to the \emph{lesser limited principle of omniscience}, \LLPO.
+\end{theorem}
+\LLPO{} \cite[{Ch.\@ 1}]{Bridges1987} is a weak version of the law
+of the excluded middle, and it is not provable from intuitionistic
+axioms alone.  It states that, given an infinite stream of boolean
+values that yields $\True$ in at most one position, one can decide
+whether all even or all odd positions are $\False$.
 
-\todo[inline]{%
-    Think about the converse statement,
-    does {\LLPO} already imply injectivity?
-}
+\begin{lemma}\label{lem:DiagLimCaseAnalysis}
+  For any $x, a, b : L_{\FMSet}$ and $\Var{ys} : ℕ → L_{\FMSet}$,
+  if $\Op{diag} : ∀ n\Where x_n = \Var{ys}(n)_n$,
+  then
+  \[
+    ∀ n\Where (\Var{ys}(n) = a) → (\Var{ys}(1+n) = b) → (!^n (a_{1+n}) = b_n)
+  \]
+\end{lemma}
+\begin{proof}
+  \begin{align*}
+    \Bang^n(a_{1+n})
+      &= a_n \\
+      &= \Var{ys}(n)_n \\
+      &= x_n \\
+      &= \Bang^n(x_{1+n}) \\
+      &= \Bang^n(\Var{ys}(1+n)_{1+n}) \\
+      &= \Bang^n(b_{1+n}) \\
+      &= b_n
+  \end{align*}
+\end{proof}
+
+\begin{lemma}\label{lem:InjPresImpliesComplete}
+  If $\Op{pres}$ is injective, then $L_{\FMSet}$ is complete.
+\end{lemma}
+\begin{proof}
+  Given a limit $\ell : L_{\FMSet}$\todo{We're implicitly working with the HIT-definition here},
+  denote by $\ell_n : L_{\FMSet} → \FMSet^n 1$ the projection maps out of the limit.
+
+  Assume $x, y_1, y_2 : L_{\FMSet}$, $\Var{ys} : ℕ → L_{\FMSet}$,
+  $\Op{split} : ∀ n\Where (\Var{ys}_n = y_1) \mathrel{+} (\Var{ys}_n = y_2)$
+  and $\Op{diag} : ∀ n\Where x_n = \Var{ys}_n(n)$.
+  The goal is to show $\PropTruncCon[x = y_1 \mathrel{+} x = y_2]$.
+  From $\Op{split}$ we define the complement of $\Var{ys}$,
+  \[
+    \bar{\Var{ys}}(n)\DefEq
+      \begin{cases}
+        y_2 & \text{if}~\Var{ys}_n(n) = y_1 \\
+        y_1 & \text{if}~\Var{ys}_n(n) = y_2 \\
+      \end{cases}
+  \]
+  We show that the diagonal of $\bar{\Var{ys}}$ too has the limit-property,
+  i.e.\@ that
+  \[
+    ∀ n\Where
+      \Bang^n (\bar{\Var{vs}}(1+n)_{1+n}) = \bar{\Var{ys}}(n)_n
+      \Step{step:IsLimYsComplement}
+  \]
+  For this, fix $n$ and check the four cases generated by inspecting $\Op{split} n$
+  and $\Op{split}{} (1+n)$.
+  In one case, \cref{step:IsLimYsComplement} reduces to the limit-property of $y_1$,
+  in another to that of $y_2$ and in the remaining cases to \cref{lem:DiagLimCaseAnalysis}.
+  Call the resulting limit $\bar{x} : L_{\FMSet}$.
+
+  Write $\BagCon{x, y} \DefEq \eta\, x \oplus \eta\, y : \FMSet X$.
+  Then for all $n$, we know that
+  \begin{align}\Step{step:ppc}
+    \BagCon{\Var{ys}_n, \bar{\Var{ys}}_n} = \BagCon{y_1, y_2}
+  \end{align}
+  either by $\Op{refl}$ or $\Op{\oplus comm}$, depending on $\Op{split} n$.
+  Then\todo{better wording}
+  \[
+    \Op{pres} \BagCon{x, \bar{x}}\, n
+      = \BagCon{x_n , \bar{x}_n}
+      = \BagCon{\Var{ys}(n)_n , \bar{\Var{ys}}(n)_n}
+      = \Op{pres} \BagCon{\Var{ys}(n) , \bar{\Var{ys}}(n)}\, n
+      = \Op{pres} \BagCon{y_1 , y_2}\, n
+  \]
+  Therefore, $\Op{pres}(\BagCon{x, \bar{x}}) = \Op{pres}(\BagCon{y_1, y_2})$.
+  From injectivity of $\Op{pres}$ it follows that
+  \[
+    x \in \BagCon{x, \bar{x}} = \BagCon{y_1, y_2}
+  \]
+  which means that merely $x = y_1$ or $x = y_2$.
+\end{proof}
+
+\begin{proof}[\cref{thm:InjPresImpliesLLPO}]
+  \Cref{lem:InjPresImpliesComplete} shows that $L_{\FMSet}$ is complete,
+  which implies injectivity (\cite[{Theorem~7}]{Veltri2021}).
+\end{proof}
 
 \subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
 
