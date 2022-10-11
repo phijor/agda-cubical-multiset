@@ -8,13 +8,13 @@
 
 \begin{document}
 
-\title{Final Coalgebra of the Finite Bag Functor}
+\title{The Final Coalgebra of the Finite Bag Functor, Constructively}
 \author{%
     Philipp Joram\orcidID{0000-0002-0448-7907} \and
     Niccolò Veltri\orcidID{0000-0002-7230-3436}%
 }
 %
-\authorrunning{P. Joram et al.}
+\authorrunning{P. Joram and N. Veltri}
 \institute{Department of Software Science, Tallinn University of Technology, Estonia}
 
 \maketitle              % typeset the header of the contribution
@@ -28,6 +28,40 @@ The abstract should briefly summarize the contents of the paper in
 
 \section{Introduction}
 
+\emph{Coalgebras} are functions of the form $c : S \to F S$, where $S$ is a set of states and $F$ is a functor specifying a certain class of collections of states \cite{Rutten2000,Jacobs2016}. For example, $F S$ could be lists over $S$, bags or subsets of $S$ (possibly with some cardinality restrictions), wellfounded trees with leaves or nodes in $S$, or probability distributions over $S$. The coalgebra $c$ describes the dynamics of a transition system or an automaton: to each state $s : S$, the function $c$ associates the collection of states $c \,s : F S$ that are reachable from $s$ in one step. The choice of collection functor $F$ is dictated by the specific flavour of non-determinism that is intrinsic in the transition relation. Does the order or multiplicity of reachable states matter? Is the choice of a new state probabilistic? Does the transition relation additionally depend on a set of labels, weights or actions?
+
+The denotational semantics of a transition system $c : S \to F S$ is typically given in terms of the \emph{final coalgebra} $\nu F$ of the functor $F$, which  consists of non-wellfounded trees with branching specified by $F$. When $F$ is the list functor, each tree has a finite and ordered collection of subtrees. If $F$ is the finite bag functor, the order of subtrees does not matter, and if $F$ is the finite powerset functor, multiplicity of subtrees does not matter either. %Picking $F$ as the finite probability distribution functor, the trees correspond to
+The interpretation of a state $s : S$ in $\nu F$ is the possibly-infinite tree obtained by ``running'' the coalgebra $c$ with $s$ as initial state. As such, it gives a complete description of the evolution of the system $c$ starting from state $s$.
+
+The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and in particular the formal description of final coalgebras \cite{Barr1993,Adamek1995,Worrell2005} and the associated notion of bisimilarity and behavioural equivalence of states, is traditionally developed in a set-theoretic framework, with reasoning based on classical logic. In this work, we propose to study the theory of coalgebras in a framework based on constructive logic, more specifically in homotopy type theory (HoTT) \cite{HoTTBook}. The use of a constructive metatheory is beneficial for the development of \emph{formal denotational semantics} of dynamical systems and programming languages, often centered on the notions of final coalgebra and bisimilarity \cite{Turi1997}, in proof assistants based on variants of Martin-L{\"o}f type theory, such as Agda, Coq, Idris or Lean. The specific choice of HoTT is motivated by its expressivity and innovative features, higher inductive types (HITs) and the univalence principle, which are crucial ingredients for faithfully representing a variety of collection functors $F$ and reasoning up to equivalent presentations of $F$. 
+
+Specific constructions of final coalgebras for a selection of functors, performed \emph{internally} in HoTT, already exist in the literature. Ahrens el al.~\cite{Ahrens2015} presented a construction of \emph{M-types}, i.e. final coalgebras of polynomial functors. They show that, for a polynomial functor $F$, the traditional set-theoretic construction of its M-type as the $\omega$-limit of the chain
+\begin{equation}\label{eq:chain}
+    1 \xleftarrow{!} {F 1}
+      \xleftarrow{F !} {F^2 1}
+      \xleftarrow{F^2 !} {F^3 1}
+      \xleftarrow{F^3 !}
+      \cdots
+\end{equation}
+(with $1$ being the unit type and $!$ the unique map into $1$) can be ported without major complications to the setting of HoTT. Veltri \cite{Veltri2021} exhamined various constructions of the final coalgebra of the finite powerset functor, which is known to not be definable as an $\omega$-limit \cite{Adamek1995}. Worrell proposed a set-theoretic construction as a $(\omega+\omega)$-limit \cite{Worrell2005}, but Veltri showed that this cannot be ported to the constructive setting of HoTT: Worrell's $(\omega+\omega)$-limit is the final coalgebra of the finite powerset functor if and only if the \emph{lesser limited principle of omniscience} ($\LLPO$) holds, which is a constructive taboo \cite{Bridges1987}.
+
+
+We extend this line of work by studying the final coalgebra of the \emph{finite bag functor}. This is an intermediate situation between finitary polynomial functors, such as the one delivering lists, and general finitary functors, such as the one delivering finite subsets. It also serves as the starting point for a constructive analysis of (final) coalgebras for the \emph{analytic functors} of Joyal \cite{Joyal1986}, arising in type theory from \emph{quotient containers} \cite{Abbott2004}, and generally encompassing many datatypes with symmetries associated to generalized species, such as finite bags, unordered pairs and cyclic lists \cite{Yorgey2010,Yorgey2014}.
+
+Following the recent work of Choudhury and Fiore \cite{Choudhury2021}, we define and compare various implementations of the type of finite bags in HoTT. Choudhury and Fiore give two equivalent presentations of finite bags as HITs: as free commutative monoids and as lists modulo swapping of adjacent entries. We add an equivalent presentation of finite bags as an analytic functor: a finite bag $\FMSet X$ over a type $X$ is a pair of a natural number $n$ (its size) and an equivalence class of functions typed $\Fin n \to X$ picking an element of $X$ for each $k < n$. Two functions $f ,g :\Fin n \to X$ belong to the same equivalence class if there merely exists an equivalence $\sigma : \Fin n \to \Fin n$ such that $f \circ \sigma = g$. The type $\FMSet X$ is always a set (in the sense of HoTT, i.e. a type with at most one identification between any two terms), since it employs set-quotienting. Similarly, the HITs of Choudhury and Fiore are sets. Following \cite{Kock2012}, finite bags can alternatively be defined as a polynomial functor returning a groupoid (in the sense of HoTT, i.e. a type whose equality types are sets) instead of a set. In this case, a finite bag $\Bag X$ over $X$ is a pair consisting of a finite type $Y$ and a function from $Y$ to $X$. The set-based and the groupoid-based definitions of bags can be appropriately related via the set-truncation construction: $\SetTrunc{\Bag X} \simeq \FMSet X$.
+
+We present 3 constructions of the final coalgebra of the finite bag functor:
+\begin{enumerate}
+\item Working with the set-based functor $\FMSet$, we try to replicate the classical set-theoretic construction as an $\omega$-limit of (\ref{eq:chain}) in our constructive setting. We show that this cannot be directly performed in HoTT without introducing some form of classical logic, an issue already spotted in the case of the finite powerset functor \cite{Veltri2021}. Formally, we show that $\FMSet$ weakly preserves the $\omega$-limit of (\ref{eq:chain}) (actually all $\omega$-limits if one assumes the axiom of countable choice), but strong preservation of this limit implies $\LLPO$.
+\item The list functor admits a final coalgebra $\nu\List$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $R$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the bag functor. This construction can be smoothly replicated as a \emph{strict} $\omega$-limit in the category of \emph{setoids} \cite{Barthe2003}. Problems arise when trying to port the latter from setoids to sets, effectively forming the set-quotient $\nu\List \mathbin{/_{\!2}} R$: we prove that the resulting type is a fixpoint for $\FMSet$, in the sense that $\FMSet (\nu\List \mathbin{/_{\!2}} R) \simeq \nu\List \mathbin{/_{\!2}} R$, but showing that this is the final coalgebra requires the assumption of the full axiom of choice. 
+\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\nu\Bag$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\nu\Bag$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\nu\Bag}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra seems to again require the axiom of choice. 
+\end{enumerate}
+Practically, the last two constructions, while not generally delivering the final coalgebra of the set-based bag functor, can still be used as denotational domains for resource-sensitive transition systems with a \emph{finite} set of states \cite{Frumin2018}: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, there exists a unique coalgebra morphism from $S$ to $\nu\List \mathbin{/_{\!2}} R$, and also from $S$ to $\SetTrunc{\nu\Bag}$.
+
+We finally discuss generalizations of our constructions to other analytic functors. We also look at an alternative construction of the final $\FMSet$-coalgebra using Cubical Agda's primitive \emph{coinductive types} \cite{Vezzosi2019}. In Cubical Agda, HITs such as $\FMSet X$ can appear in the codomain of coinductive type destructors, which is intuitively justified by the treatment of HITs in Cubical Agda as inductive types with constructors possibly depending on interval variables \cite{Coquand2018,Cavallo2019}.
+
+The material presented in the paper have been formalized in the Cubical Agda proof
+assistant. The code is freely available at (INSERT GITHUB LINK).
 \subsection{Notation}
 \begin{itemize}
   \item Definitional equality: $\DefEq$
@@ -528,7 +562,7 @@ Note that the above fixpoint is not necessarily the \emph{largest} fixpoint.
 
 \subsubsection{Acknowledgements}
 
-\nocite{*}
+%\nocite{*}
 
 \bibliographystyle{splncs04}
 \bibliography{Multiset}
