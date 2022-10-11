@@ -3,9 +3,7 @@
 
 \RequirePackage{kvoptions}
 
-\DeclareBoolOption{debug}{%
-    \def\thmt@debug{\typeout}%
-}
+\DeclareBoolOption{debug}
 
 \DeclareDefaultOption{\PackageWarning{multiset}{Unknown ‘\CurrentOption’}}
 
@@ -15,15 +13,20 @@
 % Shout-out to hyperref for being particularly obtuse.
 % See: https://texblog.net/hyperref/
 
-\RequirePackage[utf8]{inputenc}
-\RequirePackage{newunicodechar}
-
-\RequirePackage{xparse}
-\RequirePackage{amsmath}
-\RequirePackage{amsthm}
-
 \RequirePackage{amsfonts}
 \RequirePackage{stmaryrd} % for \{l,r}bag
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+
+\ifmultiset@debug
+    \PassOptionsToPackage{verbose}{newunicodechar}
+\fi
+\RequirePackage{newunicodechar}[2018/04/08]
+
+\RequirePackage{xparse}
+\RequirePackage{mathtools}
+\RequirePackage{amsmath}
 
 \PassOptionsToPackage{colorlinks}{hyperref}
 \RequirePackage{doi} % Links to DOI in bibliography
@@ -33,29 +36,34 @@
 
 \newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
 \newunicodechar{→}{\ensuremath{\mathrel{\mathnormal\to}}}
-\newunicodechar{∀}{\ensuremath{\mathnormal\forall}}
+\newunicodechar{∀}{\ensuremath{\mathnormal\forall\/}}
 \newunicodechar{∃}{\ensuremath{\mathop{\mathnormal\exists\/}}}
 \newunicodechar{≃}{\mathbin{\mathnormal\simeq}}
 
+\newcommand{\OpFont}{\mathsf}
+
 \DeclareMathOperator{\Chain}{ch}
 \DeclareMathOperator{\Shift}{sh}
-\DeclareMathOperator{\Type}{Type}
-\DeclareMathOperator{\Fin}{Fin}
+\DeclareMathOperator{\Type}{\OpFont{Type}}
+\DeclareMathOperator{\Fin}{\OpFont{Fin}}
 \DeclareMathOperator{\Sym}{\mathfrak{S}}
+\NewDocumentCommand{\Cons}{}{\ensuremath{\mathbin{\dblcolon}}}
 
 \newcommand*{\Empty}{\mathsf{\varepsilon}}
 \newcommand*{\Singl}{\operatorname{\mathsf{\eta}}}
 \newcommand*{\Union}{\mathbin{\oplus}}
 \newcommand*{\Var}[1]{\mathit{#1}}
-\newcommand*{\Op}[1]{\operatorname{\mathsf{#1}}}
+\newcommand*{\Op}[1]{\operatorname{\OpFont{#1}}}
 
 \newcommand*{\DefEq}{\ensuremath{\mathbin{=_\mathsf{df}}}}
 
 \DeclareMathOperator{\Refl}{\mathsf{refl}}
 \DeclareMathOperator{\PathP}{\mathsf{PathP}}
 
+\DeclareMathOperator{\List}{\mathsf{List}}
 \DeclareMathOperator{\FMSet}{\mathsf{FMSet}}
 \DeclareMathOperator{\Bag}{\mathsf{Bag}}
+\DeclarePairedDelimiter{\BagCon}{\lbag}{\rbag}
 \newcommand*{\FMGpd}{%
     \PackageWarning{multiset}{Use \\Bag, dummy!}%
     \Bag
@@ -72,12 +80,17 @@
 
 \NewDocumentCommand{\Rec}{m}{\Op{rec}_{#1}}
 \NewDocumentCommand{\Elim}{m}{\Op{elim}_{#1}}
+\NewDocumentCommand{\Map}{m}{\Op{map}_{#1}}
+
+\NewDocumentCommand{\FinElim}{}{\Elim{\OpFont{fin}}}
+\NewDocumentCommand{\FinElimComp}{}{\Elim{\OpFont{fin}}^\beta}
 
 \DeclareMathOperator{\IsProp}{\mathsf{isProp}}
 \DeclareMathOperator{\IsSet}{\mathsf{isSet}}
 \DeclareMathOperator{\IsGpd}{\mathsf{isGroupoid}}
 
 \NewDocumentCommand{\Lim}{m}{L_{#1}}
+\DeclareMathOperator{\Bang}{!}
 
 \newcommand*{\UU}{\ensuremath{\mathcal{U}}}
 

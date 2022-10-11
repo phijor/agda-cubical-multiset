@@ -1,39 +1,71 @@
-% This is samplepaper.tex, a sample chapter demonstrating the
-% LLNCS macro package for Springer Computer Science proceedings;
-% Version 2.21 of 2022/01/12
-%
 \documentclass[runningheads]{llncs}
-%
-\usepackage[T1]{fontenc}
-\usepackage{multiset}
+
+\usepackage[debug]{multiset}
 
 \usepackage{bussproofs}
-
-\usepackage{textcomp}
 
 \usepackage{todonotes}
 
 \begin{document}
 
-\title{Final Coalgebra of the Finite Bag Functor}
+\title{The Final Coalgebra of the Finite Bag Functor, Constructively}
 \author{%
-    Philipp Joram\inst{1}\orcidID{0000-0002-0448-7907} \and
-    Niccolò Veltri\inst{1}\orcidID{0000-0002-7230-3436}%
+    Philipp Joram\orcidID{0000-0002-0448-7907} \and
+    Niccolò Veltri\orcidID{0000-0002-7230-3436}%
 }
 %
-\authorrunning{P. Joram et al.}
+\authorrunning{P. Joram and N. Veltri}
 \institute{Department of Software Science, Tallinn University of Technology, Estonia}
 
 \maketitle              % typeset the header of the contribution
 
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+  Coalgebras for the finite bag functor are dynamical systems where the transition relation is resource-sensitive: the collection of reachable states records the number of ways in which each state can be reached. The final coalgebra of the finite bag functor is employed as a denotational domain for the evaluation of such dynamical systems. Its elements are non-wellfounded trees with finite unordered branching, depicting the evolution of systems starting from a given initial state.
+
+  This paper is dedicated to the construction of the final coalgebra of the finite bag functor in homotopy type theory (HoTT). We first compare various equivalent definitions of finite bags employing higher inductive types, both as sets and as groupoids (in the sense of HoTT). We then analyze a few classical set-theoretic constructions of final coalgebras in our constructive setting. We show that, in the case of set-based definitions of finite bags, these constructions are either intrinsically classical, in the sense that they are equivalent to some weak form of excluded middle, or cannot be directly reproduced in HoTT without the assumption of classical principles. The final coalgebra can be safely constructed in HoTT only employing the groupoid-based definition of finite bags. We discuss generalizations of these constructions to more general analytic functors. We also show how Cubical Agda's coinductive types can be used to build the final coalgebra of the finite bag functor. 
+
+\keywords{finite bags \and final coalgebra \and homotopy type theory.}
 \end{abstract}
 
 \section{Introduction}
+
+\emph{Coalgebras} are functions of the form $c : S \to F S$, where $S$ is a set of states and $F$ is a functor specifying a certain class of collections of states \cite{Rutten2000,Jacobs2016}. For example, $F S$ could be lists over $S$, bags or subsets of $S$ (possibly with some cardinality restrictions), wellfounded trees with leaves or nodes in $S$, or probability distributions over $S$. The coalgebra $c$ describes the dynamics of a transition system or an automaton: to each state $s : S$, the function $c$ associates the collection of states $c \,s : F S$ that are reachable from $s$ in one step. The choice of collection functor $F$ is dictated by the specific flavour of non-determinism that is intrinsic in the transition relation. Does the order or multiplicity of reachable states matter? Is the choice of a new state probabilistic? Does the transition relation additionally depend on a set of labels, weights or actions?
+
+The denotational semantics of a transition system $c : S \to F S$ is typically given in terms of the \emph{final coalgebra} $\nu F$ of the functor $F$, which  consists of non-wellfounded trees with branching specified by $F$. When $F$ is the list functor, each tree has a finite and ordered collection of subtrees. If $F$ is the finite bag functor, the order of subtrees does not matter, and if $F$ is the finite powerset functor, multiplicity of subtrees does not matter either. %Picking $F$ as the finite probability distribution functor, the trees correspond to
+The interpretation of a state $s : S$ in $\nu F$ is the possibly-infinite tree obtained by ``running'' the coalgebra $c$ with $s$ as initial state. As such, it gives a complete description of the evolution of the system $c$ starting from state $s$.
+
+The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and in particular the formal description of final coalgebras \cite{Barr1993,Adamek1995,Worrell2005} and the associated notion of bisimilarity and behavioural equivalence of states, is traditionally developed in a set-theoretic framework, with reasoning based on classical logic. In this work, we propose to study the theory of coalgebras in a framework based on constructive logic, more specifically in homotopy type theory (HoTT) \cite{HoTTBook}. The use of a constructive metatheory is beneficial for the development of \emph{formal denotational semantics} of dynamical systems and programming languages, often centered on the notions of final coalgebra and bisimilarity \cite{Turi1997}, in proof assistants based on variants of Martin-L{\"o}f type theory, such as Agda, Coq, Idris or Lean. The specific choice of HoTT is motivated by its expressivity and innovative features, higher inductive types (HITs) and the univalence principle, which are crucial ingredients for faithfully representing a variety of collection functors $F$ and reasoning up to equivalent presentations of $F$. 
+
+Specific constructions of final coalgebras for a selection of functors, performed \emph{internally} in HoTT, already exist in the literature. Ahrens el al.~\cite{Ahrens2015} presented a construction of \emph{M-types}, i.e. final coalgebras of polynomial functors. They show that, for a polynomial functor $F$, the traditional set-theoretic construction of its M-type as the $\omega$-limit of the chain
+\begin{equation}\label{eq:chain}
+    1 \xleftarrow{!} {F 1}
+      \xleftarrow{F !} {F^2 1}
+      \xleftarrow{F^2 !} {F^3 1}
+      \xleftarrow{F^3 !}
+      \cdots
+\end{equation}
+(with $1$ being the unit type and $!$ the unique map into $1$) can be ported without major complications to the setting of HoTT. Veltri \cite{Veltri2021} exhamined various constructions of the final coalgebra of the finite powerset functor, which is known to not be definable as an $\omega$-limit \cite{Adamek1995}. Worrell proposed a set-theoretic construction as a $(\omega+\omega)$-limit \cite{Worrell2005}, but Veltri showed that this cannot be ported to the constructive setting of HoTT: Worrell's $(\omega+\omega)$-limit is the final coalgebra of the finite powerset functor if and only if the \emph{lesser limited principle of omniscience} ($\LLPO$) holds, which is a constructive taboo \cite{Bridges1987}.
+
+
+We extend this line of work by studying the final coalgebra of the \emph{finite bag functor}. This is an intermediate situation between finitary polynomial functors, such as the one delivering lists, and general finitary functors, such as the one delivering finite subsets. It also serves as the starting point for a constructive analysis of (final) coalgebras for the \emph{analytic functors} of Joyal \cite{Joyal1986}, arising in type theory from \emph{quotient containers} \cite{Abbott2004}, and generally encompassing many datatypes with symmetries associated to generalized species, such as finite bags, unordered pairs and cyclic lists \cite{Yorgey2010,Yorgey2014}.
+
+Following the recent work of Choudhury and Fiore \cite{Choudhury2021}, we define and compare various implementations of the type of finite bags in HoTT. Choudhury and Fiore give two equivalent presentations of finite bags as HITs: as free commutative monoids and as lists modulo swapping of adjacent entries. We add an equivalent presentation of finite bags as an analytic functor: a finite bag $\FMSet X$ over a type $X$ is a pair of a natural number $n$ (its size) and an equivalence class of functions typed $\Fin n \to X$ picking an element of $X$ for each $k < n$. Two functions $f ,g :\Fin n \to X$ belong to the same equivalence class if there merely exists an equivalence $\sigma : \Fin n \to \Fin n$ such that $f \circ \sigma = g$. The type $\FMSet X$ is always a set (in the sense of HoTT, i.e. a type with at most one identification between any two terms), since it employs set-quotienting. Similarly, the HITs of Choudhury and Fiore are sets. Following \cite{Kock2012}, finite bags can alternatively be defined as a polynomial functor returning a groupoid (in the sense of HoTT, i.e. a type whose equality types are sets) instead of a set. In this case, a finite bag $\Bag X$ over $X$ is a pair consisting of a finite type $Y$ and a function from $Y$ to $X$. The set-based and the groupoid-based definitions of bags can be appropriately related via the set-truncation construction: $\SetTrunc{\Bag X} \simeq \FMSet X$.
+
+We present 3 constructions of the final coalgebra of the finite bag functor:
+\begin{enumerate}
+\item Working with the set-based functor $\FMSet$, we try to replicate the classical set-theoretic construction as an $\omega$-limit of (\ref{eq:chain}) in our constructive setting. We show that this cannot be directly performed in HoTT without introducing some form of classical logic, an issue already spotted in the case of the finite powerset functor \cite{Veltri2021}. Formally, we show that $\FMSet$ weakly preserves the $\omega$-limit of (\ref{eq:chain}) (actually all $\omega$-limits if one assumes the axiom of countable choice), but strong preservation of this limit implies $\LLPO$.
+\item The list functor admits a final coalgebra $\nu\List$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $R$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the bag functor. This construction can be smoothly replicated as a \emph{strict} $\omega$-limit in the category of \emph{setoids} \cite{Barthe2003}. Problems arise when trying to port the latter from setoids to sets, effectively forming the set-quotient $\nu\List \mathbin{/_{\!2}} R$: we prove that the resulting type is a fixpoint for $\FMSet$, in the sense that $\FMSet (\nu\List \mathbin{/_{\!2}} R) \simeq \nu\List \mathbin{/_{\!2}} R$, but showing that this is the final coalgebra requires the assumption of the full axiom of choice. 
+\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\nu\Bag$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\nu\Bag$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\nu\Bag}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra seems to again require the axiom of choice. 
+\end{enumerate}
+Practically, the last two constructions, while not generally delivering the final coalgebra of the set-based bag functor, can still be used as denotational domains for resource-sensitive transition systems with a \emph{finite} set of states \cite{Frumin2018}: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, there exists a unique coalgebra morphism from $S$ to $\nu\List \mathbin{/_{\!2}} R$, and also from $S$ to $\SetTrunc{\nu\Bag}$.
+
+We finally discuss generalizations of our constructions to other analytic functors. We also look at an alternative construction of the final $\FMSet$-coalgebra using Cubical Agda's primitive \emph{coinductive types} \cite{Vezzosi2019}. In Cubical Agda, HITs such as $\FMSet X$ can appear in the codomain of coinductive type destructors, which is intuitively justified by the treatment of HITs in Cubical Agda as inductive types with constructors possibly depending on interval variables \cite{Coquand2018,Cavallo2019}.
+
+The material presented in the paper have been formalized in the Cubical Agda proof
+assistant. The code is freely available at (INSERT GITHUB LINK).
+
+\section{Type Theory and Cubical Agda}
 
 \subsection{Notation}
 \begin{itemize}
@@ -44,9 +76,12 @@ The abstract should briefly summarize the contents of the paper in
     Binders extend as far right as possible.
   \item $\exists$ for \emph{mere existence}, i.e. $\PropTrunc{\sum (\mathunderscore)\Where X}$.
   \item dependent paths: $\PathP{} (\lambda i\Where \mathunderscore)\, \mathunderscore\, \mathunderscore$
+  \item eliminators and co.:
+    For any $F : \Type → \Type$, write
+    $\Elim{F}$, $\Rec{F}$ and $\Map{F}$
+    for the (dependent) eliminator, recursor and action on maps.
 \end{itemize}
 
-\section{Type Theory and Cubical Agda}
 
 \section{The Finite Bag Functor}
 
@@ -125,7 +160,6 @@ defined as the higher inductive type induced by the following rules:
   \end{align*}
   where $\sim$ is the proposition-valued relation defined as
   \begin{align*}
-    \textunderscore\sim\textunderscore &: ∀ \{n\}\Where (v\, w : \Fin n → X) → \Type \\
     v \sim w &\mathrel{=_{\mathsf{df}}}
       ∃ \sigma : \Fin n ≃ \Fin n \Where
         \PathP{} (\lambda i\Where \operatorname{ua}(\sigma)\, i → X)\, v\, w
@@ -159,11 +193,30 @@ defined as the higher inductive type induced by the following rules:
     {\SetTrunc{(k : \Fin n) → \mathop{Y\/} k}}
   \]
 \end{lemma}
+\begin{proof}
+  We sketch a proof for a constant type family $Y = (\lambda \Blank \Where X)$.
+  The dependent case is analogous.
+  The function underlying the equivalence is defined by induction on $n$.
+  For $n = 0$ we have $\Fin 0 ≃ \bot$,
+  so $\Op{box} \DefEq (\lambda \Blank\Where \SetTruncCon[\Elim{\bot}])$.
+  In the inductive step, we lift the \enquote{cons} operation
+  $
+    (\Cons) : X → (\Fin n → X) → (\Fin{} (1 + n) → X)
+  $
+  on vectors to the set-truncation.
+  By induction on $n$, we see that
+  \begin{align*}
+    &\Op{unbox} : \SetTrunc{\Fin n → X} → \Fin k → \SetTrunc{X} \\
+    &\Op{unbox} \bar{v}\, k \DefEq \Map{\SetTrunc{\Blank}} (\lambda v\Where v\, k)\, \bar{v}
+  \end{align*}
+  is a two-sided inverse of $\Op{box}$.
+  The proof uses the fact that $\Map{\SetTrunc{\Blank}}$ is functorial.
+\end{proof}
 
 \begin{definition}
   The principle of finite choice can be defined in terms of $\Op{box}$:
   \begin{align*}
-    \Op{elim}_{\Op{fin}} &: \forall n\Where \\
+    \FinElim &: \forall n\Where \\
       &\to \{B : (\Fin n \to \SetTrunc{X}) \to \Type\} \\
       &\to (\forall v\Where \IsSet (B\, v)) \\
       &\to ((\mathsf{choice} : \Fin n \to X) \to B\, (\SetTruncCon{} \circ \mathsf{choice})) \\
@@ -173,8 +226,8 @@ defined as the higher inductive type induced by the following rules:
   set-truncation elimination on $\operatorname{box} v$.
   It comes with a computational rule
   \begin{align*}
-    \Op{elim}^\beta_{\Op{fin}} : (v : \Fin n → X)
-      → \Op{elim}_{\Op{fin}} (\SetTruncCon{} \circ v) = \operatorname{\mathsf{choice}} v
+    \FinElimComp : (v : \Fin n → X)
+      → \FinElim (\SetTruncCon{} \circ v) = \operatorname{\mathsf{choice}} v
   \end{align*}
 \end{definition}
 
@@ -185,16 +238,17 @@ defined as the higher inductive type induced by the following rules:
   \end{equation}
 \end{theorem}
 \begin{proof}
-  \begin{enumerate}
-    \item Inverse is given by $\operatorname{map} \SetTruncCon{} : \FMSet X → \FMSet \SetTrunc{X}$.
-    \item Define the inverse by using
-      \[
-        \Op{requot} : ∀ \{n\}\Where
-          (\Fin n → \SetTrunc{X})
-          → (\Fin n → X) \SetQuot{} {\sim_n},
-      \]
-      defined via $\Op{elim}_{\Op{fin}}$.
-  \end{enumerate}
+  We obtain the equivalence from an isomorphism.
+  The inverse map is set-truncation of the members of the finite multiset.
+  In the forward direction, we use $\FinElim$ to define a function
+  \[
+    \Op{requot} : ∀ \{n\}\Where
+    (\Fin n → \SetTrunc{X})
+    → \SetQuot[(\Fin n → X)][\sim_n]
+  \]
+  that turns set-truncation into a set-quotient and prove that it preserves $(\sim_n)$.
+  By recursion on $\FMSet \SetTrunc{X}$, this enough to obtain $\FMSet \SetTrunc{X} → \FMSet X$.
+  That these maps are mutual inverses follows from $\FinElimComp$.
 \end{proof}
 
 \subsection{As a Groupoid}
@@ -210,6 +264,12 @@ We define a type family $\Bag : \Type → \Type$,
 and substantiate these claims by first showing its set-truncation is $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
 and later by constructing its final coalgebra (\cref{ssec:FMGpdLim}, \cref{thm:FMGpdLim}).
 
+\todo[inline]{%
+  We should cite \cite{Piceghello2021} here.
+  He defines the free symmetric monoidal groupoid on a type
+  as a HITs (\enquote{s-lists}).
+}
+
 First, recall one way of defining \enquote{finite} sets in HoTT:
 
 \begin{definition}
@@ -224,10 +284,11 @@ First, recall one way of defining \enquote{finite} sets in HoTT:
     \Op{FinSet} \DefEq
       \sum (Y : \Type)\Where \Op{isFinSet} Y
   \]
+  The underlying type of a $\FinSet$ is accessed via the first projection $\langle\Blank\rangle : \FinSet → \Type$.
 \end{definition}
 
 It is easy to show that $\Op{isFinSet}$ is a proposition and that any type satisfying the predicate is a set.
-Similarly, one shows that $\Op{FinSet}$ forms a groupoid.
+It follows that $\Op{FinSet}$ forms a groupoid.
 Note that $\Op{FinSet}$ is a \emph{large} type, i.e. it lives in the successor universe of the types that it ranges over.
 From this, we can define a \enquote{tote}, which we think of as a finite collections of things in $X$:
 \begin{definition}
@@ -248,7 +309,7 @@ In general, $\Tote X$ is at least a groupoid.
   By assumption $X$ is a groupoid,
   so the function type $\langle Y \rangle → X$ is a groupoid
   for any $Y : \FinSet$.
-  By construction $\Bij$ is a groupoid, therefore the entire $\Sigma$-type is a groupoid.
+  But $\FinSet$ is also a groupoid, therefore the entire $\Sigma$-type is a groupoid.
 \end{proof}
 
 Note that $\Tote$ is again a large type family.
@@ -269,30 +330,31 @@ We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ 
 \end{theorem}
 \begin{proof}
   The proof proceeds by constructing an explicit isomorphism $\FMSet X \cong \SetTrunc{\Tote X}$.
-  The forward function is straight forward, while the inverse function has to be carefully defined with the
+  The forward direction is unproblematic, while the inverse function has to be carefully defined with the
   homotopy levels of the involved types in mind.
 
-  \newcommand*{\ToTote}{\operatorname{\mathsf{toTote}}}
+  \newcommand*{\ToTote}{\Op{toTote}}
+  \newcommand*{\ToFMSet}{\Op{toFMSet}}
 
-  To construct the map $\FMSet X → \SetTrunc{\Tote X}$, by the induction principle
+  To construct $\ToTote : \FMSet X → \SetTrunc{\Tote X}$, by the induction principle
   $\Elim{\FMSet}$, it is enough to give a function
   $f : \forall \{\Var{sz}\}\Where (\Fin \Var{sz} → X) → \SetTrunc{\Tote X}$
   and to show that it respects $(\sim)$.
   Let $f(v) \DefEq \SetTruncCon[(\Fin \Var{sz} , v)]$, since $\Fin \Var{sz}$ is obviously a finite set.
   To prove that $v \sim w$ implies $f(v) = f(w)$, we note that the conclusion is a proposition,
   thus by induction on $v \sim w$ obtain a permutation $\sigma$ such that $r : v \circ \sigma = w$.
-  We conclude that
-  \[
-    p \DefEq
-      \operatorname{\mathsf{\Sigma PathP}}\, (\mathsf{ua}\, \sigma)\, r : (\Fin\Var{sz} , v) = (\Fin\Var{sz}, w),
-  \]
-  which implies $f(v) = f(w)$ by applying $\SetTruncCon$ to $p$.
+  By univalence, $\Op{ua} \sigma : \Fin \Var{sz} = \Fin \Var{sz}$,
+  and transporting $r$ along this path yields
+  $
+    p : (\Fin\Var{sz} , v) = (\Fin\Var{sz}, w)
+  $.
+  Then $\Op{cong} \SetTruncCon\, p : f(v) = f(w)$ as desired.
 
-  To define the inverse $\SetTrunc{\Tote X} → \FMSet X$,
-  by set-truncation elimination it is enough to provide
+  In the other direction $\ToFMSet : \SetTrunc{\Tote X} → \FMSet X$
+  is define by set-truncation elimination, and it is enough to provide
   \begin{align*}
-    g : \Tote{X} &→ \FMSet X \\
-    g\, (Y, \Var{sz}, e, v) &\DefEq (\Var{sz} , g')
+    &g : \Tote{X} → \FMSet X \\
+    &g\, (Y, \Var{sz}, e, v) \DefEq (\Var{sz} , g')
   \end{align*}
   where $Y$ is a finite set of size $\Var{sz}$ with $e : \PropTrunc{Y ≃ \Fin\Var{sz}}$ and $v : Y → X$.
   We would like to use a composition $\Fin\Var{sz} → Y → X$ to find
@@ -306,9 +368,8 @@ We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ 
   \end{align*}
   is \emph{weakly-constant} in the sense of \cite{Kraus2017} to obtain $g'$ from $e$ using the elimination
   principle of \cite[{Corollary~2}]{Capriotti2015}.
-
-  Proving that $g$ is a right-inverse of $f$ is straight forward.
-  Proving that it is a left-inverse reduces to showing that $v \circ \alpha \sim v$ for any $v : Y → X$ and $\alpha : \Fin n ≃ Y$.
+  Proving $\ToFMSet \circ \ToTote = \Op{id}$ is straightforward.
+  Proving $\ToTote \circ \ToFMSet = \Op{id}$ reduces to showing that $v \circ \alpha \sim v$ for any $v : Y → X$ and $\alpha : \Fin n ≃ Y$.
 \end{proof}
 
 \begin{definition}\label{def:Bag}
@@ -319,14 +380,14 @@ We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ 
       \sum\,\Var{x} : \operatorname{\mathsf{Bij}}\Where
         \langle x \rangle \to X,
   \end{align*}
-  We abbreviate ${\lbag v \rbag} \DefEq (x, v) : \Bag X$ if $x$ can be inferred from context.
+  We abbreviate $\BagCon{v} \DefEq (x, v) : \Bag X$ if $x$ can be inferred from context.
 \end{definition}
 
 \paragraph{Comparing $\Op{List}$ and $\Bag$}\todo{Fit this comparison in somewhere}
 Note that $\Bag$ is somewhat analogous to $\Op{List}$:
 Given a type $A$ and a family $B$ over it, they both match ${\sum (a : A)\Where B(a) → X}$:
 we have $A = ℕ$ and $B = \Fin$ for $\Op{List}$,
-and $A = \Bij$ and $B = \langle\_\rangle$ for $\Bag$.
+and $A = \Bij$ and $B = \BagCon{\Blank}$ for $\Bag$.
 In particular, $\SetTrunc{\Bij} ≃ ℕ$.
 
 \subsection{As lists up to permutation}
@@ -340,26 +401,106 @@ In particular, $\SetTrunc{\Bij} ≃ ℕ$.
 Describe limits in general.
 Maybe compare final coalgebras and corecursive algebras which are fixpoints.
 
-\subsection{Final Coalgebras as an $\omega$-Limit in Set}
+\subsection{Final Coalgebras as an \ensuremath{\omega}-Limit in Set}
 
 \todo[inline]{%
     Surjectivity works (under the assumption of countable(?) choice).
 }
 
-  \begin{theorem}\label{thm:InjPresImpliesLLPO}
-    The function 
-        $\operatorname{pres}\colon
-            \FMSet (\lim_{n < \omega} \FMSet^n 1)
-            \to
-            \lim_{n < \omega} (\FMSet^{n+1} 1)$
-    is surjective,
-    but its injectivity implies the \emph{lesser limited principle of omniscience}, \LLPO.
-  \end{theorem}
+\begin{theorem}\label{thm:InjPresImpliesLLPO}
+  The function
+  $\Op{pres}\colon
+      \FMSet (\lim_{n < \omega} \FMSet^n 1)
+      \to
+      \lim_{n < \omega} (\FMSet^{n+1} 1)$
+  is surjective,
+  but its injectivity is equivalent to the \emph{lesser limited principle of omniscience}, \LLPO.
+\end{theorem}
+\LLPO{} \cite[{Ch.\@ 1}]{Bridges1987} is a weak version of the law
+of the excluded middle, and it is not provable from intuitionistic
+axioms alone.  It states that, given an infinite stream of boolean
+values that yields $\True$ in at most one position, one can decide
+whether all even or all odd positions are $\False$.
 
-\todo[inline]{%
-    Think about the converse statement,
-    does {\LLPO} already imply injectivity?
-}
+\begin{lemma}\label{lem:DiagLimCaseAnalysis}
+  For any $x, a, b : L_{\FMSet}$ and $\Var{ys} : ℕ → L_{\FMSet}$,
+  if $\Op{diag} : ∀ n\Where x_n = \Var{ys}(n)_n$,
+  then
+  \[
+    ∀ n\Where (\Var{ys}(n) = a) → (\Var{ys}(1+n) = b) → (!^n (a_{1+n}) = b_n)
+  \]
+\end{lemma}
+\begin{proof}
+  \begin{align*}
+    \Bang^n(a_{1+n})
+      &= a_n \\
+      &= \Var{ys}(n)_n \\
+      &= x_n \\
+      &= \Bang^n(x_{1+n}) \\
+      &= \Bang^n(\Var{ys}(1+n)_{1+n}) \\
+      &= \Bang^n(b_{1+n}) \\
+      &= b_n
+  \end{align*}
+\end{proof}
+
+\begin{lemma}\label{lem:InjPresImpliesComplete}
+  If $\Op{pres}$ is injective, then $L_{\FMSet}$ is complete.
+\end{lemma}
+\begin{proof}
+  Given a limit $\ell : L_{\FMSet}$\todo{We're implicitly working with the HIT-definition here},
+  denote by $\ell_n : L_{\FMSet} → \FMSet^n 1$ the projection maps out of the limit.
+
+  Assume $x, y_1, y_2 : L_{\FMSet}$, $\Var{ys} : ℕ → L_{\FMSet}$,
+  $\Op{split} : ∀ n\Where (\Var{ys}_n = y_1) \mathrel{+} (\Var{ys}_n = y_2)$
+  and $\Op{diag} : ∀ n\Where x_n = \Var{ys}_n(n)$.
+  The goal is to show $\PropTruncCon[x = y_1 \mathrel{+} x = y_2]$.
+  From $\Op{split}$ we define the complement of $\Var{ys}$,
+  \[
+    \bar{\Var{ys}}(n)\DefEq
+      \begin{cases}
+        y_2 & \text{if}~\Var{ys}_n(n) = y_1 \\
+        y_1 & \text{if}~\Var{ys}_n(n) = y_2 \\
+      \end{cases}
+  \]
+  We show that the diagonal of $\bar{\Var{ys}}$ too has the limit-property,
+  i.e.\@ that
+  \[
+    ∀ n\Where
+      \Bang^n (\bar{\Var{vs}}(1+n)_{1+n}) = \bar{\Var{ys}}(n)_n
+      \Step{step:IsLimYsComplement}
+  \]
+  For this, fix $n$ and check the four cases generated by inspecting $\Op{split} n$
+  and $\Op{split}{} (1+n)$.
+  In one case, \cref{step:IsLimYsComplement} reduces to the limit-property of $y_1$,
+  in another to that of $y_2$ and in the remaining cases to \cref{lem:DiagLimCaseAnalysis}.
+  Call the resulting limit $\bar{x} : L_{\FMSet}$.
+
+  Write $\BagCon{x, y} \DefEq \eta\, x \oplus \eta\, y : \FMSet X$.
+  Then for all $n$, we know that
+  \begin{align}\Step{step:ppc}
+    \BagCon{\Var{ys}_n, \bar{\Var{ys}}_n} = \BagCon{y_1, y_2}
+  \end{align}
+  either by $\Op{refl}$ or $\Op{\oplus comm}$, depending on $\Op{split} n$.
+  Then\todo{better wording}
+  \[
+    \Op{pres} \BagCon{x, \bar{x}}\, n
+      = \BagCon{x_n , \bar{x}_n}
+      = \BagCon{\Var{ys}(n)_n , \bar{\Var{ys}}(n)_n}
+      = \Op{pres} \BagCon{\Var{ys}(n) , \bar{\Var{ys}}(n)}\, n
+      = \Op{pres} \BagCon{y_1 , y_2}\, n
+  \]
+  Therefore, $\Op{pres}(\BagCon{x, \bar{x}}) = \Op{pres}(\BagCon{y_1, y_2})$.
+  From injectivity of $\Op{pres}$ it follows that
+  \[
+    x \in \BagCon{x, \bar{x}} = \BagCon{y_1, y_2}
+  \]
+  which means that merely $x = y_1$ or $x = y_2$.
+\end{proof}
+
+\begin{proof}[\cref{thm:InjPresImpliesLLPO}]
+  \Cref{lem:InjPresImpliesComplete} shows that $L_{\FMSet}$ is complete,
+  which implies injectivity (\cite[{Theorem~7}]{Veltri2021}).
+\end{proof}
 
 \subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
 
@@ -425,7 +566,7 @@ Note that the above fixpoint is not necessarily the \emph{largest} fixpoint.
 
 \subsubsection{Acknowledgements}
 
-\nocite{*}
+%\nocite{*}
 
 \bibliographystyle{splncs04}
 \bibliography{Multiset}

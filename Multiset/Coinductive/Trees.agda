@@ -105,57 +105,6 @@ record ExtEq (i : Size) (t₁ t₂ : Tree ∞) : Type where
     subtreesE : {j : Size< i} → Relator (ExtEq j) (subtrees t₁) (subtrees t₂)
 open ExtEq public
 
-mapDRelator' : ∀{ℓ}{X Y : Type ℓ}
-  → {R : X → X → Type ℓ} {S : Y → Y → Type ℓ}
-  → {f : X → Y}
-  → (∀ {x x'} → R x x' → S (f x) (f x'))
-  → ∀ {xs xs'}
-  → DRelator R xs xs'
-  → DRelator S (mapList f xs) (mapList f xs')
-mapDRelator' fRel nil = nil
-mapDRelator' fRel (cons p) =
-  cons (∥map∥ (λ { (x , r , m , p')
-                     → _ , fRel r , ∈mapList m , subst (DRelator _ _) (remove-mapList m) (mapDRelator' fRel p')
-                })
-              p)
-
-mapDRelator : {X : Type} {R S : X → X → Type} {xs ys : List X}
-  → (∀ {x y} → R x y → S x y) 
-  → DRelator R xs ys → DRelator S xs ys
-mapDRelator rs p =
-  subst2 (DRelator _) (mapListId _) (mapListId _) (mapDRelator' {f = λ x → x} rs p)
-
-mapListRel-fun : ∀{ℓ}{X Y : Type ℓ}
-  → {R : Y → Y → Type ℓ} 
-  → {f g : X → Y}
-  → (∀ x → R (f x) (g x))
-  → ∀ xs
-  → ListRel R (mapList f xs) (mapList g xs)
-mapListRel-fun rfg [] = []
-mapListRel-fun rfg (x ∷ xs) = rfg x ∷ mapListRel-fun rfg xs
-
-mapRelator' : ∀{ℓ}{X Y : Type ℓ}
-  → {R : X → X → Type ℓ} {S : Y → Y → Type ℓ}
-  → {f : X → Y}
-  → (∀ {x x'} → R x x' → S (f x) (f x'))
-  → ∀ {xs xs'}
-  → Relator R xs xs'
-  → Relator S (mapList f xs) (mapList f xs')
-mapRelator' fRel (p , q) = mapDRelator' fRel p , mapDRelator' fRel q
-
-mapRelator-fun : ∀{ℓ}{X Y : Type ℓ}
-  → {R : Y → Y → Type ℓ}
-  → (∀{x y} → R x y → R y x)
-  → {f g : X → Y}
-  → (∀ x → R (f x) (g x))
-  → ∀ xs
-  → Relator R (mapList f xs) (mapList g xs)
-mapRelator-fun symR rfg xs = ListRel→Relator symR (mapListRel-fun rfg xs)
-
-mapM : ∀{X Y} (f : X → Y) → M X → M Y
-mapM f = recQ squash/ (λ xs → [ mapList f xs ])
-  λ xs ys rs → eq/ _ _ (mapRelator' (cong f) rs)
-
 subtreesE-1 : ∀ {ts ts'} → Relator (ExtEq ∞) ts ts' → ExtEq ∞ (subtrees-1 ts) (subtrees-1 ts')
 subtreesE (subtreesE-1 r) = (mapDRelator (λ x → x) (r .fst)) , mapDRelator (λ x → x) (r .snd)
 
