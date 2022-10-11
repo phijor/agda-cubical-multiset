@@ -67,23 +67,87 @@ assistant. The code is freely available at (INSERT GITHUB LINK).
 
 \section{Type Theory and Cubical Agda}
 
-\subsection{Notation}
+We work in homotopy type theory \cite{HoTTBook} and practically our formalization takes place in Cubical Agda \cite{Vezzosi2019}. In this section we recall some basic notions that are employed in our development.
+
+Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$. Implicit arguments of dependent functions are enclosed in curly brackets. Basics inductive types include: unit type $1$, empty type $\bot$, Booleans values $\Bool$, natural numbers $ℕ$, lists $\List A$, dependent pairs $\sum (x : A) \Where B \, x$, binary sum $A + B$ and products $A \times B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is called $! : A \to 1$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types, introduced in the end of this section). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$.. Most of our constructions are universe-polymorphic, but for the sake of readibility in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
+
+Given $x, y : A$, their definitional equality is denoted $x \DefEq y$ while propositional equality is $x = y$. Following ``cubical terminology'', the latter is called the \emph{path type} between $x$ and $y$. In Cubical Agda, the path type $x = y$ behaves similarly to a function type $\Interval \to A$, where $\Interval$ is a primitive interval type with endpoints $i_0$ and $i_1$. An element $p : x = y$ is eliminated by application to an interval name $r : \Interval$, returning $p \, r : A$. But unlike function types, this application can compute even when $p$ is unknown by using the endpoints $x$ and $y$: $p \,i_0$ reduces to $x$ and $p \,i_1$ reduces to $y$.  Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. Paths can be made \emph{dependent} by allowing the type $A$ to vary over the interval, i.e. $A : \Interval \to \Type$. When $x : A \, i_0$ and $y : A \, i_1$, we write $\PathP{} A \,x\, y$ for the dependent path type between $x$ and $y$. 
+
+A function $f : A \to B$ is an \emph{equivalence} if it has contractible fibers, i.e. if the preimage of any element in $B$ under $f$ is a singleton type. Any function underlying a type isomorphism defines an equivalence. Writing $A \simeq B$ for the type of equivalences between $A$ and $B$, Voevodsky's \emph{univalence principle} states that the canonical function of type $A = B \to A \simeq B$ is an equivalence. This is a theorem in Cubical Agda. In particular, there is a function $\operatorname{ua} : A \simeq B \to A = B$ turning equivalences into path equalities. Univalence implies \emph{function extensionality}: pointwise equal functions are equal.
+
+We recall the first instances of the hierarchy of \emph{homotopy levels}, and say that a type $A$ is:
 \begin{itemize}
-  \item Definitional equality: $\DefEq$
-  \item propositional equality (paths): $=$
-  \item Binders: always in the form of $\mathsf{Q} (x : X)\Where \langle\mathsf{expr}\rangle$,
-    i.e. $\sum (n : \N)\Where n * n = 2$.
-    Binders extend as far right as possible.
-  \item $\exists$ for \emph{mere existence}, i.e. $\PropTrunc{\sum (\mathunderscore)\Where X}$.
-  \item dependent paths: $\PathP{} (\lambda i\Where \mathunderscore)\, \mathunderscore\, \mathunderscore$
-  \item eliminators and co.:
-    For any $F : \Type → \Type$, write
-    $\Elim{F}$, $\Rec{F}$ and $\Map{F}$
-    for the (dependent) eliminator, recursor and action on maps.
+  \item ($n = 1$) a \emph{proposition}, if
+    $\IsProp A \DefEq (a , b : A)\Where a = b$ is inhabited,
+  \item ($n = 2$) a \emph{set}, if
+    $\IsSet A \DefEq (a, b : A)\Where \IsProp \ (a = b)$ is inhabited,
+  \item ($n = 3$) a \emph{groupoid}, if
+    $\IsGpd A \DefEq (a, b : A)\Where \IsSet \ (a = b)$ is inhabited.
 \end{itemize}
+When mentioning \enquote{sets} or \enquote{groupoids}, we always refer to the definition above.
+
+A \emph{higher inductive type} (HIT) is like an inductive type, but its constructors can build both its elements and its (higher) paths. HITs are primitively supported in Cubical Agda. We recall the definition of three basic HITs: propositional truncation, set truncation and the set quotient. 
+
+The \emph{propositional truncation} $\PropTrunc{A}$ is the proposition associated to the type $A$, i.e. it unifies all the elements and (higher) paths of $A$. It is the HIT with constructors
+\begin{center}
+  \hspace*{\fill}
+    \AxiomC{$a : A$}
+    \UnaryInfC{
+      $\PropTruncCon[a] : \PropTrunc{A}$
+    }
+    \DisplayProof
+  \hfill
+    \AxiomC{$x, y : \PropTrunc{A}$}
+    \UnaryInfC{$\PropTruncSquash\,x\,y : x = y$}
+    \DisplayProof
+  \hspace*{\fill}
+\end{center}
+We define the \emph{existential quantifier} $\exists (x : A) \Where B\, x \DefEq \PropTrunc{\sum (x : A) \Where B\,x}$, which records the mere existence of an element $x$ satisfying $B$.    
+
+The \emph{set truncation} $\SetTrunc{A}$ is the set associated to the type $A$, i.e. it unifies all (higher) paths of $A$. It is the HIT with constructors
+\begin{center}
+  \hspace*{\fill}
+    \AxiomC{$a : A$}
+    \UnaryInfC{
+      $\SetTruncCon[a] : \SetTrunc{A}$
+    }
+    \DisplayProof
+  \hfill
+    \AxiomC{$x, y : \SetTrunc{A}$}
+    \AxiomC{$p, q : x = y$}
+    \BinaryInfC{$\SetTruncSquash\,p\,q : p = q$}
+    \DisplayProof
+  \hspace*{\fill}
+\end{center}
+
+The \emph{set quotient} $\SetQuot[A][\sim]$ of a type $A$ by a (possibly proof-relevant) relation
+$({\sim}) : A \to A \to \Type$ is the HIT with constructors
+\begin{center}
+  \hspace*{\fill}
+    \AxiomC{$a : A$}
+    \UnaryInfC{
+      $\SetQuotCon[a] : \SetQuot[A][\sim]$
+    }
+    \DisplayProof
+  \hfill
+    \AxiomC{$a, b : A$}
+    \AxiomC{$r : a \sim b$}
+    \BinaryInfC{$\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}\,r : \SetQuotCon[a] = \SetQuotCon[b]$}
+    \DisplayProof
+  \hfill
+    \AxiomC{$x, y : \SetQuot[A][\sim]$}
+    \AxiomC{$p, q : x = y$}
+    \BinaryInfC{$\SetQuotSquash\,p\,q : p = q$}
+    \DisplayProof
+  \hspace*{\fill}
+\end{center}
+The term $\SetQuotCon[a]$ is the ${\sim}$-equivalence class of $a$, while the path constructor $\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}$ states that $\sim$-related elements have path equal equivalence classes. The higher path constructor $\SetQuotSquash$ forces $\SetQuot[A][\sim]$ to be a set.
+
+Other HITs are presented in the next section, where we also take a closer look at their elimination principles.
 
 
-\section{The Finite Bag Functor}
+
+\section{The Finite Bag Functor}\label{sec:finite-bag}
 
 The action of the bag functor on a type $X$ can be encoded as higher inductive
 types in various ways, two of which we present here.
