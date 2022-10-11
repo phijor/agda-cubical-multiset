@@ -20,10 +20,12 @@
 \maketitle              % typeset the header of the contribution
 
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
 
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+  Coalgebras for the finite bag functor are dynamical systems where the transition relation is resource-sensitive: the collection of reachable states records the number of ways in which each state can be reached. The final coalgebra of the finite bag functor is employed as a denotational domain for the evaluation of such dynamical systems. Its elements are non-wellfounded trees with finite unordered branching, depicting the evolution of systems starting from a given initial state.
+
+  This paper is dedicated to the construction of the final coalgebra of the finite bag functor in homotopy type theory (HoTT). We first compare various equivalent definitions of finite bags employing higher inductive types, both as sets and as groupoids (in the sense of HoTT). We then analyze a few classical set-theoretic constructions of final coalgebras in our constructive setting. We show that, in the case of set-based definitions of finite bags, these constructions are either intrinsically classical, in the sense that they are equivalent to some weak form of excluded middle, or cannot be directly reproduced in HoTT without the assumption of classical principles. The final coalgebra can be safely constructed in HoTT only employing the groupoid-based definition of finite bags. We discuss generalizations of these constructions to more general analytic functors. We also show how Cubical Agda's coinductive types can be used to build the final coalgebra of the finite bag functor. 
+
+\keywords{finite bags \and final coalgebra \and homotopy type theory.}
 \end{abstract}
 
 \section{Introduction}
@@ -62,6 +64,9 @@ We finally discuss generalizations of our constructions to other analytic functo
 
 The material presented in the paper have been formalized in the Cubical Agda proof
 assistant. The code is freely available at (INSERT GITHUB LINK).
+
+\section{Type Theory and Cubical Agda}
+
 \subsection{Notation}
 \begin{itemize}
   \item Definitional equality: $\DefEq$
@@ -77,7 +82,6 @@ assistant. The code is freely available at (INSERT GITHUB LINK).
     for the (dependent) eliminator, recursor and action on maps.
 \end{itemize}
 
-\section{Type Theory and Cubical Agda}
 
 \section{The Finite Bag Functor}
 
