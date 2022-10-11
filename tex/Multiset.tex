@@ -1,9 +1,5 @@
-% This is samplepaper.tex, a sample chapter demonstrating the
-% LLNCS macro package for Springer Computer Science proceedings;
-% Version 2.21 of 2022/01/12
-%
 \documentclass[runningheads]{llncs}
-%
+
 \usepackage[T1]{fontenc}
 \usepackage{multiset}
 
@@ -44,6 +40,10 @@ The abstract should briefly summarize the contents of the paper in
     Binders extend as far right as possible.
   \item $\exists$ for \emph{mere existence}, i.e. $\PropTrunc{\sum (\mathunderscore)\Where X}$.
   \item dependent paths: $\PathP{} (\lambda i\Where \mathunderscore)\, \mathunderscore\, \mathunderscore$
+  \item eliminators and co.:
+    For any $F : \Type → \Type$, write
+    $\Elim_{F}$, $\Rec_{F}$ and $\Map_{F}$
+    for the (dependent) eliminator, recursor and action on maps.
 \end{itemize}
 
 \section{Type Theory and Cubical Agda}
@@ -159,11 +159,30 @@ defined as the higher inductive type induced by the following rules:
     {\SetTrunc{(k : \Fin n) → \mathop{Y\/} k}}
   \]
 \end{lemma}
+\begin{proof}
+  We sketch a proof for a constant type family $Y = (\lambda \Blank \Where X)$.
+  The dependent case is analogous.
+  The function underlying the equivalence is defined by induction on $n$.
+  For $n = 0$ we have $\Fin 0 ≃ \bot$,
+  so $\Op{box} \DefEq \SetTruncCon[\Elim{\bot}]$.
+  In the inductive step, we lift the \enquote{cons} operation
+  $
+    (\Cons) : X → (\Fin n → X) → (\Fin{} (1 + n) → X)
+  $
+  on vectors to the set-truncation.
+  By induction on $n$, we see that
+  \begin{align*}
+    &\Op{unbox} : \SetTrunc{\Fin n → X} → \Fin k → \SetTrunc{X} \\
+    &\Op{unbox} \bar{v}\, k \DefEq \Map{\SetTrunc{\Blank}} (\lambda v\Where v\, k)\, \bar{v}
+  \end{align*}
+  is a two-sided inverse of $\Op{box}$.
+  The proof boils down to the fact that $\Map{\SetTrunc{\Blank}}$ is functorial.
+\end{proof}
 
 \begin{definition}
   The principle of finite choice can be defined in terms of $\Op{box}$:
   \begin{align*}
-    \Op{elim}_{\Op{fin}} &: \forall n\Where \\
+    \FinElim &: \forall n\Where \\
       &\to \{B : (\Fin n \to \SetTrunc{X}) \to \Type\} \\
       &\to (\forall v\Where \IsSet (B\, v)) \\
       &\to ((\mathsf{choice} : \Fin n \to X) \to B\, (\SetTruncCon{} \circ \mathsf{choice})) \\
@@ -173,8 +192,8 @@ defined as the higher inductive type induced by the following rules:
   set-truncation elimination on $\operatorname{box} v$.
   It comes with a computational rule
   \begin{align*}
-    \Op{elim}^\beta_{\Op{fin}} : (v : \Fin n → X)
-      → \Op{elim}_{\Op{fin}} (\SetTruncCon{} \circ v) = \operatorname{\mathsf{choice}} v
+    \FinElimComp : (v : \Fin n → X)
+      → \FinElim (\SetTruncCon{} \circ v) = \operatorname{\mathsf{choice}} v
   \end{align*}
 \end{definition}
 
@@ -185,16 +204,17 @@ defined as the higher inductive type induced by the following rules:
   \end{equation}
 \end{theorem}
 \begin{proof}
-  \begin{enumerate}
-    \item Inverse is given by $\operatorname{map} \SetTruncCon{} : \FMSet X → \FMSet \SetTrunc{X}$.
-    \item Define the inverse by using
-      \[
-        \Op{requot} : ∀ \{n\}\Where
-          (\Fin n → \SetTrunc{X})
-          → (\Fin n → X) \SetQuot{} {\sim_n},
-      \]
-      defined via $\Op{elim}_{\Op{fin}}$.
-  \end{enumerate}
+  We obtain the equivalence from an isomorphism.
+  The inverse map is set-truncation of the members of the finite multiset.
+  In the forward direction, we use $\FinElim$ to define a function
+  \[
+    \Op{requot} : ∀ \{n\}\Where
+    (\Fin n → \SetTrunc{X})
+    → \SetQuot[(\Fin n → X)][\sim_n]
+  \]
+  that turns set-truncation into a set-quotient and prove that it preserves $(\sim_n)$.
+  By recursion on $\FMSet \SetTrunc{X}$, this enough to obtain $\FMSet \SetTrunc{X} → \FMSet X$.
+  That these maps are mutual inverses follows from $\FinElimComp$.
 \end{proof}
 
 \subsection{As a Groupoid}
@@ -224,10 +244,11 @@ First, recall one way of defining \enquote{finite} sets in HoTT:
     \Op{FinSet} \DefEq
       \sum (Y : \Type)\Where \Op{isFinSet} Y
   \]
+  The underlying type of a $\FinSet$ is accessed via the first projection $\langle\Blank\rangle : \FinSet → \Type$.
 \end{definition}
 
 It is easy to show that $\Op{isFinSet}$ is a proposition and that any type satisfying the predicate is a set.
-Similarly, one shows that $\Op{FinSet}$ forms a groupoid.
+It follows that $\Op{FinSet}$ forms a groupoid.
 Note that $\Op{FinSet}$ is a \emph{large} type, i.e. it lives in the successor universe of the types that it ranges over.
 From this, we can define a \enquote{tote}, which we think of as a finite collections of things in $X$:
 \begin{definition}
@@ -248,7 +269,7 @@ In general, $\Tote X$ is at least a groupoid.
   By assumption $X$ is a groupoid,
   so the function type $\langle Y \rangle → X$ is a groupoid
   for any $Y : \FinSet$.
-  By construction $\Bij$ is a groupoid, therefore the entire $\Sigma$-type is a groupoid.
+  But $\FinSet$ is also a groupoid, therefore the entire $\Sigma$-type is a groupoid.
 \end{proof}
 
 Note that $\Tote$ is again a large type family.
@@ -269,7 +290,7 @@ We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ 
 \end{theorem}
 \begin{proof}
   The proof proceeds by constructing an explicit isomorphism $\FMSet X \cong \SetTrunc{\Tote X}$.
-  The forward function is straight forward, while the inverse function has to be carefully defined with the
+  The forward direction is unproblematic, while the inverse function has to be carefully defined with the
   homotopy levels of the involved types in mind.
 
   \newcommand*{\ToTote}{\operatorname{\mathsf{toTote}}}

@@ -19,6 +19,7 @@
 \RequirePackage{newunicodechar}
 
 \RequirePackage{xparse}
+\RequirePackage{mathtools}
 \RequirePackage{amsmath}
 \RequirePackage{amsthm}
 
@@ -37,17 +38,20 @@
 \newunicodechar{∃}{\ensuremath{\mathop{\mathnormal\exists\/}}}
 \newunicodechar{≃}{\mathbin{\mathnormal\simeq}}
 
+\newcommand{\OpFont}{\mathsf}
+
 \DeclareMathOperator{\Chain}{ch}
 \DeclareMathOperator{\Shift}{sh}
-\DeclareMathOperator{\Type}{Type}
-\DeclareMathOperator{\Fin}{Fin}
+\DeclareMathOperator{\Type}{\OpFont{Type}}
+\DeclareMathOperator{\Fin}{\OpFont{Fin}}
 \DeclareMathOperator{\Sym}{\mathfrak{S}}
+\NewDocumentCommand{\Cons}{}{\ensuremath{\mathbin{\dblcolon}}}
 
 \newcommand*{\Empty}{\mathsf{\varepsilon}}
 \newcommand*{\Singl}{\operatorname{\mathsf{\eta}}}
 \newcommand*{\Union}{\mathbin{\oplus}}
 \newcommand*{\Var}[1]{\mathit{#1}}
-\newcommand*{\Op}[1]{\operatorname{\mathsf{#1}}}
+\newcommand*{\Op}[1]{\operatorname{\OpFont{#1}}}
 
 \newcommand*{\DefEq}{\ensuremath{\mathbin{=_\mathsf{df}}}}
 
@@ -72,6 +76,10 @@
 
 \NewDocumentCommand{\Rec}{m}{\Op{rec}_{#1}}
 \NewDocumentCommand{\Elim}{m}{\Op{elim}_{#1}}
+\NewDocumentCommand{\Map}{m}{\Op{map}_{#1}}
+
+\NewDocumentCommand{\FinElim}{}{\Elim{\OpFont{fin}}}
+\NewDocumentCommand{\FinElimComp}{}{\Elim{\OpFont{fin}}^\beta}
 
 \DeclareMathOperator{\IsProp}{\mathsf{isProp}}
 \DeclareMathOperator{\IsSet}{\mathsf{isSet}}
