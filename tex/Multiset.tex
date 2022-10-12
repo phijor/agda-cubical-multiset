@@ -28,6 +28,9 @@
 \keywords{finite bags \and final coalgebra \and homotopy type theory.}
 \end{abstract}
 
+\setcounter{tocdepth}{1}
+\tableofcontents
+
 \section{Introduction}
 
 \emph{Coalgebras} are functions of the form $c : S \to F S$, where $S$ is a set of states and $F$ is a functor specifying a certain class of collections of states \cite{Rutten2000,Jacobs2016}. For example, $F S$ could be lists over $S$, bags or subsets of $S$ (possibly with some cardinality restrictions), wellfounded trees with leaves or nodes in $S$, or probability distributions over $S$. The coalgebra $c$ describes the dynamics of a transition system or an automaton: to each state $s : S$, the function $c$ associates the collection of states $c \,s : F S$ that are reachable from $s$ in one step. The choice of collection functor $F$ is dictated by the specific flavour of non-determinism that is intrinsic in the transition relation. Does the order or multiplicity of reachable states matter? Is the choice of a new state probabilistic? Does the transition relation additionally depend on a set of labels, weights or actions?
@@ -63,15 +66,20 @@ Practically, the last two constructions, while not generally delivering the fina
 We finally discuss generalizations of our constructions to other analytic functors. We also look at an alternative construction of the final $\FMSet$-coalgebra using Cubical Agda's primitive \emph{coinductive types} \cite{Vezzosi2019}. In Cubical Agda, HITs such as $\FMSet X$ can appear in the codomain of coinductive type destructors, which is intuitively justified by the treatment of HITs in Cubical Agda as inductive types with constructors possibly depending on interval variables \cite{Coquand2018,Cavallo2019}.
 
 The material presented in the paper have been formalized in the Cubical Agda proof
-assistant. The code is freely available at (INSERT GITHUB LINK).
+assistant. The code is freely available at \url{https://github.com/phijor/agda-cubical-multiset}.
 
 \section{Type Theory and Cubical Agda}
 
 We work in homotopy type theory \cite{HoTTBook} and practically our formalization takes place in Cubical Agda \cite{Vezzosi2019}. In this section we recall some basic notions that are employed in our development.
 
-Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$. Implicit arguments of dependent functions are enclosed in curly brackets. Basics inductive types include: unit type $1$, empty type $\bot$, Booleans values $\Bool$, natural numbers $ℕ$, lists $\List A$, dependent pairs $\sum (x : A) \Where B \, x$, binary sum $A + B$ and products $A \times B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is called $! : A \to 1$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types, introduced in the end of this section). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$.. Most of our constructions are universe-polymorphic, but for the sake of readibility in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
+Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$. Implicit arguments of dependent functions are enclosed in curly brackets. Basics inductive types include: unit type $1$, empty type $\bot$, Booleans values $\Bool$, natural numbers $ℕ$, lists $\List A$, dependent pairs $\sum (x : A) \Where B \, x$, binary sum $A + B$ and products $A \times B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is called $! : A \to 1$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types, introduced in the end of this section). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readibility in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
 
-Given $x, y : A$, their definitional equality is denoted $x \DefEq y$ while propositional equality is $x = y$. Following ``cubical terminology'', the latter is called the \emph{path type} between $x$ and $y$. In Cubical Agda, the path type $x = y$ behaves similarly to a function type $\Interval \to A$, where $\Interval$ is a primitive interval type with endpoints $i_0$ and $i_1$. An element $p : x = y$ is eliminated by application to an interval name $r : \Interval$, returning $p \, r : A$. But unlike function types, this application can compute even when $p$ is unknown by using the endpoints $x$ and $y$: $p \,i_0$ reduces to $x$ and $p \,i_1$ reduces to $y$.  Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. Paths can be made \emph{dependent} by allowing the type $A$ to vary over the interval, i.e. $A : \Interval \to \Type$. When $x : A \, i_0$ and $y : A \, i_1$, we write $\PathP{} A \,x\, y$ for the dependent path type between $x$ and $y$. 
+Given $x, y : A$, their definitional equality is denoted $x \DefEq y$ while propositional equality is $x = y$.
+Following ``cubical terminology'', the latter is called the \emph{path type} between $x$ and $y$.
+In Cubical Agda, the path type $x = y$ behaves similarly to a function type $\Interval \to A$, where $\Interval$ is a primitive interval type with endpoints $i_0$ and $i_1$.
+An element $p : x = y$ is eliminated by application to an interval name $r : \Interval$, returning $p \, r : A$.
+But unlike function types, this application can compute even when $p$ is unknown by using the endpoints $x$ and $y$: $p \,i_0$ reduces to $x$ and $p \,i_1$ reduces to $y$.
+Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. 
 
 A function $f : A \to B$ is an \emph{equivalence} if it has contractible fibers, i.e. if the preimage of any element in $B$ under $f$ is a singleton type. Any function underlying a type isomorphism defines an equivalence. Writing $A \simeq B$ for the type of equivalences between $A$ and $B$, Voevodsky's \emph{univalence principle} states that the canonical function of type $A = B \to A \simeq B$ is an equivalence. This is a theorem in Cubical Agda. In particular, there is a function $\operatorname{ua} : A \simeq B \to A = B$ turning equivalences into path equalities. Univalence implies \emph{function extensionality}: pointwise equal functions are equal.
 
@@ -147,13 +155,12 @@ Other HITs are presented in the next section, where we also take a closer look a
 
 
 
-\section{The Finite Bag Functor}\label{sec:finite-bag}
+\section{The Finite Multiset Functor}\label{sec:finite-mset}
 
 The action of the bag functor on a type $X$ can be encoded as higher inductive
 types in various ways, two of which we present here.
 The first is as the type of lists set-quotiented by an \emph{up to permutation}-relation,
 the second being the free commutative monoid on $X$.
-
 
 \subsection{As a HIT}
 
@@ -212,23 +219,52 @@ defined as the higher inductive type induced by the following rules:
     \end{center}
 \end{itemize}
 
-\subsection{As a Set Quotient}
+\todo[inline]{%
+  Rename $\M$ to $\Op{FCM}$ (\enquote{free commutative monoid}, I think \cite{Choudhury2021} use it too).
+}
 
-\begin{definition}
-  The type of finite multisets over a type $X$ is the type
-  \begin{align*}
-    \FMSet X
-      \mathbin{=_{\mathrm{df}}}
-      \sum\,\Var{sz} : ℕ\Where
-        (\Fin \Var{sz} \to X) \mathbin{/_{\!2}} \mathrel{\sim},
-  \end{align*}
-  where $\sim$ is the proposition-valued relation defined as
-  \begin{align*}
-    v \sim w &\mathrel{=_{\mathsf{df}}}
-      ∃ \sigma : \Fin n ≃ \Fin n \Where
-        \PathP{} (\lambda i\Where \operatorname{ua}(\sigma)\, i → X)\, v\, w
-  \end{align*}
-\end{definition}
+\begin{align*}
+  \Rec{\M X} &: ∀ \{A : \Type\}
+    → \IsSet A \\
+    &→ (\varepsilon^* : A)
+      → (\eta^* : X → A)
+      → (\Blank\!{+}\!\Blank : A → A → A) \\
+    &→ (∀ a\Where \varepsilon^* + a = a) \\
+    &→ (∀ a\, b\, c\Where a + (b + c) = (a + b) + c) \\
+    &→ (∀ a\, b\Where a + b = b + a) \\
+    &→ \M X → A
+\end{align*}
+
+\todo[inline]{%
+  --
+}
+
+\subsection{As a Quotient of Lists}
+
+\begin{itemize}
+  \item define the datatype (w/ relator or permutations?)
+  \item linear orders and sorting (permutations)
+\end{itemize}
+
+\subsection{As an Analytic Functor}
+
+We define a type of finite multisets over a type $X$ is the type by
+\begin{align*}
+  \FMSet X
+    \mathbin{=_{\mathrm{df}}}
+    \sum\,\Var{sz} : ℕ\Where
+      (\Fin \Var{sz} \to X) \mathbin{/_{\!2}} \mathrel{\sim},
+\end{align*}
+where $\sim$ is the proposition-valued relation defined as
+\begin{align*}
+  v \sim w &\mathrel{=_{\mathsf{df}}}
+    ∃ \sigma : \Fin n ≃ \Fin n \Where
+      v = w \circ \sigma
+\end{align*}
+
+\todo[inline]{%
+  Maybe eename $\FMSet$ to $\Op{MSet}$?
+}
 
 \begin{definition}
   The recursion principle for $\FMSet X$ is the function
@@ -270,7 +306,7 @@ defined as the higher inductive type induced by the following rules:
   on vectors to the set-truncation.
   By induction on $n$, we see that
   \begin{align*}
-    &\Op{unbox} : \SetTrunc{\Fin n → X} → \Fin k → \SetTrunc{X} \\
+    &\Op{unbox} : \SetTrunc{\Fin n → X} → \Fin n → \SetTrunc{X} \\
     &\Op{unbox} \bar{v}\, k \DefEq \Map{\SetTrunc{\Blank}} (\lambda v\Where v\, k)\, \bar{v}
   \end{align*}
   is a two-sided inverse of $\Op{box}$.
@@ -315,7 +351,13 @@ defined as the higher inductive type induced by the following rules:
   That these maps are mutual inverses follows from $\FinElimComp$.
 \end{proof}
 
-\subsection{As a Groupoid}
+\begin{theorem}
+  For any $X$, the types $\FMSet X$, $\M X$ and $\operatorname{PList} X$ are equivalent.
+\end{theorem}
+
+\section{The Final Coalgebra in Sets}
+
+\section{The Bag Functor in Groupoids}
 Following \cite{Kock2012}, we argue the correct perspective on bags in Homotopy Type Theory
 is to define them as groupoids instead of sets.
 The rationale is that identifications of bags are permutations, and these should inherently be treated as \emph{data}.
@@ -406,7 +448,7 @@ We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ 
   and to show that it respects $(\sim)$.
   Let $f(v) \DefEq \SetTruncCon[(\Fin \Var{sz} , v)]$, since $\Fin \Var{sz}$ is obviously a finite set.
   To prove that $v \sim w$ implies $f(v) = f(w)$, we note that the conclusion is a proposition,
-  thus by induction on $v \sim w$ obtain a permutation $\sigma$ such that $r : v \circ \sigma = w$.
+  thus by induction on $v \sim w$ obtain a permutation $\sigma$ such that $r : v = w \circ \sigma$.
   By univalence, $\Op{ua} \sigma : \Fin \Var{sz} = \Fin \Var{sz}$,
   and transporting $r$ along this path yields
   $
@@ -454,16 +496,23 @@ we have $A = ℕ$ and $B = \Fin$ for $\Op{List}$,
 and $A = \Bij$ and $B = \BagCon{\Blank}$ for $\Bag$.
 In particular, $\SetTrunc{\Bij} ≃ ℕ$.
 
-\subsection{As lists up to permutation}
-
-\begin{theorem}
-  For any $X$, the types $\FMSet X$, $\M X$ and $\operatorname{PList} X$ are equivalent.
-\end{theorem}
-
 \section{The Final Coalgebra}
 
 Describe limits in general.
 Maybe compare final coalgebras and corecursive algebras which are fixpoints.
+\todo[inline]{%
+  Mention what the type of final coalgebras is.
+  Use contractibility for UP.
+}
+
+\subsection{$\omega$-Chains and Limits}
+
+\begin{itemize}
+  \item definition of chains (in type theory)
+  \item define type of limits, mention universal property
+  \item shifted limit
+  \item mention that $\Op{pres}$ is given by the UP
+\end{itemize}
 
 \subsection{Final Coalgebras as an \ensuremath{\omega}-Limit in Set}
 
@@ -472,19 +521,29 @@ Maybe compare final coalgebras and corecursive algebras which are fixpoints.
 }
 
 \begin{theorem}\label{thm:InjPresImpliesLLPO}
-  The function
+  The injectivity of the function
   $\Op{pres}\colon
       \FMSet (\lim_{n < \omega} \FMSet^n 1)
       \to
       \lim_{n < \omega} (\FMSet^{n+1} 1)$
-  is surjective,
-  but its injectivity is equivalent to the \emph{lesser limited principle of omniscience}, \LLPO.
+  is equivalent to the \emph{lesser limited principle of omniscience}, \LLPO.
 \end{theorem}
 \LLPO{} \cite[{Ch.\@ 1}]{Bridges1987} is a weak version of the law
 of the excluded middle, and it is not provable from intuitionistic
 axioms alone.  It states that, given an infinite stream of boolean
 values that yields $\True$ in at most one position, one can decide
 whether all even or all odd positions are $\False$.
+
+\begin{proof}[\cref{thm:InjPresImpliesLLPO}]
+  Both injectivity and \LLPO{} are propositions, so we show equivalence from bi-implication.
+  \Cref{lem:InjPresImpliesComplete} shows that injectivity implies completeness of $L_{\FMSet}$,
+  which implies injectivity (\cite[{Theorem~7}]{Veltri2021}).
+  The other direction is done in \cref{lem:LLPOImpliesPresInj}.
+\end{proof}
+
+\begin{theorem}\label{thm:InjPresSurjective}
+  $\Op{pres}$ is surjective.
+\end{theorem}
 
 \begin{lemma}\label{lem:DiagLimCaseAnalysis}
   For any $x, a, b : L_{\FMSet}$ and $\Var{ys} : ℕ → L_{\FMSet}$,
@@ -561,9 +620,11 @@ whether all even or all odd positions are $\False$.
   which means that merely $x = y_1$ or $x = y_2$.
 \end{proof}
 
-\begin{proof}[\cref{thm:InjPresImpliesLLPO}]
-  \Cref{lem:InjPresImpliesComplete} shows that $L_{\FMSet}$ is complete,
-  which implies injectivity (\cite[{Theorem~7}]{Veltri2021}).
+\begin{lemma}\label{lem:LLPOImpliesPresInj}
+  Assuming \LLPO, $\Op{pres}$ is injective.
+\end{lemma}
+\begin{proof}
+  \todo[inline]{Prove it.}
 \end{proof}
 
 \subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
