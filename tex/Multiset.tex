@@ -72,7 +72,7 @@ assistant. The code is freely available at \url{https://github.com/phijor/agda-c
 
 We work in homotopy type theory \cite{HoTTBook} and practically our formalization takes place in Cubical Agda \cite{Vezzosi2019}. In this section we recall some basic notions that are employed in our development.
 
-Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$. Implicit arguments of dependent functions are enclosed in curly brackets. Basics inductive types include: unit type $1$, empty type $\bot$, Booleans values $\Bool$, natural numbers $ℕ$, lists $\List A$, dependent pairs $\sum (x : A) \Where B \, x$, binary sum $A + B$ and products $A \times B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is called $! : A \to 1$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types, introduced in the end of this section). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readibility in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
+Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$. Implicit arguments of dependent functions are enclosed in curly brackets. Basics inductive types include: unit type $1$, empty type $\bot$, Booleans values $\Bool$, natural numbers $ℕ$, finite prefixes of the naturals $\Fin n$, lists $\List A$, dependent pairs $\sum (x : A) \Where B \, x$, binary sum $A + B$ and products $A \times B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is called $! : A \to 1$. Membership in a list is $x \in xs$ and removal of an occurrence $m : x \in xs$ is $xs \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types, introduced in the end of this section). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readibility in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
 
 Given $x, y : A$, their definitional equality is denoted $x \DefEq y$ while propositional equality is $x = y$.
 Following ``cubical terminology'', the latter is called the \emph{path type} between $x$ and $y$.
@@ -128,46 +128,47 @@ The \emph{set truncation} $\SetTrunc{A}$ is the set associated to the type $A$, 
   \hspace*{\fill}
 \end{center}
 
-The \emph{set quotient} $\SetQuot[A][\sim]$ of a type $A$ by a (possibly proof-relevant) relation
-$({\sim}) : A \to A \to \Type$ is the HIT with constructors
+The \emph{set quotient} $\SetQuot[A][R]$ of a type $A$ by a (possibly proof-relevant) relation
+$R : A \to A \to \Type$ is the HIT with constructors
 \begin{center}
   \hspace*{\fill}
     \AxiomC{$a : A$}
     \UnaryInfC{
-      $\SetQuotCon[a] : \SetQuot[A][\sim]$
+      $\SetQuotCon[a] : \SetQuot[A][R]$
     }
     \DisplayProof
   \hfill
     \AxiomC{$a, b : A$}
-    \AxiomC{$r : a \sim b$}
+    \AxiomC{$r : R \,a\, b$}
     \BinaryInfC{$\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}\,r : \SetQuotCon[a] = \SetQuotCon[b]$}
     \DisplayProof
   \hfill
-    \AxiomC{$x, y : \SetQuot[A][\sim]$}
+    \AxiomC{$x, y : \SetQuot[A][R]$}
     \AxiomC{$p, q : x = y$}
     \BinaryInfC{$\SetQuotSquash\,p\,q : p = q$}
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-The term $\SetQuotCon[a]$ is the ${\sim}$-equivalence class of $a$, while the path constructor $\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}$ states that $\sim$-related elements have path equal equivalence classes. The higher path constructor $\SetQuotSquash$ forces $\SetQuot[A][\sim]$ to be a set.
+The term $\SetQuotCon[a]$ is the $R$-equivalence class of $a$, while the path constructor $\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}$ states that $R$-related elements have path equal equivalence classes. The higher path constructor $\SetQuotSquash$ forces $\SetQuot[A][R]$ to be a set. A set-quotient $\SetQuot[A][R]$ is called \emph{definable} if the equivalence class constructor has a section, i.e. there is a representative-picking function $\rep: \SetQuot[A][R] \, \to A$ such that $\SetQuotCon[\rep\,x] = x$ for all $x : \SetQuot[A][R]$ \cite{Li2015}.
 
 Other HITs are presented in the next section, where we also take a closer look at their elimination principles.
 
 
 
-\section{The Finite Multiset Functor}\label{sec:finite-mset}
+\section{The Finite Bag Functor in Sets}\label{sec:finite-bags-sets}
 
-The action of the bag functor on a type $X$ can be encoded as higher inductive
-types in various ways, two of which we present here.
-The first is as the type of lists set-quotiented by an \emph{up to permutation}-relation,
-the second being the free commutative monoid on $X$.
+The action of the finite bag functor on a type $X$ can be encoded as higher inductive
+types in various ways, three of which are presented here. 
+The first is as the free commutative monoid, the second as lists modulo permutations,
+%set-quotiented by an \emph{up to permutation}-relation,
+the third as an analytic functor. These are all set-based definitions, in the sense that the type of finite bags is a set. Groupoid-based definitions are discussed in Section~\ref{sec:finite-bags-groupoids}.
 
-\subsection{As a HIT}
+\subsection{As the Free Commutative Monoid}
 
-Given a type $X$, the free commutative monoid $(\M X, \Union, \Empty)$ is
-defined as the higher inductive type induced by the following rules:
-\begin{itemize}
-  \item Point constructors:
+Given a type $X$, the \emph{free commutative monoid} on $X$
+\cite{Choudhury2021} is the HIT $\M X$ induced by the following rules:
+%\begin{itemize}
+%  \item Point constructors:
     \begin{center}
       \hspace*{\fill}
         \AxiomC{$\vphantom{X}$}
@@ -183,9 +184,10 @@ defined as the higher inductive type induced by the following rules:
         \UnaryInfC{$\Var{xs} \Union \Var{ys} : \M X$}
         \DisplayProof
       \hspace*{\fill}
-    \end{center}
-  \item Monoid axioms and commutativity:
-    \begin{center}
+%    \end{center}
+ % \item Monoid axioms and commutativity:
+      \\[6pt]
+%    \begin{center}
       \hspace*{\fill}
         \AxiomC{$\Var{xs} : \M X$}
         \UnaryInfC{$\mathsf{unit} : \Empty \Union \Var{xs} = \Var{xs}$}
@@ -205,10 +207,10 @@ defined as the higher inductive type induced by the following rules:
         }
         \DisplayProof
       \hspace*{\fill}
-    \end{center}
-  \item set truncation:
-    \begin{center}
-      \hspace*{\fill}
+%    \end{center}
+%  \item set truncation:
+%    \begin{center}
+%      \hspace*{\fill}
         \AxiomC{$\Var{xs}, \Var{ys} : \M X$}
         \AxiomC{$p, q : \Var{xs} = \Var{ys}$}
         \BinaryInfC{
@@ -217,81 +219,107 @@ defined as the higher inductive type induced by the following rules:
         \DisplayProof
       \hspace*{\fill}
     \end{center}
-\end{itemize}
+%\end{itemize}
 
-\todo[inline]{%
-  Rename $\M$ to $\Op{FCM}$ (\enquote{free commutative monoid}, I think \cite{Choudhury2021} use it too).
-}
+The costructor $\Singl$ embeds $X$ into $\M X$, while $\Empty$ and $\Union$ are the unit and multiplication of the monoid. The path constructors express unitality of $\Empty$ wrt. $\Union$, associativity and commutativity of $\Union$, and the final higher path constructor forces $\M X$ to be a set.
 
+In Cubical Agda, functions out of HITs like $\M X$ can be defined directly by pattern matching. But it is often useful to have elimination principles at hand that give more control on the shape of the proof obligations. For example, the non-dependent elimination principle of $\M X$ states that a function of type $\M X \to A$ is definable, provided that $A$ is a commutative monoid and there exists a function $\eta^* : X \to A$.
 \begin{align*}
-  \Rec{\M X} &: ∀ \{A : \Type\}
-    → \IsSet A \\
-    &→ (\varepsilon^* : A)
-      → (\eta^* : X → A)
-      → (\Blank\!{+}\!\Blank : A → A → A) \\
+  \Rec{\M X} &: \{A : \Type\} → \IsSet A \\
+    &→ (\varepsilon^* : A) \,(\eta^* : X → A) \, (({+}) : A → A → A) \\
     &→ (∀ a\Where \varepsilon^* + a = a) \\
     &→ (∀ a\, b\, c\Where a + (b + c) = (a + b) + c) \\
     &→ (∀ a\, b\Where a + b = b + a) \\
     &→ \M X → A
 \end{align*}
-
-\todo[inline]{%
-  --
-}
+$\M$ is a functor, with action on maps given by
+\begin{align*}
+  &\Map{M} : (f : X \to Y) \to \M X \to \M Y \\
+  &\Map{M}\,f \DefEq \Rec{\M X}\;\mathsf{trunc}\;\Empty\;(\eta \circ f)\;(\Union)\;\mathsf{unit}\;\mathsf{assoc}\;\mathsf{comm}
+\end{align*}
 
 \subsection{As a Quotient of Lists}
 
-\begin{itemize}
-  \item define the datatype (w/ relator or permutations?)
-  \item linear orders and sorting (permutations)
-\end{itemize}
+Another standard definition of the type of finite multisets is as lists modulo permutations. The relation specifying the existence of a permutation between two lists can be given in multiple ways, here we mention two possibilities.
+
+Given $xs, ys : \List X$, the relation $\Perm \,xs \,ys$ is generated by the rules:
+\begin{center}
+  \hspace*{\fill}
+    \AxiomC{$\vphantom{X}$}
+    \UnaryInfC{$\Perm \, xs\, xs$}
+    \DisplayProof
+  \hfill
+    \AxiomC{$\Perm\, (xs \Append x \Cons y \Cons ys)\,zs$}
+    \UnaryInfC{$\Perm\, (xs \Append y \Cons x \Cons ys)\,zs$}
+    \DisplayProof
+  \hspace*{\fill}
+\end{center}
+In other words, $\Perm$ is the reflexive-transitive closure of the relation generated by pairs of lists of the form $xs \Append x \Cons y \Cons ys$ and $xs \Append x \Cons y \Cons ys$. This is a very intensional way of representing permutations of lists: a proof of $\Perm\, xs\, ys$ not only records where each entry in $xs$ is moved to in $ys$, but also how it is moved there. As such, $\Perm \, xs\,ys$ is not a proposition. 
+
+Another way os specifying permutations is via a \emph{relation lifting}, often called a \emph{relator} \cite{Levy2011}. Given a relation $R$ on a type $X$, we inductively define a relation $\DRelator \, R$ on $\List X$, which intuitively states that each occurrence of an element $x$ in the first list is $R$-related to the occurrence of an element $y$ in the second list.
+\begin{center}
+  \hspace*{\fill}
+    \AxiomC{$\vphantom{X}$}
+    \UnaryInfC{$\DRelator\, R\; [\ ]\; ys$}
+    \DisplayProof
+  \hfill
+    \AxiomC{$\exists (y : Y) \Where \sum (m : y \in ys) \Where R\;x\;y \times \DRelator\,R\;xs\;(ys \setminus m)$}
+    \UnaryInfC{$\DRelator\, R\; (x \Cons xs)\;ys$}
+    \DisplayProof
+  \hspace*{\fill}
+\end{center}
+The relation lifting of $R$ is the symmetric closure of $\DRelator\,R$, i.e. $\Relator\,R\;xs\;ys \DefEq \DRelator\,R\;xs\;ys \times \DRelator\,R\;ys\;xs$.
+Because of the presence of a propositional trunctation in the premise of the 2nd rule, both $\DRelator\,R$ and $\Relator\,R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator\,R$ is an equivalence relation.
+
+When $R$ is path equality on $X$, the type $\Relator\,(=)\;xs\;ys$ expresses the existence of a permutation connecting $xs$ and $ys$. In fact, there is a bi-implication between $\Perm\;xs\;ys$ and $\Relator\,(=)\;xs\;ys$. Therefore, we have two equivalent presentations of lists modulo permutations: $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator\,(=)]$. They are also both equivalent to $\M X$.
 
 \subsection{As an Analytic Functor}
 
-We define a type of finite multisets over a type $X$ is the type by
+Finally, we define the type of finite multisets over $X$ as an \emph{analytic functor}~\cite{Joyal1986}, which is provably equivalent to $\M X$, $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\DRelator\,(=)]$.
 \begin{align*}
   \FMSet X
-    \mathbin{=_{\mathrm{df}}}
-    \sum\,\Var{sz} : ℕ\Where
-      (\Fin \Var{sz} \to X) \mathbin{/_{\!2}} \mathrel{\sim},
+    \DefEq
+    \sum (\Var{n} : ℕ) \Where
+      \SetQuot[(\Fin \Var{n} \to X)][\SymAct \Var{n}]
 \end{align*}
-where $\sim$ is the proposition-valued relation defined as
+where $\sim$ is the propositionally-valued relation 
 \begin{align*}
-  v \sim w &\mathrel{=_{\mathsf{df}}}
-    ∃ \sigma : \Fin n ≃ \Fin n \Where
+  \SymAct n \;v \;w &\mathrel{=_{\mathsf{df}}}
+    ∃ (\sigma : \Fin n ≃ \Fin n) \Where
       v = w \circ \sigma
 \end{align*}
+In other words, an element of $\FMSet X$ is a pair of a natural numbers $n$ (the size of the multiset) and an equivalence class of functions $v : \Fin n \to X$ picking an element in $X$ for each index $k < n$. The relation $\SymAct n$ is the action of the symmetric group $\Fin n \simeq \Fin n$ on $n$-tuples of elements of $X$. By taking a different subgroup of the symmetric group one obtains different analytic functors, e.g. by restricting to cyclic permutations one gets cyclic lists. We write $\SymActSigma n$ for the non-propositionally truncated variant of $\SymAct n$. We write $v \sim w$ instead of $\SymAct n \;v \;w$ when $n$ is clear from context, and analogously $\SetQuot[(\Fin n \to X)][\sim]$ in place of $\SetQuot[(\Fin \Var{n} \to X)][\SymAct \Var{n}]$.
 
-\todo[inline]{%
-  Maybe eename $\FMSet$ to $\Op{MSet}$?
-}
 
-\begin{definition}
-  The recursion principle for $\FMSet X$ is the function
-  \begin{align*}
-    \Rec{\FMSet}
-      &: \{A : \Type\} → \IsSet{A} \\
-      &→ (\Op{as} : \{n : ℕ\} → (v : \Fin n → X) → A) \\
-      &→ (∀ n\Where (v, w : \Fin n → X) → v \sim_n w → \Op{as} v = \Op{as} w) \\
-      &→ \FMSet X → A
-  \end{align*}
-  defined from the recursion principle of set-quotients.
-  Similarly, we define the induction principle $\Op{elim}_{\FMSet}$ for
-  a dependent type family $B : \FMSet X → \Type$ of sets.
-\end{definition}
 
-\subsubsection{Finite Choice for Sets}
 
-\begin{lemma}
-  Set truncation distributes over finite families of types.
+
+%% \begin{definition}
+%%   The recursion principle for $\FMSet X$ is the function
+%%   \begin{align*}
+%%     \Rec{\FMSet}
+%%       &: \{A : \Type\} → \IsSet{A} \\
+%%       &→ (\Op{as} : \{n : ℕ\} → (v : \Fin n → X) → A) \\
+%%       &→ (∀ n\Where (v, w : \Fin n → X) → v \sim_n w → \Op{as} v = \Op{as} w) \\
+%%       &→ \FMSet X → A
+%%   \end{align*}
+%%   defined from the recursion principle of set-quotients.
+%%   Similarly, we define the induction principle $\Op{elim}_{\FMSet}$ for
+%%   a dependent type family $B : \FMSet X → \Type$ of sets.
+%% \end{definition}
+
+%\subsubsection{Finite Choice for Sets}
+
+The proof of Theorem~\ref{thm:FMSetFixpointOfTrunc} employs the fact that $\FMSet$ is closed under set truncation.  The proof factors through the following lemma, stating that set truncation distributes over finite families of types.
+\begin{lemma}\label{lem:FiniteChoice}
   For any $n : ℕ$ and type family $Y : \Fin n \to \Type$,
   there is an equivalence
-  \[
+  $
     \Op{box} :
     ((k : \Fin n) → \SetTrunc{\mathop{Y\/} k})
     ≃
-    {\SetTrunc{(k : \Fin n) → \mathop{Y\/} k}}
-  \]
+    {\SetTrunc{(k : \Fin n) → \mathop{Y\/} k}}.
+  $
 \end{lemma}
 \begin{proof}
   We sketch a proof for a constant type family $Y = (\lambda \Blank \Where X)$.
@@ -304,71 +332,104 @@ where $\sim$ is the proposition-valued relation defined as
     (\Cons) : X → (\Fin n → X) → (\Fin{} (1 + n) → X)
   $
   on vectors to the set-truncation.
-  By induction on $n$, we see that
-  \begin{align*}
-    &\Op{unbox} : \SetTrunc{\Fin n → X} → \Fin n → \SetTrunc{X} \\
-    &\Op{unbox} \bar{v}\, k \DefEq \Map{\SetTrunc{\Blank}} (\lambda v\Where v\, k)\, \bar{v}
-  \end{align*}
-  is a two-sided inverse of $\Op{box}$.
-  The proof uses the fact that $\Map{\SetTrunc{\Blank}}$ is functorial.
+  A two-sided inverse $\Op{unbox} : \SetTrunc{\Fin n → X} → \Fin n → \SetTrunc{X}$ of $\Op{box}$ is given by $\Op{unbox} \bar{v}\, k \DefEq \Map{\SetTrunc{\Blank}} (\lambda v\Where v\, k)\, \bar{v}$.
+  %By induction on $n$, we see that
+  %\begin{align*}
+  %  & \Op{unbox} : \SetTrunc{\Fin n → X} → \Fin n → \SetTrunc{X}\\
+  %  &\Op{unbox} \bar{v}\, k \DefEq \Map{\SetTrunc{\Blank}} (\lambda v\Where v\, k)\, \bar{v}
+  %\end{align*}
+  %The proof uses the fact that $\Map{\SetTrunc{\Blank}}$ is functorial.
 \end{proof}
-
-\begin{definition}
-  The principle of finite choice can be defined in terms of $\Op{box}$:
+%\begin{definition}
+The equivalence of Lemma \ref{lem:FiniteChoice} allows to define a variant of the elimination principle $\Elim{\SetTrunc{\Blank}}$ which takes $\Fin n \to \SetTrunc{X}$ as input (a sort of ``finite choice'' principle for set truncation)
+%taking The principle of finite choice can be defined in terms of $\Op{box}$:
   \begin{align*}
-    \FinElim &: \forall n\Where \\
-      &\to \{B : (\Fin n \to \SetTrunc{X}) \to \Type\} \\
-      &\to (\forall v\Where \IsSet (B\, v)) \\
-      &\to ((\mathsf{choice} : \Fin n \to X) \to B\, (\SetTruncCon{} \circ \mathsf{choice})) \\
+    \FinElim &: \{n : ℕ\}\, \{B : (\Fin n \to \SetTrunc{X}) \to \Type\} \to (\forall v\Where \IsSet (B\, v)) \\
+      &\to ((w : \Fin n \to X) \to B\, (\SetTruncCon{} \circ w)) \\
       &\to (v : \Fin n \to \SetTrunc{X}) \to B\, v)
   \end{align*}
-  It is defined by applying $\mathsf{choice}$ to the term obtained from
-  set-truncation elimination on $\operatorname{box} v$.
-  It comes with a computational rule
-  \begin{align*}
-    \FinElimComp : (v : \Fin n → X)
-      → \FinElim (\SetTruncCon{} \circ v) = \operatorname{\mathsf{choice}} v
-  \end{align*}
-\end{definition}
+ % It is defined by applying $\mathsf{choice}$ to the term obtained from
+ % set-truncation elimination on $\operatorname{box} v$.
+  which furthermore comes with a (propositional) computational rule
+  %\begin{align*}
+    $\FinElimComp : (v : \Fin n → X)
+      → \FinElim (\SetTruncCon{} \circ v) = \operatorname{\mathsf{choice}} v$.
+  %\end{align*}
+%\end{definition}
 
 \begin{theorem}\label{thm:FMSetSetTruncInvariant}
-  Finite multisets are invariant under set-truncation:
-  \begin{equation}
-    \FMSet \SetTrunc{X} ≃ \FMSet X
-  \end{equation}
+  $\FMSet$ is invariant under set-truncation: $\FMSet \SetTrunc{X} ≃ \FMSet X$.
 \end{theorem}
 \begin{proof}
-  We obtain the equivalence from an isomorphism.
-  The inverse map is set-truncation of the members of the finite multiset.
-  In the forward direction, we use $\FinElim$ to define a function
-  \[
-    \Op{requot} : ∀ \{n\}\Where
+  The equivalence is obtained from an isomorphism.
+  The right-to-left map is $\Map{\FMSet}\,\SetTruncCon{}$.
+  For the left-to-right map, we use $\FinElim$ to define a function typed
+$  %\[
+    %\Op{requot} : ∀ \{n\}\Where
     (\Fin n → \SetTrunc{X})
-    → \SetQuot[(\Fin n → X)][\sim_n]
-  \]
-  that turns set-truncation into a set-quotient and prove that it preserves $(\sim_n)$.
-  By recursion on $\FMSet \SetTrunc{X}$, this enough to obtain $\FMSet \SetTrunc{X} → \FMSet X$.
+    → \SetQuot[(\Fin n → X)][\sim]
+  %\]
+  $
+  that turns set truncation into a set quotient, %and to prove that the latter preserves $(\sim)$.
+  %By recursion on $\FMSet \SetTrunc{X}$,
+  which is enough to obtain a function typed $\FMSet \SetTrunc{X} → \FMSet X$.
   That these maps are mutual inverses follows from $\FinElimComp$.
 \end{proof}
 
-\begin{theorem}
-  For any $X$, the types $\FMSet X$, $\M X$ and $\operatorname{PList} X$ are equivalent.
-\end{theorem}
+\subsection{Definable Quotients and Sorting}\label{sec:Sorting}
 
-\section{The Final Coalgebra in Sets}
+The proof of Theorem~\ref{thm:InjPresSurjective} relies on the validity of two specific instances of the axiom of countable choice. We show here that these instances hold and therefor Theorem~\ref{thm:InjPresSurjective} is true without the need of postulating countable choice. This is achieved by showing that, whenever a type $X$ is endowed with a linear order $(<)$, then $\SetQuot[\List X][\Perm]$ is a definable set-quotient.
 
-\section{The Bag Functor in Groupoids}
-Following \cite{Kock2012}, we argue the correct perspective on bags in Homotopy Type Theory
-is to define them as groupoids instead of sets.
+Remember that a relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositinally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
+If $X$ has a linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via function $\sort : \List X \to \List X$ intuitively implementing the insertion-sort algorithm. We can show $\Perm \,xs\,(\sort\,xs)$. Sorting is independent of the positions of each entry in the input list, therefore via the recursion principle of set-quotients we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
+The latter is equivalent to $\FMSet X$, which implies the following result.
+\begin{proposition}\label{prop:ListPermDefQuot}
+If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable quotient for all $n : ℕ$.
+\end{proposition}
+
+Sorting also allows us to explicitly find a canonical permutation between any two related lists. Given $p : \Perm \,xs\,ys$, we can find another proof $\canonicalPerm \;p : \Perm\,xs\,ys$: there are permutations $\Perm\,xs\,(\sort\,xs)$ and $\Perm\,(\sort\,ys)\,ys$, and moreover the existence of the given permutation $p$ implies $\sort\,xs = \sort\,ys$. The function $\canonicalPerm$ is constant, since its definition never inspect the input permutation $p$. 
+\begin{proposition}\label{prop:ListPermDefQuot}
+If $X$ is linearly-ordered, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$ , i.e. the propositional truncation in $\SymAct n\; v\; w$ can be removed.
+\end{proposition}
+
+A linear order $(<)$ on $X$ can be extended to a linear order on $\List X$ via the \emph{lexicographic order}:
+\begin{center}
+  \hspace*{\fill}
+    \AxiomC{$\vphantom{X}$}
+    \UnaryInfC{$\Lex\, (<)\; [\ ]\; ys$}
+    \DisplayProof
+  \hfill
+    \AxiomC{$x < y$}
+    \UnaryInfC{$\Lex\,(<)\;(x \Cons xs) \;(y \Cons ys)$}
+    \DisplayProof
+  \hfill
+    \AxiomC{$x = y$}
+    \AxiomC{$\Lex\,(<)\;xs\;ys$}
+    \BinaryInfC{$\Lex\,(<)\;(x \Cons xs) \;(y \Cons ys)$}
+    \DisplayProof
+  \hspace*{\fill}
+\end{center}
+This can further be extended to a linear order on $\SetQuot[\List X][\Perm]$ as follows: $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
+\begin{proposition}
+If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.
+  
+\end{proposition}
+
+\section{The Final Coalgebra in Sets}\label{sec:final-coalgebra-sets}
+
+\section{The Finite Bag Functor in Groupoids}\label{sec:finite-bags-groupoids}
+
+The results of Section~\ref{sec:final-coalgebra-sets} are evidence that the set-based definitions of finite bags from Section~\ref{sec:finite-bags-sets} are not fit for a fully constructive construction of the final coalgebra. In this section we start looking at groupoid-based definition and, following the ideas of \cite{Kock2012} and \cite{Finster2021},  argue that the correct perspective on finite bags in HoTT is to define them as groupoids instead of sets, particularly for the goal of final semantics.
 The rationale is that identifications of bags are permutations, and these should inherently be treated as \emph{data}.
 Instead of viewing bags as quotients of lists, thereby \enquote{forgetting} about the permutations,
 we define a type of lists with \enquote{more identifications}.
 Since all constructions based on this type have to be homotopy coherent,
-they will automatically respect these extra data,
+they will automatically respect the extra data,
 making them invariant under permutation for free.
-We define a type family $\Bag : \Type → \Type$,
-and substantiate these claims by first showing its set-truncation is $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
-and later by constructing its final coalgebra (\cref{ssec:FMGpdLim}, \cref{thm:FMGpdLim}).
+We define a type family $\Bag : \Type → \Type$ of finite bags in groupoids,
+and substantiate the previous claims by first showing that its set-truncation is equivalent to $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
+and later by constructing its final coalgebra in a straighforward way %(\cref{ssec:FMGpdLim},
+(\cref{thm:FMGpdLim}).
 
 \todo[inline]{%
   We should cite \cite{Piceghello2021} here.
@@ -376,36 +437,37 @@ and later by constructing its final coalgebra (\cref{ssec:FMGpdLim}, \cref{thm:F
   as a HITs (\enquote{s-lists}).
 }
 
-First, recall one way of defining \enquote{finite} sets in HoTT:
-
-\begin{definition}
+First, recall one way of defining finite sets in HoTT \cite{Frumin2018}.
+%\begin{definition}
   A type $Y$ is called \emph{(Bishop-) finite} if
-  \[
+  $
     \Op{isFinSet} Y \DefEq
       \sum (n : ℕ)\Where \PropTrunc{Y ≃ \Fin n}
-  \]
+  $
   holds,
   and we denote the collection of such types by
-  \[
+  $
     \Op{FinSet} \DefEq
-      \sum (Y : \Type)\Where \Op{isFinSet} Y
-  \]
+      \sum (Y : \Type)\Where \Op{isFinSet} Y.
+  $
   The underlying type of a $\FinSet$ is accessed via the first projection $\langle\Blank\rangle : \FinSet → \Type$.
-\end{definition}
+%\end{definition}
 
 It is easy to show that $\Op{isFinSet}$ is a proposition and that any type satisfying the predicate is a set.
 It follows that $\Op{FinSet}$ forms a groupoid.
-Note that $\Op{FinSet}$ is a \emph{large} type, i.e. it lives in the successor universe of the types that it ranges over.
-From this, we can define a \enquote{tote}, which we think of as a finite collections of things in $X$:
-\begin{definition}
-  A large type, $\Tote : \Type_\ell → \Type_{\ell + 1}$:
+Note that $\Op{FinSet}$ is a \emph{large} type, i.e. $\Op{FinSet} : \Type_1$.
+%it lives in the successor universe of the types that it ranges over.
+From this, we can define a \enquote{tote} $\Tote : \Type → \Type1$ (``tote'' in the sense of a ``large bag'') as
+%, which we think of as a finite collection of elememts in $X$:
+%\begin{definition}
+%  A large type, $\Tote : \Type_\ell → \Type_{\ell + 1}$:
   \begin{align*}
     \Tote X
       \mathbin{=_{\mathrm{df}}}
-      \sum\,\Var{B} : \operatorname{FinSet}\Where B \to X,
+      \sum\,(\Var{B} : \Op{FinSet})\Where \langle B \rangle \to X,
   \end{align*}
-\end{definition}
-
+%\end{definition}
+Elements of ...
 In general, $\Tote X$ is at least a groupoid.
 
 \begin{proposition}
@@ -418,8 +480,7 @@ In general, $\Tote X$ is at least a groupoid.
   But $\FinSet$ is also a groupoid, therefore the entire $\Sigma$-type is a groupoid.
 \end{proof}
 
-Note that $\Tote$ is again a large type family.
-This makes it unsuitable for iteration, as the assignment $(\lambda n\Where \Tote^n \mathsf{1})$
+As $\Tote X$ is a large type, it is unsuitable for iteration, as the assignment $(\lambda n\Where \Tote^n \mathsf{1})$
 of $n$-fold applications of the family is not typeable in a universe of bounded size.
 We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ that avoids this issue, following \cite{Finster2021}.
 
