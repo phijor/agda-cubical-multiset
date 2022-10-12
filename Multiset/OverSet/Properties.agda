@@ -85,9 +85,8 @@ private
 isSetSymmQuot : ∀ {n} → isSet ((Fin n → X) /₂ SymmetricAction n)
 isSetSymmQuot = squash/₂
 
-private
-  [_]∼ : {n : ℕ} → (v : Fin n → X) → (Fin n → X) /₂ SymmetricAction n
-  [_]∼ = [_]₂ {R = SymmetricAction _}
+[_]∼ : {n : ℕ} → (v : Fin n → X) → (Fin n → X) /₂ SymmetricAction n
+[_]∼ = [_]₂ {R = SymmetricAction _}
 
 eq/∼ : ∀ {sz} {v w : Fin sz → X} → v ∼ w → [ v ]∼ ≡ [ w ]∼
 eq/∼ rel = eq/₂ _ _ rel
@@ -132,13 +131,23 @@ module _ {ℓ} {X : Type ℓ} (n : ℕ) where
   effective : ∀ {v w : Fin n → X} → [ v ]∼ ≡ [ w ]∼ → v ∼ₙ w
   effective {v} {w} = invIsEq (isEffective-∼ v w)
 
+  invariantˡ : ∀ {v : Fin n → X} (σ : Fin n ≃ Fin n) → v ∘ equivFun σ ∼ v
+  invariantˡ σ = ∣ σ , ua→ (λ (k : Fin _) → refl) ∣₁
+
+isSubstInvariantˡ : ∀ { n : ℕ}
+  → (v : Fin n → X)
+  → (p : n ≡ n)
+  → [ v ∘ subst Fin p ]∼ ≡ [ v ]∼
+isSubstInvariantˡ {X = X} {n = n} v p = eq/₂ (v ∘ subst Fin p) v ∣ idEquiv _ , ua→ rel ∣₁ where
+  open import Cubical.Data.Nat.Properties using (isSetℕ)
+  rel : (k : Fin n) → v (subst Fin p k) ≡ v k
+  rel k = cong v (isSet-subst {B = Fin} isSetℕ p k)
+
 isPermutationInvariantˡ : ∀ {n : ℕ}
   → (v : Fin n → X)
   → (σ : Fin n ≃ Fin n)
   → [ v ∘ equivFun σ ]∼ ≡ [ v ]∼
-isPermutationInvariantˡ {X = X} {n = n} v σ = eq/₂ (v ∘ equivFun σ) v ∣ σ , ua→ rel ∣₁ where
-  rel : (k : Fin n) → v (equivFun σ k) ≡ v (equivFun σ k)
-  rel k = refl
+isPermutationInvariantˡ {X = X} {n = n} v σ = eq/₂ (v ∘ equivFun σ) v (invariantˡ _ σ)
 
 isPermutationInvariant : ∀ {m n : ℕ}
   → {v w : Fin m → X}

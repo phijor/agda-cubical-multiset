@@ -62,14 +62,19 @@ module _ (F : Type → Type) {{ FunctorF : Functor F }} where
   LimPathPExt = Limit.ChainLimitPathPExt ch
   ShLimPathPExt = Limit.ChainLimitPathPExt (shift ch)
 
+  isShLim→isLim : ∀ {el : (n : ℕ) → F^ suc n} → isShLim el → isLim (λ n → !^ n (el n))
+  isShLim→isLim {el} is-shlim n = cong (!^ n) (is-shlim n)
+
+  isLim→isShLim : ∀ {el : (n : ℕ) → F^ n} → isLim el → isShLim (el ∘ suc)
+  isLim→isShLim islim n = islim (suc n)
 
   ShLim→Lim : ShLim → Lim
-  ShLim→Lim sh .elements n = ch .π n (sh .elements n)
-  ShLim→Lim sh .isChainLimit n = cong (ch .π n) (sh .isChainLimit n)
+  ShLim→Lim sh .elements n = !^ n (sh .elements n)
+  ShLim→Lim sh .isChainLimit = isShLim→isLim (sh .isChainLimit)
 
   Lim→ShLim : Lim → ShLim
   Lim→ShLim lim .elements = lim .elements ∘ suc
-  Lim→ShLim lim .isChainLimit = lim .isChainLimit ∘ suc
+  Lim→ShLim lim .isChainLimit = isLim→isShLim (lim .isChainLimit)
 
   open Iso
 
