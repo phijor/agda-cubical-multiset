@@ -43,12 +43,12 @@ The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and 
 Specific constructions of final coalgebras for a selection of functors, performed \emph{internally} in HoTT, already exist in the literature. Ahrens el al.~\cite{Ahrens2015} presented a construction of \emph{M-types}, i.e. final coalgebras of polynomial functors. They show that, for a polynomial functor $F$, the traditional set-theoretic construction of its M-type as the $\omega$-limit of the chain
 \begin{equation}\label{eq:chain}
     1 \xleftarrow{!} {F 1}
-      \xleftarrow{F !} {F^2 1}
-      \xleftarrow{F^2 !} {F^3 1}
-      \xleftarrow{F^3 !}
+      \xleftarrow{\Map{F} !} {F^2 1}
+      \xleftarrow{\Map{F}^2 !} {F^3 1}
+      \xleftarrow{\Map{F}^3 !}
       \cdots
 \end{equation}
-(with $1$ being the unit type and $!$ the unique map into $1$) can be ported without major complications to the setting of HoTT. Veltri \cite{Veltri2021} exhamined various constructions of the final coalgebra of the finite powerset functor, which is known to not be definable as an $\omega$-limit \cite{Adamek1995}. Worrell proposed a set-theoretic construction as a $(\omega+\omega)$-limit \cite{Worrell2005}, but Veltri showed that this cannot be ported to the constructive setting of HoTT: Worrell's $(\omega+\omega)$-limit is the final coalgebra of the finite powerset functor if and only if the \emph{lesser limited principle of omniscience} ($\LLPO$) holds, which is a constructive taboo \cite{Bridges1987}.
+(with $1$ being the unit type and $!$ the unique map into $1$) can be ported without major complications to the setting of HoTT. Veltri \cite{Veltri2021} exhamined various constructions of the final coalgebra of the finite powerset functor, which is known to not be definable as an $\omega$-limit \cite{Adamek1995}. Worrell proposed a set-theoretic construction as a $(\omega+\omega)$-limit \cite{Worrell2005}, but Veltri showed that this cannot be ported to the constructive setting of HoTT: Worrell's $(\omega+\omega)$-limit is the final coalgebra of the finite powerset functor if and only if the \emph{lesser limited principle of omniscience} (\LLPO{}) holds, which is a constructive taboo \cite{Bridges1987}.
 
 
 We extend this line of work by studying the final coalgebra of the \emph{finite bag functor}. This is an intermediate situation between finitary polynomial functors, such as the one delivering lists, and general finitary functors, such as the one delivering finite subsets. It also serves as the starting point for a constructive analysis of (final) coalgebras for the \emph{analytic functors} of Joyal \cite{Joyal1986}, arising in type theory from \emph{quotient containers} \cite{Abbott2004}, and generally encompassing many datatypes with symmetries associated to generalized species, such as finite bags, unordered pairs and cyclic lists \cite{Yorgey2010,Yorgey2014}.
@@ -57,7 +57,7 @@ Following the recent work of Choudhury and Fiore \cite{Choudhury2021}, we define
 
 We present 3 constructions of the final coalgebra of the finite bag functor:
 \begin{enumerate}
-\item Working with the set-based functor $\FMSet$, we try to replicate the classical set-theoretic construction as an $\omega$-limit of (\ref{eq:chain}) in our constructive setting. We show that this cannot be directly performed in HoTT without introducing some form of classical logic, an issue already spotted in the case of the finite powerset functor \cite{Veltri2021}. Formally, we show that $\FMSet$ weakly preserves the $\omega$-limit of (\ref{eq:chain}) (actually all $\omega$-limits if one assumes the axiom of countable choice), but strong preservation of this limit implies $\LLPO$.
+\item Working with the set-based functor $\FMSet$, we try to replicate the classical set-theoretic construction as an $\omega$-limit of (\ref{eq:chain}) in our constructive setting. We show that this cannot be directly performed in HoTT without introducing some form of classical logic, an issue already spotted in the case of the finite powerset functor \cite{Veltri2021}. Formally, we show that $\FMSet$ weakly preserves the $\omega$-limit of (\ref{eq:chain}) (actually all $\omega$-limits if one assumes the axiom of countable choice), but strong preservation of this limit implies \LLPO{}.
 \item The list functor admits a final coalgebra $\nu\List$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $R$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the bag functor. This construction can be smoothly replicated as a \emph{strict} $\omega$-limit in the category of \emph{setoids} \cite{Barthe2003}. Problems arise when trying to port the latter from setoids to sets, effectively forming the set-quotient $\nu\List \mathbin{/_{\!2}} R$: we prove that the resulting type is a fixpoint for $\FMSet$, in the sense that $\FMSet (\nu\List \mathbin{/_{\!2}} R) \simeq \nu\List \mathbin{/_{\!2}} R$, but showing that this is the final coalgebra requires the assumption of the full axiom of choice. 
 \item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\nu\Bag$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\nu\Bag$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\nu\Bag}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra seems to again require the axiom of choice. 
 \end{enumerate}
@@ -79,7 +79,7 @@ Following ``cubical terminology'', the latter is called the \emph{path type} bet
 In Cubical Agda, the path type $x = y$ behaves similarly to a function type $\Interval \to A$, where $\Interval$ is a primitive interval type with endpoints $i_0$ and $i_1$.
 An element $p : x = y$ is eliminated by application to an interval name $r : \Interval$, returning $p \, r : A$.
 But unlike function types, this application can compute even when $p$ is unknown by using the endpoints $x$ and $y$: $p \,i_0$ reduces to $x$ and $p \,i_1$ reduces to $y$.
-Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. 
+Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. We write $\Refl\,x$ for the constant path (i.e. proof of reflexivity) in $x = x$ and $(\bullet)$ for sequentional composition of paths.
 
 A function $f : A \to B$ is an \emph{equivalence} if it has contractible fibers, i.e. if the preimage of any element in $B$ under $f$ is a singleton type. Any function underlying a type isomorphism defines an equivalence. Writing $A \simeq B$ for the type of equivalences between $A$ and $B$, Voevodsky's \emph{univalence principle} states that the canonical function of type $A = B \to A \simeq B$ is an equivalence. This is a theorem in Cubical Agda. In particular, there is a function $\operatorname{ua} : A \simeq B \to A = B$ turning equivalences into path equalities. Univalence implies \emph{function extensionality}: pointwise equal functions are equal.
 
@@ -214,7 +214,7 @@ Given a type $X$, the \emph{free commutative monoid} on $X$
         \AxiomC{$\Var{xs}, \Var{ys} : \M X$}
         \AxiomC{$p, q : \Var{xs} = \Var{ys}$}
         \BinaryInfC{
-          $\mathsf{trunc} : p = q$
+          $\mathsf{squash}_{\M} \;p\;q : p = q$
         }
         \DisplayProof
       \hspace*{\fill}
@@ -235,7 +235,7 @@ In Cubical Agda, functions out of HITs like $\M X$ can be defined directly by pa
 $\M$ is a functor, with action on maps given by
 \begin{align*}
   &\Map{M} : (f : X \to Y) \to \M X \to \M Y \\
-  &\Map{M}\,f \DefEq \Rec{\M X}\;\mathsf{trunc}\;\Empty\;(\eta \circ f)\;(\Union)\;\mathsf{unit}\;\mathsf{assoc}\;\mathsf{comm}
+  &\Map{M}\,f \DefEq \Rec{\M X}\;\mathsf{squash}_{\M}\;\Empty\;(\eta \circ f)\;(\Union)\;\mathsf{unit}\;\mathsf{assoc}\;\mathsf{comm}
 \end{align*}
 
 \subsection{As a Quotient of Lists}
@@ -388,7 +388,7 @@ If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable
 \end{proposition}
 
 Sorting also allows us to explicitly find a canonical permutation between any two related lists. Given $p : \Perm \,xs\,ys$, we can find another proof $\canonicalPerm \;p : \Perm\,xs\,ys$: there are permutations $\Perm\,xs\,(\sort\,xs)$ and $\Perm\,(\sort\,ys)\,ys$, and moreover the existence of the given permutation $p$ implies $\sort\,xs = \sort\,ys$. The function $\canonicalPerm$ is constant, since its definition never inspect the input permutation $p$. 
-\begin{proposition}\label{prop:ListPermDefQuot}
+\begin{proposition}\label{prop:ListPermCanonicalPerm}
 If $X$ is linearly-ordered, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$ , i.e. the propositional truncation in $\SymAct n\; v\; w$ can be removed.
 \end{proposition}
 
@@ -411,15 +411,188 @@ A linear order $(<)$ on $X$ can be extended to a linear order on $\List X$ via t
 \end{center}
 This can further be extended to a linear order on $\SetQuot[\List X][\Perm]$ as follows: $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
 \begin{proposition}
-If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.
-  
+If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.  
 \end{proposition}
 
 \section{The Final Coalgebra in Sets}\label{sec:final-coalgebra-sets}
 
+We now turn to constructing the final coalgebra of the finite bag functor, given by one of the equivalent definitions in Section~\ref{sec:finite-bags-sets}. But first, a few basic definitions.
+
+Given an functor $F : \Type \to \Type$, the types of \emph{coalgebras}
+and \emph{coalgebra morphisms} between two coalgebras $(A,a)$ and
+$(B,b)$ are 
+\begin{align*}
+  \Coalg\;F &\DefEq \sum (A : \Type) \Where A \to F A \\
+  \CoalgMor\,F\,(A,a)\,(B,b) &\DefEq \sum (f : A \to B) \Where \forall x \Where b \,(f\,x) = \Map{F} f \,(a \,x)
+\end{align*}
+A coalgebra is \emph{final} if there exists a unique coalgebra morphism to any other coalgebra. This can be formalized by saying that there is a coalgebra $C : \Coalg\;F$ such that the type $\CoalgMor\;F\;C\;D$ is contractible for any other coalgebra $D$. These definitions are the same of Ahrens et al.~\cite{Ahrens2015}, which they only consider in the case of $F$ being a polynomial functor.
+
+We now analyse two set-theoretic constructions of the final coalgebra for the finite bag functor: as an $\omega$-limit (Section~\ref{sec:final-limit-set}) and as a set-quotient of the final coalgebras of the $\List$ functor (Section~\ref{sec:final-quotient-set}).
+%% Describe limits in general.
+%% Maybe compare final coalgebras and corecursive algebras which are fixpoints.
+%% \todo[inline]{%
+%%   Mention what the type of final coalgebras is.
+%%   Use contractibility for UP.
+%% }
+%% 
+%% \subsection{$\omega$-Chains and Limits}
+%% 
+%% \begin{itemize}
+%%   \item definition of chains (in type theory)
+%%   \item define type of limits, mention universal property
+%%   \item shifted limit
+%%   \item mention that $\Op{pres}$ is given by the UP
+%% \end{itemize}
+
+\subsection{As an \ensuremath{\omega}-Limit}\label{sec:final-limit-set}
+
+Consider the chain in (\ref{eq:chain}), with $F$ replaced by $\FMSet$. We formally define $\FMSet^n 1$ by recursion on $n$: $\FMSet^0 1 \DefEq 1$ and $\FMSet^{1 + n} 1 \DefEq \FMSet (\FMSet^1)$. Similarly we can define the iteration $\Map{\FMSet}^n\,!$.
+In HoTT, the \emph{(homotopy) limit} of the chain is definable as
+\[
+\lim_{n} (\FMSet^n 1) \DefEq \sum (xs : \forall n \Where \FMSet^n 1) \Where \forall n \Where
+\Map{\FMSet}^n\,!\,(xs_{1 + n}) = xs_n
+\]
+So an element of the limit consists of an element $xs_n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs_{1 + n}$ to $\FMSet^n 1$ via $\Map{\FMSet}^n\,!$ is equal to $xs_n$. The $n$-th projection from the limit is called $\ell_n : \lim_n (\FMSet^n 1) → \FMSet^n 1$. The limit is invariant wrt. shifting the chain by one position, i.e. there is an equivalence $\shift : \lim_{n} (\FMSet^n 1) \simeq \lim_{n} (\FMSet^{1 + n} 1)$.
+The limit is a set, since all types in its diagram are sets.
+
+In classical set theory, $\lim_{n} (\FMSet^n 1)$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\Op{pres} : \FMSet \,(\lim_{n} (\FMSet^n 1)) \to \lim_{n} (\FMSet^{n+1} 1)$ via the universal property of the limit: the first component of $\Op{pres} \,s$ is $\lambda n \Where \Map{\FMSet}\,\ell_n \,s$. The function $\Op{pres}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\Op{pres}^{-1}$ provides a coalgebra for $\lim_{n} (\FMSet^n 1)$. This can be proved to be final, again using the universal property of the limit.
+
+Constructively, there are issues in proving that $\Op{pres}$ is an equivalence. We are able to show that it is surjective (actually more, a split epimorphism), but its injectivity is equivalent to the \emph{lesser limited principle of omniscience} (\LLPO{}) \cite[{Ch.\@ 1}]{Bridges1987}. The latter is a weak version of the law of the excluded middle, and it is not provable from intuitionistic axioms alone.  It states that, given an infinite stream of boolean
+values that yields $\True$ in at most one position, one can decide
+whether all even or all odd positions are $\False$.
+
+\begin{theorem}\label{thm:InjPresSurjective}
+ The function $\Op{pres}$ is surjective.
+\end{theorem}
+
+Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficient to show that there is a bi-implication between them. But first a useful lemma.
+
+\begin{lemma}\label{lem:DiagLimCaseAnalysis}
+  For any $x, y_1, y_2 : \lim_n(\FMSet^n 1)$ and $\Var{ys} : ℕ → \lim_n(\FMSet^n 1)$,
+  such that $∀ n\Where \ell_n\,x = \ell_n\,(\Var{ys}\,n)$, if some $n$ we have
+  $\Var{ys}\,n = y_1$ and $\Var{ys}\,(1+n) = y_2$, then $\Map{\FMSet}^n\,!\, (\ell_{1+n}\,y_1) = \ell_n\,y_2$.
+\end{lemma}
+\begin{proof}
+  We have the following sequence of equalities:
+  \begin{align*}
+    \Map{\FMSet}^n\,!\, (\ell_{1+n}\,y_1)
+      &= \ell_n\,y_1 
+      = \ell_n\,(\Var{ys}\,n) 
+      = \ell_n \,x \\
+      &= \Map{\FMSet}^n\,!\, (\ell_{1+n}\,x) 
+      = \Map{\FMSet}^n\,!\, (\ell_{1+n}\,(\Var{ys}\,(1+n))) \\
+      &= \Map{\FMSet}^n\,!\,(\ell_{1 + n} \,y_2) 
+      = \ell_n \,y_2
+  \end{align*}
+\end{proof}
+
+\begin{theorem}\label{lem:InjPresImpliesComplete}
+  If $\Op{pres}$ is injective, then \LLPO{} holds.
+\end{theorem}
+\begin{proof}
+  In this proof we use $\M$ instead of $\FMSet$. The statement of the theorem holds since $\M X$ is equivalent to $\FMSet$. 
+  It is sufficent to show that the injectivity of $\Op{pres}$ implies that the following type is inhabited:
+  \begin{equation}\label{eq:compl}
+    \def\arraystretch{1.2}
+    \begin{array}{l}
+   \{x, y_1, y_2 : \lim_n(\M^n 1)\} \;(ys : ℕ \to \lim_n(\M^n 1)) \\
+  \hspace{.5cm} \to (\Op{split} : \forall n \Where ys\;n = y_1 +  ys\;n = y_2) (\Op{diag} : \forall n \Where \ell_n \;x = \ell_n \;(ys\;n)) \\
+  \hspace{.5cm} \to \PropTrunc{x = y_1 + x = y_2}
+    \end{array}
+  \end{equation}
+  This is a form of \emph{completeness} of two-element subsets of the $\omega$-limit~\cite{Mandelkern1988} which is known to imply \LLPO{}~\cite[{Theorem~7}]{Veltri2021}.
+  
+%  Given an element $ : L_{\M}$\todo{We're implicitly working with the HIT-definition here},
+%  denote by $\ell_n : L_{\M} → \M^n 1$ the projection maps out of the limit.
+
+  To prove completeness, assume $x, y_1, y_2, ys, \Op{split}$ and $\Op{diag}$ as in (\ref{eq:compl}).
+  %:  \lim_n(\M^n 1)$, $\Var{ys} : ℕ →  \lim_n(\M^n 1)$,
+  %$\Op{split} : ∀ n\Where (\Var{ys}\,n = y_1) \mathrel{+} (\Var{ys} \,n = y_2)$
+  %and $\Op{diag} : ∀ n\Where \ell_n \,x = \ell_n (\Var{ys}\,n)$.
+  %The goal is to show $\PropTruncCon[x = y_1 \mathrel{+} x = y_2]$.
+  Using $\Op{split}$, define the complement of $\Var{ys}$ as $\overline{\Var{ys}}\,n\DefEq y_2$ is $\Var{ys}\, n = y_1$ and $\overline{\Var{ys}}\,n\DefEq y_1$ if $\Var{ys}\,n = y_2$.
+%%   \[
+%%     \overline{\Var{ys}}\,n\DefEq
+%%       \begin{cases}
+%%         y_2 & \text{if}~\Var{ys}\, n = y_1 \\
+%%         y_1 & \text{if}~\Var{ys}\,n = y_2
+%%       \end{cases}
+%%   \]
+  The diagonal of $\overline{\Var{ys}}$ also has the limit-property,
+  i.e.
+  \begin{equation}\label{step:IsLimYsComplement}
+    ∀ n\Where
+    \Map{\M}^n\,!\, (\ell_{1 + n} \,(\overline{\Var{ys}}\, (1+n))) = \ell_n \,(\overline{\Var{ys}}\,n)
+  \end{equation}
+    %  \Step{step:IsLimYsComplement}$$
+  For this, fix $n$ and check the four cases generated by inspecting $\Op{split} n$
+  and $\Op{split}{} (1+n)$.
+  In one case, (\ref{step:IsLimYsComplement}) reduces to the limit-property of $y_1$,
+  in another to that of $y_2$ and in the remaining cases to \cref{lem:DiagLimCaseAnalysis}.
+  Call  $\overline{x} : \lim_n(\M^n 1)$ the element of the limit such that $\ell_n \,\overline{x} \DefEq \ell_n\,(\overline{ys}\,n)$.
+
+  Write $\{x, y\} \DefEq \eta\, x \oplus \eta\, y$ for the two-element bag comprising of $x$ and $y$. For all $n$, we know that
+  %\begin{align}\Step{step:ppc}
+    $\{\Var{ys}\,n, \overline{\Var{ys}}\,n\} = \{y_1, y_2\}$
+  %\end{align}
+  either by $\Op{refl}$ or $\Op{\oplus comm}$, depending on $\Op{split} n$.
+  Using the latter equality, the definition of $\Op{pres}$ and the assumption $\Op{diag}$, we can form the following sequence of paths:%\todo{better wording}
+  \begin{align*}
+    \ell_n\,(\Op{pres} \{x, \overline{x}\})
+      &= \{\ell_n \,x , \ell_n \,\overline{x}\}
+      = \{\ell_n \,(\Var{ys}\,n) , \ell_n\,(\overline{\Var{ys}} \,n)\}\\
+      &= \ell_n \, (\Op{pres} \{\Var{ys}\,n , \overline{\Var{ys}}\,n\}) 
+      = \ell_n \, (\Op{pres} \{y_1 , y_2\})
+  \end{align*}
+  which implies that $\Op{pres}\{x, \overline{x}\} = \Op{pres}\{y_1, y_2\}$.
+  From the injectivity of $\Op{pres}$ it follows that $\{x, \overline{x}\} = \{y_1, y_2\}$, which also implies that (merely) $x = y_1$ or $x = y_2$.
+\end{proof}
+
+\begin{theorem}\label{lem:LLPOImpliesPresInj}
+  \LLPO{} implies the injectivity of $\Op{pres}$.
+\end{theorem}
+%\begin{proof}
+%  \todo[inline]{Prove it.}
+%\end{proof}
+For the proof, which employs the functor $F X \DefEq \SetQuot[\List X][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result in \cite{Veltri2021}: the injectivity of $\Op{pres} : \Op{Pfin} \,(\lim_{n} (\Op{Pfin}^n 1)) \to \lim_{n} (\Op{Pfin}^{n+1} 1)$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in the similar result for the finite powerset functor.
+
+
+\subsection{As a Quotient of the Final $\List$-Coalgebra}\label{sec:final-quotient-set}
+
+It is known that the limit $\lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}. Using the relation lifting $\Relator$, it is possible to construct a relation on $\lim_n (\List^n 1)$ so that the resulting setoid is the final coalgebra of the setoid-functor $\Op{FMSetoid}(X,R) \DefEq (\List X,\Relator\,R)$ in the category of setoids \cite{Barthe2003}. The desired relation on $\lim_n (\List^n 1)$ is obtained as the $\omega$-limit of the chain
+\begin{equation}\label{eq:chain-rel}
+    \Op{Tot} \xleftarrow{} {\Relator\,\Op{Tot}}
+      \xleftarrow{} {\Relator^2\,\Op{Tot}}
+      \xleftarrow{} {\Relator^3\,\Op{Tot}}
+      \xleftarrow{} %{\Map{F}^3 !}
+      \cdots
+\end{equation}
+in the category of relations, where $\Op(Tot)$ is the total relation on the unit type $1$. The chain in (\ref{eq:chain-rel}) lives above the chain in (\ref{eq:chain}) with $F \DefEq \List$.
+\begin{theorem}\label{thm:final-setoids}
+The setoid $(\lim_n(\List^n 1),\lim_n(\Relator^n 1))$ has a $\Op{FMSetoid}$-coalgebra structure which is final in the category of setoids.
+\end{theorem}
+The proof is similar to the one for the finite powerset functor in \cite[{Theorem~1}]{Veltri2021}.
+
+Similarly to the case of the finite powerset, set-quotienting $\lim_n(\List^n 1)$ by the relation $\lim_n(\Relator^n 1)$ does not give the final coalgebra for the finite bag functor in sets. We can show that the resulting quotient is a fixpoint, and in particular a coalgebra. But the proof of finality requires the full axiom of choice. 
+\begin{theorem}\label{thm:fixpoint-quotient}
+  For all $X : \Type$, we have $\FMSet(\SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]) \simeq \SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]$.
+\end{theorem}
+\begin{theorem}\label{thm:final-quotient}
+  Assuming the axiom of choice, $\SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]$ is the final coalgebra of $\FMSet$ in sets.
+\end{theorem}
+Both proofs, which employs the functor $F X \DefEq \SetQuot[\List X][\Relator\,(=)]$ instead of $\FMSet$, are analogous to related ones for the finite powerset functor in \cite{Veltri2021}.
+Why is the axiom of choice needed in \cref{thm:final-quotient}? Intuitively, the construction of a coalgebra morphism from a given coalgebra $c : X \to \SetQuot[\List X][\Relator\,(=)]$ can invoke $c$ an arbitrarily large number of times. Since we are given no information on the
+cardinality of $X$, each application of $c$ may happen on a different
+input $x: X$. This implies that generally the recursion principle of
+set quotients would need to be employed the same large number of times,
+and this could only be achieved by assuming the full axiom of choice.
+
+
+While not delivering the final coalgebra of $\FMSet$ without extra classical assumptions, the quotient $\SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]$ can still be used as a denotational domain for transition systems with a finite set of states: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, we are able to construct a unique coalgebra morphism from $S$ to $\SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]$.
+
 \section{The Finite Bag Functor in Groupoids}\label{sec:finite-bags-groupoids}
 
-The results of Section~\ref{sec:final-coalgebra-sets} are evidence that the set-based definitions of finite bags from Section~\ref{sec:finite-bags-sets} are not fit for a fully constructive construction of the final coalgebra. In this section we start looking at groupoid-based definition and, following the ideas of \cite{Kock2012} and \cite{Finster2021},  argue that the correct perspective on finite bags in HoTT is to define them as groupoids instead of sets, particularly for the goal of final semantics.
+The results of Section~\ref{sec:final-coalgebra-sets} are evidence that the set-based definitions of finite bags from Section~\ref{sec:finite-bags-sets} are not fit for a fully constructive construction of the final coalgebra. In this section we start looking at groupoid-based definition and, following the ideas of Kock~\cite{Kock2012} and Finster et al.~\cite{Finster2021},  argue that the correct perspective on finite bags in HoTT is to define them as groupoids instead of sets, particularly for the goal of final semantics.
 The rationale is that identifications of bags are permutations, and these should inherently be treated as \emph{data}.
 Instead of viewing bags as quotients of lists, thereby \enquote{forgetting} about the permutations,
 we define a type of lists with \enquote{more identifications}.
@@ -430,12 +603,6 @@ We define a type family $\Bag : \Type → \Type$ of finite bags in groupoids,
 and substantiate the previous claims by first showing that its set-truncation is equivalent to $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
 and later by constructing its final coalgebra in a straighforward way %(\cref{ssec:FMGpdLim},
 (\cref{thm:FMGpdLim}).
-
-\todo[inline]{%
-  We should cite \cite{Piceghello2021} here.
-  He defines the free symmetric monoidal groupoid on a type
-  as a HITs (\enquote{s-lists}).
-}
 
 First, recall one way of defining finite sets in HoTT \cite{Frumin2018}.
 %\begin{definition}
@@ -467,228 +634,113 @@ From this, we can define a \enquote{tote} $\Tote : \Type → \Type1$ (``tote'' i
       \sum\,(\Var{B} : \Op{FinSet})\Where \langle B \rangle \to X,
   \end{align*}
 %\end{definition}
-Elements of ...
-In general, $\Tote X$ is at least a groupoid.
-
+Elements of $\Tote X$ are pairs consisting of a finite set $B$ and a function from (the type underlying) $B$ to $X$ which picks the elements in the tote. The univalence principle implies that the path type $(B,v) = (C,W)$ in $\Tote X$ is equivalent to the type of dependent pairs consisting of an equivalence $\sigma : \langle B \rangle \simeq \langle C\rangle$ and a path $v = w \circ \sigma$.
+This indicates that $\Tote X$ is not a set, in general it is at least a groupoid.
 \begin{proposition}
   If $X$ is a groupoid, then $\Tote X$ is a groupoid.
 \end{proposition}
 \begin{proof}
-  By assumption $X$ is a groupoid,
-  so the function type $\langle Y \rangle → X$ is a groupoid
-  for any $Y : \FinSet$.
-  But $\FinSet$ is also a groupoid, therefore the entire $\Sigma$-type is a groupoid.
+  Since $X$ is a groupoid, the function type $\langle B \rangle → X$ is a groupoid
+  for any $B : \FinSet$.
+  $\FinSet$ is also a groupoid, so the entire $\Sigma$-type is a groupoid.
 \end{proof}
-
-As $\Tote X$ is a large type, it is unsuitable for iteration, as the assignment $(\lambda n\Where \Tote^n \mathsf{1})$
-of $n$-fold applications of the family is not typeable in a universe of bounded size.
-We will later\todo{\cref{def:Bag}} introduce an equivalent, small family $\Bag$ that avoids this issue, following \cite{Finster2021}.
-
-\todo[inline]{%
-  Relating $\Tote$ back to finite multisets:
-}
-
+$\Tote X$ differs from $\FMSet X$ in that path equality in the former records the permutations between the (finite sets representing) sizes of the bags, while the second only cares about the mere existence of a permutation. Nonetheless, the two definitions become equivalent when we set-truncate the type of totes.
 \begin{theorem}\label{thm:FMSetOfFMGpdTrunc}
-  Set-truncating a tote yields a finite multiset.
-  For any type $X$,
-  \[
-    \SetTrunc{\Tote X} ≃ \FMSet X
-  \]
+  For any type $X$, $\SetTrunc{\Tote X} ≃ \FMSet X$.
 \end{theorem}
 \begin{proof}
-  The proof proceeds by constructing an explicit isomorphism $\FMSet X \cong \SetTrunc{\Tote X}$.
-  The forward direction is unproblematic, while the inverse function has to be carefully defined with the
-  homotopy levels of the involved types in mind.
+  The proof proceeds by constructing an isomorphism $\FMSet X \cong \SetTrunc{\Tote X}$.
+  The forward direction is unproblematic, while the inverse function has to be carefully defined with the homotopy levels of the involved types in mind.
 
-  \newcommand*{\ToTote}{\Op{toTote}}
-  \newcommand*{\ToFMSet}{\Op{toFMSet}}
-
-  To construct $\ToTote : \FMSet X → \SetTrunc{\Tote X}$, by the induction principle
-  $\Elim{\FMSet}$, it is enough to give a function
-  $f : \forall \{\Var{sz}\}\Where (\Fin \Var{sz} → X) → \SetTrunc{\Tote X}$
-  and to show that it respects $(\sim)$.
-  Let $f(v) \DefEq \SetTruncCon[(\Fin \Var{sz} , v)]$, since $\Fin \Var{sz}$ is obviously a finite set.
-  To prove that $v \sim w$ implies $f(v) = f(w)$, we note that the conclusion is a proposition,
-  thus by induction on $v \sim w$ obtain a permutation $\sigma$ such that $r : v = w \circ \sigma$.
-  By univalence, $\Op{ua} \sigma : \Fin \Var{sz} = \Fin \Var{sz}$,
+  A function $\ToTote : \FMSet X → \SetTrunc{\Tote X}$ can be defined by invoking $\Rec{\FMSet}$, so it is enough to give a function
+  $f : \forall \{\Var{n}\}\Where (\Fin \Var{n} → X) → \SetTrunc{\Tote X}$
+  and show that it respects $(\sim)$.
+  Take $f(v) \DefEq \SetTruncCon[(\Fin \Var{n} , v)]$, since $\Fin \Var{n}$ is obviously a finite set.
+  To prove that $v \sim w$ implies $f(v) = f(w)$, notice that the conclusion is a proposition,
+  thus by invoking $\Rec{\PropTrunc{\Blank}}$ we can assume given a permutation $\sigma$ such that $r : v = w \circ \sigma$.
+  By univalence, $\Op{ua} \sigma : \Fin \Var{n} = \Fin \Var{n}$,
   and transporting $r$ along this path yields
   $
-    p : (\Fin\Var{sz} , v) = (\Fin\Var{sz}, w)
+    p : (\Fin\Var{n} , v) = (\Fin\Var{n}, w)
   $.
   Then $\Op{cong} \SetTruncCon\, p : f(v) = f(w)$ as desired.
 
-  In the other direction $\ToFMSet : \SetTrunc{\Tote X} → \FMSet X$
-  is define by set-truncation elimination, and it is enough to provide
-  \begin{align*}
-    &g : \Tote{X} → \FMSet X \\
-    &g\, (Y, \Var{sz}, e, v) \DefEq (\Var{sz} , g')
-  \end{align*}
-  where $Y$ is a finite set of size $\Var{sz}$ with $e : \PropTrunc{Y ≃ \Fin\Var{sz}}$ and $v : Y → X$.
-  We would like to use a composition $\Fin\Var{sz} → Y → X$ to find
-  $g' : \SetQuot[(\Fin\Var{sz} → X)][\mathord{\sim}]$,
-  but one cannot do so because $e$ is propositionally truncated.
-  Using induction directly on $e$ cannot work, since $g'$ lives in a set.
-  We can however show that
-  \begin{align*}
-    &\operatorname{\mathsf{from-equiv}} : (Y ≃ \Fin\Var{sz}) → \SetQuot[(\Fin\Var{sz} → X)][\mathord{\sim}] \\
-    &\operatorname{\mathsf{from-equiv}} \alpha \DefEq \SetQuotCon[v \circ \alpha]
-  \end{align*}
-  is \emph{weakly-constant} in the sense of \cite{Kraus2017} to obtain $g'$ from $e$ using the elimination
-  principle of \cite[{Corollary~2}]{Capriotti2015}.
+  In the other direction, define $\ToFMSet : \SetTrunc{\Tote X} → \FMSet X$
+  by invoking $\Rec{\SetTrunc{\Blank}}$, so it is enough to provide $g : \Tote{X} → \FMSet X$. %which is given as $g\, ((B, \Var{n}, e), v) \DefEq (\Var{n} , g')$.
+  Assume given a finite set $B$ of size $\Var{n}$ with $e : \PropTrunc{B ≃ \Fin\Var{n}}$ and $v : B → X$. We would like to return something in $\SetQuot[(\Fin\Var{n} → X)][\mathord{\sim}]$ by recursion on $e$, but this cannot work since the return type is a set.
+%  We would like to use a composition $\Fin\Var{n} → Y → X$ to find
+%  $g' : \SetQuot[(\Fin\Var{n} → X)][\mathord{\sim}]$,
+%  but one cannot do so because $e$ is propositionally truncated.
+%  Using induction directly on $e$ cannot work, since $g'$ lives in a set.
+  We can however employ a different recursion principle of propositional truncation \cite[{Corollary~2}]{Capriotti2015}, which allows to define a function into a set provided that the function is \emph{(weakly) constant} in the sense of \cite{Kraus2017}. Define  
+%  \begin{align*}
+    $g' : (B ≃ \Fin\Var{n}) → \SetQuot[(\Fin\Var{n} → X)][\mathord{\sim}]$ as $g'\, \alpha \DefEq \SetQuotCon[v \circ \alpha]$, which can be proved to be constant and therefore well-defined. We can then take $g\, ((B, \Var{n}, e), v) \DefEq (\Var{n} , g'\,e)$.
+  %\end{align*}
   Proving $\ToFMSet \circ \ToTote = \Op{id}$ is straightforward.
-  Proving $\ToTote \circ \ToFMSet = \Op{id}$ reduces to showing that $v \circ \alpha \sim v$ for any $v : Y → X$ and $\alpha : \Fin n ≃ Y$.
+  Proving $\ToTote \circ \ToFMSet = \Op{id}$ reduces to showing that $v \circ \alpha \sim v$ for any $v : B → X$ and $\alpha : \Fin n ≃ B$, which is also direct.
 \end{proof}
 
-\begin{definition}\label{def:Bag}
-  A small type:
+As $\Tote X$ is a large type, it is unsuitable for iteration, as the assignment $(\lambda n\Where \Tote^n \mathsf{1})$
+of $n$-fold applications of the family is not well-typed.
+%typeable in a universe of bounded size.
+Following \cite{Finster2021}, we introduce an equivalent but small definition $\Bij$ of the type of finite sets $\Op{FinSet}$ that avoids this issue.
+  \begin{center}
+    \small
+    \hspace*{\fill}
+      \AxiomC{$n : \N$}
+      \UnaryInfC{
+        $\Obj n : \Bij$
+      }
+      \DisplayProof
+    \hfill
+      \AxiomC{$m, n : \N$}
+      \AxiomC{$\alpha : \Fin m ≃ \Fin n$}
+      \BinaryInfC{$\Hom : \Obj m = \Obj n$}
+      \DisplayProof
+    \hfill
+      \AxiomC{$n : \N$}
+      \UnaryInfC{$\Hom (\mathsf{id}) = \Refl\,(\Obj n)$}
+      \DisplayProof
+    \hspace*{\fill}
+    \\[1em]
+    \hspace*{\fill}
+      \AxiomC{$m, n, o : \N$}
+      \AxiomC{$\alpha : \Fin m ≃ \Fin n$}
+      \AxiomC{$\beta : \Fin n ≃ \Fin o$}
+      \TrinaryInfC{$\Hom(\beta \circ \alpha) = \Hom \alpha \bullet \Hom \beta$}
+      \DisplayProof
+      \hspace*{\fill}
+        \AxiomC{$\vphantom{X}$}
+        \UnaryInfC{$\IsGpd \;\Bij$}
+        \DisplayProof
+    \hspace*{\fill}
+  \end{center}
+  %Here, $\operatorname{id}$ is the identity-equivalence, $(\circ)$ composition of equivalences,
+  There is an equivalence $\Bij \simeq \Op{FinSet}$. In particular, one can extract a type $\langle x \rangle : \Type$ from each $x : \Bij$.
+
+  A small type of finite bags in groupoids is defined replacing $\Op{FinSet}$ with $\Bij$.
+%\begin{definition}\label{def:Bag}
+%  A small type:
   \begin{align*}
     \Bag X
       \mathbin{=_{\mathrm{df}}}
       \sum\,\Var{x} : \operatorname{\mathsf{Bij}}\Where
         \langle x \rangle \to X,
   \end{align*}
-  We abbreviate $\BagCon{v} \DefEq (x, v) : \Bag X$ if $x$ can be inferred from context.
-\end{definition}
+ We abbreviate $\BagCon{v} \DefEq (x, v) : \Bag X$ if $x : \Bij$ can be inferred from context.
+%\end{definition}
+%\paragraph{Comparing $\Op{List}$ and $\Bag$}\todo{Fit this comparison in somewhere}
+ Notice that $\Bag$ is the \emph{polynomial functor} associated to the container with $\Bij$ and $\langle x \rangle$ as positions at shape $x$. This can be seen as a \enquote{higher, more informative} variant of the list functor, which has $ℕ$ as shapes and $\Fin n$ as positions at shape $n$, a statement substantiated by Theorem \ref{thm:FMSetOfFMGpdTrunc}.
+% , in a way analogous to $\Op{List}$:
+%Given a type $A$ and a family $B$ over it, they both match ${\sum (a : A)\Where B(a) → X}$:
+%we have $A = ℕ$ and $B = \Fin$ for $\Op{List}$,
+%and $A = \Bij$ and $B = \BagCon{\Blank}$ for $\Bag$.
+%In particular, $\SetTrunc{\Bij} ≃ ℕ$.
 
-\paragraph{Comparing $\Op{List}$ and $\Bag$}\todo{Fit this comparison in somewhere}
-Note that $\Bag$ is somewhat analogous to $\Op{List}$:
-Given a type $A$ and a family $B$ over it, they both match ${\sum (a : A)\Where B(a) → X}$:
-we have $A = ℕ$ and $B = \Fin$ for $\Op{List}$,
-and $A = \Bij$ and $B = \BagCon{\Blank}$ for $\Bag$.
-In particular, $\SetTrunc{\Bij} ≃ ℕ$.
+\section{The Final Coalgebra in Groupoids}
 
-\section{The Final Coalgebra}
 
-Describe limits in general.
-Maybe compare final coalgebras and corecursive algebras which are fixpoints.
-\todo[inline]{%
-  Mention what the type of final coalgebras is.
-  Use contractibility for UP.
-}
-
-\subsection{$\omega$-Chains and Limits}
-
-\begin{itemize}
-  \item definition of chains (in type theory)
-  \item define type of limits, mention universal property
-  \item shifted limit
-  \item mention that $\Op{pres}$ is given by the UP
-\end{itemize}
-
-\subsection{Final Coalgebras as an \ensuremath{\omega}-Limit in Set}
-
-\todo[inline]{%
-    Surjectivity works (under the assumption of countable(?) choice).
-}
-
-\begin{theorem}\label{thm:InjPresImpliesLLPO}
-  The injectivity of the function
-  $\Op{pres}\colon
-      \FMSet (\lim_{n < \omega} \FMSet^n 1)
-      \to
-      \lim_{n < \omega} (\FMSet^{n+1} 1)$
-  is equivalent to the \emph{lesser limited principle of omniscience}, \LLPO.
-\end{theorem}
-\LLPO{} \cite[{Ch.\@ 1}]{Bridges1987} is a weak version of the law
-of the excluded middle, and it is not provable from intuitionistic
-axioms alone.  It states that, given an infinite stream of boolean
-values that yields $\True$ in at most one position, one can decide
-whether all even or all odd positions are $\False$.
-
-\begin{proof}[\cref{thm:InjPresImpliesLLPO}]
-  Both injectivity and \LLPO{} are propositions, so we show equivalence from bi-implication.
-  \Cref{lem:InjPresImpliesComplete} shows that injectivity implies completeness of $L_{\FMSet}$,
-  which implies injectivity (\cite[{Theorem~7}]{Veltri2021}).
-  The other direction is done in \cref{lem:LLPOImpliesPresInj}.
-\end{proof}
-
-\begin{theorem}\label{thm:InjPresSurjective}
-  $\Op{pres}$ is surjective.
-\end{theorem}
-
-\begin{lemma}\label{lem:DiagLimCaseAnalysis}
-  For any $x, a, b : L_{\FMSet}$ and $\Var{ys} : ℕ → L_{\FMSet}$,
-  if $\Op{diag} : ∀ n\Where x_n = \Var{ys}(n)_n$,
-  then
-  \[
-    ∀ n\Where (\Var{ys}(n) = a) → (\Var{ys}(1+n) = b) → (!^n (a_{1+n}) = b_n)
-  \]
-\end{lemma}
-\begin{proof}
-  \begin{align*}
-    \Bang^n(a_{1+n})
-      &= a_n \\
-      &= \Var{ys}(n)_n \\
-      &= x_n \\
-      &= \Bang^n(x_{1+n}) \\
-      &= \Bang^n(\Var{ys}(1+n)_{1+n}) \\
-      &= \Bang^n(b_{1+n}) \\
-      &= b_n
-  \end{align*}
-\end{proof}
-
-\begin{lemma}\label{lem:InjPresImpliesComplete}
-  If $\Op{pres}$ is injective, then $L_{\FMSet}$ is complete.
-\end{lemma}
-\begin{proof}
-  Given a limit $\ell : L_{\FMSet}$\todo{We're implicitly working with the HIT-definition here},
-  denote by $\ell_n : L_{\FMSet} → \FMSet^n 1$ the projection maps out of the limit.
-
-  Assume $x, y_1, y_2 : L_{\FMSet}$, $\Var{ys} : ℕ → L_{\FMSet}$,
-  $\Op{split} : ∀ n\Where (\Var{ys}_n = y_1) \mathrel{+} (\Var{ys}_n = y_2)$
-  and $\Op{diag} : ∀ n\Where x_n = \Var{ys}_n(n)$.
-  The goal is to show $\PropTruncCon[x = y_1 \mathrel{+} x = y_2]$.
-  From $\Op{split}$ we define the complement of $\Var{ys}$,
-  \[
-    \bar{\Var{ys}}(n)\DefEq
-      \begin{cases}
-        y_2 & \text{if}~\Var{ys}_n(n) = y_1 \\
-        y_1 & \text{if}~\Var{ys}_n(n) = y_2 \\
-      \end{cases}
-  \]
-  We show that the diagonal of $\bar{\Var{ys}}$ too has the limit-property,
-  i.e.\@ that
-  \[
-    ∀ n\Where
-      \Bang^n (\bar{\Var{vs}}(1+n)_{1+n}) = \bar{\Var{ys}}(n)_n
-      \Step{step:IsLimYsComplement}
-  \]
-  For this, fix $n$ and check the four cases generated by inspecting $\Op{split} n$
-  and $\Op{split}{} (1+n)$.
-  In one case, \cref{step:IsLimYsComplement} reduces to the limit-property of $y_1$,
-  in another to that of $y_2$ and in the remaining cases to \cref{lem:DiagLimCaseAnalysis}.
-  Call the resulting limit $\bar{x} : L_{\FMSet}$.
-
-  Write $\BagCon{x, y} \DefEq \eta\, x \oplus \eta\, y : \FMSet X$.
-  Then for all $n$, we know that
-  \begin{align}\Step{step:ppc}
-    \BagCon{\Var{ys}_n, \bar{\Var{ys}}_n} = \BagCon{y_1, y_2}
-  \end{align}
-  either by $\Op{refl}$ or $\Op{\oplus comm}$, depending on $\Op{split} n$.
-  Then\todo{better wording}
-  \[
-    \Op{pres} \BagCon{x, \bar{x}}\, n
-      = \BagCon{x_n , \bar{x}_n}
-      = \BagCon{\Var{ys}(n)_n , \bar{\Var{ys}}(n)_n}
-      = \Op{pres} \BagCon{\Var{ys}(n) , \bar{\Var{ys}}(n)}\, n
-      = \Op{pres} \BagCon{y_1 , y_2}\, n
-  \]
-  Therefore, $\Op{pres}(\BagCon{x, \bar{x}}) = \Op{pres}(\BagCon{y_1, y_2})$.
-  From injectivity of $\Op{pres}$ it follows that
-  \[
-    x \in \BagCon{x, \bar{x}} = \BagCon{y_1, y_2}
-  \]
-  which means that merely $x = y_1$ or $x = y_2$.
-\end{proof}
-
-\begin{lemma}\label{lem:LLPOImpliesPresInj}
-  Assuming \LLPO, $\Op{pres}$ is injective.
-\end{lemma}
-\begin{proof}
-  \todo[inline]{Prove it.}
-\end{proof}
-
-\subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
+%\subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
 
 \begin{theorem}\label{thm:FMGpdLim}
   Let $L_{\Bag} \DefEq \lim_{n < \omega} \Bag^n 1$.
@@ -750,7 +802,13 @@ Note that the above fixpoint is not necessarily the \emph{largest} fixpoint.
 
 \section{Conclusions}
 
+Connections with Piceghello \cite{Piceghello2021}.
+He defines the free symmetric monoidal groupoid on a type
+  as a HITs.
+
+
 \subsubsection{Acknowledgements}
+  This work was supported by the Estonian Research Council grant PSG749.
 
 %\nocite{*}
 
