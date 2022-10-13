@@ -35,8 +35,8 @@
 
 \emph{Coalgebras} are functions of the form $c : S \to F S$, where $S$ is a set of states and $F$ is a functor specifying a certain class of collections of states \cite{Rutten2000,Jacobs2016}. For example, $F S$ could be lists over $S$, bags or subsets of $S$ (possibly with some cardinality restrictions), wellfounded trees with leaves or nodes in $S$, or probability distributions over $S$. The coalgebra $c$ describes the dynamics of a transition system or an automaton: to each state $s : S$, the function $c$ associates the collection of states $c \,s : F S$ that are reachable from $s$ in one step. The choice of collection functor $F$ is dictated by the specific flavour of non-determinism that is intrinsic in the transition relation. Does the order or multiplicity of reachable states matter? Is the choice of a new state probabilistic? Does the transition relation additionally depend on a set of labels, weights or actions?
 
-The denotational semantics of a transition system $c : S \to F S$ is typically given in terms of the \emph{final coalgebra} $\nu F$ of the functor $F$, which  consists of non-wellfounded trees with branching specified by $F$. When $F$ is the list functor, each tree has a finite and ordered collection of subtrees. If $F$ is the finite bag functor, the order of subtrees does not matter, and if $F$ is the finite powerset functor, multiplicity of subtrees does not matter either. %Picking $F$ as the finite probability distribution functor, the trees correspond to
-The interpretation of a state $s : S$ in $\nu F$ is the possibly-infinite tree obtained by ``running'' the coalgebra $c$ with $s$ as initial state. As such, it gives a complete description of the evolution of the system $c$ starting from state $s$.
+The denotational semantics of a transition system $c : S \to F S$ is typically given in terms of the \emph{final coalgebra} $\Lim{F}$ of the functor $F$, which  consists of non-wellfounded trees with branching specified by $F$. When $F$ is the list functor, each tree has a finite and ordered collection of subtrees. If $F$ is the finite bag functor, the order of subtrees does not matter, and if $F$ is the finite powerset functor, multiplicity of subtrees does not matter either. %Picking $F$ as the finite probability distribution functor, the trees correspond to
+The interpretation of a state $s : S$ in $\Lim{F}$ is the possibly-infinite tree obtained by ``running'' the coalgebra $c$ with $s$ as initial state. As such, it gives a complete description of the evolution of the system $c$ starting from state $s$.
 
 The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and in particular the formal description of final coalgebras \cite{Barr1993,Adamek1995,Worrell2005} and the associated notion of bisimilarity and behavioural equivalence of states, is traditionally developed in a set-theoretic framework, with reasoning based on classical logic. In this work, we propose to study the theory of coalgebras in a framework based on constructive logic, more specifically in homotopy type theory (HoTT) \cite{HoTTBook}. The use of a constructive metatheory is beneficial for the development of \emph{formal denotational semantics} of dynamical systems and programming languages, often centered on the notions of final coalgebra and bisimilarity \cite{Turi1997}, in proof assistants based on variants of Martin-L{\"o}f type theory, such as Agda, Coq, Idris or Lean. The specific choice of HoTT is motivated by its expressivity and innovative features, higher inductive types (HITs) and the univalence principle, which are crucial ingredients for faithfully representing a variety of collection functors $F$ and reasoning up to equivalent presentations of $F$. 
 
@@ -58,12 +58,13 @@ Following the recent work of Choudhury and Fiore \cite{Choudhury2021}, we define
 We present 3 constructions of the final coalgebra of the finite bag functor:
 \begin{enumerate}
 \item Working with the set-based functor $\FMSet$, we try to replicate the classical set-theoretic construction as an $\omega$-limit of (\ref{eq:chain}) in our constructive setting. We show that this cannot be directly performed in HoTT without introducing some form of classical logic, an issue already spotted in the case of the finite powerset functor \cite{Veltri2021}. Formally, we show that $\FMSet$ weakly preserves the $\omega$-limit of (\ref{eq:chain}) (actually all $\omega$-limits if one assumes the axiom of countable choice), but strong preservation of this limit implies \LLPO{}.
-\item The list functor admits a final coalgebra $\nu\List$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $R$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the bag functor. This construction can be smoothly replicated as a \emph{strict} $\omega$-limit in the category of \emph{setoids} \cite{Barthe2003}. Problems arise when trying to port the latter from setoids to sets, effectively forming the set-quotient $\nu\List \mathbin{/_{\!2}} R$: we prove that the resulting type is a fixpoint for $\FMSet$, in the sense that $\FMSet (\nu\List \mathbin{/_{\!2}} R) \simeq \nu\List \mathbin{/_{\!2}} R$, but showing that this is the final coalgebra requires the assumption of the full axiom of choice. 
-\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\nu\Bag$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\nu\Bag$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\nu\Bag}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra seems to again require the axiom of choice. 
+\item The list functor admits a final coalgebra $\Lim{\List}$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $R$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the bag functor. This construction can be smoothly replicated as a \emph{strict} $\omega$-limit in the category of \emph{setoids} \cite{Barthe2003}. Problems arise when trying to port the latter from setoids to sets, effectively forming the set-quotient $\Lim{\List} \mathbin{/_{\!2}} R$: we prove that the resulting type is a fixpoint for $\FMSet$, in the sense that $\FMSet (\Lim{\List} \mathbin{/_{\!2}} R) \simeq \Lim{\List} \mathbin{/_{\!2}} R$, but showing that this is the final coalgebra requires the assumption of the full axiom of choice. 
+\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra seems to again require the axiom of choice. 
 \end{enumerate}
-Practically, the last two constructions, while not generally delivering the final coalgebra of the set-based bag functor, can still be used as denotational domains for resource-sensitive transition systems with a \emph{finite} set of states \cite{Frumin2018}: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, there exists a unique coalgebra morphism from $S$ to $\nu\List \mathbin{/_{\!2}} R$, and also from $S$ to $\SetTrunc{\nu\Bag}$.
+Practically, the last two constructions, while not generally delivering the final coalgebra of the set-based bag functor, can still be used as denotational domains for resource-sensitive transition systems with a \emph{finite} set of states \cite{Frumin2018}: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, there exists a unique coalgebra morphism from $S$ to $\Lim{\List} \mathbin{/_{\!2}} R$, and also from $S$ to $\SetTrunc{\Lim{\Bag}}$.
 
-We finally discuss generalizations of our constructions to other analytic functors. We also look at an alternative construction of the final $\FMSet$-coalgebra using Cubical Agda's primitive \emph{coinductive types} \cite{Vezzosi2019}. In Cubical Agda, HITs such as $\FMSet X$ can appear in the codomain of coinductive type destructors, which is intuitively justified by the treatment of HITs in Cubical Agda as inductive types with constructors possibly depending on interval variables \cite{Coquand2018,Cavallo2019}.
+We conclude by discuss generalizations of our constructions to other analytic functors and looking at an alternative construction of the final $\FMSet$-coalgebra using Cubical Agda's primitive coinductive types \cite{Vezzosi2019}.
+%In Cubical Agda, HITs such as $\FMSet X$ can appear in the codomain of coinductive type destructors, which is intuitively justified by the treatment of HITs in Cubical Agda as inductive types with constructors possibly depending on interval variables \cite{Coquand2018,Cavallo2019}.
 
 The material presented in the paper have been formalized in the Cubical Agda proof
 assistant. The code is freely available at \url{https://github.com/phijor/agda-cubical-multiset}.
@@ -268,7 +269,7 @@ Another way of specifying permutations is via a \emph{relation lifting}, often c
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-The relation lifting of $R$ is the symmetric closure of $\DRelator\,R$, i.e. $\Relator\,R\;xs\;ys \DefEq \DRelator\,R\;xs\;ys \times \DRelator\,R\;ys\;xs$.
+The relation lifting of $R$ is the symmetric closure of the relation $\DRelator\,R$, i.e. $\Relator\,R\;xs\;ys \DefEq \DRelator\,R\;xs\;ys \times \DRelator\,R\;ys\;xs$.
 Because of the presence of a propositional trunctation in the premise of the 2nd rule, both $\DRelator\,R$ and $\Relator\,R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator\,R$ is an equivalence relation.
 
 When $R$ is path equality on $X$, the type $\Relator\,(=)\;xs\;ys$ expresses the existence of a permutation connecting $xs$ and $ys$. In fact, there is a bi-implication between $\Perm\;xs\;ys$ and $\Relator\,(=)\;xs\;ys$. Therefore, we have two equivalent presentations of lists modulo permutations: $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator\,(=)]$. They are also both equivalent to $\M X$.
@@ -410,7 +411,7 @@ A linear order $(<)$ on $X$ can be extended to a linear order on $\List X$ via t
   \hspace*{\fill}
 \end{center}
 This can further be extended to a linear order on $\SetQuot[\List X][\Perm]$ as follows: $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
-\begin{proposition}
+\begin{proposition}\label{prop:lift-linear-order}
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.  
 \end{proposition}
 
@@ -450,27 +451,21 @@ Consider the chain in (\ref{eq:chain}), with $F$ replaced by $\FMSet$. We formal
 In HoTT, the \emph{(homotopy) limit} of the chain is definable as
 \[
 \lim_{n} (\FMSet^n 1) \DefEq \sum (xs : \forall n \Where \FMSet^n 1) \Where \forall n \Where
-\Map{\FMSet}^n\,!\,(xs_{1 + n}) = xs_n
+\Map{\FMSet}^n\,!\,(xs\;(1 + n)) = xs\;n
 \]
-So an element of the limit consists of an element $xs_n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs_{1 + n}$ to $\FMSet^n 1$ via $\Map{\FMSet}^n\,!$ is equal to $xs_n$. The $n$-th projection from the limit is called $\ell_n : \lim_n (\FMSet^n 1) → \FMSet^n 1$. The limit is invariant wrt. shifting the chain by one position, i.e. there is an equivalence $\shift : \lim_{n} (\FMSet^n 1) \simeq \lim_{n} (\FMSet^{1 + n} 1)$.
+Write $\Lim{\FMSet} \DefEq \lim_{n} (\FMSet^n 1)$. An element of the limit consists of an element $xs\,n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs\,(1 + n)$ to $\FMSet^n 1$ via $\Map{\FMSet}^n\,!$ is equal to $xs\,n$. The $n$-th projection from the limit is called $\ell_n : \Lim{\FMSet} → \FMSet^n 1$. The limit is invariant wrt. shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{\FMSet} \simeq \LimSh{\FMSet}$, where $\LimSh{\FMSet} \DefEq \lim_{n} (\FMSet^{1 + n} 1)$. We use $\ell_n : \LimSh{\FMSet} → \FMSet^{1+n} 1$ also for the $n$-th projection from the shifted limit.
 The limit is a set, since all types in its diagram are sets.
 
-In classical set theory, $\lim_{n} (\FMSet^n 1)$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\Op{pres} : \FMSet \,(\lim_{n} (\FMSet^n 1)) \to \lim_{n} (\FMSet^{n+1} 1)$ via the universal property of the limit: the first component of $\Op{pres} \,s$ is $\lambda n \Where \Map{\FMSet}\,\ell_n \,s$. The function $\Op{pres}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\Op{pres}^{-1}$ provides a coalgebra for $\lim_{n} (\FMSet^n 1)$. This can be proved to be final, again using the universal property of the limit.
+In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\Op{pres} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: the first component of $\Op{pres} \,s$ is $\lambda n \Where \Map{\FMSet}\,\ell_n \,s$. The function $\Op{pres}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\Op{pres}^{-1}$ provides a coalgebra for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
 
-Constructively, there are issues in proving that $\Op{pres}$ is an equivalence. We are able to show that it is surjective (actually more, a split epimorphism), but its injectivity is equivalent to the \emph{lesser limited principle of omniscience} (\LLPO{}) \cite[{Ch.\@ 1}]{Bridges1987}. The latter is a weak version of the law of the excluded middle, and it is not provable from intuitionistic axioms alone.  It states that, given an infinite stream of boolean
+Constructively, there are issues in proving that $\Op{pres}$ is an equivalence. Its injectivity is equivalent to the \emph{lesser limited principle of omniscience} (\LLPO{}) \cite[{Ch.\@ 1}]{Bridges1987}. The latter is a weak version of the law of the excluded middle, and it is not provable from intuitionistic axioms alone.  It states that, given an infinite stream of boolean
 values that yields $\True$ in at most one position, one can decide
 whether all even or all odd positions are $\False$.
-
-\begin{theorem}\label{thm:InjPresSurjective}
- The function $\Op{pres}$ is surjective.
-\end{theorem}
-
 Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficient to show that there is a bi-implication between them. But first a useful lemma.
 
 \begin{lemma}\label{lem:DiagLimCaseAnalysis}
-  For any $x, y_1, y_2 : \lim_n(\FMSet^n 1)$ and $\Var{ys} : ℕ → \lim_n(\FMSet^n 1)$,
-  such that $∀ n\Where \ell_n\,x = \ell_n\,(\Var{ys}\,n)$, if some $n$ we have
-  $\Var{ys}\,n = y_1$ and $\Var{ys}\,(1+n) = y_2$, then $\Map{\FMSet}^n\,!\, (\ell_{1+n}\,y_1) = \ell_n\,y_2$.
+  For $x, y_1, y_2 : \Lim{\FMSet}$, $\Var{ys} : ℕ → \Lim{\FMSet}$
+  such that $∀ n\Where \ell_n\,x = \ell_n\,(\Var{ys}\,n)$, and $n : ℕ$, if $\Var{ys}\,n = y_1$ and $\Var{ys}\,(1+n) = y_2$, then $\Map{\FMSet}^n\,!\, (\ell_{1+n}\,y_1) = \ell_n\,y_2$.
 \end{lemma}
 \begin{proof}
   We have the following sequence of equalities:
@@ -495,7 +490,7 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
   \begin{equation}\label{eq:compl}
     \def\arraystretch{1.2}
     \begin{array}{l}
-   \{x, y_1, y_2 : \lim_n(\M^n 1)\} \;(ys : ℕ \to \lim_n(\M^n 1)) \\
+   \{x, y_1, y_2 : \Lim{\M}\} \;(ys : ℕ \to \Lim{\M}) \\
   \hspace{.5cm} \to (\Op{split} : \forall n \Where ys\;n = y_1 +  ys\;n = y_2) (\Op{diag} : \forall n \Where \ell_n \;x = \ell_n \;(ys\;n)) \\
   \hspace{.5cm} \to \PropTrunc{x = y_1 + x = y_2}
     \end{array}
@@ -506,7 +501,7 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
 %  denote by $\ell_n : L_{\M} → \M^n 1$ the projection maps out of the limit.
 
   To prove completeness, assume $x, y_1, y_2, ys, \Op{split}$ and $\Op{diag}$ as in (\ref{eq:compl}).
-  %:  \lim_n(\M^n 1)$, $\Var{ys} : ℕ →  \lim_n(\M^n 1)$,
+  %:  \Lim{\M}$, $\Var{ys} : ℕ →  \Lim{\M}$,
   %$\Op{split} : ∀ n\Where (\Var{ys}\,n = y_1) \mathrel{+} (\Var{ys} \,n = y_2)$
   %and $\Op{diag} : ∀ n\Where \ell_n \,x = \ell_n (\Var{ys}\,n)$.
   %The goal is to show $\PropTruncCon[x = y_1 \mathrel{+} x = y_2]$.
@@ -529,7 +524,7 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
   and $\Op{split}{} (1+n)$.
   In one case, (\ref{step:IsLimYsComplement}) reduces to the limit-property of $y_1$,
   in another to that of $y_2$ and in the remaining cases to \cref{lem:DiagLimCaseAnalysis}.
-  Call  $\overline{x} : \lim_n(\M^n 1)$ the element of the limit such that $\ell_n \,\overline{x} \DefEq \ell_n\,(\overline{ys}\,n)$.
+  Call  $\overline{x} : \Lim{\M}$ the element of the limit such that $\ell_n \,\overline{x} \DefEq \ell_n\,(\overline{ys}\,n)$.
 
   Write $\{x, y\} \DefEq \eta\, x \oplus \eta\, y$ for the two-element bag comprising of $x$ and $y$. For all $n$, we know that
   %\begin{align}\Step{step:ppc}
@@ -554,31 +549,57 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
 %\begin{proof}
 %  \todo[inline]{Prove it.}
 %\end{proof}
-For the proof, which employs the functor $F X \DefEq \SetQuot[\List X][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result in \cite{Veltri2021}: the injectivity of $\Op{pres} : \Op{Pfin} \,(\lim_{n} (\Op{Pfin}^n 1)) \to \lim_{n} (\Op{Pfin}^{n+1} 1)$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in the similar result for the finite powerset functor.
+For the proof, which employs the functor $F X \DefEq \SetQuot[\List X][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result in \cite{Veltri2021}: the injectivity of $\Op{pres} : \Op{Pfin} \,\Lim{\Op{Pfin}} \to \LimSh{\Op{Pfin}}$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in the similar result for the finite powerset functor.
+
+Nevertheless, we are able to salvage in our constructive setting that $\Op{pres}$ is a split epimorphism, i.e. it has a section. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but stong limit-preservation is equivalent to \LLPO{}.
+%irst we show that each set $\FMSet^n 1$ can be endowed with a linear order.
+\begin{lemma}\label{lem:iter-linear}
+For all $n$, $\FMSet^n 1$ is linearly-ordered.
+\end{lemma}
+\begin{proof}
+Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)$ is the empty relation and $x <^{1 + n} y \DefEq \LexPerm\,(<^n)\;x\;y$. Proposition \ref{prop:lift-linear-order} implies that the order $(<^n)$ is linear for all $n$.
+\end{proof}
+
+\begin{theorem}\label{thm:InjPresSurjective}
+ The function $\Op{pres}$ is a split epimorphism.
+\end{theorem}
+\begin{proof}
+  Let $s : \LimSh{\FMSet}$, we build an element $t : \FMSet \,\Lim{\FMSet}$ in the fiber of $\Op{pres}$ over $s$. The size (i.e. the 1st projection) of the bags $\ell_n\,s$ is the same for all $n$, call it $n^*$. We set the size of $t$ to be $n^*$. Given an index $k : \Fin n^*$, we now search for an element $u\,k : \Lim{\FMSet}$ for defining $t \DefEq (n^*,u)$.
+
+  For each $d : ℕ$, we know that $\ell_{d + 1}\,s$ is path equal to a pair of the form $(n*,v_d)$. In order to construct $u$ we need access to a representative of the equivalence class $v_d : \SetQuot[\Fin n^* \to \FMSet^d 1][\sim]$ for each $d$. We know that this can be done using Lemma~\ref{lem:iter-linear} and Proposition~\ref{prop:ListPermDefQuot}. Let $w_d : \Fin n^* \to \FMSet^d 1$ be the canonical representative of $v_d$. The limit-property of $s$ can be translated to the mere existence of a permutation $\sigma_d : \Fin n^* \simeq \Fin n^*$ such that $\Map{\FMSet}^d\,!\,(w_{1 + d} \,(\sigma_d\,k)) = w_d\,k$, for all $d$ and $k : \Fin n^*$. The construction of $u$ also requires access to the each permutation $\sigma_d$, that sits inside a propositional truncation for each $d$. We can access this by invoking Lemma~\ref{lem:iter-linear} and Proposition~\ref{prop:ListPermCanonicalPerm}.
+
+  We now have all the ingredients for building $u$. Define a permutation $\sigma^*_d : \Fin n^* \simeq \Fin n^*$ by induction on $d$: $\sigma^*_0 \DefEq \Op{id}$, $\sigma^*_{1+d} \DefEq \sigma_d \circ \sigma^*_d$. Then take $u$ such that $\ell_d \,(u\,k) \DefEq w_d\,(\sigma^*_d \,k)$. One can show that $u\,k : \Lim{\FMSet}$ for all $k : \Fin n^*$ and that $t$ is indeed in the fiber of $\Op{pres}$ over $s$.
+\end{proof}
 
 
 \subsection{As a Quotient of the Final $\List$-Coalgebra}\label{sec:final-quotient-set}
 
-It is known that the limit $\lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}. Using the relation lifting $\Relator$, it is possible to construct a relation on $\lim_n (\List^n 1)$ so that the resulting setoid is the final coalgebra of the setoid-functor $\Op{FMSetoid}(X,R) \DefEq (\List X,\Relator\,R)$ in the category of setoids \cite{Barthe2003}. The desired relation on $\lim_n (\List^n 1)$ is obtained as the $\omega$-limit of the chain
+It is known that the limit $\Lim{\List} \DefEq \lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}. Let $\unfold$ be its coalgebra structure.  Using the relation lifting $\Relator$, it is possible to construct a relation on $\Lim{\List}$ so that the resulting setoid is the final coalgebra of the setoid-functor $\Op{FMSetoid}(X,R) \DefEq (\List X,\Relator\,R)$ in the category of setoids \cite{Barthe2003}. The desired relation on $\Lim{\List}$ is obtained by first iterating the relator:
+\[
+\Relator^0 s\;t \DefEq 1, \quad
+\Relator^{1+n}\;s\;t \DefEq \Relator\,(\Relator^n)\;(\unfold\,s)\,(\unfold\,t)
+\]
+for $s,t : \Lim{\List}$, then taking the limit of the chain of propositions:
 \begin{equation}\label{eq:chain-rel}
-    \Op{Tot} \xleftarrow{} {\Relator\,\Op{Tot}}
-      \xleftarrow{} {\Relator^2\,\Op{Tot}}
-      \xleftarrow{} {\Relator^3\,\Op{Tot}}
+    \Relator^0 s\;t \xleftarrow{} {\Relator^1 s\;t}
+      \xleftarrow{} {\Relator^2 s\;t}
+      \xleftarrow{} {\Relator^3 s\;t}
       \xleftarrow{} %{\Map{F}^3 !}
       \cdots
 \end{equation}
-in the category of relations, where $\Op(Tot)$ is the total relation on the unit type $1$. The chain in (\ref{eq:chain-rel}) lives above the chain in (\ref{eq:chain}) with $F \DefEq \List$.
+where the backward functions are generated by ! and the fact that $(\forall x,y\Where R \,x\,y \to S \,x\,y)$ implies $\forall xs,ys \Where \Relator \,R\;xs\;ys \to \Relator \,S\;xs\;ys$.
+For all $s,t : \Lim{\List}$, the desired relation $\Bisim\,s\,t$ is the limit of the chain in (\ref{eq:chain-rel}), i.e. a countable intersection, since all types in the chain are propositions.
 \begin{theorem}\label{thm:final-setoids}
-The setoid $(\lim_n(\List^n 1),\lim_n(\Relator^n 1))$ has a $\Op{FMSetoid}$-coalgebra structure which is final in the category of setoids.
+The setoid $(\Lim{\List},\Bisim)$ has a $\Op{FMSetoid}$-coalgebra structure which is final in the category of setoids.
 \end{theorem}
 The proof is similar to the one for the finite powerset functor in \cite[{Theorem~1}]{Veltri2021}.
 
-Similarly to the case of the finite powerset, set-quotienting $\lim_n(\List^n 1)$ by the relation $\lim_n(\Relator^n 1)$ does not give the final coalgebra for the finite bag functor in sets. We can show that the resulting quotient is a fixpoint, and in particular a coalgebra. But the proof of finality requires the full axiom of choice. 
+Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by the relation $\Bisim$ does not give the final coalgebra for the finite bag functor in sets. We can show that the resulting quotient is a fixpoint, and in particular a coalgebra. But the proof of finality requires the full axiom of choice. 
 \begin{theorem}\label{thm:fixpoint-quotient}
-  For all $X : \Type$, we have $\FMSet(\SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]) \simeq \SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]$.
+  For all $X : \Type$, we have $\FMSet(\SetQuot[\Lim{\List}][\Bisim]) \simeq \SetQuot[\Lim{\List}][\Bisim]$.
 \end{theorem}
 \begin{theorem}\label{thm:final-quotient}
-  Assuming the axiom of choice, $\SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]$ is the final coalgebra of $\FMSet$ in sets.
+  Assuming the axiom of choice, $\SetQuot[\Lim{\List}][\Bisim]$ is the final coalgebra of $\FMSet$ in sets.
 \end{theorem}
 Both proofs, which employs the functor $F X \DefEq \SetQuot[\List X][\Relator\,(=)]$ instead of $\FMSet$, are analogous to related ones for the finite powerset functor in \cite{Veltri2021}.
 Why is the axiom of choice needed in \cref{thm:final-quotient}? Intuitively, the construction of a coalgebra morphism from a given coalgebra $c : X \to \SetQuot[\List X][\Relator\,(=)]$ can invoke $c$ an arbitrarily large number of times. Since we are given no information on the
@@ -588,7 +609,7 @@ set quotients would need to be employed the same large number of times,
 and this could only be achieved by assuming the full axiom of choice.
 
 
-While not delivering the final coalgebra of $\FMSet$ without extra classical assumptions, the quotient $\SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]$ can still be used as a denotational domain for transition systems with a finite set of states: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, we are able to construct a unique coalgebra morphism from $S$ to $\SetQuot[\lim_n(\List^n 1)][\lim_n(\Relator^n 1)]$.
+While not delivering the final coalgebra of $\FMSet$ without extra classical assumptions, the quotient $\SetQuot[\Lim{\List}][\Bisim]$ can still be used as a denotational domain for transition systems with a finite set of states: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, we are able to construct a unique coalgebra morphism from $S$ to $\SetQuot[\Lim{\List}][\Bisim]$.
 
 \section{The Finite Bag Functor in Groupoids}\label{sec:finite-bags-groupoids}
 
@@ -723,9 +744,9 @@ Following \cite{Finster2021}, we introduce an equivalent but small definition $\
 %  A small type:
   \begin{align*}
     \Bag X
-      \mathbin{=_{\mathrm{df}}}
-      \sum\,\Var{x} : \operatorname{\mathsf{Bij}}\Where
-        \langle x \rangle \to X,
+      \DefEq
+      \sum (\Var{x} : \Bij) \Where
+        \langle x \rangle \to X
   \end{align*}
  We abbreviate $\BagCon{v} \DefEq (x, v) : \Bag X$ if $x : \Bij$ can be inferred from context.
 %\end{definition}
