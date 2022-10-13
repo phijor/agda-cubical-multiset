@@ -368,6 +368,13 @@ anaM' =
        (λ c x → [ anaTree c ∞ x ])
        (λ c c' rc → funExt (λ x → eq/ _ _ (anaTreeRelCoalg c c' rc ∞ x)))
 
+anaTreeRel : ∀ {X} {R : X → X → Type}
+  → (c : X → List X) (cRel : ∀ {x y} → R x y → Relator R (c x) (c y))
+  → (j : Size)
+  → ∀ {x y} → R x y
+  → ExtEq j (anaTree c ∞ x) (anaTree c ∞ y)
+subtreesE (anaTreeRel c cRel j r) {k} = mapRelator' (anaTreeRel c cRel k) (cRel r)
+
 -- the construction of the anamorphism;
 -- for this to work, we assume that θ has a section, i.e. it is a
 -- split epimorphism; this is equivalent to full axiom of choice (the
@@ -418,14 +425,6 @@ module _ (θInv : ∀ A {B} (R : B → B → Type) → (A → B / R) → [ A ⇒
     → ∀ x → νM→MνM (anaM c x) ≡ mapM (anaM c) (c x)
   anaMEq c x =
     anaMEq' (θ1Inv c) x ∙ cong (λ f → mapM (anaM c) (f x)) (sectionθ1 c)
-
-  anaTreeRel : ∀ {X} {R : X → X → Type}
-    → (c : X → List X) (cRel : ∀ {x y} → R x y → Relator R (c x) (c y))
-    → (j : Size)
-    → ∀ {x y} → R x y
-    → ExtEq j (anaTree c ∞ x) (anaTree c ∞ y)
-  subtreesE (anaTreeRel c cRel j r) {k} = mapRelator' (anaTreeRel c cRel k) (cRel r)
-
 
   anaMUniq''' : {X : Type} (Xset : isSet X) (c : X → List X)
     → (f : X → Tree ∞) 
