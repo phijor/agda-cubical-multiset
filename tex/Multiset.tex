@@ -59,7 +59,7 @@ We present 3 constructions of the final coalgebra of the finite bag functor:
 \begin{enumerate}
 \item Working with the set-based functor $\FMSet$, we try to replicate the classical set-theoretic construction as an $\omega$-limit of (\ref{eq:chain}) in our constructive setting. We show that this cannot be directly performed in HoTT without introducing some form of classical logic, an issue already spotted in the case of the finite powerset functor \cite{Veltri2021}. Formally, we show that $\FMSet$ weakly preserves the $\omega$-limit of (\ref{eq:chain}) (actually all $\omega$-limits if one assumes the axiom of countable choice), but strong preservation of this limit implies \LLPO{}.
 \item The list functor admits a final coalgebra $\Lim{\List}$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $R$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the bag functor. This construction can be smoothly replicated as a \emph{strict} $\omega$-limit in the category of \emph{setoids} \cite{Barthe2003}. Problems arise when trying to port the latter from setoids to sets, effectively forming the set-quotient $\Lim{\List} \mathbin{/_{\!2}} R$: we prove that the resulting type is a fixpoint for $\FMSet$, in the sense that $\FMSet (\Lim{\List} \mathbin{/_{\!2}} R) \simeq \Lim{\List} \mathbin{/_{\!2}} R$, but showing that this is the final coalgebra requires the assumption of the full axiom of choice. 
-\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra seems to  require a non-constructive principle similar to the axiom of choice. 
+\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra seems to  require the assumption of choice-like principles. 
 \end{enumerate}
 Practically, the last two constructions, while not generally delivering the final coalgebra of the set-based bag functor, can still be used as denotational domains for resource-sensitive transition systems with a \emph{finite} set of states \cite{Frumin2018}: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, there exists a unique coalgebra morphism from $S$ to $\Lim{\List} \mathbin{/_{\!2}} R$, and also from $S$ to $\SetTrunc{\Lim{\Bag}}$.
 
@@ -783,10 +783,8 @@ Since $\Bag$ is a polynomial functor, its final coalgebra can be computed as the
   The function $\operatorname{pres} : \Bag\,\Lim{\Bag} \to \LimSh{\Bag}$ is an equivalence of groupoids. In particular, $\Lim{\Bag}$ is the final $\Bag$-coalgebra.
 \end{theorem}
 
-The combination of Theorem~\ref{thm:FMSetOfFMGpdTrunc} and Theorem~\ref{prop:BagTote}, together with the fact that set truncation preserve equivalences, implies that $\SetTrunc{\Bag^n 1}$ is equivalent to $\FMSet^n 1$ for all $n$. One might wonder whether the set truncation of $\Lim{\Bag}$ delivers the final coalgebra of $\FMSet$. We are able to show that $\SetTrunc{\Lim{\Bag}}$ is a fixpoint of $\FMSet$, but the proof of finality requires an additional assumption, which shares some similarities with the axiom of choice.
-%\subsection{Truncating the Groupoid Construction}
-%Compare the set-truncation of the groupoid construction
-%and the set-level definition.
+The combination of Theorem~\ref{thm:FMSetOfFMGpdTrunc} and Theorem~\ref{prop:BagTote}, together with the fact that set truncation preserve equivalences, implies that $\SetTrunc{\Bag^n 1}$ is equivalent to $\FMSet^n 1$ for all $n$. One might wonder whether the set truncation of $\Lim{\Bag}$ delivers the final coalgebra of $\FMSet$. We are able to show that $\SetTrunc{\Lim{\Bag}}$ is a fixpoint of $\FMSet$.
+%but the proof of finality requires an additional assumption, which shares some similarities with the axiom of choice.
 \begin{theorem}\label{thm:FMSetFixpointOfTrunc}
   %The set-truncation of $\Lim{\Bag}$ is a fixpoint of $\FMSet$, i.e.\@
   There is an equivalence $\FMSet \SetTrunc{\Lim{\Bag}} ≃ \SetTrunc{\Lim{\Bag}}$.
@@ -805,16 +803,18 @@ The combination of Theorem~\ref{thm:FMSetOfFMGpdTrunc} and Theorem~\ref{prop:Bag
   and \eqref{thm:FMSetFixpointOfTrunc:step3} follows from \cref{thm:FMGpdLim}.
   %since $\Lim{\Bag}$ is a limit.
 \end{proof}
+It seems highely unlikely that the coalgebra underlying the equivalence in \cref{thm:FMSetFixpointOfTrunc} is provably final without the assumption of any choice-like principles. Initial investigations show that, in order to construct a coalgebra morphism typed $X \to \SetTrunc{\Lim{\Bag}}$ from a coalgebra $c : X \to \FMSet X$,
+%(or, equivalently, a function $c' : X \to \SetTrunc{\Bag X}$)
+we need to assume the following principle: the function $\theta_{X,Y} : \SetTrunc{X \to Y} \to (X \to \SetTrunc{Y})$, which can be easily defined using  $\Rec{\SetTrunc{\Blank}}$, has a section for all types $X$ and $Y$. The proof of uniqueness of the mediating coalgebra morphism seems to additionally require an instance of the axiom of choice. We refrain from showing a proof of finality here, which we leave to future work. We do not know what is the strength of assuming the existence of a section for $\theta_{X,Y}$, nor how it compares to other choice principles. It surely resembles a form of choice: if set truncation is replaced with propositonal truncation, then the required principle becomes a particular instance of the axiom of choice.
+%% \begin{theorem}\label{thm:final-set-truncation}
+%%   Assuming that $\theta_X$ has a section for all types $X$, then $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$ in sets.
+%% \end{theorem}
+%% \begin{proof}
+%% Let $c : X \to \FMSet X$ be a coalgebra, which is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. We use the section of $\theta_X$ on $c'$ to build  an set-truncated $\Bag$-coalgebra $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{\Blank}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in groupoids, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $X$ and $\SetTrunc{\Lim{\Bag}}$.
+%% \end{proof}
+%We do not yet know what is the strength of assuming the existence of a section for $\theta_X$ and how it compares to well-known choice principles. It resembles a form of choice: if set truncation is replaced with propositonal truncation, then it becomes a particular instance of the axiom of choice.
 
-Let $\theta_X : \SetTrunc{X \to \Bag X} \to (X \to \SetTrunc{\Bag X})$ be the canonical map defined by $\Rec{\SetTrunc{\Blank}}$. Generally there is no way to construct a map in the reverse direction. Assuming that such map exists and it is a section for $\theta_X$, we are able to prove the finality of the coalgebra underlying the equivalence in \cref{thm:FMSetFixpointOfTrunc}.
-\begin{theorem}\label{thm:final-set-truncation}
-  Assuming that $\theta_X$ has a section for all types $X$, then $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$ in sets.
-\end{theorem}
-\begin{proof}
-Let $c : X \to \FMSet X$ be a coalgebra, which is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. We use the section of $\theta_X$ on $c'$ to build  an set-truncated $\Bag$-coalgebra $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{\Blank}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in groupoids, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $X$ and $\SetTrunc{\Lim{\Bag}}$.
-\end{proof}
-We do not yet know what is the strength of assuming the existence of a section for $\theta_X$ and how it compares to well-known choice principles. It resembles a form of choice: if set truncation is replaced with propositonal truncation, then it becomes a particular instance of the axiom of choice.
-Similarly to the quotient $\SetQuot[\Lim{\List}][\Bisim]$ of Section~\ref{sec:final-quotient-set}, $\SetTrunc{\Lim{\Bag}}$ can be used to give semantics to transition systems with finite set of states, since a section for $\theta_X$ is derivable in case $X$ is a finite set using the \enquote{finite choice} principle in (\ref{eq:finite-choice}).
+Similarly to the quotient $\SetQuot[\Lim{\List}][\Bisim]$ of Section~\ref{sec:final-quotient-set}, $\SetTrunc{\Lim{\Bag}}$ can be used to give semantics to transition systems with finite set of states: a section for $\theta_{X,Y}$ is derivable in case $X$ is a finite set using the \enquote{finite choice} principle in (\ref{eq:finite-choice}).
 
 %% Note that the above fixpoint is not necessarily the \emph{largest} fixpoint.
 %% \todo[inline,caption={Choice for largest fixpoint}]{%
