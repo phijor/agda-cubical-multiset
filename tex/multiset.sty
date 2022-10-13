@@ -46,8 +46,11 @@
 \DeclareMathOperator{\Shift}{sh}
 \DeclareMathOperator{\Type}{\OpFont{Type}}
 \DeclareMathOperator{\Fin}{\OpFont{Fin}}
+\DeclareMathOperator{\SymAct}{\OpFont{SymAct}}
+\DeclareMathOperator{\SymActSigma}{\OpFont{SymAct'}}
 \DeclareMathOperator{\Sym}{\mathfrak{S}}
 \NewDocumentCommand{\Cons}{}{\ensuremath{\mathbin{\dblcolon}}}
+\NewDocumentCommand{\Append}{}{\ensuremath{\mathbin{++}}}
 
 \newcommand*{\Empty}{\mathsf{\varepsilon}}
 \newcommand*{\Singl}{\operatorname{\mathsf{\eta}}}
@@ -62,6 +65,8 @@
 
 \DeclareMathOperator{\List}{\mathsf{List}}
 \DeclareMathOperator{\FMSet}{\mathsf{FMSet}}
+\DeclareMathOperator{\M}{\mathsf{FMC}}
+\DeclareMathOperator{\FMC}{\mathsf{FMC}}
 \DeclareMathOperator{\Bag}{\mathsf{Bag}}
 \DeclarePairedDelimiter{\BagCon}{\lbag}{\rbag}
 \newcommand*{\FMGpd}{%
@@ -82,14 +87,15 @@
 \NewDocumentCommand{\Elim}{m}{\Op{elim}_{#1}}
 \NewDocumentCommand{\Map}{m}{\Op{map}_{#1}}
 
-\NewDocumentCommand{\FinElim}{}{\Elim{\OpFont{fin}}}
-\NewDocumentCommand{\FinElimComp}{}{\Elim{\OpFont{fin}}^\beta}
+\NewDocumentCommand{\FinElim}{}{\Elim{\SetTrunc{\Blank}\OpFont{fin}}}
+\NewDocumentCommand{\FinElimComp}{}{\Elim{\SetTrunc{\Blank}\OpFont{fin}}^\beta}
 
 \DeclareMathOperator{\IsProp}{\mathsf{isProp}}
 \DeclareMathOperator{\IsSet}{\mathsf{isSet}}
 \DeclareMathOperator{\IsGpd}{\mathsf{isGroupoid}}
 
-\NewDocumentCommand{\Lim}{m}{L_{#1}}
+\NewDocumentCommand{\Lim}{m}{\mathsf{L}_{#1}}
+\NewDocumentCommand{\LimSh}{m}{\mathsf{L}^{\mathsf{sh}}_{#1}}
 \DeclareMathOperator{\Bang}{!}
 
 \newcommand*{\UU}{\ensuremath{\mathcal{U}}}
@@ -98,7 +104,6 @@
 
 \newcommand*{\N}{\ensuremath{\mathbb{N}}}
 
-\newcommand*{\M}{\ensuremath{\mathsf{M}}}
 
 \newcommand*{\Blank}{\ensuremath{\mathord{\_}}}
 
@@ -137,3 +142,25 @@
 \creflabelformat{step}{(#2#1#3)}
 
 \NewDocumentCommand{\Step}{m}{\label[step]{#1}}
+
+\newcommand*{\Perm}{\ensuremath{\mathsf{Perm}}}
+\newcommand*{\DRelator}{\ensuremath{\mathsf{DRelator}}}
+\newcommand*{\Relator}{\ensuremath{\mathsf{Relator}}}
+\newcommand*{\rep}{\ensuremath{\mathsf{rep}}}
+\newcommand*{\sort}{\ensuremath{\mathsf{sort}}}
+\newcommand*{\sortPerm}{\ensuremath{\mathsf{sortPerm}}}
+\newcommand*{\canonicalPerm}{\ensuremath{\mathsf{canonicalPerm}}}
+\newcommand*{\Lex}{\ensuremath{\mathsf{Lex}}}
+\newcommand*{\LexPerm}{\ensuremath{\mathsf{LexPerm}}}
+\newcommand*{\shift}{\ensuremath{\mathsf{shift}}}
+
+
+\newcommand*{\ToTote}{\Op{toTote}}
+\newcommand*{\ToFMSet}{\Op{toFMSet}}
+
+\newcommand*{\Coalg}{\ensuremath{\mathsf{Coalg}}}
+\newcommand*{\CoalgMor}{\ensuremath{\mathsf{CoalgMor}}}
+\newcommand*{\Final}{\ensuremath{\mathsf{Final}}}
+
+\newcommand*{\unfold}{\ensuremath{\mathsf{unfold}}}
+\newcommand*{\Bisim}{\ensuremath{\mathsf{Bisim}}}
