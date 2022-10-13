@@ -7,6 +7,7 @@ open import Multiset.Coinductive.Size
 open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.List hiding ([_]) renaming (map to mapList)
 open import Cubical.Data.Sigma
 open import Cubical.Data.Nat
@@ -303,6 +304,14 @@ inj-νM→MνM =
 MνM→νM→MνM : ∀ t → MνM→νM (νM→MνM t) ≡ t
 MνM→νM→MνM t = inj-νM→MνM _ _ (νM→MνM→νM _)
 
+M-νM-FixpointIso : Iso (M νM) νM
+M-νM-FixpointIso .Iso.fun = MνM→νM
+M-νM-FixpointIso .Iso.inv = νM→MνM
+M-νM-FixpointIso .Iso.rightInv = MνM→νM→MνM
+M-νM-FixpointIso .Iso.leftInv = νM→MνM→νM
+
+M-νM-FixpointEquiv : M νM ≃ νM
+M-νM-FixpointEquiv = isoToEquiv M-νM-FixpointIso
 
 -- pointwise lifting of a relation to a function space
 PW : {X A B : Type} (R : A → B → Type) → (X → A) → (X → B) → Type

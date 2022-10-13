@@ -127,10 +127,9 @@ open import Multiset.OverSet.Limit using (module Surjectivity)
 
 -- 4.2 As a Quotient of the Final List-Coalgebra
 
--- TODO: link the following theorems
--- Theorem 5
--- Theorem 6
--- Theorem 7
+-- See the module Multiset.Coinductive for the results of this section.
+-- They aren't included here since they are defined using Agda's sized types,
+-- which are enabled with the --sized-types flag.
 
 -- 5 The Finite Bag Functor in Groupoids
 
