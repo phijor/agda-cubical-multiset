@@ -38,7 +38,7 @@
 The denotational semantics of a transition system $c : S \to F S$ is typically given in terms of the \emph{final coalgebra} $\Lim{F}$ of the functor $F$, which  consists of non-wellfounded trees with branching specified by $F$. When $F$ is the list functor, each tree has a finite and ordered collection of subtrees. If $F$ is the finite bag functor, the order of subtrees does not matter, and if $F$ is the finite powerset functor, multiplicity of subtrees does not matter either. %Picking $F$ as the finite probability distribution functor, the trees correspond to
 The interpretation of a state $s : S$ in $\Lim{F}$ is the possibly-infinite tree obtained by ``running'' the coalgebra $c$ with $s$ as initial state. As such, it gives a complete description of the evolution of the system $c$ starting from state $s$.
 
-The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and in particular the formal description of final coalgebras \cite{Barr1993,Adamek1995,Worrell2005} and the associated notion of bisimilarity and behavioural equivalence of states, is traditionally developed in a set-theoretic framework, with reasoning based on classical logic. In this work, we propose to study the theory of coalgebras in a framework based on constructive logic, more specifically in homotopy type theory (HoTT) \cite{HoTTBook}. The use of a constructive metatheory is beneficial for the development of \emph{formal denotational semantics} of dynamical systems and programming languages, often centered on the notions of final coalgebra and bisimilarity \cite{Turi1997}, in proof assistants based on variants of Martin-L{\"o}f type theory, such as Agda, Coq, Idris or Lean. The specific choice of HoTT is motivated by its expressivity and innovative features, higher inductive types (HITs) and the univalence principle, which are crucial ingredients for faithfully representing a variety of collection functors $F$ and reasoning up to equivalent presentations of $F$. 
+The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and in particular the formal description of final coalgebras \cite{Barr1993,Adamek1995,Worrell2005} and the associated notion of bisimilarity and behavioural equivalence of states, is traditionally developed in a set-theoretic framework, with reasoning based on classical logic. In this work, we propose to study the theory of coalgebras in a framework based on constructive logic, more specifically in homotopy type theory (HoTT) \cite{HoTTBook}. The use of a constructive metatheory is beneficial for the development of \emph{formal denotational semantics} of dynamical systems and programming languages, often centered on the notions of final coalgebra and bisimilarity \cite{Turi1997}, in proof assistants based on variants of Martin-L{\"o}f type theory, such as Agda, Coq, Idris or Lean. The specific choice of HoTT is motivated by its expressiveness and innovative features, higher inductive types (HITs) and the univalence principle, which are crucial ingredients for faithfully representing a variety of collection functors $F$ and reasoning up to equivalent presentations of $F$. 
 
 Specific constructions of final coalgebras for a selection of functors, performed \emph{internally} in HoTT, already exist in the literature. Ahrens el al.~\cite{Ahrens2015} presented a construction of \emph{M-types}, i.e. final coalgebras of polynomial functors. They show that, for a polynomial functor $F$, the traditional set-theoretic construction of its M-type as the $\omega$-limit of the chain
 \begin{equation}\label{eq:chain}
@@ -48,7 +48,7 @@ Specific constructions of final coalgebras for a selection of functors, performe
       \xleftarrow{\Map{F}^3 !}
       \cdots
 \end{equation}
-(with $1$ being the unit type and $!$ the unique map into $1$) can be ported without major complications to the setting of HoTT. Veltri \cite{Veltri2021} exhamined various constructions of the final coalgebra of the finite powerset functor, which is known to not be definable as an $\omega$-limit \cite{Adamek1995}. Worrell proposed a set-theoretic construction as a $(\omega+\omega)$-limit \cite{Worrell2005}, but Veltri showed that this cannot be ported to the constructive setting of HoTT: Worrell's $(\omega+\omega)$-limit is the final coalgebra of the finite powerset functor if and only if the \emph{lesser limited principle of omniscience} (\LLPO{}) holds, which is a constructive taboo \cite{Bridges1987}.
+(with $1$ being the unit type and $!$ the unique map into $1$) can be ported without major complications to the setting of HoTT. Veltri \cite{Veltri2021} examined various constructions of the final coalgebra of the finite powerset functor, which is known to not be definable as an $\omega$-limit \cite{Adamek1995}. Worrell proposed a set-theoretic construction as a $(\omega+\omega)$-limit \cite{Worrell2005}, but Veltri showed that this cannot be ported to the constructive setting of HoTT: Worrell's $(\omega+\omega)$-limit is the final coalgebra of the finite powerset functor if and only if the \emph{lesser limited principle of omniscience} (\LLPO{}) holds, which is a constructive taboo \cite{Bridges1987}.
 
 
 We extend this line of work by studying the final coalgebra of the \emph{finite bag functor}. This is an intermediate situation between finitary polynomial functors, such as the one delivering lists, and general finitary functors, such as the one delivering finite subsets. It also serves as the starting point for a constructive analysis of (final) coalgebras for the \emph{analytic functors} of Joyal \cite{Joyal1986}, arising in type theory from \emph{quotient containers} \cite{Abbott2004}, and generally encompassing many datatypes with symmetries associated to generalized species, such as finite bags, unordered pairs and cyclic lists \cite{Yorgey2010,Yorgey2014}.
@@ -73,14 +73,14 @@ assistant. The code is freely available at \url{https://github.com/phijor/agda-c
 
 We work in homotopy type theory \cite{HoTTBook} and practically our formalization takes place in Cubical Agda \cite{Vezzosi2019}. In this section we recall some basic notions that are employed in our development.
 
-Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$. Implicit arguments of dependent functions are enclosed in curly brackets. Basics inductive types include: unit type $1$, empty type $\bot$, Booleans values $\Bool$, natural numbers $ℕ$, finite prefixes of the naturals $\Fin n$, lists $\List A$, dependent pairs $\sum (x : A) \Where B \, x$, binary sum $A + B$ and products $A \times B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is called $! : A \to 1$. Membership in a list is $x \in xs$ and removal of an occurrence $m : x \in xs$ is $xs \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types, introduced in the end of this section). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readibility in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
+Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$. Implicit arguments of dependent functions are enclosed in curly brackets. Basics inductive types include: unit type $1$, empty type $\bot$, the Booleans $\Bool$, natural numbers $ℕ$, finite prefixes of the naturals $\Fin n$, lists $\List A$, dependent pairs $\sum (x : A) \Where B \, x$, binary sum $A + B$ and products $A \times B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is called $! : A \to 1$. Membership in a list is $x \in xs$ and removal of an occurrence $m : x \in xs$ is $xs \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types, introduced in the end of this section). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readibility in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
 
 Given $x, y : A$, their definitional equality is denoted $x \DefEq y$ while propositional equality is $x = y$.
 Following ``cubical terminology'', the latter is called the \emph{path type} between $x$ and $y$.
 In Cubical Agda, the path type $x = y$ behaves similarly to a function type $\Interval \to A$, where $\Interval$ is a primitive interval type with endpoints $i_0$ and $i_1$.
 An element $p : x = y$ is eliminated by application to an interval name $r : \Interval$, returning $p \, r : A$.
 But unlike function types, this application can compute even when $p$ is unknown by using the endpoints $x$ and $y$: $p \,i_0$ reduces to $x$ and $p \,i_1$ reduces to $y$.
-Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. We write $\Refl\,x$ for the constant path (i.e. proof of reflexivity) in $x = x$ and $(\bullet)$ for sequentional composition of paths.
+Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. We write $\Refl\,x$ for the constant path (i.e. proof of reflexivity) in $x = x$ and $(\bullet)$ for sequential composition of paths.
 
 A function $f : A \to B$ is an \emph{equivalence} if it has contractible fibers, i.e. if the preimage of any element in $B$ under $f$ is a singleton type. Any function underlying a type isomorphism defines an equivalence. Writing $A \simeq B$ for the type of equivalences between $A$ and $B$, Voevodsky's \emph{univalence principle} states that the canonical function of type $A = B \to A \simeq B$ is an equivalence. This is a theorem in Cubical Agda. In particular, there is a function $\operatorname{ua} : A \simeq B \to A = B$ turning equivalences into path equalities. Univalence implies \emph{function extensionality}: pointwise equal functions are equal.
 
@@ -332,7 +332,7 @@ The proof of Theorem~\ref{thm:FMSetFixpointOfTrunc} employs the fact that $\FMSe
   $
     (\Cons) : X → (\Fin n → X) → (\Fin{} (1 + n) → X)
   $
-  on vectors to the set-truncation.
+  to the set-truncation.
   A two-sided inverse $\Op{unbox} : \SetTrunc{\Fin n → X} → \Fin n → \SetTrunc{X}$ of $\Op{box}$ is given by $\Op{unbox} \bar{v}\, k \DefEq \Map{\SetTrunc{\Blank}} (\lambda v\Where v\, k)\, \bar{v}$.
   %By induction on $n$, we see that
   %\begin{align*}
@@ -450,13 +450,13 @@ We now analyse two set-theoretic constructions of the final coalgebra for the fi
 
 \subsection{As an \ensuremath{\omega}-Limit}\label{sec:final-limit-set}
 
-Consider the chain in (\ref{eq:chain}), with $F$ replaced by $\FMSet$. We formally define $\FMSet^n 1$ by recursion on $n$: $\FMSet^0 1 \DefEq 1$ and $\FMSet^{1 + n} 1 \DefEq \FMSet (\FMSet^n 1)$. Similarly we can define the iteration $\Map{\FMSet}^n\,!$.
+Consider the chain in (\ref{eq:chain}), with $F$ replaced by $\FMSet$. We formally define $\FMSet^n 1$ by recursion on $n$: $\FMSet^0 1 \DefEq 1$ and $\FMSet^{1 + n} 1 \DefEq \FMSet (\FMSet^n 1)$. Similarly we can define the iteration $\Bang^n_{\FMSet} = \Map{\FMSet}^n\,\Bang$.
 In HoTT, the \emph{(homotopy) limit} of the chain is definable as
 \[
 \lim_{n} (\FMSet^n 1) \DefEq \sum (xs : \forall n \Where \FMSet^n 1) \Where \forall n \Where
-\Map{\FMSet}^n\,!\,(xs\;(1 + n)) = xs\;n
+  \Bang^n_{\FMSet}\,(xs\;(1 + n)) = xs\;n
 \]
-Write $\Lim{\FMSet} \DefEq \lim_{n} (\FMSet^n 1)$. An element of the limit consists of an element $xs\,n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs\,(1 + n)$ to $\FMSet^n 1$ via $\Map{\FMSet}^n\,!$ is equal to $xs\,n$. The $n$-th projection from the limit is called $\ell_n : \Lim{\FMSet} → \FMSet^n 1$. The limit is invariant wrt. shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{\FMSet} \simeq \LimSh{\FMSet}$, where $\LimSh{\FMSet} \DefEq \lim_{n} (\FMSet^{1 + n} 1)$. We use $\ell_n : \LimSh{\FMSet} → \FMSet^{1+n} 1$ also for the $n$-th projection from the shifted limit.
+Write $\Lim{\FMSet} \DefEq \lim_{n} (\FMSet^n 1)$. An element of the limit consists of an element $xs\,n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs\,(1 + n)$ to $\FMSet^n 1$ via $\Bang^n_{\FMSet}$ is equal to $xs\,n$. The $n$-th projection from the limit is called $\ell_n : \Lim{\FMSet} → \FMSet^n 1$. The limit is invariant wrt.\@ shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{\FMSet} \simeq \LimSh{\FMSet}$, where $\LimSh{\FMSet} \DefEq \lim_{n} (\FMSet^{1 + n} 1)$. We use $\ell_n : \LimSh{\FMSet} → \FMSet^{1+n} 1$ also for the $n$-th projection from the shifted limit.
 The limit is a set, since all types in its diagram are sets.
 
 In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\Op{pres} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: the first component of $\Op{pres} \,s$ is $\lambda n \Where \Map{\FMSet}\,\ell_n \,s$. The function $\Op{pres}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\Op{pres}^{-1}$ provides a coalgebra for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
@@ -468,18 +468,18 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
 
 \begin{lemma}\label{lem:DiagLimCaseAnalysis}
   For $x, y_1, y_2 : \Lim{\FMSet}$, $\Var{ys} : ℕ → \Lim{\FMSet}$
-  such that $∀ n\Where \ell_n\,x = \ell_n\,(\Var{ys}\,n)$, and $n : ℕ$, if $\Var{ys}\,n = y_1$ and $\Var{ys}\,(1+n) = y_2$, then $\Map{\FMSet}^n\,!\, (\ell_{1+n}\,y_1) = \ell_n\,y_2$.
+  such that $∀ n\Where \ell_n\,x = \ell_n\,(\Var{ys}\,n)$, and $n : ℕ$, if $\Var{ys}\,n = y_1$ and $\Var{ys}\,(1+n) = y_2$, then $\Bang_{\FMSet}^n(\ell_{1+n}\,y_1) = \ell_n\,y_2$.
 \end{lemma}
 \begin{proof}
   We have the following sequence of equalities:
   \begin{align*}
-    \Map{\FMSet}^n\,!\, (\ell_{1+n}\,y_1)
+    \Bang^n_{\FMSet} (\ell_{1+n}\,y_1)
       &= \ell_n\,y_1 
       = \ell_n\,(\Var{ys}\,n) 
       = \ell_n \,x \\
-      &= \Map{\FMSet}^n\,!\, (\ell_{1+n}\,x) 
-      = \Map{\FMSet}^n\,!\, (\ell_{1+n}\,(\Var{ys}\,(1+n))) \\
-      &= \Map{\FMSet}^n\,!\,(\ell_{1 + n} \,y_2) 
+      &= \Bang^n_{\FMSet}  (\ell_{1+n}\,x) 
+      = \Bang^n_{\FMSet} (\ell_{1+n}\,(\Var{ys}\,(1+n))) \\
+      &= \Bang^n_{\FMSet} (\ell_{1 + n} \,y_2) 
       = \ell_n \,y_2
   \end{align*}
 \end{proof}
@@ -508,7 +508,7 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
   %$\Op{split} : ∀ n\Where (\Var{ys}\,n = y_1) \mathrel{+} (\Var{ys} \,n = y_2)$
   %and $\Op{diag} : ∀ n\Where \ell_n \,x = \ell_n (\Var{ys}\,n)$.
   %The goal is to show $\PropTruncCon[x = y_1 \mathrel{+} x = y_2]$.
-  Using $\Op{split}$, define the complement of $\Var{ys}$ as $\overline{\Var{ys}}\,n\DefEq y_2$ is $\Var{ys}\, n = y_1$ and $\overline{\Var{ys}}\,n\DefEq y_1$ if $\Var{ys}\,n = y_2$.
+  Using $\Op{split}$, define the complement of $\Var{ys}$ as $\overline{\Var{ys}}\,n\DefEq y_2$ if $\Var{ys}\, n = y_1$ and $\overline{\Var{ys}}\,n\DefEq y_1$ if $\Var{ys}\,n = y_2$.
 %%   \[
 %%     \overline{\Var{ys}}\,n\DefEq
 %%       \begin{cases}
@@ -520,7 +520,7 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
   i.e.
   \begin{equation}\label{step:IsLimYsComplement}
     ∀ n\Where
-    \Map{\M}^n\,!\, (\ell_{1 + n} \,(\overline{\Var{ys}}\, (1+n))) = \ell_n \,(\overline{\Var{ys}}\,n)
+    \Bang^n_{\M} (\ell_{1 + n} \,(\overline{\Var{ys}}\, (1+n))) = \ell_n \,(\overline{\Var{ys}}\,n)
   \end{equation}
     %  \Step{step:IsLimYsComplement}$$
   For this, fix $n$ and check the four cases generated by inspecting $\Op{split} n$
@@ -571,10 +571,10 @@ Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)
 
   For each $d : ℕ$, we know that $\ell_{d + 1}\,s$ is path equal to a pair of the form $(n*,v_d)$. In order to construct $u$ we need access to a representative of the equivalence class $v_d : \SetQuot[(\Fin n^* \to \FMSet^d 1)][\sim]$ for each $d$. We know that this can be done using Lemma~\ref{lem:iter-linear} and Proposition~\ref{prop:ListPermDefQuot}. Let $w_d : \Fin n^* \to \FMSet^d 1$ be the canonical representative of $v_d$.
   The limit-property of $s$ can be translated to the mere existence of a permutation $\sigma_d : \Fin n^* \simeq \Fin n^*$
-  such that $p : \Map{\FMSet}^d\Bang\,(w_{1 + d}\, k) = w_d \,(\sigma_d\,k)$, for all $d: ℕ$ and $k : \Fin n^*$. The construction of $u$ also requires access to the each permutation $\sigma_d$, that sits inside a propositional truncation for each $d$. We can access all these permutations by invoking Lemma~\ref{lem:iter-linear} and Proposition~\ref{prop:ListPermCanonicalPerm}.
+  such that $p : \Bang_{\FMSet}^d(w_{1 + d}\, k) = w_d \,(\sigma_d\,k)$, for all $d: ℕ$ and $k : \Fin n^*$. The construction of $u$ also requires access to the each permutation $\sigma_d$, that sits inside a propositional truncation for each $d$. We can access all these permutations by invoking Lemma~\ref{lem:iter-linear} and Proposition~\ref{prop:ListPermCanonicalPerm}.
 
   We now have all the ingredients for building $u$. Define a permutation $\sigma^*_d : \Fin n^* \simeq \Fin n^*$ by induction on $d$: $\sigma^*_0 \DefEq \Op{id}$, $\sigma^*_{1+d} \DefEq \sigma_d^{-1} \circ \sigma^*_d$. Then take $u$ such that $\ell_d \,(u\,k) \DefEq w_d\,(\sigma^*_d \,k)$. One can show that $u\,k : \Lim{\FMSet}$ for all $k : \Fin n^*$ since
-  $\Map{\FMSet}^d\Bang\, (w_{d+1}(\sigma^*_{d+1}\, k)) \stackrel{p}{=} w_d (\sigma_d (\sigma^*_{d+1}\, k)) = w_d (\sigma_d (\sigma_d^{-1} (\sigma^*_d\, k))) = w_d (\sigma^*_d\, k)$,
+  $\Bang_{\FMSet}^d (w_{d+1}(\sigma^*_{d+1}\, k)) \stackrel{p}{=} w_d (\sigma_d (\sigma^*_{d+1}\, k)) = w_d (\sigma_d (\sigma_d^{-1} (\sigma^*_d\, k))) = w_d (\sigma^*_d\, k)$,
   and that $t$ is indeed in the fiber of $\Op{pres}$ over $s$.
 \end{proof}
 
@@ -652,7 +652,7 @@ It is easy to show that $\Op{isFinSet}$ is a proposition and that any type satis
 It follows that $\Op{FinSet}$ forms a groupoid.
 Note that $\Op{FinSet}$ is a \emph{large} type, i.e. $\Op{FinSet} : \Type_1$.
 %it lives in the successor universe of the types that it ranges over.
-From this, we can define a \enquote{tote} $\Tote : \Type → \Type1$ (``tote'' in the sense of a ``large bag'') as
+From this, we can define a \enquote{tote} (in the sense of a \enquote{large bag}) $\Tote : \Type → \Type_1$ as
 %, which we think of as a finite collection of elememts in $X$:
 %\begin{definition}
 %  A large type, $\Tote : \Type_\ell → \Type_{\ell + 1}$:
@@ -662,7 +662,7 @@ From this, we can define a \enquote{tote} $\Tote : \Type → \Type1$ (``tote'' i
       \sum\,(\Var{B} : \Op{FinSet})\Where \langle B \rangle \to X,
   \end{align*}
 %\end{definition}
-Elements of $\Tote X$ are pairs consisting of a finite set $B$ and a function from (the type underlying) $B$ to $X$ which picks the elements in the tote. The univalence principle implies that the path type $(B,v) = (C,W)$ in $\Tote X$ is equivalent to the type of dependent pairs consisting of an equivalence $\sigma : \langle B \rangle \simeq \langle C\rangle$ and a path $v = w \circ \sigma$.
+Elements of $\Tote X$ are pairs consisting of a finite set $B$ and a function from (the type underlying) $B$ to $X$ which picks the elements in the tote. The univalence principle implies that the path type $(B,v) = (C,w)$ in $\Tote X$ is equivalent to the type of dependent pairs consisting of an equivalence $\sigma : \langle B \rangle \simeq \langle C\rangle$ and a path $v = w \circ \sigma$.
 This indicates that $\Tote X$ is not a set, in general it is at least a groupoid.
 \begin{proposition}
   If $X$ is a groupoid, then $\Tote X$ is a groupoid.
@@ -765,7 +765,7 @@ Following \cite{Finster2021}, we first introduce an equivalent but small definit
   \end{proposition}
  Notice that $\Bag$ is the \emph{polynomial functor} associated to the container with $\Bij$ and $\langle x \rangle$ as positions at shape $x$. This can be seen as a \enquote{higher, more informative} variant of the list functor, which has $ℕ$ as shapes and $\Fin n$ as positions at shape $n$, a statement substantiated by Theorem \ref{thm:FMSetOfFMGpdTrunc}.
 
-We believe that $\Bag X$ can be proved equivalent to the \emph{free symmetric monoidal groupoid} on $X$ defined as a HIT by Piceghello \cite{Piceghello2021}. The equivalent would serve as an alternative proof of MacLane's coherence for symmetric monoidal categories.
+We believe that $\Bag X$ can be proved equivalent to the \emph{free symmetric monoidal groupoid} on $X$ defined as a HIT by Piceghello \cite{Piceghello2021}. The equivalence would serve as an alternative proof of MacLane's coherence for symmetric monoidal categories.
 
 % , in a way analogous to $\Op{List}$:
 %Given a type $A$ and a family $B$ over it, they both match ${\sum (a : A)\Where B(a) → X}$:
@@ -841,7 +841,7 @@ The coinductive type associated to $\M$ is given by the following coinductive re
 \end{array}
 \]
 The type $\cLim{\M}$ has a constructor $\fold : \cLim{\M}\to \M \cLim{\M}$ and a destructor 
-$\unfold : \cLim{\M} \to \M \cLim{\M}$ which are each other inverses. In particular, $\unfold \circ \fold$ is judgementally equal to the identity function, while the other equations can be proved by corecursion and path introduction:
+$\unfold : \cLim{\M} \to \M \cLim{\M}$ which are mutual inverses. In particular, $\unfold \circ \fold$ is judgementally equal to the identity function, while the other equations can be proved by corecursion and path introduction:
 \[
 \def\arraystretch{0.8}
 \begin{array}{l}
@@ -878,7 +878,7 @@ The proof that $\Op{final}$ is a coalgebra morphism is simply given by reflexivi
 
 The formulation $\FMSet$ of the finite bag functor exposes this as an analytic functor, which differs from a polynomial functor in that the tuple of elements $\Fin\,n \to X$ is quotiented by the relation generated by the action of the symmetric group with $n$ elements on $X$. Other analytic functors arise by choosing a different subgroup of the symmetric group. For example, picking the subgroup of cyclic permutations delivers the functor of cyclic lists, while taking the trivial subgroup allows us to recover the list functor. 
 
-More generally analytic functors can be seen as instances of the functors associated to the \emph{quotient containers} of Abbott et al.~\cite{Abbott2004}. A quotient container is a triple consisting of a type $A$, a type family $B : A \to \Type$ and a propositinally-valued type family $P : \forall \{a\} \Where B \,a \simeq B \,a \to \Type$ which is closed under identity, inverses and composition of equivalences. The associated functor is:
+More generally analytic functors can be seen as instances of the functors associated to the \emph{quotient containers} of Abbott et al.~\cite{Abbott2004}. A quotient container is a triple consisting of a type $A$, a type family $B : A \to \Type$ and a propositionally-valued type family $P : \forall \{a\} \Where B \,a \simeq B \,a \to \Type$ which is closed under identity, inverses and composition of equivalences. The associated functor is:
 \[
 \Op{F}_{A,B,P}\,X \DefEq \sum (a : A) \Where \SetQuot[(B\,a \to X)][\Op{Act} \,P\,a]
 \]
@@ -890,7 +890,7 @@ where the relation $\Op{Act} \,P\,a$ is
 \]
 The type $\Op{F}_{A,B,P}\,X$ is a set whenever the type of shapes $A$ is a set. The functor $\FMSet$ is the instance where $A \DefEq ℕ$, $B \DefEq \Fin$ and $P\,\sigma \DefEq 1$.
 
-We know that the contruction of the final coalgebra as an $\omega$-limit in sets for a general analytic functor $\Op{F}_{A,B,P}$ is problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:InjPresSurjective} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\Op{pres} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ is not generally a split epimorphism, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:InjPresSurjective} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor. 
+We know that the construction of the final coalgebra as an $\omega$-limit in sets for a general analytic functor $\Op{F}_{A,B,P}$ is problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:InjPresSurjective} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\Op{pres} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ is not generally a split epimorphism, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:InjPresSurjective} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor. 
 The employment of these propositions can be seen as the invocation of two specific instances of the axiom of countable choice.
 
 Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A,B,P}$ in groupoids, akin to the functor $\Bag$. First, the small HIT construction of the groupoid of finite types $\Bij$ can be generalized:
@@ -926,7 +926,7 @@ Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A
         \DisplayProof
     \hspace*{\fill}
   \end{center}
-Here $\Op{Prefl}$ and $\Op{Pcomp}$ are the closures of $P$ wrt. identity and composition of equivalences.
+Here $\Op{Prefl}$ and $\Op{Pcomp}$ are the closures of $P$ wrt.\@ identity and composition of equivalences.
 When $B$ is valued in sets, one can also define a function $\langle\Blank\rangle : \Op{U}_{A,B,P} \to \Type$ extracting a type, which for $\Obj a$ is $B\,a$.
 The polynomial functor $\Op{G}_{A,B,P}$ is defined as
 \[
