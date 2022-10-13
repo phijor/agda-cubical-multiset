@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Chains where
 
 open import Cubical.Foundations.Prelude
@@ -109,13 +111,13 @@ module Limit (C : Chain ℓ) where
   universalProperty : (A → ChainLimit) ≃ Cone A
   universalProperty = isoToEquiv universalPropertyIso
 
-mapLimit : {C D : Chain ℓ}
-  → (f : (n : ℕ) → (C .Chain.Ob n) → (D .Chain.Ob n))
-  → Limit.ChainLimit C
-  → Limit.ChainLimit D
-mapLimit f (Limit.lim elements isChainLimit) = Limit.lim
-  (λ n → f n (elements n))
-  λ n → {! cong f!}
+-- mapLimit : {C D : Chain ℓ}
+--   → (f : (n : ℕ) → (C .Chain.Ob n) → (D .Chain.Ob n))
+--   → Limit.ChainLimit C
+--   → Limit.ChainLimit D
+-- mapLimit f (Limit.lim elements isChainLimit) = Limit.lim
+--   (λ n → f n (elements n))
+--   λ n → {! cong f!}
 
 module FunctorChain
   (F : Type ℓ → Type ℓ) (map : {X Y : Type ℓ} → (X → Y) → (F X → F Y))

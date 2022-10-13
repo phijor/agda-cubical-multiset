@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Omniscience where
 
 open import Multiset.Prelude

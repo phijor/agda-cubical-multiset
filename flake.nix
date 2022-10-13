@@ -36,11 +36,12 @@
           buildPhase = ''
             runHook preBuild
 
-            # Build all modules
-            agda ./Multiset/Index.lagda.md
+            # Make sure the README builds with --safe
+            agda --safe README.agda
 
             # Build all modules using extra flags
-            agda ./Multiset/Coinductive.agda
+            # FIXME: Figure out why this fails with 'Cannot set OPTIONS pragma --sized-types with safe flag.'
+            # agda --sized-types ./Multiset/Coinductive.agda
 
             runHook postBuild
           '';

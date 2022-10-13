@@ -1,13 +1,17 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Inductive.Properties where
 
 open import Multiset.Prelude
 open import Multiset.Util using (!_)
-open import Multiset.Util.Logic using
-  ( _xor_
-  ; xorl
-  ; xorr
-  ; isPropXor
-  )
+open import Multiset.Inductive.Base as M
+
+-- open import Multiset.Util.Logic using
+--   ( _xor_
+--   ; xorl
+--   ; xorr
+--   ; isPropXor
+--   )
 
 open import Cubical.Foundations.Id using (ap)
 open import Cubical.Foundations.Equiv
@@ -43,8 +47,6 @@ open import Cubical.Data.Sigma as Sigma
 open import Cubical.Relation.Nullary.Base
   using
   (¬_)
-
-open import Multiset.Inductive.Base as M
 
 record M-Dalg {ℓ : Level} {X : Type} : Type (ℓ-suc ℓ) where
   field
@@ -320,228 +322,228 @@ map-ε {f = f} = ind (λ xs → isPropΠ λ h → isSetM xs ε) empty* singl* un
     map-xs₂ : map f xs₂ ≡ ε
     map-xs₂ = no-zero-divisorsʳ mapH
 
-module _ {ℓ} {X : Type ℓ} where
-  open import Cubical.Relation.Nullary
+-- module _ {ℓ} {X : Type ℓ} where
+--   open import Cubical.Relation.Nullary
 
-  open import Cubical.Data.Sum.Base using (_⊎_)
+--   open import Cubical.Data.Sum.Base using (_⊎_)
 
-  isEmpty : M X → Type ℓ
-  isEmpty xs = xs ≡ ε
+--   isEmpty : M X → Type ℓ
+--   isEmpty xs = xs ≡ ε
 
-  isPropIsEmpty : ∀ {xs} → isProp (isEmpty xs)
-  isPropIsEmpty = isSetM _ _
+--   isPropIsEmpty : ∀ {xs} → isProp (isEmpty xs)
+--   isPropIsEmpty = isSetM _ _
 
-  isSingleton' : M X → Type
-  isSingleton' xs = sizeof xs ≡ 1
+--   isSingleton' : M X → Type
+--   isSingleton' xs = sizeof xs ≡ 1
 
-  isPropIsSingleton' : ∀ {xs} → isProp (isSingleton' xs)
-  isPropIsSingleton' {xs = xs} = ℕ.isSetℕ (sizeof xs) 1
+--   isPropIsSingleton' : ∀ {xs} → isProp (isSingleton' xs)
+--   isPropIsSingleton' {xs = xs} = ℕ.isSetℕ (sizeof xs) 1
 
-  isSingleton : M X → Type ℓ
-  isSingleton = fiber η
+--   isSingleton : M X → Type ℓ
+--   isSingleton = fiber η
 
-  isSingleton₁ : M X → Type ℓ
-  isSingleton₁ xs = ∃[ x ∈ X ] (η x ≡ xs)
+--   isSingleton₁ : M X → Type ℓ
+--   isSingleton₁ xs = ∃[ x ∈ X ] (η x ≡ xs)
 
-  isSingletonElement : ∀ {xs} → isSingleton xs → X
-  isSingletonElement = fst
+--   isSingletonElement : ∀ {xs} → isSingleton xs → X
+--   isSingletonElement = fst
 
-  isSingletonProof : ∀ {xs} → (p : isSingleton xs) → η (isSingletonElement p) ≡ xs
-  isSingletonProof = snd
+--   isSingletonProof : ∀ {xs} → (p : isSingleton xs) → η (isSingletonElement p) ≡ xs
+--   isSingletonProof = snd
 
-  isSingleton'→isSingleton : ∀ {xs} → isSingleton' xs → isSingleton xs
-  isSingleton'→isSingleton {xs = xs} = M.ind {! !} {! !} {! !} {! !} xs
+--   isSingleton'→isSingleton : ∀ {xs} → isSingleton' xs → isSingleton xs
+--   isSingleton'→isSingleton {xs = xs} = M.ind {! !} {! !} {! !} {! !} xs
 
-  isSingleton→isSingleton' : ∀ {xs} → isSingleton xs → isSingleton' xs
-  isSingleton→isSingleton' {xs = xs} (x , p) = cong sizeof (sym p)
+--   isSingleton→isSingleton' : ∀ {xs} → isSingleton xs → isSingleton' xs
+--   isSingleton→isSingleton' {xs = xs} (x , p) = cong sizeof (sym p)
 
-  isSingleton-η : ∀ x → isSingleton (η x)
-  isSingleton-η x = x , refl
+--   isSingleton-η : ∀ x → isSingleton (η x)
+--   isSingleton-η x = x , refl
 
-  ¬isSingleton-ε : ¬ (isSingleton ε)
-  ¬isSingleton-ε = η≢ε ∘ isSingletonProof
+--   ¬isSingleton-ε : ¬ (isSingleton ε)
+--   ¬isSingleton-ε = η≢ε ∘ isSingletonProof
 
-  isContr-η-Path : ∀ {x y : X} → x ≡ y → isContr (η x ≡ η y)
-  isContr-η-Path p = cong η p , isSetM _ _ (cong η p)
+--   isContr-η-Path : ∀ {x y : X} → x ≡ y → isContr (η x ≡ η y)
+--   isContr-η-Path p = cong η p , isSetM _ _ (cong η p)
 
-  isSet→isSetIsSingleton : (isSet X) → ∀ {xs} → isSet (isSingleton xs)
-  isSet→isSetIsSingleton setX {xs = xs} = isSetΣ setX λ x → isProp→isSet (isSetM (η x) xs)
+--   isSet→isSetIsSingleton : (isSet X) → ∀ {xs} → isSet (isSingleton xs)
+--   isSet→isSetIsSingleton setX {xs = xs} = isSetΣ setX λ x → isProp→isSet (isSetM (η x) xs)
 
-  isSet→isPropIsSingleton : (isSet X) → ∀ {xs} → isProp (isSingleton xs)
-  isSet→isPropIsSingleton setX {xs = xs} (x , p) (y , q) = ΣPathP ({! !} , isSet→SquareP (λ i j → isSetM) p q (p ∙ sym q) refl)
-    -- M.ind {P = λ xs → isProp (isSingleton xs)}
-    -- (λ xs → isPropIsProp) (λ { (x , p) (y , q) → {! !} }) (λ { z (x , p) (y , q) → {! !} }) {! !} xs
+--   isSet→isPropIsSingleton : (isSet X) → ∀ {xs} → isProp (isSingleton xs)
+--   isSet→isPropIsSingleton setX {xs = xs} (x , p) (y , q) = ΣPathP ({! !} , isSet→SquareP (λ i j → isSetM) p q (p ∙ sym q) refl)
+--     -- M.ind {P = λ xs → isProp (isSingleton xs)}
+--     -- (λ xs → isPropIsProp) (λ { (x , p) (y , q) → {! !} }) (λ { z (x , p) (y , q) → {! !} }) {! !} xs
 
-  isSet→isSingleton₁≃isSingleton : (isSet X) → ∀ {xs} → isSingleton₁ xs ≃ isSingleton xs
-  isSet→isSingleton₁≃isSingleton setX = {! Σ-cong-equiv!} -- Σ-cong-equiv-snd λ x → PT.propTruncIdempotent≃ {! !}
+--   isSet→isSingleton₁≃isSingleton : (isSet X) → ∀ {xs} → isSingleton₁ xs ≃ isSingleton xs
+--   isSet→isSingleton₁≃isSingleton setX = {! Σ-cong-equiv!} -- Σ-cong-equiv-snd λ x → PT.propTruncIdempotent≃ {! !}
 
-  isSubSingleton : M X → Type ℓ
-  isSubSingleton xs = isEmpty xs ⊎ isSingleton xs
+--   isSubSingleton : M X → Type ℓ
+--   isSubSingleton xs = isEmpty xs ⊎ isSingleton xs
 
-  isSingleton-⊕-xor : ∀ xs ys
-    → isSingleton (xs ⊕ ys)
-    → (isSingleton xs) xor (isSingleton ys)
-  isSingleton-⊕-xor xs ys h = {! !}
+--   isSingleton-⊕-xor : ∀ xs ys
+--     → isSingleton (xs ⊕ ys)
+--     → (isSingleton xs) xor (isSingleton ys)
+--   isSingleton-⊕-xor xs ys h = {! !}
 
-  isPropIsSingleton : ∀ {xs} → isProp (isSingleton xs)
-  isPropIsSingleton {xs = xs} = {! !}
+--   isPropIsSingleton : ∀ {xs} → isProp (isSingleton xs)
+--   isPropIsSingleton {xs = xs} = {! !}
 
-  -- isPropIsSingleton : ∀ {xs} → isProp (isSingleton xs)
-  -- isPropIsSingleton {xs = xs} = isPropRetract isSingleton→isSingleton' isSingleton'→isSingleton {! !} (isPropIsSingleton' {xs = xs})
-    -- ind {P = λ xs → isProp (isSingleton xs)}
-    -- (λ xs → isPropIsProp) empty* {! !} {! !} xs where
+--   -- isPropIsSingleton : ∀ {xs} → isProp (isSingleton xs)
+--   -- isPropIsSingleton {xs = xs} = isPropRetract isSingleton→isSingleton' isSingleton'→isSingleton {! !} (isPropIsSingleton' {xs = xs})
+--     -- ind {P = λ xs → isProp (isSingleton xs)}
+--     -- (λ xs → isPropIsProp) empty* {! !} {! !} xs where
 
-    -- empty* : isProp (isSingleton ε)
-    -- empty* (x , ηx≡ε) (y , _) = Empty.rec (η≢ε ηx≡ε)
+--     -- empty* : isProp (isSingleton ε)
+--     -- empty* (x , ηx≡ε) (y , _) = Empty.rec (η≢ε ηx≡ε)
 
-    -- singl* : ∀ x → isProp (isSingleton (η x))
-    -- singl* x = {! !}
+--     -- singl* : ∀ x → isProp (isSingleton (η x))
+--     -- singl* x = {! !}
   
-  decEmpty : ∀ xs → Dec (isEmpty xs)
-  decEmpty = ind (λ xs → isPropDec isPropIsEmpty) dec-ε dec-η dec-⊕ where
-    dec-ε : Dec (isEmpty ε)
-    dec-ε = yes refl
+--   decEmpty : ∀ xs → Dec (isEmpty xs)
+--   decEmpty = ind (λ xs → isPropDec isPropIsEmpty) dec-ε dec-η dec-⊕ where
+--     dec-ε : Dec (isEmpty ε)
+--     dec-ε = yes refl
 
-    dec-η : ∀ x → Dec (isEmpty (η x))
-    dec-η x = no η≢ε
+--     dec-η : ∀ x → Dec (isEmpty (η x))
+--     dec-η x = no η≢ε
 
-    dec-⊕ : ∀ {xs ys}
-      → Dec (isEmpty xs)
-      → Dec (isEmpty ys)
-      → Dec (isEmpty (xs ⊕ ys))
-    dec-⊕ (yes xs≡ε) (yes ys≡ε) = yes (subst-ε⊕ε≡ε xs≡ε ys≡ε)
-    dec-⊕ (yes _) (no ys≢ε) = no $ ys≢ε ∘ no-zero-divisorsʳ
-    dec-⊕ (no xs≢ε) _ = no $ xs≢ε ∘ no-zero-divisorsˡ
+--     dec-⊕ : ∀ {xs ys}
+--       → Dec (isEmpty xs)
+--       → Dec (isEmpty ys)
+--       → Dec (isEmpty (xs ⊕ ys))
+--     dec-⊕ (yes xs≡ε) (yes ys≡ε) = yes (subst-ε⊕ε≡ε xs≡ε ys≡ε)
+--     dec-⊕ (yes _) (no ys≢ε) = no $ ys≢ε ∘ no-zero-divisorsʳ
+--     dec-⊕ (no xs≢ε) _ = no $ xs≢ε ∘ no-zero-divisorsˡ
   
-  decIsSingleton : ∀ xs → Dec (isSingleton xs)
-  decIsSingleton = ind (λ xs → isPropDec isPropIsSingleton) dec-ε dec-η dec-⊕ where
-    dec-ε : Dec (isSingleton ε)
-    dec-ε = no (η≢ε ∘ snd)
+--   decIsSingleton : ∀ xs → Dec (isSingleton xs)
+--   decIsSingleton = ind (λ xs → isPropDec isPropIsSingleton) dec-ε dec-η dec-⊕ where
+--     dec-ε : Dec (isSingleton ε)
+--     dec-ε = no (η≢ε ∘ snd)
 
-    dec-η : ∀ x → Dec (isSingleton (η x))
-    dec-η x = yes $ isSingleton-η x
+--     dec-η : ∀ x → Dec (isSingleton (η x))
+--     dec-η x = yes $ isSingleton-η x
 
-    dec-⊕ : ∀ {xs ys}
-      → Dec (isSingleton xs)
-      → Dec (isSingleton ys)
-      → Dec (isSingleton (xs ⊕ ys))
-    dec-⊕ (yes (x , ηx≡⊕)) (yes q) = no {!  !}
-    dec-⊕ (yes (x , ηx≡⊕)) (no ¬q) = yes {! !}
-    dec-⊕ (no ¬p) (yes q) = yes {! !}
-    dec-⊕ (no ¬p) (no ¬q) = no {! !}
-
-
-map⁻¹-isSingleton : ∀ {f : X → Y}
-  → (xs : M X)
-  → isSingleton (map f xs)
-  → isSingleton xs
-map⁻¹-isSingleton {X = X} {f = f} = M.ind {P = λ xs → isSingleton (map f xs) → isSingleton xs}
-  (λ xs → isPropΠ λ _ → isPropIsSingleton) empty* singl* {! !} where
-    empty* : isSingleton (map f ε) → _
-    empty* (_ , ηx≡ε) = Empty.elim (η≢ε ηx≡ε)
-
-    singl* : ∀ x → isSingleton (map f (η x)) → isSingleton (η x)
-    singl* x _ = x , refl
-
-    union* : ∀ {xs ys}
-      → (isSingleton (map f xs) → isSingleton xs)
-      → (isSingleton (map f ys) → isSingleton ys)
-      → isSingleton (map f (xs ⊕ ys)) → isSingleton (xs ⊕ ys)
-    union* {xs} {ys} indH-xs indH-ys h = {!h !} where
-      _ = {! isSingleton-⊕-xor (map f xs) (map f ys) h !}
-
-      p : isSingleton (map f xs) xor isSingleton (map f ys)
-        → isSingleton (xs ⊕ ys)
-      p (xorl (singl-xs , ¬singl-ys)) = indH-xs singl-xs .fst , {! indH-xs singl-xs .snd!}
-      p (xorr x) = {! !}
-
-ofSizeOne : ∀ {ℓ} (X : Type ℓ) → Type ℓ
-ofSizeOne X = Σ[ xs ∈ M X ] (sizeof xs ≡ 1)
-
-η-merely-injective : ∀ {x y : X}
-  → η x ≡ η y
-  → ∥ x ≡ y ∥₁
-η-merely-injective {x = x} {y = y} p = {! !}
-
-module _ {ℓ} {X : Type ℓ} (setX : isSet X) where
-
-  ofSizeOne→isSingleton : ∀ {xs : M X}
-    → sizeof xs ≡ 1 → isSingleton xs
-  ofSizeOne→isSingleton {xs = xs} = M.elim {A = λ xs → sizeof xs ≡ 1 → isSingleton xs}
-    (λ xs → isSetΠ λ _ → isSet→isSetIsSingleton setX)
-    (Empty.rec ∘ ℕ.znots) (λ x _ → x , refl) union*
-    {! !} {! !} {! λ _ _ → transportRefl !} xs
-    where
-    module _ {xs ys : M X}
-      (indH-xs : sizeof xs ≡ 1 → Σ[ x ∈ X ] η x ≡ xs)
-      (indH-ys : sizeof ys ≡ 1 → Σ[ y ∈ X ] η y ≡ ys)
-      (p : sizeof (xs ⊕ ys) ≡ 1) where
-
-      size-split : ((sizeof xs ≡ 1) × (sizeof ys ≡ 0)) ⊎ ((sizeof ys ≡ 1) × (sizeof xs ≡ 0))
-      size-split = sumOf1-subsplit p
-
-      left : ((sizeof xs ≡ 1) × (sizeof ys ≡ 0)) → Σ[ x ∈ X ] η x ≡ (xs ⊕ ys)
-      left (singl-xs , empty-ys) = subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym p') (indH-xs singl-xs) where
-        p' : xs ⊕ ys ≡ xs
-        p' = cong (xs ⊕_) (sizeof≡0→ε _ empty-ys) ∙ unit' _
-
-      right : ((sizeof ys ≡ 1) × (sizeof xs ≡ 0)) → Σ[ y ∈ X ] η y ≡ (xs ⊕ ys)
-      right (singl-ys , empty-xs) = subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym q') (indH-ys singl-ys) where
-        q' : xs ⊕ ys ≡ ys
-        q' = cong (_⊕ ys) (sizeof≡0→ε _ empty-xs) ∙ unit _
-
-      union* : Σ[ z ∈ X ] η z ≡ xs ⊕ ys
-      union* = Sum.elim left right size-split
+--     dec-⊕ : ∀ {xs ys}
+--       → Dec (isSingleton xs)
+--       → Dec (isSingleton ys)
+--       → Dec (isSingleton (xs ⊕ ys))
+--     dec-⊕ (yes (x , ηx≡⊕)) (yes q) = no {!  !}
+--     dec-⊕ (yes (x , ηx≡⊕)) (no ¬q) = yes {! !}
+--     dec-⊕ (no ¬p) (yes q) = yes {! !}
+--     dec-⊕ (no ¬p) (no ¬q) = no {! !}
 
 
-    unit* : ∀ {xs : M X}
-      → (P : sizeof xs ≡ 1 → isSingleton xs)
-      → PathP (λ i → sizeof (unit xs i) ≡ 1 → isSingleton (unit xs i)) (union* (λ x → Empty.rec (ℕ.znots x)) P) P
-    unit* {xs = xs} P = symP {A = λ i → sizeof (unit xs i) ≡ 1 → isSingleton (unit xs i)} (subst-filler (λ xs → sizeof xs ≡ 1 → isSingleton xs) (sym $ unit xs) P ▷ {! (sym $ funExt step) !}) where
-      module _ (q : sizeof xs ≡ 1) where
-        bar : sumOf1-subsplit q ≡ Sum.inr (q , refl)
-        bar = refl
+-- map⁻¹-isSingleton : ∀ {f : X → Y}
+--   → (xs : M X)
+--   → isSingleton (map f xs)
+--   → isSingleton xs
+-- map⁻¹-isSingleton {X = X} {f = f} = M.ind {P = λ xs → isSingleton (map f xs) → isSingleton xs}
+--   (λ xs → isPropΠ λ _ → isPropIsSingleton) empty* singl* {! !} where
+--     empty* : isSingleton (map f ε) → _
+--     empty* (_ , ηx≡ε) = Empty.elim (η≢ε ηx≡ε)
 
-        foo : union* (Empty.rec ∘ ℕ.znots) P q ≡ subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym (refl ∙ unit _)) (P q)
-        foo = refl
+--     singl* : ∀ x → isSingleton (map f (η x)) → isSingleton (η x)
+--     singl* x _ = x , refl
 
-        step : _ ≡ _
-        step =
-          union* (Empty.rec ∘ ℕ.znots) P q ≡⟨⟩
-          subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym (refl ∙ unit _)) (P q) ≡⟨ cong (λ r → subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym r) (P q)) (sym $ lUnit (unit _)) ⟩
-          subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym (unit _)) (P q) ∎
+--     union* : ∀ {xs ys}
+--       → (isSingleton (map f xs) → isSingleton xs)
+--       → (isSingleton (map f ys) → isSingleton ys)
+--       → isSingleton (map f (xs ⊕ ys)) → isSingleton (xs ⊕ ys)
+--     union* {xs} {ys} indH-xs indH-ys h = {!h !} where
+--       _ = {! isSingleton-⊕-xor (map f xs) (map f ys) h !}
 
-  η-injective : ∀ {x y : X}
-    → η x ≡ η y
-    → x ≡ y
-  η-injective p =
-    {! !}
+--       p : isSingleton (map f xs) xor isSingleton (map f ys)
+--         → isSingleton (xs ⊕ ys)
+--       p (xorl (singl-xs , ¬singl-ys)) = indH-xs singl-xs .fst , {! indH-xs singl-xs .snd!}
+--       p (xorr x) = {! !}
 
-map-η′ : ∀ {f : X → Y}
-  → (xs : M X)
-  → (y : Y)
-  → map f xs ≡ η y
-  → ∃[ x ∈ X ] (xs ≡ η x)
-map-η′ {X = X} {f = f} = M.ind {P = P} isPropP
-  empty* singl* {! !} where
-  P : M X → Type _
-  P xs = ∀ y → map f xs ≡ η y → ∃[ x ∈ X ] xs ≡ η x
+-- ofSizeOne : ∀ {ℓ} (X : Type ℓ) → Type ℓ
+-- ofSizeOne X = Σ[ xs ∈ M X ] (sizeof xs ≡ 1)
 
-  isPropP = λ xs → isPropΠ2 λ y h → isPropPropTrunc
+-- η-merely-injective : ∀ {x y : X}
+--   → η x ≡ η y
+--   → ∥ x ≡ y ∥₁
+-- η-merely-injective {x = x} {y = y} p = {! !}
 
-  empty* : ∀ y → ε ≡ η y → _
-  empty* y = Empty.elim ∘ η≢ε ∘ sym
+-- module _ {ℓ} {X : Type ℓ} (setX : isSet X) where
 
-  singl* : ∀ x y → map f (η x) ≡ η y → ∃[ x′ ∈ X ] η x ≡ η x′
-  singl* x y h = ∣ x , refl ∣₁
+--   ofSizeOne→isSingleton : ∀ {xs : M X}
+--     → sizeof xs ≡ 1 → isSingleton xs
+--   ofSizeOne→isSingleton {xs = xs} = M.elim {A = λ xs → sizeof xs ≡ 1 → isSingleton xs}
+--     (λ xs → isSetΠ λ _ → isSet→isSetIsSingleton setX)
+--     (Empty.rec ∘ ℕ.znots) (λ x _ → x , refl) union*
+--     {! !} {! !} {! λ _ _ → transportRefl !} xs
+--     where
+--     module _ {xs ys : M X}
+--       (indH-xs : sizeof xs ≡ 1 → Σ[ x ∈ X ] η x ≡ xs)
+--       (indH-ys : sizeof ys ≡ 1 → Σ[ y ∈ X ] η y ≡ ys)
+--       (p : sizeof (xs ⊕ ys) ≡ 1) where
 
-  union* : ∀ {xs₁ xs₂}
-    → P xs₁
-    → P xs₂
-    → ∀ y → map f (xs₁ ⊕ xs₂) ≡ η y → ∃[ x ∈ X ] xs₁ ⊕ xs₂ ≡ η x
-  union* indH-xs₁ indH-xs₂ y h = PT.map2 {! !} {! !} {! !} where
+--       size-split : ((sizeof xs ≡ 1) × (sizeof ys ≡ 0)) ⊎ ((sizeof ys ≡ 1) × (sizeof xs ≡ 0))
+--       size-split = sumOf1-subsplit p
 
-    _ = {! PT.rec ?  !}
+--       left : ((sizeof xs ≡ 1) × (sizeof ys ≡ 0)) → Σ[ x ∈ X ] η x ≡ (xs ⊕ ys)
+--       left (singl-xs , empty-ys) = subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym p') (indH-xs singl-xs) where
+--         p' : xs ⊕ ys ≡ xs
+--         p' = cong (xs ⊕_) (sizeof≡0→ε _ empty-ys) ∙ unit' _
+
+--       right : ((sizeof ys ≡ 1) × (sizeof xs ≡ 0)) → Σ[ y ∈ X ] η y ≡ (xs ⊕ ys)
+--       right (singl-ys , empty-xs) = subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym q') (indH-ys singl-ys) where
+--         q' : xs ⊕ ys ≡ ys
+--         q' = cong (_⊕ ys) (sizeof≡0→ε _ empty-xs) ∙ unit _
+
+--       union* : Σ[ z ∈ X ] η z ≡ xs ⊕ ys
+--       union* = Sum.elim left right size-split
+
+
+--     unit* : ∀ {xs : M X}
+--       → (P : sizeof xs ≡ 1 → isSingleton xs)
+--       → PathP (λ i → sizeof (unit xs i) ≡ 1 → isSingleton (unit xs i)) (union* (λ x → Empty.rec (ℕ.znots x)) P) P
+--     unit* {xs = xs} P = symP {A = λ i → sizeof (unit xs i) ≡ 1 → isSingleton (unit xs i)} (subst-filler (λ xs → sizeof xs ≡ 1 → isSingleton xs) (sym $ unit xs) P ▷ {! (sym $ funExt step) !}) where
+--       module _ (q : sizeof xs ≡ 1) where
+--         bar : sumOf1-subsplit q ≡ Sum.inr (q , refl)
+--         bar = refl
+
+--         foo : union* (Empty.rec ∘ ℕ.znots) P q ≡ subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym (refl ∙ unit _)) (P q)
+--         foo = refl
+
+--         step : _ ≡ _
+--         step =
+--           union* (Empty.rec ∘ ℕ.znots) P q ≡⟨⟩
+--           subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym (refl ∙ unit _)) (P q) ≡⟨ cong (λ r → subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym r) (P q)) (sym $ lUnit (unit _)) ⟩
+--           subst (λ zs → Σ[ x ∈ X ] η x ≡ zs) (sym (unit _)) (P q) ∎
+
+--   η-injective : ∀ {x y : X}
+--     → η x ≡ η y
+--     → x ≡ y
+--   η-injective p =
+--     {! !}
+
+-- map-η′ : ∀ {f : X → Y}
+--   → (xs : M X)
+--   → (y : Y)
+--   → map f xs ≡ η y
+--   → ∃[ x ∈ X ] (xs ≡ η x)
+-- map-η′ {X = X} {f = f} = M.ind {P = P} isPropP
+--   empty* singl* {! !} where
+--   P : M X → Type _
+--   P xs = ∀ y → map f xs ≡ η y → ∃[ x ∈ X ] xs ≡ η x
+
+--   isPropP = λ xs → isPropΠ2 λ y h → isPropPropTrunc
+
+--   empty* : ∀ y → ε ≡ η y → _
+--   empty* y = Empty.elim ∘ η≢ε ∘ sym
+
+--   singl* : ∀ x y → map f (η x) ≡ η y → ∃[ x′ ∈ X ] η x ≡ η x′
+--   singl* x y h = ∣ x , refl ∣₁
+
+--   union* : ∀ {xs₁ xs₂}
+--     → P xs₁
+--     → P xs₂
+--     → ∀ y → map f (xs₁ ⊕ xs₂) ≡ η y → ∃[ x ∈ X ] xs₁ ⊕ xs₂ ≡ η x
+--   union* indH-xs₁ indH-xs₂ y h = PT.map2 {! !} {! !} {! !} where
+
+--     _ = {! PT.rec ?  !}
 
 module _ where
   open import Cubical.Data.Vec.Base as Vec
@@ -556,25 +558,15 @@ module _ where
   fromList : List X → M X
   fromList = List.foldr M._∷_ ε
 
-module _ where
-  open import Multiset.OverSet as FMSet
-    using (FMSet)
+-- module _ where
+--   open import Multiset.OverSet as FMSet
+--     using (FMSet)
 
-  toFMSet : M X → FMSet X
-  toFMSet = M.elim (λ xs → FMSet.isSetFMSet) FMSet.[] FMSet.[_] FMSet._++_ {! !} {! !} {! !}
+--   toFMSet : M X → FMSet X
+--   toFMSet = M.elim (λ xs → FMSet.isSetFMSet) FMSet.[] FMSet.[_] FMSet._++_ {! !} {! !} {! !}
 
-  fromFMSet : FMSet X → M X
-  fromFMSet = FMSet.∷-elim (λ xs → isSetM) ε (λ x → x ∷_) λ x y {_} {xs} → ∷-swap x y xs
-
-module Choice where
-
-  countable : ∀ {A : ℕ → Type ℓ}
-    → (setA : ∀ n → isSet (A n))
-    → (f : (n : ℕ) → M (A n))
-    → M (∀ n → A n)
-  countable {A = A} setA f = {! !} where
-    setA' : isOfHLevelDep 2 A
-    setA' = isOfHLevel→isOfHLevelDep 2 setA
+--   fromFMSet : FMSet X → M X
+--   fromFMSet = FMSet.∷-elim (λ xs → isSetM) ε (λ x → x ∷_) λ x y {_} {xs} → ∷-swap x y xs
 
 map-id : ∀ {ℓ} {X : Type ℓ} (s : M X)
   → map (λ x → x) s ≡ s

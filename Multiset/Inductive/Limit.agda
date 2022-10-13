@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Inductive.Limit where
 
 open import Multiset.Prelude
@@ -5,7 +7,7 @@ open import Multiset.Util using (!_ ; isInjective ; isSurjective)
 
 open import Multiset.Inductive.Base as M
 open import Multiset.Inductive.Properties as M
-open import Multiset.Inductive.Logic as M
+open import Multiset.Inductive.Logic as M using (_∈_)
 
 open import Multiset.Chains
 open import Multiset.Chains.FunctorChain
@@ -92,8 +94,8 @@ module _ where
 
   zip₁-islim : (xs : M (Lim M)) → isShLim M (zip₁ xs)
   zip₁-islim = ind {P = λ xs → isShLim M (zip₁ xs)}
-    (λ xs → isPropΠ λ n → isSetM _ _)
-    empty* singl* union* where
+    (λ xs → isPropΠ λ n → isSetM (!^ (suc n) (zip₁ xs (suc n))) (zip₁ xs n))
+    empty* singl* λ {xs} {ys} → (union* xs ys) where
 
     empty* : ∀ n → ε ≡ ε
     empty* _ = refl
@@ -102,23 +104,15 @@ module _ where
     singl* x n = cong η (x .isChainLimit n)
 
     union*
-      : ∀ {xs ys : M (Lim M)}
+      : ∀ (xs ys : M (Lim M))
       → isShLim M (zip₁ xs)
       → isShLim M (zip₁ ys)
       → isShLim M (zip₁ (xs ⊕ ys))
-    union* indH-xs indH-ys n = cong₂ _⊕_ (indH-xs n) (indH-ys n)
+    union* _ _ indH-xs indH-ys n = cong₂ _⊕_ (indH-xs n) (indH-ys n)
 
 zip : M (Lim M) → ShLim M
 zip xs .Limit.ChainLimit.elements = zip₁ xs
 zip xs .Limit.ChainLimit.isChainLimit = zip₁-islim xs
-
-isSurjectiveZip : isSurjective zip
-isSurjectiveZip sh = unzipped , unzipped-proof where
-  unzipped : M (Lim M)
-  unzipped = {! !}
-
-  unzipped-proof : zip unzipped ≡ sh
-  unzipped-proof = {! !}
 
 infixr 6 _⊎₁_
 _⊎₁_ : ∀ {ℓ ℓ'} → (A : Type ℓ) → (B : Type ℓ') → Type (ℓ-max ℓ ℓ')
@@ -148,6 +142,23 @@ isPropComplete : isProp Complete
 isPropComplete =
   isPropImplicitΠ2 λ _ _ → isPropImplicitΠ λ _ → isPropΠ3 λ _ _ _ → PT.isPropPropTrunc
 
+diag-ysᶜ-islim-alternating : ∀ {n} {a b : Lim M}
+  → (x : Lim M)
+  → (ys : ℕ → Lim M)
+  → (∀ n → cut n x ≡ diag ys n)
+  → (ys n ≡ a)
+  → (ys (suc n) ≡ b)
+  → !^ n (cut (suc n) a) ≡ cut n b
+diag-ysᶜ-islim-alternating {n = n} {a} {b} x ys q ysₙ≡a ysₙ₊₁≡b =
+  !^ n (cut (suc n) a)   ≡⟨ a .isChainLimit n ⟩
+  cut n a                ≡⟨ cong (cut n) (sym ysₙ≡a) ⟩
+  diag ys n              ≡⟨ sym (q n) ⟩
+  cut n x                ≡⟨ sym (x .isChainLimit n) ⟩
+  !^ n (cut (suc n) x)   ≡⟨ cong (!^ n) (q (suc n)) ⟩
+  !^ n (diag ys (suc n)) ≡⟨ cong (!^ n ∘ cut (suc n)) ysₙ₊₁≡b ⟩
+  !^ n (cut (suc n) b)   ≡⟨ b .isChainLimit n ⟩
+  cut n b ∎
+
 zip-inj⇒complete : isInjective zip → Complete
 zip-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
 
@@ -159,25 +170,11 @@ zip-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
   ... | inl ysₙ≡y₁ = cong ⟅_, y₂ ⟆ ysₙ≡y₁
   ... | inr ysₙ≡y₂ = cong ⟅_, y₁ ⟆ ysₙ≡y₂ ∙ ⟅,⟆-comm y₂ y₁
 
-  diag-ysᶜ-islim-alternating : ∀ {n} {a b : Lim M}
-    → (ys n ≡ a)
-    → (ys (suc n) ≡ b)
-    → !^ n (cut (suc n) a) ≡ cut n b
-  diag-ysᶜ-islim-alternating {n = n} {a} {b} ysₙ≡a ysₙ₊₁≡b =
-    !^ n (cut (suc n) a)   ≡⟨ a .isChainLimit n ⟩
-    cut n a                ≡⟨ cong (cut n) (sym ysₙ≡a) ⟩
-    diag ys n              ≡⟨ sym (q n) ⟩
-    cut n x                ≡⟨ sym (x .isChainLimit n) ⟩
-    !^ n (cut (suc n) x)   ≡⟨ cong (!^ n) (q (suc n)) ⟩
-    !^ n (diag ys (suc n)) ≡⟨ cong (!^ n ∘ cut (suc n)) ysₙ₊₁≡b ⟩
-    !^ n (cut (suc n) b)   ≡⟨ b .isChainLimit n ⟩
-    cut n b ∎
-
   diag-ysᶜ-islim : ∀ n → !^ n (diag ysᶜ (suc n)) ≡ diag ysᶜ n
   diag-ysᶜ-islim n with (p (suc n)) | (p n)
   ... | inl ysₙ₊₁≡y₁ | inl ysₙ≡y₁ = y₂ .isChainLimit n
-  ... | inl ysₙ₊₁≡y₁ | inr ysₙ≡y₂ = diag-ysᶜ-islim-alternating ysₙ≡y₂ ysₙ₊₁≡y₁
-  ... | inr ysₙ₊₁≡y₂ | inl ysₙ≡y₁ = diag-ysᶜ-islim-alternating ysₙ≡y₁ ysₙ₊₁≡y₂
+  ... | inl ysₙ₊₁≡y₁ | inr ysₙ≡y₂ = diag-ysᶜ-islim-alternating x ys q ysₙ≡y₂ ysₙ₊₁≡y₁
+  ... | inr ysₙ₊₁≡y₂ | inl ysₙ≡y₁ = diag-ysᶜ-islim-alternating x ys q ysₙ≡y₁ ysₙ₊₁≡y₂
   ... | inr ysₙ₊₁≡y₂ | inr ysₙ≡y₂ = y₁ .isChainLimit n
 
   xᶜ : Lim M
@@ -208,6 +205,7 @@ zip-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
     x∈⟅y₁,y₂⟆ : x ∈ ⟅ y₁ , y₂ ⟆
     x∈⟅y₁,y₂⟆ = subst (x ∈_) diags-pair-path x∈⟅x,xᶜ⟆
 
+{-
 long : (n : ℕ) → M ^ n
 long zero = tt
 long (suc n) = η (long n)
@@ -291,3 +289,4 @@ zip-complete⇒LLPO complete a true? = PT.map (Sum.map-⊎ case₁ {! !})
   case₁ p n with a 0
   ... | false = {! !}
   ... | true = {! cong (cut n) p!}
+-}

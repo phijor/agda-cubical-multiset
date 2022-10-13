@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.AxiomChoice where
 
 open import Cubical.Core.Everything
@@ -90,7 +92,7 @@ SectionIsProp : ∀ A {B} (R : B → B → Type)
   → (f : A → B / R)
   → isProp (Σ ([ A ⇒ B ]/ R) (λ g → θ A R g ≡ f))
 SectionIsProp A R Rprop Reqr f (g , eq) (g' , eq') =
-  Σ≡Prop (λ _ → {! isPropFunEq _ _ λ _ → squash/ _ _ !})
+  Σ≡Prop (λ _ → isOfHLevelPathP' 1 (isSetΠ λ _ → squash/) _ f)
     (SectionIsProp' A R Rprop Reqr f g g' eq eq')
 
 module _ (θInv : ∀ A {B} (R : B → B → Type) → (A → B / R) → [ A ⇒ B ]/ R)
@@ -98,7 +100,7 @@ module _ (θInv : ∀ A {B} (R : B → B → Type) → (A → B / R) → [ A ⇒
 
   ac' : ∀ (A : Type) {B : Type} (R : B → B → Type)
     → (f : (A → B) / PW R) → ∃[ g ∈ (A → B) ] [_] ∘ g ≡ θ A R f
-  ac' A R = elimProp (λ _ → {! propTruncIsProp !}) (λ g → ∣ g , refl ∣₁)
+  ac' A R = elimProp (λ _ → isPropPropTrunc) (λ g → ∣ g , refl ∣₁)
 
   ac : ∀ (A : Type) {B : Type} (R : B → B → Type)
     → (f : A → B / R) → ∃[ g ∈ (A → B) ] [_] ∘ g ≡ f

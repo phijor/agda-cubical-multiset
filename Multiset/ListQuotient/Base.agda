@@ -1,5 +1,6 @@
+{-# OPTIONS --safe #-}
 
-module Multiset.Coinductive.ListStuff where
+module Multiset.ListQuotient.Base where
 
 open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude

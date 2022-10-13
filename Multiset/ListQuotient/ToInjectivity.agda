@@ -1,7 +1,10 @@
-module Multiset.Coinductive.ToInjectivity where
+{-# OPTIONS --safe #-}
+
+module Multiset.ListQuotient.ToInjectivity where
 
 open import Multiset.Prelude
 open import Multiset.Util using (!_ ; isInjective ; isSurjective)
+open import Multiset.ListQuotient.Base
 
 open import Multiset.Chains
 open import Multiset.Chains.FunctorChain
@@ -20,8 +23,7 @@ open import Cubical.Data.Sigma as Sigma
 open import Cubical.Data.Sum as Sum using (_⊎_ ; inl ; inr)
 open import Cubical.Data.Nat.Base hiding (_^_)
 open import Cubical.Data.Nat.Order as NatOrder
-open import Cubical.Data.Bool --.Base as Bool
---  using (Bool ; if_then_else_ ; true ; false ; _and_ ; not; _or_)
+open import Cubical.Data.Bool
 
 open import Cubical.Relation.Nullary
 
@@ -32,8 +34,6 @@ open import Cubical.HITs.PropositionalTruncation as PT
     )
 
 open import Cubical.HITs.SetQuotients as ST
-
-open import Multiset.Coinductive.ListStuff
 
 instance
   FunctorM : Functor M
@@ -352,7 +352,3 @@ llpo⇒zip-inj llpo =
             (λ { (y , p , r) →
               J (λ z _ → Σ (z ∈ map (cut n) ys) (λ m → DRelator _≡_ (map (cut n) xs) (remove (map (cut n) ys) m))) r (sym p) })
             (consInvDRelator (drel n))
-
-
-
-    

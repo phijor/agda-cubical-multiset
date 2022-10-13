@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Inductive.Base where
 
 open import Multiset.Prelude
@@ -170,18 +172,18 @@ m ∷ʳ x = m ⊕ η x
   y ∷ x ∷ zs ≡⟨ cong (y ∷_) ys-split ⟩
   y ∷ ys ∎
   
-∷-elim : {B : M X → Type ℓ'}
-  → (setB : ∀ m → isSet (B m))
-  → (nil : B ε)
-  → (cons : (x : X) → {xs : M X} → B xs → B (x ∷ xs))
-  → (swap : (x y : X) → {xs : M X} → {b : B xs} → PathP (λ i → B (∷-swap x y xs i)) (cons x (cons y b)) (cons y (cons x b)))
-  → (xs : M X) → B xs
-∷-elim {B = B} setB nil cons swap = elim setB nil η* _⊕*_ {! !} {! !} {! !} where
-  η* : ∀ x → B (η x)
-  η* x = subst B (unit' (η x)) (cons x nil)
+-- ∷-elim : {B : M X → Type ℓ'}
+--   → (setB : ∀ m → isSet (B m))
+--   → (nil : B ε)
+--   → (cons : (x : X) → {xs : M X} → B xs → B (x ∷ xs))
+--   → (swap : (x y : X) → {xs : M X} → {b : B xs} → PathP (λ i → B (∷-swap x y xs i)) (cons x (cons y b)) (cons y (cons x b)))
+--   → (xs : M X) → B xs
+-- ∷-elim {B = B} setB nil cons swap = elim setB nil η* _⊕*_ {! !} {! !} {! !} where
+--   η* : ∀ x → B (η x)
+--   η* x = subst B (unit' (η x)) (cons x nil)
 
-  _⊕*_ : ∀ {xs ys} → B xs → B ys → B (xs ⊕ ys)
-  b-xs ⊕* b-ys = {! !}
+--   _⊕*_ : ∀ {xs ys} → B xs → B ys → B (xs ⊕ ys)
+--   b-xs ⊕* b-ys = {! !}
 
 module _ where
   open import Cubical.Data.Nat as ℕ using (ℕ)

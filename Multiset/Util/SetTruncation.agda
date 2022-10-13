@@ -1,7 +1,10 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Util.SetTruncation where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Function
   using
     ( _∘_
@@ -99,17 +102,19 @@ map2IdRight : ∀ {ℓw} {W : Type ℓw}
   → map2 (λ x w → x) x w ≡ x
 map2IdRight = ST.elim2 (λ _ _ → ST.isSetPathImplicit) (λ _ _ → refl)
 
+setTruncIso : {A : Type ℓ} {B : Type ℓ'}
+  → Iso A B
+  → Iso ∥ A ∥₂ ∥ B ∥₂
+setTruncIso {A = A} {B = B} isom = ∥isom∥ where
+  open Iso
+
+  ∥isom∥ : Iso _ _
+  fun ∥isom∥ = ST.map (isom .fun)
+  inv ∥isom∥ = ST.map (isom .inv)
+  rightInv ∥isom∥ = ST.elim (λ _ → isProp→isSet (ST.squash₂ _ _)) (cong ∣_∣₂ ∘ isom .rightInv)
+  leftInv ∥isom∥ = ST.elim (λ _ → isProp→isSet (ST.squash₂ _ _)) (cong ∣_∣₂ ∘ isom .leftInv)
+
 setTruncEquiv : {A : Type ℓ} {B : Type ℓ'}
   → A ≃ B
   → ∥ A ∥₂ ≃ ∥ B ∥₂
-setTruncEquiv {A = A} {B = B} e = ST.map (equivFun e) , is-equiv where
-  center : ∥ B ∥₂ → ∥ A ∥₂
-  center = ST.map (invEq e)
-
-  contr : ∀ ∣b∣ → ST.map (equivFun e) (ST.map (invEq e) ∣b∣) ≡ ∣b∣
-  contr = ST.elim
-    (λ ∣b∣ → isProp→isSet (isSetSetTrunc (ST.map (equivFun e) (ST.map (invEq e) ∣b∣)) ∣b∣))
-    (λ a → cong ∣_∣₂ (secEq e a))
-
-  is-equiv : isEquiv (ST.map (equivFun e))
-  is-equiv .equiv-proof = λ { ∣b∣ → (center ∣b∣ , contr ∣b∣) , {! ΣPathP!} }
+setTruncEquiv {A = A} {B = B} e = isoToEquiv (setTruncIso (equivToIso e))

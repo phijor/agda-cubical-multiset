@@ -20,7 +20,7 @@ open import Cubical.Relation.Binary
 open BinaryRelation
 open isEquivRel
 
-open import Multiset.Coinductive.ListStuff
+open import Multiset.ListQuotient.Base
 
 -- non-wellfounded trees with finite ordered branching
 record Tree (i : Size) : Type where

@@ -1,3 +1,4 @@
+{-# OPTIONS --safe #-}
 
 module Multiset.Ordering.Order where
 
@@ -13,7 +14,7 @@ open BinaryRelation
 open isEquivRel
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum as Sum
-open import Multiset.Coinductive.ListStuff hiding (M)
+open import Multiset.ListQuotient.Base hiding (M)
 
 -- ====================================================================
 

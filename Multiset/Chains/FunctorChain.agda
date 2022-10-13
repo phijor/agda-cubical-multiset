@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Chains.FunctorChain where
 
 open import Multiset.Prelude

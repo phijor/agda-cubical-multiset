@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.OverGroupoid.Base where
 
 open import Cubical.Foundations.Prelude

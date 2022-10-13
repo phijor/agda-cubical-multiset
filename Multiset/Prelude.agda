@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Prelude where
 
 open import Cubical.Foundations.Prelude

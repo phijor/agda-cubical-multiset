@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.OverSet where
 
 open import Multiset.OverSet.Base public

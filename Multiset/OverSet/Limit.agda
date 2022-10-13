@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.OverSet.Limit where
 
 open import Multiset.Prelude

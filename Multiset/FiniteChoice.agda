@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.FiniteChoice where
 
 open import Multiset.Util using (Π⊥≡elim ; isPropΠ⊥)

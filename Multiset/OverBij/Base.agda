@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.OverBij.Base where
 
 open import Multiset.Bij as Bij

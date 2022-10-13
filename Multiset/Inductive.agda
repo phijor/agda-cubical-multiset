@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Inductive where
 
 open import Multiset.Inductive.Base public

@@ -1,4 +1,4 @@
 name: multiset
 depend: cubical
 include: .
-flags: --cubical --allow-unsolved-metas -vprofile:7 -vprofile.definitions:10
+flags: --cubical -vprofile:7 -vprofile.definitions:10

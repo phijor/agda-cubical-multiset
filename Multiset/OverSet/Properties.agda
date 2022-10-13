@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.OverSet.Properties where
 
 open import Multiset.Prelude
@@ -364,49 +366,49 @@ FMSetContr≃ℕ {X = X} contrX = Sigma.Σ-contractSnd contrMembers/∼ where
         (λ _ → isSetSetQuotient _ _)
         λ (y : Fin sz → X) → cong [_]₂ (contrMembers .snd y)
 
-∷-elim : {B : FMSet X → Type ℓ'}
-  → (setB : ∀ m → isSet (B m))
-  → (nil : B [])
-  → (cons : (x : X) → {xs : FMSet X} → B xs → B (x ∷ xs))
-  → (comm : (x y : X) → {xs : FMSet X} → {b : B xs} → PathP (λ i → B (∷-comm x y xs i)) (cons x (cons y b)) (cons y (cons x b)))
-  → (m : FMSet X) → B m
-∷-elim {X = X} {B = B} setB nil cons comm = elimSet {B = B} setB fun well-defined where
-  fun : ∀ {sz} (v : Fin sz → X) → B (sz , [ v ]₂)
-  fun {zero} v = subst (λ v → B (0 , [ v ]₂)) (Π⊥≡elim v) nil
-  fun {suc sz} v = subst (λ v → B (suc sz , [ v ]₂)) p rec₂ where
-    rec₁ : B (sz , [ v ∘ fsuc ]₂)
-    rec₁ = fun (v ∘ fsuc)
+-- ∷-elim : {B : FMSet X → Type ℓ'}
+--   → (setB : ∀ m → isSet (B m))
+--   → (nil : B [])
+--   → (cons : (x : X) → {xs : FMSet X} → B xs → B (x ∷ xs))
+--   → (comm : (x y : X) → {xs : FMSet X} → {b : B xs} → PathP (λ i → B (∷-comm x y xs i)) (cons x (cons y b)) (cons y (cons x b)))
+--   → (m : FMSet X) → B m
+-- ∷-elim {X = X} {B = B} setB nil cons comm = elimSet {B = B} setB fun well-defined where
+--   fun : ∀ {sz} (v : Fin sz → X) → B (sz , [ v ]₂)
+--   fun {zero} v = subst (λ v → B (0 , [ v ]₂)) (Π⊥≡elim v) nil
+--   fun {suc sz} v = subst (λ v → B (suc sz , [ v ]₂)) p rec₂ where
+--     rec₁ : B (sz , [ v ∘ fsuc ]₂)
+--     rec₁ = fun (v ∘ fsuc)
 
-    rec₂ : B (v fzero ∷ (sz , [ v ∘ fsuc ]₂))
-    rec₂ = cons (v fzero) rec₁
+--     rec₂ : B (v fzero ∷ (sz , [ v ∘ fsuc ]₂))
+--     rec₂ = cons (v fzero) rec₁
 
-    p : (v fzero ∷ᶠ v ∘ fsuc) ≡ v
-    p = ∷ᶠ-β v
+--     p : (v fzero ∷ᶠ v ∘ fsuc) ≡ v
+--     p = ∷ᶠ-β v
 
-  well-defined : ∀ {sz} (v w : Fin sz → X) (r : v ∼ w)
-    → PathP (λ i → B (sz , eq/₂ v w r i)) (fun v) (fun w)
-  well-defined {zero} v w = PT.elim (λ r p q → isSet→SquareP (λ i j → setB _) p q _ _) {! subst-filler (λ v → B (0 , [ v ]₂)) (Π⊥≡elim v) nil !}
-  well-defined {suc sz} v w = PT.elim (λ r p q → isSet→SquareP (λ i j → setB _) p q _ _) {! !}
+--   well-defined : ∀ {sz} (v w : Fin sz → X) (r : v ∼ w)
+--     → PathP (λ i → B (sz , eq/₂ v w r i)) (fun v) (fun w)
+--   well-defined {zero} v w = PT.elim (λ r p q → isSet→SquareP (λ i j → setB _) p q _ _) {! subst-filler (λ v → B (0 , [ v ]₂)) (Π⊥≡elim v) nil !}
+--   well-defined {suc sz} v w = PT.elim (λ r p q → isSet→SquareP (λ i j → setB _) p q _ _) {! !}
 
-∷-elimProp : ∀ {P : FMSet X → Type ℓ'}
-  → (propP : ∀ xs → isProp (P xs))
-  → (nil : P [])
-  → (cons : (x : X) → {xs : FMSet X} → P xs → P (x ∷ xs))
-  → (m : FMSet X) → P m
-∷-elimProp {P = P} propP nil cons = ∷-elim {B = P} (isProp→isSet ∘ propP) nil cons comm where
-  comm = λ x y {xs} {p} → isProp→PathP (λ i → propP _) (cons x (cons y p)) (cons y (cons x p))
+-- ∷-elimProp : ∀ {P : FMSet X → Type ℓ'}
+--   → (propP : ∀ xs → isProp (P xs))
+--   → (nil : P [])
+--   → (cons : (x : X) → {xs : FMSet X} → P xs → P (x ∷ xs))
+--   → (m : FMSet X) → P m
+-- ∷-elimProp {P = P} propP nil cons = ∷-elim {B = P} (isProp→isSet ∘ propP) nil cons comm where
+--   comm = λ x y {xs} {p} → isProp→PathP (λ i → propP _) (cons x (cons y p)) (cons y (cons x p))
 
-_++_ : FMSet X → FMSet X → FMSet X
-_++_ = ∷-elim (λ xs → isSetΠ λ ys → isSetFMSet)
-  (λ ys → ys)
-  (λ x xs++_ ys → x ∷ (xs++ ys))
-  λ x y {xs} {xs++_} → funExt (∷-comm x y ∘ xs++_)
+-- _++_ : FMSet X → FMSet X → FMSet X
+-- _++_ = ∷-elim (λ xs → isSetΠ λ ys → isSetFMSet)
+--   (λ ys → ys)
+--   (λ x xs++_ ys → x ∷ (xs++ ys))
+--   λ x y {xs} {xs++_} → funExt (∷-comm x y ∘ xs++_)
 
 
-map-head : ∀ {ℓ'} {Y : Type ℓ'} {x} {xs}
-  → (f : X → Y)
-  → map f (x ∷ xs) ≡ f x ∷ map f xs
-map-head {x = x} {xs = xs} f = FMSetPathP (refl {x = suc (size xs)}) {! !}
+-- map-head : ∀ {ℓ'} {Y : Type ℓ'} {x} {xs}
+--   → (f : X → Y)
+--   → map f (x ∷ xs) ≡ f x ∷ map f xs
+-- map-head {x = x} {xs = xs} f = FMSetPathP (refl {x = suc (size xs)}) {! !}
   -- ∷-elimProp {P = λ xs → map f (x ∷ xs) ≡ f x ∷ map f xs} (λ xs → isSetFMSet _ _) nil* {! !} xs where
   -- nil* : ⟅ [ f ∘ Sum.rec (λ _ → x) Empty.elim ]₂ ⟆ ≡ ⟅ [ Sum.rec (λ _ → f x) (f ∘ Empty.elim) ]₂ ⟆
   -- nil* = FMSetPath _ _ ∣ idEquiv _ , ua→ (Sum.elim (λ _ → refl {x = f x}) Empty.elim) ∣₁
@@ -490,5 +492,8 @@ module STInvariance {ℓ} {X : Type ℓ} where
   STInvarianceIso .inv = toSetTrunc
   STInvarianceIso .rightInv = sectionFromTo
   STInvarianceIso .leftInv = retractFromTo
+
+  STInvarianceEquiv : FMSet ∥ X ∥₂ ≃ FMSet X
+  STInvarianceEquiv = isoToEquiv STInvarianceIso
 
 open STInvariance using (STInvarianceIso) public

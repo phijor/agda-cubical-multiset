@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-}
+
 module Multiset.Bij.Base where
 
 open import Multiset.Util.Path
