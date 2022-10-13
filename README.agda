@@ -150,15 +150,6 @@ Proposition4 = isGroupoidTote
 -- The definition in groupoinds, when truncated yields the definition in sets:
 Theorem8 = FMSet≃∥Tote∥₂
 
--- Theorem 10:
--- The equivalence FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂ lives in the following module:
---
---  open import Multiset.OverSet.Fixpoint
---
--- The proof is complete, but Agda loops when trying to type-check the equivalence.
--- Ironically, this happens when trying to show (Σ A B) ≃ (Σ A B') from B ≃ B', which
--- should not pose a problem at all!
-
 -- The small axiomatization:
 open import Multiset.OverBij
   using
@@ -173,6 +164,8 @@ open import Multiset.OverBij
 _ : Type → Type
 _ = Bag
 
+-- 6 The Final Coalgebra in Groupoids
+
 -- The limit preservation map is an equivalence.
 Theorem9 = zipUnzipIso
 
@@ -183,3 +176,19 @@ Bag-pres = Unzip.unzipped
 -- The map underlying the isomorphism in Theorem 9 is indeed the limit preservation map.
 _ : zipUnzipIso .Iso.inv ≡ Unzip.unzipped
 _ = zipUnzipIsoInv≡unzipped
+
+-- Theorem 10:
+-- The equivalence FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂ lives in the following module:
+--
+--  open import Multiset.OverSet.Fixpoint
+--
+-- The proof is complete, but Agda loops when trying to type-check the equivalence.
+-- Ironically, this happens when trying to show (Σ A B) ≃ (Σ A B') from B ≃ B', which
+-- should not pose a problem at all!
+
+
+-- 7 Alternatives and Generalizations
+
+-- 7.1 Using Coinductive Types
+
+-- See `Multiset.Coalgebra.FinCoalg` for the details, again --sized-types is needed.
