@@ -59,7 +59,7 @@ We present 3 constructions of the final coalgebra of the finite bag functor:
 \begin{enumerate}
 \item Working with the set-based functor $\FMSet$, we try to replicate the classical set-theoretic construction as an $\omega$-limit of (\ref{eq:chain}) in our constructive setting. We show that this cannot be directly performed in HoTT without introducing some form of classical logic, an issue already spotted in the case of the finite powerset functor \cite{Veltri2021}. Formally, we show that $\FMSet$ weakly preserves the $\omega$-limit of (\ref{eq:chain}) (actually all $\omega$-limits if one assumes the axiom of countable choice), but strong preservation of this limit implies \LLPO{}.
 \item The list functor admits a final coalgebra $\Lim{\List}$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $R$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the bag functor. This construction can be smoothly replicated as a \emph{strict} $\omega$-limit in the category of \emph{setoids} \cite{Barthe2003}. Problems arise when trying to port the latter from setoids to sets, effectively forming the set-quotient $\Lim{\List} \mathbin{/_{\!2}} R$: we prove that the resulting type is a fixpoint for $\FMSet$, in the sense that $\FMSet (\Lim{\List} \mathbin{/_{\!2}} R) \simeq \Lim{\List} \mathbin{/_{\!2}} R$, but showing that this is the final coalgebra requires the assumption of the full axiom of choice. 
-\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra seems to  require the assumption of choice-like principles. 
+\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of (\ref{eq:chain}), a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We  show that it is a fixpoint of $\FMSet$, but showing that it is the final coalgebra requires again the axiom of choice. 
 \end{enumerate}
 Practically, the last two constructions, while not generally delivering the final coalgebra of the set-based bag functor, can still be used as denotational domains for resource-sensitive transition systems with a \emph{finite} set of states \cite{Frumin2018}: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, there exists a unique coalgebra morphism from $S$ to $\Lim{\List} \mathbin{/_{\!2}} R$, and also from $S$ to $\SetTrunc{\Lim{\Bag}}$.
 
@@ -342,7 +342,7 @@ The proof of Theorem~\ref{thm:FMSetFixpointOfTrunc} employs the fact that $\FMSe
   %The proof uses the fact that $\Map{\SetTrunc{\Blank}}$ is functorial.
 \end{proof}
 %\begin{definition}
-The equivalence of Lemma \ref{lem:FiniteChoice} allows to define a variant of the elimination principle $\Elim{\SetTrunc{\Blank}}$ which takes $\Fin n \to \SetTrunc{X}$ as input (a sort of ``finite choice'' principle for set truncation)
+The equivalence of Lemma \ref{lem:FiniteChoice} allows to define a variant of the elimination principle $\Elim{\SetTrunc{X}}$ which takes $\Fin n \to \SetTrunc{X}$ as input (a sort of ``finite choice'' principle for set truncation)
 %taking The principle of finite choice can be defined in terms of $\Op{box}$:
   \begin{equation}\label{eq:finite-choice}
     \def\arraystretch{1.2}
@@ -459,12 +459,12 @@ In HoTT, the \emph{(homotopy) limit} of the chain is definable as
 Write $\Lim{\FMSet} \DefEq \lim_{n} (\FMSet^n 1)$. An element of the limit consists of an element $xs\,n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs\,(1 + n)$ to $\FMSet^n 1$ via $\Bang^n_{\FMSet}$ is equal to $xs\,n$. The $n$-th projection from the limit is called $\ell_n : \Lim{\FMSet} → \FMSet^n 1$. The limit is invariant wrt.\@ shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{\FMSet} \simeq \LimSh{\FMSet}$, where $\LimSh{\FMSet} \DefEq \lim_{n} (\FMSet^{1 + n} 1)$. We use $\ell_n : \LimSh{\FMSet} → \FMSet^{1+n} 1$ also for the $n$-th projection from the shifted limit.
 The limit is a set, since all types in its diagram are sets.
 
-In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\Op{pres} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: the first component of $\Op{pres} \,s$ is $\lambda n \Where \Map{\FMSet}\,\ell_n \,s$. The function $\Op{pres}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\Op{pres}^{-1}$ provides a coalgebra for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
+In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\pres{\FMSet} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: the first component of $\pres{\FMSet} \,s$ is $\lambda n \Where \Map{\FMSet}\,\ell_n \,s$. The function $\pres{\FMSet}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\pres{\FMSet}^{-1}$ provides a coalgebra for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
 
-Constructively, there are issues in proving that $\Op{pres}$ is an equivalence. Its injectivity is equivalent to the \emph{lesser limited principle of omniscience} (\LLPO{}) \cite[{Ch.\@ 1}]{Bridges1987}. The latter is a weak version of the law of the excluded middle, and it is not provable from intuitionistic axioms alone.  It states that, given an infinite stream of boolean
+Constructively, there are issues in proving that $\pres{\FMSet}$ is an equivalence. Its injectivity is equivalent to the \emph{lesser limited principle of omniscience} (\LLPO{}) \cite[{Ch.\@ 1}]{Bridges1987}. The latter is a weak version of the law of the excluded middle, and it is not provable from intuitionistic axioms alone.  It states that, given an infinite stream of boolean
 values that yields $\True$ in at most one position, one can decide
 whether all even or all odd positions are $\False$.
-Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficient to show that there is a bi-implication between them. But first a useful lemma.
+Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is sufficient to show that there is a bi-implication between them. But first a useful lemma.
 
 \begin{lemma}\label{lem:DiagLimCaseAnalysis}
   For $x, y_1, y_2 : \Lim{\FMSet}$, $\Var{ys} : ℕ → \Lim{\FMSet}$
@@ -485,11 +485,11 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
 \end{proof}
 
 \begin{theorem}\label{lem:InjPresImpliesComplete}
-  If $\Op{pres}$ is injective, then \LLPO{} holds.
+  If $\pres{\FMSet}$ is injective, then \LLPO{} holds.
 \end{theorem}
 \begin{proof}
   In this proof we use $\M$ instead of $\FMSet$. The statement of the theorem holds since $\M X$ is equivalent to $\FMSet$. 
-  It is sufficent to show that the injectivity of $\Op{pres}$ implies that the following type is inhabited:
+  It is sufficent to show that the injectivity of $\pres{\M}$ implies that the following type is inhabited:
   \begin{equation}\label{eq:compl}
     \def\arraystretch{1.2}
     \begin{array}{l}
@@ -534,27 +534,27 @@ Both injectivity of $\Op{pres}$ and \LLPO{} are propositions, so it is sufficien
     $\{\Var{ys}\,n, \overline{\Var{ys}}\,n\} = \{y_1, y_2\}$
   %\end{align}
   either by $\Op{refl}$ or $\Op{\oplus comm}$, depending on $\Op{split} n$.
-  Using the latter equality, the definition of $\Op{pres}$ and the assumption $\Op{diag}$, we can form the following sequence of paths:%\todo{better wording}
+  Using the latter equality, the definition of $\pres{\M}$ and the assumption $\Op{diag}$, we can form the following sequence of paths:%\todo{better wording}
   \begin{align*}
-    \ell_n\,(\Op{pres} \{x, \overline{x}\})
+    \ell_n\,(\pres{\M} \{x, \overline{x}\})
       &= \{\ell_n \,x , \ell_n \,\overline{x}\}
       = \{\ell_n \,(\Var{ys}\,n) , \ell_n\,(\overline{\Var{ys}} \,n)\}\\
-      &= \ell_n \, (\Op{pres} \{\Var{ys}\,n , \overline{\Var{ys}}\,n\}) 
-      = \ell_n \, (\Op{pres} \{y_1 , y_2\})
+      &= \ell_n \, (\pres{\M} \{\Var{ys}\,n , \overline{\Var{ys}}\,n\}) 
+      = \ell_n \, (\pres{\M} \{y_1 , y_2\})
   \end{align*}
-  which implies that $\Op{pres}\{x, \overline{x}\} = \Op{pres}\{y_1, y_2\}$.
-  From the injectivity of $\Op{pres}$ it follows that $\{x, \overline{x}\} = \{y_1, y_2\}$, which also implies that (merely) $x = y_1$ or $x = y_2$.
+  which implies that $\pres{\M}\{x, \overline{x}\} = \pres{\M}\{y_1, y_2\}$.
+  From the injectivity of $\pres{\M}$ it follows that $\{x, \overline{x}\} = \{y_1, y_2\}$, which also implies that (merely) $x = y_1$ or $x = y_2$.
 \end{proof}
 
 \begin{theorem}\label{lem:LLPOImpliesPresInj}
-  \LLPO{} implies the injectivity of $\Op{pres}$.
+  \LLPO{} implies the injectivity of $\pres{\FMSet}$.
 \end{theorem}
 %\begin{proof}
 %  \todo[inline]{Prove it.}
 %\end{proof}
-For the proof, which employs the functor $F X \DefEq \SetQuot[\List X][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result in \cite{Veltri2021}: the injectivity of $\Op{pres} : \Op{Pfin} \,\Lim{\Op{Pfin}} \to \LimSh{\Op{Pfin}}$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in the similar result for the finite powerset functor.
+For the proof, which employs the functor $F X \DefEq \SetQuot[\List X][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result in \cite{Veltri2021}: the injectivity of $\pres{\Op{Pfin}} : \Op{Pfin} \,\Lim{\Op{Pfin}} \to \LimSh{\Op{Pfin}}$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in the similar result for the finite powerset functor.
 
-Nevertheless, we are able to salvage in our constructive setting that $\Op{pres}$ is a split epimorphism, i.e. it has a section. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but stong limit-preservation is equivalent to \LLPO{}.
+Nevertheless, we are able to salvage in our constructive setting that $\pres{\FMSet}$ is a split epimorphism, i.e. it has a section. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but stong limit-preservation is equivalent to \LLPO{}.
 %irst we show that each set $\FMSet^n 1$ can be endowed with a linear order.
 \begin{lemma}\label{lem:iter-linear}
 For all $n$, $\FMSet^n 1$ is linearly-ordered.
@@ -564,10 +564,10 @@ Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)
 \end{proof}
 
 \begin{theorem}\label{thm:InjPresSurjective}
- The function $\Op{pres}$ is a split epimorphism.
+ The function $\pres{\FMSet}$ is a split epimorphism.
 \end{theorem}
 \begin{proof}
-  Let $s : \LimSh{\FMSet}$, we build an element $t : \FMSet \,\Lim{\FMSet}$ in the fiber of $\Op{pres}$ over $s$. The size (i.e. the 1st projection) of the bags $\ell_n\,s$ is the same for all $n$, call it $n^*$. We set the size of $t$ to be $n^*$. Given an index $k : \Fin n^*$, we now search for an element $u\,k : \Lim{\FMSet}$ for defining $t \DefEq (n^*,u)$.
+  Let $s : \LimSh{\FMSet}$, we build an element $t : \FMSet \,\Lim{\FMSet}$ in the fiber of $\pres{\FMSet}$ over $s$. The size (i.e. the 1st projection) of the bags $\ell_n\,s$ is the same for all $n$, call it $n^*$. We set the size of $t$ to be $n^*$. Given an index $k : \Fin n^*$, we now search for an element $u\,k : \Lim{\FMSet}$ for defining $t \DefEq (n^*,u)$.
 
   For each $d : ℕ$, we know that $\ell_{d + 1}\,s$ is path equal to a pair of the form $(n*,v_d)$. In order to construct $u$ we need access to a representative of the equivalence class $v_d : \SetQuot[(\Fin n^* \to \FMSet^d 1)][\sim]$ for each $d$. We know that this can be done using Lemma~\ref{lem:iter-linear} and Proposition~\ref{prop:ListPermDefQuot}. Let $w_d : \Fin n^* \to \FMSet^d 1$ be the canonical representative of $v_d$.
   The limit-property of $s$ can be translated to the mere existence of a permutation $\sigma_d : \Fin n^* \simeq \Fin n^*$
@@ -575,16 +575,16 @@ Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)
 
   We now have all the ingredients for building $u$. Define a permutation $\sigma^*_d : \Fin n^* \simeq \Fin n^*$ by induction on $d$: $\sigma^*_0 \DefEq \Op{id}$, $\sigma^*_{1+d} \DefEq \sigma_d^{-1} \circ \sigma^*_d$. Then take $u$ such that $\ell_d \,(u\,k) \DefEq w_d\,(\sigma^*_d \,k)$. One can show that $u\,k : \Lim{\FMSet}$ for all $k : \Fin n^*$ since
   $\Bang_{\FMSet}^d (w_{d+1}(\sigma^*_{d+1}\, k)) \stackrel{p}{=} w_d (\sigma_d (\sigma^*_{d+1}\, k)) = w_d (\sigma_d (\sigma_d^{-1} (\sigma^*_d\, k))) = w_d (\sigma^*_d\, k)$,
-  and that $t$ is indeed in the fiber of $\Op{pres}$ over $s$.
+  and that $t$ is indeed in the fiber of $\pres{\FMSet}$ over $s$.
 \end{proof}
 
 
 \subsection{As a Quotient of the Final $\List$-Coalgebra}\label{sec:final-quotient-set}
 
-It is known that the limit $\Lim{\List} \DefEq \lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}. Let $\unfold$ be its coalgebra structure.  Using the relation lifting $\Relator$, it is possible to construct a relation on $\Lim{\List}$ so that the resulting setoid is the final coalgebra of the setoid-functor $\Op{FMSetoid}(X,R) \DefEq (\List X,\Relator\,R)$ in the category of setoids \cite{Barthe2003,Danielsson2012}. The desired relation on $\Lim{\List}$ is obtained by first iterating the relator:
+It is known that the limit $\Lim{\List} \DefEq \lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}. Let $\coalg{\List}$ be its coalgebra structure.  Using the relation lifting $\Relator$, it is possible to construct a relation on $\Lim{\List}$ so that the resulting setoid is the final coalgebra of the setoid-functor $\Op{FMSetoid}(X,R) \DefEq (\List X,\Relator\,R)$ in the category of setoids \cite{Barthe2003,Danielsson2012}. The desired relation on $\Lim{\List}$ is obtained by first iterating the relator:
 \[
 \Relator^0 s\;t \DefEq 1, \quad
-\Relator^{1+n}\;s\;t \DefEq \Relator\,(\Relator^n)\;(\unfold\,s)\,(\unfold\,t)
+\Relator^{1+n}\;s\;t \DefEq \Relator\,(\Relator^n)\;(\coalg{\List}\,s)\,(\coalg{\List}\,t)
 \]
 for $s,t : \Lim{\List}$, then taking the limit of the chain of propositions:
 \begin{equation}\label{eq:chain-rel}
@@ -680,12 +680,14 @@ $\Tote X$ differs from $\FMSet X$ in that path equality in the former records th
   The proof proceeds by constructing an isomorphism $\FMSet X \cong \SetTrunc{\Tote X}$.
   The forward direction is unproblematic, while the inverse function has to be carefully defined with the homotopy levels of the involved types in mind.
 
-  A function $\ToTote : \FMSet X → \SetTrunc{\Tote X}$ can be defined by invoking $\Rec{\FMSet}$, so it is enough to give a function
+  A function $\ToTote : \FMSet X → \SetTrunc{\Tote X}$ can be defined by
+  %invoking $\Rec{\FMSet}$, so it is enough to
+  giving a function
   $f : \forall \{\Var{n}\}\Where (\Fin \Var{n} → X) → \SetTrunc{\Tote X}$
   and show that it respects $(\sim)$.
   Take $f(v) \DefEq \SetTruncCon[(\Fin \Var{n} , v)]$, since $\Fin \Var{n}$ is obviously a finite set.
   To prove that $v \sim w$ implies $f(v) = f(w)$, notice that the conclusion is a proposition,
-  thus by invoking $\Rec{\PropTrunc{\Blank}}$ we can assume given a permutation $\sigma$ such that $r : v = w \circ \sigma$.
+  thus by invoking the recursion principle of propositional truncation we can assume given a permutation $\sigma$ such that $r : v = w \circ \sigma$.
   By univalence, $\Op{ua} \sigma : \Fin \Var{n} = \Fin \Var{n}$,
   and transporting $r$ along this path yields
   $
@@ -694,7 +696,7 @@ $\Tote X$ differs from $\FMSet X$ in that path equality in the former records th
   Then $\Op{cong} \SetTruncCon\, p : f(v) = f(w)$ as desired.
 
   In the other direction, define $\ToFMSet : \SetTrunc{\Tote X} → \FMSet X$
-  by invoking $\Rec{\SetTrunc{\Blank}}$, so it is enough to provide $g : \Tote{X} → \FMSet X$. %which is given as $g\, ((B, \Var{n}, e), v) \DefEq (\Var{n} , g')$.
+  by invoking $\Rec{\SetTrunc{\Tote X}}$, so it is enough to provide $g : \Tote{X} → \FMSet X$. %which is given as $g\, ((B, \Var{n}, e), v) \DefEq (\Var{n} , g')$.
   Assume given a finite set $B$ of size $\Var{n}$ with $e : \PropTrunc{B ≃ \Fin\Var{n}}$ and $v : B → X$. We would like to return something in $\SetQuot[(\Fin\Var{n} → X)][\mathord{\sim}]$ by recursion on $e$, but this cannot work since the return type is a set.
 %  We would like to use a composition $\Fin\Var{n} → Y → X$ to find
 %  $g' : \SetQuot[(\Fin\Var{n} → X)][\mathord{\sim}]$,
@@ -780,11 +782,10 @@ We believe that $\Bag X$ can be proved equivalent to the \emph{free symmetric mo
 
 Since $\Bag$ is a polynomial functor, its final coalgebra can be computed as the $\omega$-limit $\Lim{\Bag} \DefEq \lim_n (\Bag^n 1)$ \cite{Ahrens2015}. Ahrens et al. construction does not restrict the homotopy level of the polynomial functors, so it works also for $\Bag$ for which the limit $\Lim{\Bag}$ is a groupoid. Notice that a variant $\Tote' : \Type_1 \to \Type_1$ of $\Tote$, which does not raise the universe level, could in principle be replaced for $\Bag$ in the limit, by first lifting the unit type 1 to the universe $\Type_1$. The resulting limit would be a large groupoid in $\Type_1$.
 \begin{theorem}\label{thm:FMGpdLim}
-  The function $\operatorname{pres} : \Bag\,\Lim{\Bag} \to \LimSh{\Bag}$ is an equivalence of groupoids. In particular, $\Lim{\Bag}$ is the final $\Bag$-coalgebra.
+  The map $\pres{\Bag} : \Bag\,\Lim{\Bag} \to \LimSh{\Bag}$ is an equivalence of groupoids. In particular, $\Lim{\Bag}$ is the final $\Bag$-coalgebra.
 \end{theorem}
 
-The combination of Theorem~\ref{thm:FMSetOfFMGpdTrunc} and Theorem~\ref{prop:BagTote}, together with the fact that set truncation preserve equivalences, implies that $\SetTrunc{\Bag^n 1}$ is equivalent to $\FMSet^n 1$ for all $n$. One might wonder whether the set truncation of $\Lim{\Bag}$ delivers the final coalgebra of $\FMSet$. We are able to show that $\SetTrunc{\Lim{\Bag}}$ is a fixpoint of $\FMSet$.
-%but the proof of finality requires an additional assumption, which shares some similarities with the axiom of choice.
+The combination of Theorem~\ref{thm:FMSetOfFMGpdTrunc} and Theorem~\ref{prop:BagTote}, together with the fact that set truncation preserve equivalences, implies that $\SetTrunc{\Bag^n 1}$ is equivalent to $\FMSet^n 1$ for all $n$. One might wonder whether the set truncation of $\Lim{\Bag}$ delivers the final coalgebra of $\FMSet$. We are able to show that $\SetTrunc{\Lim{\Bag}}$ is a fixpoint of $\FMSet$, but the proof of finality requires the additional assumption of the axiom of choice.
 \begin{theorem}\label{thm:FMSetFixpointOfTrunc}
   %The set-truncation of $\Lim{\Bag}$ is a fixpoint of $\FMSet$, i.e.\@
   There is an equivalence $\FMSet \SetTrunc{\Lim{\Bag}} ≃ \SetTrunc{\Lim{\Bag}}$.
@@ -803,18 +804,16 @@ The combination of Theorem~\ref{thm:FMSetOfFMGpdTrunc} and Theorem~\ref{prop:Bag
   and \eqref{thm:FMSetFixpointOfTrunc:step3} follows from \cref{thm:FMGpdLim}.
   %since $\Lim{\Bag}$ is a limit.
 \end{proof}
-It seems highely unlikely that the coalgebra underlying the equivalence in \cref{thm:FMSetFixpointOfTrunc} is provably final without the assumption of any choice-like principles. Initial investigations show that, in order to construct a coalgebra morphism typed $X \to \SetTrunc{\Lim{\Bag}}$ from a coalgebra $c : X \to \FMSet X$,
-%(or, equivalently, a function $c' : X \to \SetTrunc{\Bag X}$)
-we need to assume the following principle: the function $\theta_{X,Y} : \SetTrunc{X \to Y} \to (X \to \SetTrunc{Y})$, which can be easily defined using  $\Rec{\SetTrunc{\Blank}}$, has a section for all types $X$ and $Y$. The proof of uniqueness of the mediating coalgebra morphism seems to additionally require an instance of the axiom of choice. We refrain from showing a proof of finality here, which we leave to future work. We do not know what is the strength of assuming the existence of a section for $\theta_{X,Y}$, nor how it compares to other choice principles. It surely resembles a form of choice: if set truncation is replaced with propositonal truncation, then the required principle becomes a particular instance of the axiom of choice.
-%% \begin{theorem}\label{thm:final-set-truncation}
-%%   Assuming that $\theta_X$ has a section for all types $X$, then $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$ in sets.
-%% \end{theorem}
-%% \begin{proof}
-%% Let $c : X \to \FMSet X$ be a coalgebra, which is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. We use the section of $\theta_X$ on $c'$ to build  an set-truncated $\Bag$-coalgebra $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{\Blank}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in groupoids, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $X$ and $\SetTrunc{\Lim{\Bag}}$.
-%% \end{proof}
+%It seems highely unlikely that the coalgebra underlying the equivalence in \cref{thm:FMSetFixpointOfTrunc} is provably final without the assumption of any choice-like principles. Initial investigations show that, in order to construct a coalgebra morphism typed $X \to \SetTrunc{\Lim{\Bag}}$ from a coalgebra $c : X \to \FMSet X$, we need to assume the following principle: the function $\theta_{X,Y} : \SetTrunc{X \to Y} \to (X \to \SetTrunc{Y})$, which can be easily defined using  $\Rec{\SetTrunc{\Blank}}$, has a section for all types $X$ and $Y$. The proof of uniqueness of the mediating coalgebra morphism seems to additionally require an instance of the axiom of choice. We refrain from showing a proof of finality here, which we leave to future work. We do not know what is the strength of assuming the existence of a section for $\theta_{X,Y}$, nor how it compares to other choice principles. It surely resembles a form of choice: if set truncation is replaced with propositonal truncation, then the required principle becomes a particular instance of the axiom of choice.
+We employ an alternative formulation of the axiom of choice, provably equivalent to more standard formulations~\cite{Veltri2021}. Given types $X,Y$ and a relation $R$ on $Y$, define the relation $X \to R$ on $X \to Y$ as the pointwise lifing of $R$. The axiom of choice states that the function $\theta_R : \SetQuot[(X \to Y)][(X \to R)] \to (X \to \SetQuot[Y][R])$, definable via $\Rec{\SetQuot[X \to Y][X \to R]}$, has a section. From the existence of an equivalence $e : (\SetQuot[X][{=}]) \simeq \SetTrunc{X}$, choice gives in particular a function $\psi : (X \to \SetTrunc{Y}) \to \SetTrunc{X \to Y}$ which is a right-inverse of $\theta_{=}$ (up to equivalence $e$).
+\begin{theorem}\label{thm:final-set-truncation}
+  Assuming the axiom of choice, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$ in sets.
+\end{theorem}
+\begin{proof}
+Let $c : X \to \FMSet X$ be a coalgebra, which is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\psi$ on $c'$, we a set-truncated $\Bag$-coalgebra $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in groupoids, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $X$ and $\SetTrunc{\Lim{\Bag}}$.
+\end{proof}
 %We do not yet know what is the strength of assuming the existence of a section for $\theta_X$ and how it compares to well-known choice principles. It resembles a form of choice: if set truncation is replaced with propositonal truncation, then it becomes a particular instance of the axiom of choice.
-
-Similarly to the quotient $\SetQuot[\Lim{\List}][\Bisim]$ of Section~\ref{sec:final-quotient-set}, $\SetTrunc{\Lim{\Bag}}$ can be used to give semantics to transition systems with finite set of states: a section for $\theta_{X,Y}$ is derivable in case $X$ is a finite set using the \enquote{finite choice} principle in (\ref{eq:finite-choice}).
+Similarly to the quotient $\SetQuot[\Lim{\List}][\Bisim]$ of Section~\ref{sec:final-quotient-set}, in the absence of the axiom of choice $\SetTrunc{\Lim{\Bag}}$ can still be used to give semantics to transition systems with finite set of states: a section for $\theta_{R}$ is derivable in case the domain type $X$ is finite. When $R$ is path equality, the section can be defined using the \enquote{finite choice} principle in (\ref{eq:finite-choice}).
 
 %% Note that the above fixpoint is not necessarily the \emph{largest} fixpoint.
 %% \todo[inline,caption={Choice for largest fixpoint}]{%
@@ -862,7 +861,9 @@ Notice that Agda's strict productivity checker actually rejects this definition,
 %\end{array}
 %\end{equation*}
 The proof that $\Op{final}$ is a coalgebra morphism is simply given by reflexivity. The proof of uniqueness is also quite straightforward.
-
+\begin{theorem}\label{thm:coinductive}
+$\cLim{\M}$ is the final coalgebra of $\M$.
+\end{theorem}
 
 %% \begin{itemize}
 %%     \item It is not clear that Agda's coinductive types
@@ -890,7 +891,7 @@ where the relation $\Op{Act} \,P\,a$ is
 \]
 The type $\Op{F}_{A,B,P}\,X$ is a set whenever the type of shapes $A$ is a set. The functor $\FMSet$ is the instance where $A \DefEq ℕ$, $B \DefEq \Fin$ and $P\,\sigma \DefEq 1$.
 
-We know that the construction of the final coalgebra as an $\omega$-limit in sets for a general analytic functor $\Op{F}_{A,B,P}$ is problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:InjPresSurjective} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\Op{pres} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ is not generally a split epimorphism, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:InjPresSurjective} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor. 
+We know that the construction of the final coalgebra as an $\omega$-limit in sets for a general analytic functor $\Op{F}_{A,B,P}$ is problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:InjPresSurjective} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ is not generally a split epimorphism, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:InjPresSurjective} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor. 
 The employment of these propositions can be seen as the invocation of two specific instances of the axiom of countable choice.
 
 Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A,B,P}$ in groupoids, akin to the functor $\Bag$. First, the small HIT construction of the groupoid of finite types $\Bij$ can be generalized:
