@@ -86,8 +86,8 @@
 \NewDocumentCommand{\Rec}{m}{\Op{rec}_{#1}}
 \NewDocumentCommand{\Elim}{m}{\Op{elim}_{#1}}
 \NewDocumentCommand{\Map}{m}{\Op{map}_{#1}}
-\NewDocumentCommand{\pres}{m}{\Op{alg}_{#1}}
-\NewDocumentCommand{\coalg}{m}{\Op{coalg}_{#1}}
+\NewDocumentCommand{\pres}{m}{\Op{pres}_{#1}}
+\NewDocumentCommand{\coalg}{m}{\Op{unfold}_{#1}}
 
 \NewDocumentCommand{\FinElim}{}{\Elim{\SetTrunc{X}\OpFont{fin}}}
 \NewDocumentCommand{\FinElimComp}{}{\Elim{\SetTrunc{X}\OpFont{fin}}^\beta}
@@ -165,6 +165,6 @@
 \newcommand*{\CoalgMor}{\ensuremath{\mathsf{CoalgMor}}}
 \newcommand*{\Final}{\ensuremath{\mathsf{Final}}}
 
-\newcommand*{\unfold}{\ensuremath{\mathsf{coalg}}}
-\newcommand*{\fold}{\ensuremath{\mathsf{alg}}}
+\newcommand*{\unfold}{\ensuremath{\mathsf{unfold}}}
+\newcommand*{\fold}{\ensuremath{\mathsf{fold}}}
 \newcommand*{\Bisim}{\ensuremath{\mathsf{Bisim}}}
