@@ -278,7 +278,7 @@ When $R$ is path equality on $X$, the type $\Relator \,(=)\;xs\;ys$ expresses th
 
 \subsection{As an Analytic Functor}
 
-Finally, we introduce the type of finite bags over $X$ as an \emph{analytic functor}~\cite{Joyal1986}, which is provably equivalent to $\M X$, $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator\, (=)]$.
+Finally, we introduce the type of finite bags over $X$ as an \emph{analytic functor} (in the formulation of Hasegawa~\cite{Hasegawa2002}), which is provably equivalent to $\M X$, $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator\, (=)]$.
 \begin{align*}
   \FMSet X
     \DefEq
@@ -610,7 +610,7 @@ Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by t
   For all $X : \Type$, we have $\FMSet(\SetQuot[\Lim{\List}][\Bisim]) \simeq \SetQuot[\Lim{\List}][\Bisim]$.
 \end{theorem}
 \begin{theorem}\label{thm:final-quotient}
-  Assuming the axiom of choice, $\SetQuot[\Lim{\List}][\Bisim]$ is the final coalgebra of $\FMSet$.
+  Assuming axiom of choice, $\SetQuot[\Lim{\List}][\Bisim]$ is the final coalgebra of $\FMSet$.
 \end{theorem}
 Both proofs, which employs the functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$, are analogous to related ones for the finite powerset functor in \cite{Veltri2021}.
 Why is the axiom of choice needed in \cref{thm:final-quotient}? When building a coalgebra morphism from a given coalgebra $c : X \to \SetQuot[\List X][\Relator\,(=)]$ to $\SetQuot[\List (-)][\Relator\,(=)]$, we iteratively apply $c$ on the input value in $X$. Each time $c$ is applied, we are given an equivalence class in $\SetQuot[\List X][\Relator\,(=)]$, which we need to open via $\Rec{\SetQuot[\List X][\Relator\,(=)]}$ in order to eventually produce an element of $t : \Lim{\List}$ and ultimately return $\SetQuotCon[t]$. There is no information on the
@@ -665,7 +665,7 @@ From this, we can define a \enquote{tote} (in the sense of a \enquote{large bag}
       \sum\,(\Var{B} : \Op{FinSet})\Where \langle B \rangle \to X,
   \end{align*}
 %\end{definition}
-Elements of $\Tote X$ are pairs consisting of a finite set $B$ and a function from (the type underlying) $B$ to $X$ which picks the elements in the tote. The univalence principle implies that the path type $(B,v) = (C,w)$ in $\Tote X$ is equivalent to the type of dependent pairs consisting of an equivalence $\sigma : \langle B \rangle \simeq \langle C\rangle$ and a path $v = w \circ \sigma$.
+Elements of $\Tote X$ are pairs consisting of a finite set $B$ and a function from (the type underlying) $B$ to $X$ which picks the elements in the tote.  Univalence implies that the path type $(B,v) = (C,w)$ in $\Tote X$ is equivalent to the type of dependent pairs consisting of an equivalence $\sigma : \langle B \rangle \simeq \langle C\rangle$ and a path $v = w \circ \sigma$.
 This indicates that $\Tote X$ is not a set, in general it is at least a groupoid.
 \begin{proposition}
   If $X$ is a groupoid, then $\Tote X$ is a groupoid.
@@ -751,9 +751,10 @@ Following \cite{Finster2021}, we first introduce an equivalent but small definit
   \end{center}
   %Here, $\operatorname{id}$ is the identity-equivalence, $(\circ)$ composition of equivalences,
   \begin{proposition}\label{prop:BijFinSet}
-    There is an equivalence $\Bij \simeq \Op{FinSet}$. In particular, one can extract a type $\langle x \rangle : \Type$ from each $x : \Bij$.
+    There is an equivalence $\Bij \simeq \Op{FinSet}$. In particular, one can extract a type $\langle x \rangle : \Type$ from each $x : \Bij$:
   \end{proposition}
-  A small type of finite bags valued in groupoids is defined by replacing $\Op{FinSet}$ with $\Bij$.
+  A small type of finite bags %valued in groupoids
+  is defined by replacing $\Op{FinSet}$ with $\Bij$.
 %\begin{definition}\label{def:Bag}
 %  A small type:
   \begin{align*}
@@ -810,7 +811,7 @@ The combination of \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote}, togethe
 %It seems highely unlikely that the coalgebra underlying the equivalence in \cref{thm:FMSetFixpointOfTrunc} is provably final without the assumption of any choice-like principles. Initial investigations show that, in order to construct a coalgebra morphism typed $X \to \SetTrunc{\Lim{\Bag}}$ from a coalgebra $c : X \to \FMSet X$, we need to assume the following principle: the function $\theta_{X,Y} : \SetTrunc{X \to Y} \to (X \to \SetTrunc{Y})$, which can be easily defined using  $\Rec{\SetTrunc{\Blank}}$, has a section for all types $X$ and $Y$. The proof of uniqueness of the mediating coalgebra morphism seems to additionally require an instance of the axiom of choice. We refrain from showing a proof of finality here, which we leave to future work. We do not know what is the strength of assuming the existence of a section for $\theta_{X,Y}$, nor how it compares to other choice principles. It surely resembles a form of choice: if set-truncation is replaced with propositonal truncation, then the required principle becomes a particular instance of the axiom of choice.
 We employ an alternative formulation of the axiom of choice, provably equivalent to more standard formulations~\cite{Veltri2021}. Given types $X,Y$ and a relation $R$ on $Y$, define the relation $X \to R$ on $X \to Y$ as the pointwise lifing of $R$ to functions. The axiom of choice states that the function $\theta_R : \SetQuot[(X \to Y)][(X \to R)] \to (X \to \SetQuot[Y][R])$, definable via $\Rec{\SetQuot[X \to Y][X \to R]}$, has a section. From the fact that $e : (\SetQuot[X][{=}]) \simeq \SetTrunc{X}$, the axiom of choice gives in particular a function $\psi : (X \to \SetTrunc{Y}) \to \SetTrunc{X \to Y}$ which is a right-inverse of $\theta_{=}$ (up to equivalence $e$).
 \begin{theorem}\label{thm:final-set-truncation}
-  Assuming the axiom of choice, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$.
+  Assuming axiom of choice, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$.
 \end{theorem}
 \begin{proof}
 Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote} is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\psi$ on $c'$ gives us $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in \cref{thm:FMGpdLim}, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $X$ and $\SetTrunc{\Lim{\Bag}}$.
@@ -826,7 +827,7 @@ Similarly to the quotient $\SetQuot[\Lim{\List}][\Bisim]$ of Section~\ref{sec:fi
 
 \section{Alternatives and Generalizations}
 
-We now look at an alternative construction of the final coalgebra using Cubical Agda's coinductive types \cite{Vezzosi2019} and a generalization of our constructions to other analytic functors \cite{Joyal1986}.
+We now look at an alternative construction of the final coalgebra using coinductive types and a generalization of our constructions to other analytic functors.
 
 \subsection{Using Coinductive Types}\label{sec:coinductive}
 
@@ -880,7 +881,7 @@ $\cLim{\M}$ is the final coalgebra of $\M$.
 
 \subsection{Other Analytic Functors}\label{sec:analytic}
 
-The formulation $\FMSet$ of the finite bag functor exposes this as an analytic functor, which differs from a polynomial functor in that the tuple of elements $\Fin\,n \to X$ is quotiented by the relation generated by the action of the symmetric group with $n$ elements on $X$. Other analytic functors arise by choosing a different subgroup of the symmetric group. For example, picking the subgroup of cyclic permutations delivers the functor of cyclic lists, while taking the trivial subgroup allows us to recover the list functor. 
+The formulation $\FMSet$ of the finite bag functor exposes this as an analytic functor \cite{Joyal1986,Hasegawa2002}, which differs from a polynomial functor in that the tuple of elements $\Fin\,n \to X$ is quotiented by the relation generated by the action of the symmetric group with $n$ elements on $X$. Other analytic functors arise by choosing a different subgroup of the symmetric group. For example, picking the subgroup of cyclic permutations delivers the functor of cyclic lists, while taking the trivial subgroup allows us to recover the list functor. 
 
 More generally, in type theory analytic functors can be seen as instances of the functors associated to the \emph{quotient containers} of Abbott et al.~\cite{Abbott2004}. A quotient container is a triple consisting of a type $A$, a type family $B : A \to \Type$ and a propositionally-valued type family $P : \forall \{a\} \Where B \,a \simeq B \,a \to \Type$ closed under identity, inverses and composition of equivalences. The associated functor is:
 \[
@@ -930,9 +931,9 @@ Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A
         \DisplayProof
     \hspace*{\fill}
   \end{center}
-Here $\Op{Prefl}$ and $\Op{Pcomp}$ are the closures of $P$ wrt.\@ identity and composition of equivalences.
-When $B$ is valued in sets, one can also define a function $\langle -\rangle : \Op{U}_{A,B,P} \to \Type$ extracting a set, which for $\Obj a$ is $B\,a$.
-The polynomial functor $\Op{G}_{A,B,P}$ is defined as
+$\Op{Prefl}$ and $\Op{Pcomp}$ are the closures of $P$ wrt.\@ identity and composition of equivalences.
+When $B$ is valued in sets, one can also define a function $\langle -\rangle : \Op{U}_{A,B,P} \to \Type$ extracting a set, so that $\langle \Obj a \rangle \DefEq B\,a$.
+The polynomial functor $\Op{G}_{A,B,P}$ is %defined as
 \[
 \Op{G}_{A,B,P} X \DefEq \sum (x : \Op{U}_{A,B,P}) \Where \langle x \rangle \to X
 \]
