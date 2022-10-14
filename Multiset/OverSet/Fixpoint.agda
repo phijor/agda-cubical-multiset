@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --safe #-}
 
 module Multiset.OverSet.Fixpoint where
 
@@ -26,23 +26,30 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Structure
 open import Cubical.HITs.SetTruncation as ST using (∥_∥₂)
 open import Cubical.Data.Sigma.Properties using (Σ-cong-equiv)
+open import Cubical.Data.FinSet using (FinSet)
 
-FMSetFixSetTruncTree : (FMSet ∥ BagLim ∥₂) ≃ ∥ BagLim ∥₂
-FMSetFixSetTruncTree =
-  (FMSet ∥ BagLim ∥₂) ≃⟨ isoToEquiv OverSet.STInvarianceIso ⟩
-  (FMSet BagLim)      ≃⟨ FMSet≃∥Tote∥₂ ⟩
-  (∥ Tote BagLim ∥₂)  ≃⟨ setTruncEquiv (invEquiv step) ⟩
-  (∥ BagLim ∥₂)       ■ where
+abstract
+  Vect≃⟨Bij→FinSet⟩ : (x : Bij) → (Vect BagLim x) ≃ (⟨ Bij→FinSet x ⟩ → BagLim)
+  Vect≃⟨Bij→FinSet⟩ x = preCompEquiv (⟨Bij→FinSet⟩≃Idx x)
 
-  abstract
-    Vect≃⟨Bij→FinSet⟩ : (x : Bij) → (Vect BagLim x) ≃ (⟨ Bij→FinSet x ⟩ → BagLim)
-    Vect≃⟨Bij→FinSet⟩ x = preCompEquiv (⟨Bij→FinSet⟩≃Idx x)
+_ = Σ-cong-equiv
 
-  step : BagLim ≃ (Tote BagLim)
-  step =
-    (BagLim)               ≃⟨ isoToEquiv bagLimitIso ⟩
-    (Bag BagLim)           ≃⟨ isoToEquiv BagIsoΣ ⟩
-    -- TODO: Use a version of Σ-cong-equiv that does not compute the inverse of
-    -- Bij≃FinSet using isoToEquiv.
-    (Σ Bij (Vect BagLim))  ≃⟨ {! Σ-cong-equiv Bij≃FinSet Vect≃⟨Bij→FinSet⟩ !} ⟩
-    (Tote BagLim)            ■
+-- XXX: The below hypothesis follows from Σ-cong-equiv : A ≃ A' → (∀ x → B x ≃ B' x) → Σ A B ≃ Σ A' B'
+-- applied to Bij≃FinSet and the above Vect≃⟨Bij→FinSet⟩.  But currently Agda tries to compute an
+-- inverse(?) and loops/computes forever.  Feel free to try it yourself, I gave up after letting
+-- Agda 2.6.2.2 attempt to type-check for an hour.
+module _ (does-not-compute : (Σ[ x ∈ Bij ] (Vect BagLim x)) ≃ (Σ[ B ∈ FinSet ℓ-zero ] (⟨ B ⟩ → BagLim))) where
+
+  FMSetFixSetTruncTree : (FMSet ∥ BagLim ∥₂) ≃ ∥ BagLim ∥₂
+  FMSetFixSetTruncTree =
+    (FMSet ∥ BagLim ∥₂) ≃⟨ isoToEquiv OverSet.STInvarianceIso ⟩
+    (FMSet BagLim)      ≃⟨ FMSet≃∥Tote∥₂ ⟩
+    (∥ Tote BagLim ∥₂)  ≃⟨ setTruncEquiv (invEquiv step) ⟩
+    (∥ BagLim ∥₂)       ■ where
+
+    step : BagLim ≃ (Tote BagLim)
+    step =
+      (BagLim)              ≃⟨ isoToEquiv bagLimitIso ⟩
+      (Bag BagLim)          ≃⟨ isoToEquiv BagIsoΣ ⟩
+      (Σ Bij (Vect BagLim)) ≃⟨ does-not-compute ⟩
+      (Tote BagLim)         ■

@@ -1,3 +1,4 @@
+{-# OPTIONS --safe #-}
 
 module Multiset.OverSet.Finality where
 
@@ -69,7 +70,10 @@ module _
     → h ≡ Iso.inv bagLimitIso ∘ (OverBij.map h) ∘ c
     → ana c ≡ h)
 
--- -- ∥ Bag Y ∥₂ is naturally equivalent to FMSet Y, which follows from Theorems 6 and 8
+-- -- ∥ Bag Y ∥₂ is naturally equivalent to FMSet Y, which follows from Theorems 6 and 8.
+-- -- For reasons beyond our understanding, Agda has trouble type-checking a particular
+-- -- equivalence, so we postulate it here.  See the comment in Multiset.OverSet.Fixpoint
+-- -- for an explanation of what goes wrong.
    (e : {Y : Type} → ∥ Bag Y ∥₂ ≃ FMSet Y)
    (eNat : ∀{Y Z} (f : Y → Z)→ equivFun e ∘ ST.map (OverBij.map f) ≡ OverSet.map f ∘ equivFun e)
 
@@ -201,4 +205,11 @@ module _
                  (eq ∙ cong (λ x → equivFun unfold ∘ OverSet.map h ∘ x ∘ c) (sym (funExt (secEq e))))
 
   
-
+  isContrAna : ∀ {X : Type} → (c : X → FMSet X)
+    → isContr (Σ[ h ∈ (X → ∥ BagLim ∥₂) ] h ≡ equivFun unfold ∘ OverSet.map h ∘ c)
+  isContrAna c =
+    ( (ana₂ c , ana₂Eq c) -- existence
+    , λ { (h , is-ana)
+        → Σ≡Prop (λ c → isOfHLevelPath' 1 (isSetΠ λ _ → isSetSetTrunc) c _) (ana₂Uniq c h is-ana) -- uniqeness
+      }
+    )

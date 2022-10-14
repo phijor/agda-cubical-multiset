@@ -177,15 +177,20 @@ Bag-pres = Unzip.unzipped
 _ : zipUnzipIso .Iso.inv ≡ Unzip.unzipped
 _ = zipUnzipIsoInv≡unzipped
 
--- Theorem 10:
--- The equivalence FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂ lives in the following module:
---
---  open import Multiset.OverSet.Fixpoint
---
--- The proof is complete, but Agda loops when trying to type-check the equivalence.
--- Ironically, this happens when trying to show (Σ A B) ≃ (Σ A B') from B ≃ B', which
--- should not pose a problem at all!
+open import Multiset.OverSet.Fixpoint using (FMSetFixSetTruncTree)
 
+-- The fixpoint of FMSet,  (FMSet ∥ BagLim ∥₂) ≃ ∥ BagLim ∥₂
+-- NOTE: The proof is complete, but Agda loops when trying to type-check the equivalence.
+-- Ironically, this happens when trying to show (Σ A B) ≃ (Σ A B') from ∀ x → B x ≃ B' x,
+-- which should not pose a problem at all!
+Theorem10 = FMSetFixSetTruncTree
+
+open import Multiset.OverSet.Finality using (isContrAna)
+
+-- Assuming the axiom of choice, ∥ BagLim ∥₂ is the final
+-- coalgebra of FMSet in sets, i.e. the space of coalgebra
+-- morphisms into it is contractible
+Theorem11 = isContrAna
 
 -- 7 Alternatives and Generalizations
 
