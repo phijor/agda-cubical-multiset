@@ -1,37 +1,36 @@
 # Final Coalgebras of Analytic Functors in Homotopy Type Theory
 
-In set-theoretic foundations, the final coalgebra of a finitary functor can be
-constructed in (ω+ω) steps [Worrell (2005)].  For particular finitary functors,
-constructive proofs of this exist, and for polynomial functors it is known that
-the same can be done constructively in ω steps [Ahrens, Capriotti (2015)].
+## Abstract
 
-Similarly, the intermediate class of _analytic functors_ yields final
-coalgebras in ω steps when working classically.  We are interested whether the
-same is true when working internally to HoTT.  We focus our work on the finite
-multiset functor, a particular analytic functor.
+Coalgebras for the finite bag functor are dynamical systems where the
+transition relation is resource-sensitive: the collection of reachable states
+records the number of ways in which each state can be reached. The final
+coalgebra of the finite bag functor is employed as a denotational domain for
+the evaluation of such dynamical systems. Its elements are non-wellfounded
+trees with finite unordered branching, representing the evolution of systems
+starting from a given initial state.
 
-One approach is to directly work with a set-level definition of the functor.
-This involves proving that it preserves ω-limits.  In general, this requires a
-form of countable choice, which nonetheless seems to be satisfied for the
-limits involved in the construction of the final coalgebra.
+This paper is dedicated to the construction of the final coalgebra of the
+finite bag functor in homotopy type theory (HoTT). We first compare various
+equivalent definitions of finite bags employing higher inductive types, both as
+sets and as groupoids (in the sense of HoTT). We then analyze a few classical
+set-theoretic constructions of final coalgebras in our constructive setting. We
+show that, in the case of set-based definitions of finite bags, these
+constructions are either intrinsically classical, in the sense that they are
+equivalent to some weak form of excluded middle, or cannot be directly
+reproduced in HoTT without the assumption of classical principles. The final
+coalgebra can be safely constructed in HoTT only employing the groupoid-based
+definition of finite bags. We also briefly discuss generalizations of these
+constructions to other analytic functors and an alternative way of building the
+final coalgebra of the finite bag functor using Cubical Agda's coinductive
+types.
 
-We present an alternative construction following [Kock (2012)].  Here, we
-define a polynomial functor over a groupoid, and show that its pointwise
-set-trunctation is equivalent to the ordinary finite multiset functor.  We
-construct its final coalgebra as an ω-limit, and show that it has as a
-fixed-point a type of finitely branching, non-wellfounded trees.  While the
-truncation of this type of trees is a fixed-point of the ordinary multiset
-functor, proving that it is the largest fixed-point requires another choice
-principle.
+## Formalization in Agda
 
-In the process, we give multiple formalizations of finite multisets in HoTT,
-one as type of lists modulo permutations, and another one as the HIT of the
-free commutative monoid, and connect these to prior work, e.g. [Choudhury, Fiore (2021)].
-To overcome size-issues, we port [Finster et al. (2021)]'s axiomatization of a
-small type of finite sets and bijections to cubical Agda.
+See [README.agda](README.agda) for a summary of the library that lives under
+`Multiset/`.
 
-[Ahrens, Capriotti (2015)]: https://doi.org/10.4230/LIPIcs.TLCA.2015.17
-[Worrell (2005)]: https://doi.org/10.1016/j.tcs.2004.12.009
-[Kock (2012)]: https://doi.org/10.1016/j.entcs.2013.01.001
-[Choudhury, Fiore (2021)]: https://arxiv.org/abs/2110.05412
-[Finster et al. (2021)]: https://arxiv.org/abs/2112.14050
+# License
+
+With the exception of the `tex/` directory, all files in this project are
+licensed under the terms of the MIT License, see [LICENSE](LICENSE).
