@@ -6,9 +6,10 @@
     };
     flake-utils.url = github:numtide/flake-utils;
     nixpkgs.url = github:NixOS/nixpkgs/nixpkgs-unstable;
+    nix-filter.url = github:numtide/nix-filter;
   };
 
-  outputs = { self, nixpkgs, flake-compat, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-compat, flake-utils, nix-filter, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -16,13 +17,23 @@
         };
         inherit (pkgs) agdaPackages;
 
+        tex = pkgs.texlive.combine {
+          inherit (pkgs.texlive) scheme-medium latex-bin latexmk
+            llncs
+            kvoptions amsfonts stmaryrd
+            newunicodechar
+            mathtools amsmath
+            doi csquotes cleveref
+            todonotes bussproofs;
+        };
+
         cubical = agdaPackages.cubical.overrideAttrs (oldAttrs: {
           version = "0.4prece3120d";
           src = pkgs.fetchFromGitHub {
-              owner = "agda";
-              repo = "cubical";
-              rev = "ce3120d3f8d692847b2744162bcd7a01f0b687eb";
-              sha256 = "sha256-VkbL/wfT45lrX1vSnZn3qtSlr+aBSW4IKrRWNOTWfl8=";
+            owner = "agda";
+            repo = "cubical";
+            rev = "ce3120d3f8d692847b2744162bcd7a01f0b687eb";
+            sha256 = "sha256-VkbL/wfT45lrX1vSnZn3qtSlr+aBSW4IKrRWNOTWfl8=";
           };
         });
 
@@ -56,10 +67,35 @@
             platforms = pkgs.lib.platforms.unix;
           };
         };
+
+        paper = pkgs.stdenvNoCC.mkDerivation rec {
+          name = "Multiset-in-HoTT-paper";
+          src = builtins.path {
+            path = nix-filter.lib.filter {
+              root = ./.;
+              include = [ "doc" "tex" ];
+            };
+            name = "tex-cubical-multiset";
+          };
+          buildInputs = [ pkgs.coreutils tex ];
+          phases = [ "unpackPhase" "buildPhase" "installPhase" ];
+          buildPhase = ''
+            export PATH="${pkgs.lib.makeBinPath buildInputs}";
+            mkdir -p .cache/texmf-var
+            cd tex
+            env TEXMFHOME=.cache TEXMFVAR=.cache/texmf-var \
+              latexmk -r latexmkrc -interaction=batchmode -halt-on-error
+          '';
+          installPhase = ''
+            mkdir -p $out
+            cd _target
+            cp Multiset.pdf $out/
+          '';
+        };
       in
       {
         packages = {
-          inherit multiset;
+          inherit multiset paper;
           default = multiset;
         };
 
