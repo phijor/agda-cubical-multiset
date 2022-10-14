@@ -5,6 +5,8 @@ module README where
 open import Multiset.Prelude
 
 open import Cubical.Foundations.Isomorphism using (Iso)
+open import Cubical.Foundations.Equiv using (_≃_)
+open import Cubical.Data.FinSet using (FinSet)
 import Cubical.Data.Nat as Nat using (ℕ)
 import Cubical.Data.List as List
 import Cubical.HITs.SetQuotients as SQ
@@ -114,11 +116,12 @@ Lemma2 = diag-ysᶜ-islim-alternating
 -- We prove completeness, which implies LLPO.
 Theorem2 = zip-inj⇒complete
 
--- Bonus: Using the equivalent type (List X / Perm), we
--- can even show that LLPO implies the injectivity of the
--- limit-preservation map.
 open import Multiset.ListQuotient.ToInjectivity
   using (llpo⇒zip-inj)
+
+-- Using the equivalent type (List X / Perm), we can show that
+-- LLPO implies the injectivity of the limit-preservation map.
+Theorem3 = llpo⇒zip-inj
 
 open import Multiset.OverSet.Limit using (module Surjectivity)
 
@@ -147,10 +150,17 @@ _ = Tote
 Proposition4 : {X : Type} → isGroupoid X → isGroupoid (Tote X)
 Proposition4 = isGroupoidTote
 
--- The definition in groupoinds, when truncated yields the definition in sets:
+-- The definition in groupoids, when truncated yields the definition in sets:
 Theorem8 = FMSet≃∥Tote∥₂
 
--- The small axiomatization:
+-- The small axiomatization of FinSet:
+open import Multiset.Bij.Base using (Bij)
+open import Multiset.Bij.Properties using (Bij≃FinSet ; Bij→FinSet)
+
+Proposition5 : Bij ≃ FinSet _
+Proposition5 = Bij≃FinSet
+
+-- ...and the improved Bag-functor:
 open import Multiset.OverBij
   using
     ( Bag
@@ -163,6 +173,9 @@ open import Multiset.OverBij
 -- The improved bag functor is small:
 _ : Type → Type
 _ = Bag
+
+-- XXX: The proof of Proposition 6 (Bag X ≃ Tote X) runs into an issue when typechecking.
+-- See the note on Theorem 10 below.
 
 -- 6 The Final Coalgebra in Groupoids
 
