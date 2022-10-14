@@ -11,7 +11,7 @@
 \title{The Final Coalgebra of the Finite Bag Functor in Homotopy Type Theory}
 \author{%
     Philipp Joram\orcidID{0000-0002-0448-7907} \and
-    Niccolò Veltri\orcidID{0000-0002-7230-3436}%
+    Niccol{\`o} Veltri\orcidID{0000-0002-7230-3436}%
 }
 %
 \authorrunning{P. Joram and N. Veltri}
@@ -33,7 +33,7 @@
 
 \section{Introduction}
 
-\emph{Coalgebras} are functions of the form $c : S \to F S$, where $S$ is a set of states and $F$ is a functor specifying a certain class of collections of states \cite{Rutten2000,Jacobs2016}. For example, $F S$ could be lists over $S$, bags (a.k.a. multisubsets) or subsets of $S$ (possibly with some cardinality restrictions), wellfounded trees with leaves or nodes in $S$, or probability distributions over $S$. The coalgebra $c$ describes the dynamics of a transition system or an automaton: to each state $s : S$, the function $c$ associates the collection of states $c \,s : F S$ that are reachable from $s$ in one step. The choice of collection functor $F$ is dictated by the specific flavour of non-determinism that is specified by the transition relation. Does the order or multiplicity of reachable states matter? Is the choice of a new state probabilistic? Does the transition relation additionally depend on a set of labels, weights or actions?
+\emph{Coalgebras} are functions of the form $c : S \to F S$, where $S$ is a set of states and $F$ is a functor specifying a certain class of collections of states \cite{Rutten2000,Jacobs2016}. For example, $F S$ could be lists over $S$, bags (a.k.a. multisubsets) or subsets of $S$ (possibly with some cardinality restrictions), wellfounded trees with leaves or nodes in $S$, or probability distributions over $S$. The coalgebra $c$ describes the dynamics of a transition system or an automaton: to each state $s : S$, the function $c$ associates the collection of states $c \,s : F S$ that are reachable from $s$ in one step. The choice of collection functor $F$ is dictated by the specific flavor of non-determinism that is specified by the transition relation. Does the order or multiplicity of reachable states matter? Is the choice of a new state probabilistic? Does the transition relation additionally depend on a set of labels, weights or actions?
 
 The denotational semantics of a transition system $c : S \to F S$ is typically given in terms of the \emph{final coalgebra} $\Lim{F}$ of the functor $F$, which  consists of non-wellfounded trees with branching specified by $F$. When $F$ is the list functor, each tree has a finite and ordered collection of subtrees. If $F$ is the finite bag functor, the order of subtrees does not matter, and if $F$ is the finite powerset functor, multiplicity of subtrees does not matter either. %Picking $F$ as the finite probability distribution functor, the trees correspond to
 The interpretation of a state $s : S$ in $\Lim{F}$ is the possibly-infinite tree obtained by ``running'' the coalgebra $c$ with $s$ as initial state. As such, it gives a complete description of the evolution of the system $c$ starting from state $s$.
@@ -75,7 +75,7 @@ assistant. The code is freely available at \url{https://github.com/phijor/agda-c
 
 We work in homotopy type theory \cite{HoTTBook} and practically our formalization takes place in Cubical Agda \cite{Vezzosi2019}. We recall some basic notions that are employed in our development.
 
-Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$, written also $\forall x \Where B\,x$ when the type $A$ is clear from context. Implicit arguments of dependent functions are enclosed in curly brackets. Basic inductive types include: unit $1$, empty $\bot$, Booleans $\Bool$, naturals $ℕ$, finite prefixes of naturals $\Fin n$, lists $\List A$, dependent pair $\sum (x : A) \Where B \, x$, binary sum $A + B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is $! : A \to 1$. Membership in a list is $x \in xs$ and removal of an occurrence $m : x \in xs$ is $xs \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readibility in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
+Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$, written also $\forall x \Where B\,x$ when the type $A$ is clear from context. Implicit arguments of dependent functions are enclosed in curly brackets. Basic inductive types include: unit $1$, empty $\bot$, Booleans $\Bool$, naturals $ℕ$, finite prefixes of naturals $\Fin n$, lists $\List A$, dependent pair $\sum (x : A) \Where B \, x$, binary sum $A + B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is $! : A \to 1$. Membership in a list is $x \in xs$ and removal of an occurrence $m : x \in xs$ is $xs \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readability in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
 
 Given $x, y : A$, their definitional equality is denoted $x \DefEq y$ while propositional equality is $x = y$.
 Following ``cubical terminology'', the latter is called the \emph{path type} between $x$ and $y$.
@@ -224,7 +224,7 @@ Given a type $X$, the \emph{free commutative monoid} on $X$
     \end{center}
 %\end{itemize}
 
-The costructor $\Singl$ embeds $X$ into $\M X$, while $\Empty$ and $\Union$ are the unit and multiplication of the monoid. The path constructors express unitality of $\Empty$ wrt. $\Union$, associativity and commutativity of $\Union$, and the final higher path constructor forces $\M X$ to be a set.
+The constructor $\Singl$ embeds $X$ into $\M X$, while $\Empty$ and $\Union$ are the unit and multiplication of the monoid. The path constructors express unitality of $\Empty$ wrt. $\Union$, associativity and commutativity of $\Union$, and the final higher path constructor forces $\M X$ to be a set.
 
 In Cubical Agda, functions out of HITs like $\M X$ can be defined directly by pattern matching. But it is often useful to have elimination principles at hand that give more control on the shape of the proof obligations. For example, the non-dependent elimination principle of $\M X$ states that a function of type $\M X \to A$ is definable, provided that $A$ is a commutative monoid and there exists a function $\eta^* : X \to A$.
 \begin{align*}
@@ -386,7 +386,7 @@ $  %\[
 
 In the proof of Theorem~\ref{thm:InjPresSurjective} we employ the fact that the type of finite bags $\FMSet X$, for some specific choice of $X$, is linearly-ordered and $\SetQuot[(\Fin n \to X)][\sim]$ is a definable set-quotient.
 %The proof of Theorem~\ref{thm:InjPresSurjective} relies on the validity of two specific instances of the axiom of countable choice. We show here that these instances hold and therefore Theorem~\ref{thm:InjPresSurjective} is true without the need of postulating countable choice. This is achieved by showing that, whenever a type $X$ is endowed with a linear order $(<)$, then $\SetQuot[\List X][\Perm]$ is a definable set-quotient.
-Remember that a relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositinally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
+Remember that a relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
 If $X$ has a linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, so that $\Perm \;xs\;(\sort\,xs)$ holds. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
 Since $\SetQuot[\List X][\Perm] \simeq \FMSet X$, we obtain the following result.
 \begin{proposition}\label{prop:ListPermDefQuot}
@@ -433,7 +433,7 @@ $(B,b)$ are
 \end{align*}
 A coalgebra is \emph{final} if there exists a unique coalgebra morphism to any other coalgebra. This can be formalized by saying that there is a coalgebra $C : \Coalg\;F$ such that the type $\CoalgMor\;F\;C\;D$ is contractible for any other coalgebra $D$. These definitions are the same of Ahrens et al.~\cite{Ahrens2015}, which they only consider in the case of $F$ being a polynomial functor.
 
-We analyse two constructions of the final coalgebra for the finite bag functor: as an $\omega$-limit %(Section~\ref{sec:final-limit-set})
+We analyze two constructions of the final coalgebra for the finite bag functor: as an $\omega$-limit %(Section~\ref{sec:final-limit-set})
 and as a set-quotient of the final coalgebra of the $\List$ functor. %(Section~\ref{sec:final-quotient-set}).
 %% Describe limits in general.
 %% Maybe compare final coalgebras and corecursive algebras which are fixpoints.
@@ -464,7 +464,7 @@ The limit is a set, since all types in its diagram are sets.
 
 In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\pres{\FMSet} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: take $\ell_n\,(\pres{\FMSet} \,s)$ as $\Map{\FMSet}\,\ell_n \,s$. The function $\pres{\FMSet}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\pres{\FMSet}^{-1}$ provides a coalgebra for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
 
-Constructively, there are issues in proving that $\pres{\FMSet}$ is an equivalence. Its injectivity is equivalent to the \emph{lesser limited principle of omniscience} (\LLPO{}) \cite[{Ch.\@ 1}]{Bridges1987}. The latter is a weak version of the law of the excluded middle, and it is not provable from intuitionistic axioms alone.  It states that, given an infinite stream of boolean
+Constructively, there are issues in proving that $\pres{\FMSet}$ is an equivalence. Its injectivity is equivalent to the \emph{lesser limited principle of omniscience} (\LLPO{}) \cite[{Ch.\@ 1}]{Bridges1987}. The latter is a weak version of the law of the excluded middle, and it is not provable from intuitionistic axioms alone.  It states that, given an infinite stream of Boolean
 values that yields $\True$ in at most one position, one can decide
 whether all even or all odd positions are $\False$.
 Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is sufficient to find a bi-implication between them. %But first a useful lemma.
@@ -492,7 +492,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
 \end{theorem}
 \begin{proof}
   In this proof we use $\M$ instead of $\FMSet$. The statement of the theorem holds since $\M X$ is equivalent to $\FMSet X$. 
-  It is sufficent to show that the injectivity of $\pres{\M}$ implies that the following type is inhabited:
+  It is sufficient to show that the injectivity of $\pres{\M}$ implies that the following type is inhabited:
   \begin{equation}\label{eq:compl}
     \def\arraystretch{1.2}
     \begin{array}{l}
@@ -632,7 +632,7 @@ they will automatically respect the extra data,
 making them invariant under permutation for free.
 We define two equivalent type families $\Tote,\Bag : \Type → \Type$ of finite bags valued in groupoids,
 and substantiate the previous claims by showing that the set-truncation of the former is equivalent to $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
-and constructing the final coalgebra of the latter in a straighforward way %(\cref{ssec:FMGpdLim},
+and constructing the final coalgebra of the latter in a straightforward way %(\cref{ssec:FMGpdLim},
 (\cref{thm:FMGpdLim}).
 
 First, recall one way of defining finite sets in HoTT \cite{Frumin2018}.
@@ -809,7 +809,7 @@ The combination of \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote}, togethe
   %since $\Lim{\Bag}$ is a limit.
 \end{proof}
 %It seems highely unlikely that the coalgebra underlying the equivalence in \cref{thm:FMSetFixpointOfTrunc} is provably final without the assumption of any choice-like principles. Initial investigations show that, in order to construct a coalgebra morphism typed $X \to \SetTrunc{\Lim{\Bag}}$ from a coalgebra $c : X \to \FMSet X$, we need to assume the following principle: the function $\theta_{X,Y} : \SetTrunc{X \to Y} \to (X \to \SetTrunc{Y})$, which can be easily defined using  $\Rec{\SetTrunc{\Blank}}$, has a section for all types $X$ and $Y$. The proof of uniqueness of the mediating coalgebra morphism seems to additionally require an instance of the axiom of choice. We refrain from showing a proof of finality here, which we leave to future work. We do not know what is the strength of assuming the existence of a section for $\theta_{X,Y}$, nor how it compares to other choice principles. It surely resembles a form of choice: if set-truncation is replaced with propositonal truncation, then the required principle becomes a particular instance of the axiom of choice.
-We employ an alternative formulation of the axiom of choice, provably equivalent to more standard formulations~\cite{Veltri2021}. Given types $X,Y$ and a relation $R$ on $Y$, define the relation $X \to R$ on $X \to Y$ as the pointwise lifing of $R$ to functions. The axiom of choice states that the function $\theta_R : \SetQuot[(X \to Y)][(X \to R)] \to (X \to \SetQuot[Y][R])$, definable via $\Rec{\SetQuot[X \to Y][X \to R]}$, has a section. From the fact that $e : (\SetQuot[X][{=}]) \simeq \SetTrunc{X}$, the axiom of choice gives in particular a function $\psi : (X \to \SetTrunc{Y}) \to \SetTrunc{X \to Y}$ which is a right-inverse of $\theta_{=}$ (up to equivalence $e$).
+We employ an alternative formulation of the axiom of choice, provably equivalent to more standard formulations~\cite{Veltri2021}. Given types $X,Y$ and a relation $R$ on $Y$, define the relation $X \to R$ on $X \to Y$ as the pointwise lifting of $R$ to functions. The axiom of choice states that the function $\theta_R : \SetQuot[(X \to Y)][(X \to R)] \to (X \to \SetQuot[Y][R])$, definable via $\Rec{\SetQuot[X \to Y][X \to R]}$, has a section. From the fact that $e : (\SetQuot[X][{=}]) \simeq \SetTrunc{X}$, the axiom of choice gives in particular a function $\psi : (X \to \SetTrunc{Y}) \to \SetTrunc{X \to Y}$ which is a right-inverse of $\theta_{=}$ (up to equivalence $e$).
 \begin{theorem}\label{thm:final-set-truncation}
   Assuming axiom of choice, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$.
 \end{theorem}
@@ -957,7 +957,7 @@ The construction of the final coalgebra in Section~\ref{sec:coinductive} uses a 
 of a coinductive type destructor. This is an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). Recent work by Kristensen et al.~\cite{Kristensen2022} seems to indicate that final coalgebras of functors such as $\M$ or $\Op{Pfin}$, which are defined as HITs, should be definable as the \emph{strict} $\omega$-limit of the chain in (\ref{eq:chain}) in the cubical set model, a situation already observed in the category of setoids (\cref{thm:final-setoids}). Strictness means that the limit-property holds on the nose, not only up-to path equality. 
 
 
-\subsubsection{Acknowledgements}
+\subsubsection{Acknowledgments}
   This work was supported by the Estonian Research Council grant PSG749.
 
 %\nocite{*}
