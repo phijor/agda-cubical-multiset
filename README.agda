@@ -1,5 +1,38 @@
 {-# OPTIONS --safe #-}
 
+-- Prerequisites
+-- -------------
+--
+-- This library has been tested with the following software versions:
+--  * Agda v2.6.2.2
+--  * The Cubical library, commit ce3120d3f (25th May 2022):
+--      https://github.com/agda/cubical/tree/ce3120d3f8d692847b2744162bcd7a01f0b687eb
+--
+-- Type checking the code
+-- ----------------------
+--
+-- Type check the code by running Agda in Safe Mode:
+--
+-- $ agda --safe ./README.agda
+--
+-- The modules Multiset.Coinductive.* require the Agda extension of Sized Types.
+-- This is incompatible with Safe Mode, so check them like so:
+--
+-- $ agda --sized-types ./Multiset/Coinductive.agda
+--
+-- Alternatively, use the provided Nix flake (see file flake.nix) to reproducibly
+-- type check the library with all dependencies pinned to working versions:
+--
+-- $ nix build
+--
+-- A development shell that includes all of the dependencies can be spawned via
+--
+-- $ nix shell
+-- (nix-shell) which agda
+-- /nix/store/dfr3d08mx77isqzkgxnm0vr2rrfpc20x-agdaWithPackages-2.6.2.2/bin/agda
+-- (nix-shell) $ agda --safe ./README.agda
+-- ...
+
 module README where
 
 open import Multiset.Prelude
