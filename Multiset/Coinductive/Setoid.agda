@@ -99,16 +99,15 @@ module _
   anaMSEq x = reflRelator (reflExtEq ∞) _
 
 -- uniqueness
-  anaPfinUniq' : (fS : S →S νMS)
+  anaMSUniq' : (fS : S →S νMS)
     → (∀ (s : Size) x → Relator (ExtEq s) (subtrees (fS .mor x)) (mapList (fS .mor) (c x)))
     → (j : Size) → ∀ x → ExtEq j (fS .mor x) (anaTree c ∞ x)
-  subtreesE (anaPfinUniq' fS fSeq j x) {k} = 
+  subtreesE (anaMSUniq' fS fSeq j x) {k} =
     transRelator (transExtEq k)
                  (fSeq k x)
-                 (ListRel→Relator (symExtEq k) (mapListRel-fun (anaPfinUniq' fS fSeq k) _))
+                 (ListRel→Relator (symExtEq k) (mapListRel-fun (anaMSUniq' fS fSeq k) _))
 
-  anaPfinUniq : (fS : S →S νMS)
+  anaMSUniq : (fS : S →S νMS)
     → subtreesS ∘S fS ≡S mapMS fS ∘S cS
     → fS ≡S anaMS
-  anaPfinUniq fS fSeq = anaPfinUniq' fS (λ s x → fSeq x .fst , fSeq x .snd) ∞
-
+  anaMSUniq fS fSeq = anaMSUniq' fS (λ s x → fSeq x .fst , fSeq x .snd) ∞
