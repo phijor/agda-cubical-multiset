@@ -108,14 +108,11 @@ module _ (F : Type → Type) {{ FunctorF : Functor F }} where
     map (!^ n ∘ cut (suc n)) x       ≡⟨ cong (λ f → map f x) (cut-is-lim n) ⟩∎
     map (cut n) x ∎
 
-isLimitPreserving' : (F : Type → Type) → {{ Functor F }} → Type
-isLimitPreserving' F = isEquiv (pres F)
-
 isLimitPreserving : (F : Type → Type) → {{ Functor F }} → Type
-isLimitPreserving F = F (Lim F) ≃ ShLim F
+isLimitPreserving F = isEquiv (pres F)
 
 fix : ∀ {F}
   → {{FunctorF : Functor F}}
   → isLimitPreserving F
   → F (Lim F) ≃ Lim F
-fix {F = F} pres = pres ∙ₑ ShLim≃Lim F
+fix {F = F} is-lim-pres = (pres F , is-lim-pres) ∙ₑ ShLim≃Lim F

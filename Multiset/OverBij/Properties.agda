@@ -166,8 +166,11 @@ zipUnzipIsoInv≡pres = funExt λ xs → ShLimPathPExt Bag (λ n → refl) (is-l
       is-lim′         ≡⟨ lUnit is-lim′ ⟩∎
       refl ∙ is-lim′  ∎
 
+isEquivUnzip : isEquiv (zipUnzipIso .inv)
+isEquivUnzip = isoToIsEquiv (invIso zipUnzipIso)
+
 isLimitPreservingBag : isLimitPreserving Bag
-isLimitPreservingBag = isoToEquiv (invIso zipUnzipIso)
+isLimitPreservingBag = subst isEquiv zipUnzipIsoInv≡pres isEquivUnzip
 
 bagLimitEquiv : Bag (Lim Bag) ≃ Lim Bag
 bagLimitEquiv = TerminalChain.fix isLimitPreservingBag
