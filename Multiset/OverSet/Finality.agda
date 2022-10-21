@@ -20,8 +20,7 @@ open import Multiset.OverBij.Base as OverBij
     ; ⟨Bij→FinSet⟩≃Idx
     )
 open import Multiset.OverBij.Properties as OverBij
---  using (bagLimitIso)
-  renaming (ωTree to BagLim)
+  using (BagLim ; bagLimitEquiv)
 
 
 open import Cubical.Foundations.Equiv
@@ -64,10 +63,10 @@ module _
 -- -- BagLim is the final coalgebra of Bag [Ahrens 2015]
   (ana : {X : Type} → (c : X → Bag X) → X → BagLim)
   (anaEq : {X : Type} (c : X → Bag X) 
-    → ana c ≡ Iso.inv bagLimitIso ∘ OverBij.map (ana c) ∘ c)
+    → ana c ≡ OverBij.fix⁺ ∘ OverBij.map (ana c) ∘ c)
   (anaUniq : {X : Type} (c : X → Bag X)
     → (h : X → BagLim)
-    → h ≡ Iso.inv bagLimitIso ∘ (OverBij.map h) ∘ c
+    → h ≡ OverBij.fix⁺ ∘ (OverBij.map h) ∘ c
     → ana c ≡ h)
 
 -- -- ∥ Bag Y ∥₂ is naturally equivalent to FMSet Y, which follows from Theorems 6 and 8.
@@ -101,12 +100,12 @@ module _
 
 
   unfold : FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂
-  unfold = compEquiv STInvariance.STInvarianceEquiv (compEquiv (invEquiv e) (setTruncEquiv (invEquiv bagLimitEquiv)))
+  unfold = compEquiv STInvariance.STInvarianceEquiv (compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv))
 
-  unfoldEq : compEquiv (invEquiv (STInvariance.STInvarianceEquiv)) unfold ≡ compEquiv (invEquiv e) (setTruncEquiv (invEquiv bagLimitEquiv))
+  unfoldEq : compEquiv (invEquiv (STInvariance.STInvarianceEquiv)) unfold ≡ compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv)
   unfoldEq =
     compEquiv-assoc _ _ _
-    ∙ cong (λ x → compEquiv x (compEquiv (invEquiv e) (setTruncEquiv (invEquiv bagLimitEquiv)))) (invEquiv-is-linv _)
+    ∙ cong (λ x → compEquiv x (compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv))) (invEquiv-is-linv _)
     ∙ compEquivIdEquiv _
   
   recColl₂ : {X Y A : Type} → isSet A
@@ -173,8 +172,8 @@ module _
                  (λ c → isSetΠ (λ _ → isSetSetTrunc) _ _)
                  (λ c → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c
                         ∙ cong (∣_∣₂ ∘_) (anaEq c)
-                        ∙ cong (λ x → ST.map (Iso.inv bagLimitIso) ∘ x ∘ ST.map (OverBij.map (ana c)) ∘ ∣_∣₂ ∘ c) (sym (funExt (retEq e)))
-                        ∙ cong (λ x → ST.map (Iso.inv bagLimitIso) ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (eNat (ana c))
+                        ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ x ∘ ST.map (OverBij.map (ana c)) ∘ ∣_∣₂ ∘ c) (sym (funExt (retEq e)))
+                        ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (eNat (ana c))
                         ∙ cong (λ x → x ∘ OverSet.map (ana c) ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (cong equivFun unfoldEq))
                         ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (funExt (mapComp ∣_∣₂ (ana c))) 
                         ∙ cong (λ x → equivFun unfold ∘ OverSet.map x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c)))
@@ -194,8 +193,8 @@ module _
                                       λ h eq → let eq' = eq
                                                          ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (funExt (OverSet.mapComp ∣_∣₂ h)))
                                                          ∙ cong (λ x → x ∘ OverSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c) (cong equivFun unfoldEq)
-                                                         ∙ cong (λ x → ST.map (Iso.inv bagLimitIso) ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (sym (eNat h))
-                                                         ∙ cong (λ x → ST.map (Iso.inv bagLimitIso) ∘ x ∘ ST.map (OverBij.map h) ∘ ∣_∣₂ ∘ c) (funExt (retEq e)) in
+                                                         ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (sym (eNat h))
+                                                         ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ x ∘ ST.map (OverBij.map h) ∘ ∣_∣₂ ∘ c) (funExt (retEq e)) in
                                                 elimCollProp₁ (λ _ → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ ∣_∣₂ ∘ h)
                                                               (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _)
                                                               (λ eq'' → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ∙ cong (∣_∣₂ ∘_) (anaUniq c h (funExt eq'')))

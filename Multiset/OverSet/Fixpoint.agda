@@ -16,8 +16,7 @@ open import Multiset.OverBij.Base as OverBij
     ; ⟨Bij→FinSet⟩≃Idx
     )
 open import Multiset.OverBij.Properties as OverBij
-  using (bagLimitIso)
-  renaming (ωTree to BagLim)
+  using (bagLimitEquiv ; BagLim)
 
 
 open import Cubical.Foundations.Equiv
@@ -49,7 +48,7 @@ module _ (does-not-compute : (Σ[ x ∈ Bij ] (Vect BagLim x)) ≃ (Σ[ B ∈ Fi
 
     step : BagLim ≃ (Tote BagLim)
     step =
-      (BagLim)              ≃⟨ isoToEquiv bagLimitIso ⟩
+      (BagLim)              ≃⟨ invEquiv bagLimitEquiv ⟩
       (Bag BagLim)          ≃⟨ isoToEquiv BagIsoΣ ⟩
       (Σ Bij (Vect BagLim)) ≃⟨ does-not-compute ⟩
       (Tote BagLim)         ■

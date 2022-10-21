@@ -103,6 +103,9 @@ isGroupoidBag gpdX = isOfHLevelRetractFromIso 3 BagIsoΣ (isGroupoidΣ isGroupoi
 map : (f : X → Y) → (Bag X → Bag Y)
 map f ⟅ members ⟆ = ⟅ f ∘ members ⟆
 
+mapId : (xs : Bag X) → map (λ x → x) xs ≡ xs
+mapId xs = refl
+
 map∘map : ∀ {Z : Type ℓ} → (f : X → Y) (g : Y → Z)
   → (xs : Bag X)
   → map g (map f xs) ≡ map (g ∘ f) xs
