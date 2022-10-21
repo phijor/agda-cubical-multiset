@@ -7,15 +7,15 @@ open import Multiset.Util using (!_)
 open import Multiset.OverBij.Base as OverBij
   using
     ( Bag ; BagIsoΣ
-    ; ⟅⟆-syntax
+    ; ⟅_⟆ ; ⟅⟆-syntax
     ; map
     ; Idx
     ; Vect
     ; BagPathExt ; BagPathP
     )
 open import Multiset.Bij as Bij
-open import Multiset.Chains using (Chain ; module Limit)
-open import Multiset.Chains.FunctorChain as FunctorChain
+open import Multiset.Limit.Chain as Chain using (Limit ; lim ; Chain)
+open import Multiset.Limit.TerminalChain as TerminalChain hiding (cut ; pres)
 open import Multiset.Util.Path
   using
     ( subst⁻-filler
@@ -47,8 +47,7 @@ private
     ℓ : Level
 
 open Bag using (card ; members)
-open Limit using (lim ; ChainLimit)
-open ChainLimit using (elements ; isChainLimit)
+open Limit using (elements ; is-lim)
 
 instance
   BagFunctor : Functor Bag
@@ -64,27 +63,6 @@ BagUnit≃Bij = isoToEquiv BagIsoΣ ∙ₑ Σ.Σ-contractSnd {B = λ (x : Bij) �
 private
   !^ : ∀ n → Bag ^ (suc n) → Bag ^ n
   !^ n = Bag map-!^ n
-
--- Zipping and unzipping non-wellfounded trees
-
-{- Unzipping
-
-Given a bag of non-wellfounded trees, we can "unzip" it into
-a limiting sequences of bags of trees.
-
-At step n in the sequence, the resulting bag contains a tree
-of depth n, obtained by mapping the "cut at depth n"-function
-over the input bag.
--}
-module Unzip (trees : Bag (Lim Bag)) where
-  unzip : (n : ℕ) → Bag (Bag ^ n)
-  unzip n = OverBij.map (λ tree → tree .elements n) trees
-
-  isChainLimitUnzip : (n : ℕ) → map (!^ n) (unzip (suc n)) ≡ unzip n
-  isChainLimitUnzip n = BagPathExt (λ idx → trees .members idx .isChainLimit n)
-
-  unzipped : ShLim Bag
-  unzipped = lim unzip isChainLimitUnzip
 
 open Iso
 
@@ -146,7 +124,7 @@ zipUnzipIso =
   vectChain card .Chain.π n = !^ n ∘_
 
   VectLimit : (card : Bij) → Type
-  VectLimit card = Limit.ChainLimit (vectChain card)
+  VectLimit card = Chain.Limit (vectChain card)
 
   toVectLimit : (card : Bij) → Iso (TraceFirst-snd (constTrace card)) (VectLimit card)
   toVectLimit card = go where
@@ -171,19 +149,28 @@ zipUnzipIso =
       ( bagOfTrees .card
       , lim
         (λ n idx → bagOfTrees .members idx .elements n)
-        (λ n → funExt λ idx → bagOfTrees .members idx .isChainLimit n)
+        (λ n → funExt λ idx → bagOfTrees .members idx .is-lim n)
       )
     go .rightInv _ = refl
     go .leftInv _ = refl
 
-zipUnzipIsoInv≡unzipped : zipUnzipIso .inv ≡ Unzip.unzipped
-zipUnzipIsoInv≡unzipped = refl
+zipUnzipIsoInv≡pres : zipUnzipIso .inv ≡ TerminalChain.pres Bag
+zipUnzipIsoInv≡pres = funExt λ xs → ShLimPathPExt Bag (λ n → refl) (is-lim-coh xs) where
+  open import Cubical.Foundations.GroupoidLaws using (lUnit)
+
+  module _ (xs : Bag (Lim Bag)) (n : ℕ) where
+    is-lim′ = zipUnzipIso .inv xs .is-lim n
+
+    is-lim-coh : is-lim′ ≡ TerminalChain.pres Bag xs .is-lim n
+    is-lim-coh =
+      is-lim′         ≡⟨ lUnit is-lim′ ⟩∎
+      refl ∙ is-lim′  ∎
 
 isLimitPreservingBag : isLimitPreserving Bag
 isLimitPreservingBag = isoToEquiv (invIso zipUnzipIso)
 
 bagLimitEquiv : Bag (Lim Bag) ≃ Lim Bag
-bagLimitEquiv = FunctorChain.fix isLimitPreservingBag
+bagLimitEquiv = TerminalChain.fix isLimitPreservingBag
 
 fix⁺ : Bag (Lim Bag) → Lim Bag
 fix⁺ = equivFun bagLimitEquiv

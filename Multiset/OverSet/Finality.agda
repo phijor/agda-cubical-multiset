@@ -6,10 +6,7 @@ open import Cubical.Foundations.Everything
 open import Multiset.Prelude
 open import Multiset.Util.SetTruncation using (setTruncEquiv)
 open import Multiset.OverGroupoid as OverGroupoid renaming (FMSet to Tote)
-open import Multiset.OverSet as OverSet 
-open import Multiset.Chains
-open Limit
-open ChainLimit
+open import Multiset.OverSet as OverSet
 
 open import Multiset.Bij
 open import Multiset.OverBij.Base as OverBij

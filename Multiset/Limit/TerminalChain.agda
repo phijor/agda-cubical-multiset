@@ -1,11 +1,11 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.Chains.FunctorChain where
+module Multiset.Limit.TerminalChain where
 
 open import Multiset.Prelude
 open import Multiset.Util using (!_)
 open import Multiset.Util.Square using (kiteFiller)
-open import Multiset.Chains
+open import Multiset.Limit.Chain
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function
@@ -24,8 +24,8 @@ record Functor (F : Type → Type) : Type₁ where
 
 module _ (F : Type → Type) {{ FunctorF : Functor F }} where
   open Chain
-  open Limit.ChainLimit
-    using (elements ; isChainLimit)
+  open Limit
+    using (elements ; is-lim)
 
   open Functor FunctorF using (map ; map-id ; map-comp)
 
@@ -52,17 +52,23 @@ module _ (F : Type → Type) {{ FunctorF : Functor F }} where
 
   sh = shift ch
 
-  Lim = Limit.ChainLimit ch
-  ShLim = Limit.ChainLimit sh
+  Lim = Limit ch
+  ShLim = Limit sh
 
   isLim : (el : (n : ℕ) → F^ n) → Type
-  isLim = Limit.IsChainLimit ch
+  isLim = isLimit ch
 
   isShLim : (el : (n : ℕ) → F^ suc n) → Type
-  isShLim = Limit.IsChainLimit sh
+  isShLim = isLimit sh
 
-  LimPathPExt = Limit.ChainLimitPathPExt ch
-  ShLimPathPExt = Limit.ChainLimitPathPExt (shift ch)
+  LimPathPExt = LimitPathPExt ch
+  ShLimPathPExt = LimitPathPExt (shift ch)
+
+  isSet→LimPath : (∀ k → isSet (F^ k)) → ∀ {lim₁ lim₂} → (∀ n → lim₁ .elements n ≡ lim₂ .elements n) → lim₁ ≡ lim₂
+  isSet→LimPath setF = isSet→LimitPathExt ch setF
+
+  isSet→ShLimPath : (∀ k → isSet (F^ suc k)) → ∀ {shlim₁ shlim₂} → (∀ n → shlim₁ .elements n ≡ shlim₂ .elements n) → shlim₁ ≡ shlim₂
+  isSet→ShLimPath setF = isSet→LimitPathExt (shift ch) setF
 
   isShLim→isLim : ∀ {el : (n : ℕ) → F^ suc n} → isShLim el → isLim (λ n → !^ n (el n))
   isShLim→isLim {el} is-shlim n = cong (!^ n) (is-shlim n)
@@ -72,44 +78,38 @@ module _ (F : Type → Type) {{ FunctorF : Functor F }} where
 
   ShLim→Lim : ShLim → Lim
   ShLim→Lim sh .elements n = !^ n (sh .elements n)
-  ShLim→Lim sh .isChainLimit = isShLim→isLim (sh .isChainLimit)
+  ShLim→Lim sh .is-lim = isShLim→isLim (sh .is-lim)
 
   Lim→ShLim : Lim → ShLim
-  Lim→ShLim lim .elements = lim .elements ∘ suc
-  Lim→ShLim lim .isChainLimit = isLim→isShLim (lim .isChainLimit)
+  Lim→ShLim l .elements = l .elements ∘ suc
+  Lim→ShLim l .is-lim = isLim→isShLim (l .is-lim)
 
   open Iso
 
   ShiftedLimitIso : Iso ShLim Lim
   ShiftedLimitIso .fun = ShLim→Lim
   ShiftedLimitIso .inv = Lim→ShLim
-  ShiftedLimitIso .rightInv lim = LimPathPExt (lim .isChainLimit) λ n → kiteFiller
-  ShiftedLimitIso .leftInv sh = ShLimPathPExt (sh .isChainLimit) λ n → kiteFiller
+  ShiftedLimitIso .rightInv (lim _ is-lim) = LimPathPExt is-lim λ n → kiteFiller
+  ShiftedLimitIso .leftInv (lim _ is-shlim) = ShLimPathPExt is-shlim λ n → kiteFiller
 
   ShLim≃Lim : ShLim ≃ Lim
   ShLim≃Lim = isoToEquiv ShiftedLimitIso
 
-  isWidePullback : (x : F^ 1) → (el : (n : ℕ) → F^ suc n) → Type
-  isWidePullback x el = ∀ n → map !_ (el n) ≡ x
+  cut : (n : ℕ) → Lim → F^ n
+  cut n l = l .elements n
 
-  isOfHLevelHasTrace : ∀ {x₀} {el} {n}
-    → isOfHLevel (suc n) (F^ 1)
-    → isOfHLevel n (isWidePullback x₀ el)
-  isOfHLevelHasTrace {x₀} {el} {n = n} lvl = isOfHLevelΠ n λ k → isOfHLevelPath' n lvl (map !_ (el k)) x₀
+  cut-is-lim : ∀ n → (!^ n) ∘ cut (suc n) ≡ cut n
+  cut-is-lim n = funExt λ l → l .is-lim n
 
-  isShLim→isWidePullback : (shlim : ShLim) → isWidePullback (shlim .elements 0) (shlim .elements)
-  isShLim→isWidePullback shlim zero = map-id (shlim .elements 0)
-  isShLim→isWidePullback shlim@(Limit.lim el islim) (suc n) =
-    map (!_)             (el (suc n))  ≡⟨⟩
-    map (!_ ∘ !^ n)      (el (suc n))  ≡⟨ #1 ⟩
-    map (!_) (map (!^ n) (el (suc n))) ≡⟨ #2 ⟩
-    map (!_) (el n)                    ≡⟨ #3 ⟩
-    shlim .elements 0 ∎ where
+  pres : F Lim → ShLim
+  pres x .elements n = map (cut n) x
+  pres x .is-lim n =
+    map (!^ n) (map (cut (suc n)) x) ≡⟨ sym (map-comp (!^ n) (cut (suc n)) x) ⟩
+    map (!^ n ∘ cut (suc n)) x       ≡⟨ cong (λ f → map f x) (cut-is-lim n) ⟩∎
+    map (cut n) x ∎
 
-    #1 = map-comp !_ (!^ n) (el (suc n))
-    #2 = cong (map !_) (islim n)
-    #3 = isShLim→isWidePullback shlim n
-
+isLimitPreserving' : (F : Type → Type) → {{ Functor F }} → Type
+isLimitPreserving' F = isEquiv (pres F)
 
 isLimitPreserving : (F : Type → Type) → {{ Functor F }} → Type
 isLimitPreserving F = F (Lim F) ≃ ShLim F

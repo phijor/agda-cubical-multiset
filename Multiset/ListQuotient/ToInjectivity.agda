@@ -6,8 +6,8 @@ open import Multiset.Prelude
 open import Multiset.Util using (!_ ; isInjective ; isSurjective)
 open import Multiset.ListQuotient.Base
 
-open import Multiset.Chains
-open import Multiset.Chains.FunctorChain
+open import Multiset.Limit.Chain using (Limit)
+open import Multiset.Limit.TerminalChain as TerminalChain hiding (cut ; pres)
 
 open import Multiset.Omniscience using (LLPO)
 
@@ -41,7 +41,7 @@ instance
   FunctorM .Functor.map-id = mapM-id
   FunctorM .Functor.map-comp = mapM-comp
 
-open Limit.ChainLimit
+open Limit
 
 decEqM^ : (n : ℕ) → Discrete (M ^ n)
 decEqM^ zero xs ys = yes refl
@@ -69,35 +69,23 @@ rep!^ (suc n) k k≤n x with ≤-suc-cases k n k≤n
 ... | inl p = rep!^ n k p (!^ n x)
 ... | inr p = J (λ k _ → M ^ k) x (sym p)
 
-isSetUnorderedTree : ∀ {n} → isSet (M ^ n)
-isSetUnorderedTree {zero} = Unit.isSetUnit
-isSetUnorderedTree {suc n} = isSetM
-
 limitPath : ∀ {lim₁ lim₂} → (∀ n → lim₁ .elements n ≡ lim₂ .elements n) → lim₁ ≡ lim₂
-limitPath = Limit.isSet→ChainLimitPathExt (ch M) (λ k → isSetUnorderedTree {k})
+limitPath = isSet→LimPath M
+  λ { 0 → Unit.isSetUnit
+    ; (suc n) → isSetM
+    }
 
 shiftedLimitPath : ∀ {shlim₁ shlim₂} → (∀ n → shlim₁ .elements n ≡ shlim₂ .elements n) → shlim₁ ≡ shlim₂
-shiftedLimitPath = Limit.isSet→ChainLimitPathExt (shift (ch M)) (λ k → isSetM)
+shiftedLimitPath = isSet→ShLimPath M λ k → isSetM
 
 module _ where
   open Limit
-  open ChainLimit
 
   cut : (n : ℕ) → Lim M → M ^ n
-  cut n l = l .elements n
+  cut = TerminalChain.cut M
 
-  zip₁ : M (Lim M) → ∀ n → M (M ^ n)
-  zip₁ xs n = mapM (cut n) xs
-
-  zip₁-islim : (xs : M (Lim M)) → isShLim M (zip₁ xs)
-  zip₁-islim xs n =
-    sym (mapM-comp (!^ n) (cut (suc n)) xs)
-    ∙ cong (λ f → mapM f xs) (funExt (λ l → l .isChainLimit n))
-
-zip : M (Lim M) → ShLim M
-zip xs .Limit.ChainLimit.elements = zip₁ xs
-zip xs .Limit.ChainLimit.isChainLimit = zip₁-islim xs
-
+pres : M (Lim M) → ShLim M
+pres = TerminalChain.pres M
 
 rep!Eq : (x : Lim M)
   → ∀ n k (le : k NatOrder.≤ n)
@@ -105,7 +93,7 @@ rep!Eq : (x : Lim M)
 rep!Eq x zero k le =
   J (λ k eq → J (λ k _ → M ^ k) (cut 0 x) eq ≡ cut k x) (JRefl {x = 0} (λ k _ → M ^ k) _) (sym (≤0→≡0 le))
 rep!Eq x (suc n) k le with ≤-suc-cases k n le
-... | inl p = cong (rep!^ n k p) (x .isChainLimit n) ∙ rep!Eq x n k p
+... | inl p = cong (rep!^ n k p) (x .is-lim n) ∙ rep!Eq x n k p
 ... | inr p = J (λ k eq → J (λ k _ → M ^ k) (cut (suc n) x) eq ≡ cut k x) (JRefl {x = suc n} (λ k _ → M ^ k) _) (sym p)
 
 parity : (a : ℕ → Bool) → Bool → ℕ → Bool
@@ -200,20 +188,20 @@ parity-odd' a (suc n) odd eqt eqf with dichotomyBool (a 0)
 ... | k , false , p , le , eq' , r = _ , _ , p , suc-≤-suc le , eq' , cong (λ b → if b and false or not b and true then false else parity (a ∘ suc) true k) q ∙ r
 ... | k , true , p , le , eq' , r = _ , _ , p , suc-≤-suc le , eq' , cong (λ b → if b and false or not b and true then false else parity (a ∘ suc) true k) q ∙ r
 
-llpo⇒zip-inj : LLPO → isInjective zip
-llpo⇒zip-inj llpo =
+llpo⇒pres-inj : LLPO → isInjective pres
+llpo⇒pres-inj llpo =
   elimProp2 (λ _ _ → isPropΠ (λ _ → isSetM _ _))
-            (λ xs ys zip-eq →
-              eq/ _ _ (zip-inj' xs ys
+            (λ xs ys pres-eq →
+              eq/ _ _ (pres-inj' xs ys
                          (λ n → effective (isPropRelator _≡_)
                                            (isEquivRelRelator isEquivRel≡)
                                            _ _
-                                           (funExt⁻ (cong Limit.ChainLimit.elements zip-eq) n) .fst) ,
-                       zip-inj' ys xs
+                                           (funExt⁻ (cong elements pres-eq) n) .fst) ,
+                       pres-inj' ys xs
                          (λ n → effective (isPropRelator _≡_)
                                            (isEquivRelRelator isEquivRel≡)
                                            _ _
-                                           (funExt⁻ (cong Limit.ChainLimit.elements (sym zip-eq)) n) .fst)))
+                                           (funExt⁻ (cong elements (sym pres-eq)) n) .fst)))
   where
     compl :  (x : Lim M) (ys : List (Lim M))
       → (∀ n → ∥ cut n x ∈ List.map (cut n) ys ∥₁)
@@ -306,9 +294,9 @@ llpo⇒zip-inj llpo =
         case-even-gen r n with decEven n
         ... | inl ev = case-even r n ev
         ... | inr odd =
-          sym (x .isChainLimit n)
+          sym (x .is-lim n)
           ∙ cong (!^ n) (case-even r (suc n) odd)
-          ∙ y .isChainLimit n
+          ∙ y .is-lim n
 
         case-odd : (∀ n → isOddT n → par n ≡ false)
           → ∀ n → isOddT n → cut n x ∈ List.map (cut n) ys
@@ -323,21 +311,21 @@ llpo⇒zip-inj llpo =
         ... | inl ev =
           let (y , my , eqy) = pre∈mapList (case-odd r (suc n) ev)
           in subst (λ z → z ∈ List.map (cut n) ys)
-                   (sym (y .isChainLimit n)
+                   (sym (y .is-lim n)
                     ∙ cong (!^ n) eqy
-                    ∙ x .isChainLimit n)
+                    ∙ x .is-lim n)
                    (∈mapList my)
 
-    zip-inj' : (xs ys : List (Lim M))
+    pres-inj' : (xs ys : List (Lim M))
       → (∀ n → DRelator _≡_ (List.map (cut n) xs) (List.map (cut n) ys))
       → DRelator _≡_ xs ys
-    zip-inj' [] ys drel = nil
-    zip-inj' (x ∷ xs) ys drel =
+    pres-inj' [] ys drel = nil
+    pres-inj' (x ∷ xs) ys drel =
       PT.rec (isPropDRelator _ _ _)
         (λ m → cons ∣ x ,
                       refl ,
                       m ,
-                      zip-inj' xs (remove ys m)
+                      pres-inj' xs (remove ys m)
                         (λ n → PT.rec (isPropDRelator _ _ _)
                                        (λ d →  subst (DRelator _≡_ (map (cut n) xs))
                                                      (sym (remove-mapList m))

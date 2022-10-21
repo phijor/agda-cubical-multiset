@@ -8,8 +8,8 @@ open import Multiset.Util using (!_)
 open import Multiset.OverSet.Base as FMSet
 open import Multiset.OverSet.Properties as FMSet
 
-open import Multiset.Chains
-open import Multiset.Chains.FunctorChain
+open import Multiset.Limit.Chain as Chain
+open import Multiset.Limit.TerminalChain as TerminalChain hiding (cut ; pres)
 
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Equiv
@@ -30,33 +30,20 @@ instance
   FunctorFMSet .Functor.map-id = FMSet.mapId
   FunctorFMSet .Functor.map-comp = λ { g f xs → sym (mapComp g f xs) }
 
-open Limit.ChainLimit using (elements ; isChainLimit)
+open Limit using (elements ; is-lim)
 
 !^ : ∀ n → FMSet ^ (suc n) → FMSet ^ n
 !^ n = FMSet map-!^ n
 
 shiftedLimitPath : ∀ {shlim₁ shlim₂} → (∀ n → shlim₁ .elements n ≡ shlim₂ .elements n) → shlim₁ ≡ shlim₂
-shiftedLimitPath = Limit.isSet→ChainLimitPathExt (shift (ch FMSet)) (λ k → isSetFMSet)
+shiftedLimitPath = isSet→ShLimPath FMSet λ k → isSetFMSet
 
 private
   cut : (n : ℕ) → Lim FMSet → FMSet ^ n
-  cut n tree = tree .elements n
+  cut = TerminalChain.cut FMSet
 
-zip : FMSet (Lim FMSet) → ShLim FMSet
-zip xs = Limit.lim trees islim where
-  trees : (n : ℕ) → FMSet ^ (suc n)
-  trees n = FMSet.map (cut n) xs
-
-  islim : ∀ n → !^ (suc n) (trees (suc n)) ≡ trees n
-  islim n = FMSet.elimProp {P = λ xs → !^ (suc n) (map (cut (suc n)) xs) ≡ map (cut n) xs}
-    (λ xs → isSetFMSet _ (FMSet.map (cut n) xs)) goal xs where
-    module _ {sz} (xs : Fin sz → Lim FMSet) where
-      goal : map (!^ n) (map (cut (suc n)) (sz , [ xs ]∼)) ≡ map (cut n) (sz , [ xs ]∼)
-      goal =
-        map (!^ n) (map (cut (suc n)) (sz , [ xs ]∼)) ≡⟨⟩
-        (sz , [ (!^ n) ∘ cut (suc n) ∘ xs ]∼)         ≡⟨ FMSetPathP (refl {x = sz}) (cong [_]∼ (funExt λ k → xs k .isChainLimit n)) ⟩
-        (sz , [ (cut n) ∘ xs ]∼)                      ≡⟨⟩
-        map (cut n) (sz , [ xs ]∼)                    ∎
+pres : FMSet (Lim FMSet) → ShLim FMSet
+pres = TerminalChain.pres FMSet
 
 isShLim→ConstSizeSuc :
   (xs : (n : ℕ) → FMSet ^ (suc n))
@@ -74,7 +61,7 @@ isShLim→ConstSize xs islim = prf where
   prf (suc n) = isShLim→ConstSizeSuc xs islim n ∙ prf n
 
 ShLim→ConstSize : (l : ShLim FMSet) → ∀ n → l .elements n .size ≡ l .elements 0 .size
-ShLim→ConstSize l = isShLim→ConstSize (l .elements) (l .isChainLimit)
+ShLim→ConstSize l = isShLim→ConstSize (l .elements) (l .is-lim)
 
 open import Multiset.AxiomChoice using (elimCollProp ; hasChoice ; [_⇒-d_]/_ ; θ-d ; PW-d)
 
@@ -98,20 +85,18 @@ module Surjectivity
   (chose-perm : ∀ {X : Type} sz {v w : Fin sz → X} → v ∼ w → Σ[ σ ∈ (Fin sz ≃ Fin sz) ] v ≡ w ∘ (equivFun σ))
   where
 
-  open Limit using (lim)
-
   module ConstSize (sz : ℕ) (xs : (d : Depth) → PVect (FMSet ^ (undepth d)) sz) where
     constSzLim : (d : Depth) → FMSet ^ (suc (undepth d))
     constSzLim d = sz , xs d
 
-    inhFibers : (islim : isShLim FMSet (constSzLim ∘ depth)) → ∥ fiber zip (lim (constSzLim ∘ depth) islim) ∥₁
+    inhFibers : (islim : isShLim FMSet (constSzLim ∘ depth)) → ∥ fiber pres (lim (constSzLim ∘ depth) islim) ∥₁
     inhFibers = elimCollProp {A = Depth} (λ d → Fin sz → FMSet ^ (undepth d))
       (λ _ → SymmetricAction sz) (λ _ → isPropValued-∼ sz) (λ _ → isEquivRel-∼ sz)
       (choice sz) (choice-sec sz)
       Motive isPropMotive goal xs where
 
       Motive : (∀ d → (Fin sz → FMSet ^ undepth d) / SymmetricAction sz) → Type
-      Motive = λ approx → (islim : isShLim FMSet λ d → sz , approx (depth d)) → ∥ fiber zip (lim (λ d → sz , approx (depth d)) islim) ∥₁
+      Motive = λ approx → (islim : isShLim FMSet λ d → sz , approx (depth d)) → ∥ fiber pres (lim (λ d → sz , approx (depth d)) islim) ∥₁
 
       isPropMotive : ∀ d → isProp (Motive d)
       isPropMotive d = isPropΠ λ _ → PT.isPropPropTrunc
@@ -161,7 +146,7 @@ module Surjectivity
 
         preimage-members : (Fin sz → Lim FMSet)
         preimage-members k .elements = approx' k
-        preimage-members k .isChainLimit = islim-approx' k
+        preimage-members k .is-lim = islim-approx' k
 
         preimage : FMSet (Lim FMSet)
         preimage = (sz , [ preimage-members ]∼)
@@ -169,14 +154,14 @@ module Surjectivity
         approx'∼approx : ∀ d → (λ k → approx' k d) ∼ approx (depth d)
         approx'∼approx d = FMSet.invariantˡ sz (ρs d)
 
-        preimage-in-fiber : ∀ n → zip preimage .elements n ≡ (sz , [ approx (depth n) ]∼)
+        preimage-in-fiber : ∀ n → pres preimage .elements n ≡ (sz , [ approx (depth n) ]∼)
         preimage-in-fiber n =
-          zip preimage .elements n ≡⟨⟩
+          pres preimage .elements n ≡⟨⟩
           (sz , [ (λ x → (approx' x n)) ]∼) ≡⟨ FMSetPath _ _ (approx'∼approx n) ⟩
           (sz , [ approx (depth n) ]∼) ∎
 
-  inhFibers : (base : ShLim FMSet) → ∥ fiber zip base ∥₁
-  inhFibers base = subst (λ l → ∥ fiber zip l ∥₁) (shiftedLimitPath (sym ∘ elements-path)) (ConstSize.inhFibers (base .elements 0 .size) xs islim-xs) where
+  inhFibers : (base : ShLim FMSet) → ∥ fiber pres base ∥₁
+  inhFibers base = subst (λ l → ∥ fiber pres l ∥₁) (shiftedLimitPath (sym ∘ elements-path)) (ConstSize.inhFibers (base .elements 0 .size) xs islim-xs) where
 
     sz = base .elements 0 .size
 
@@ -195,4 +180,4 @@ module Surjectivity
       (ConstSize.constSzLim (base .elements 0 .size) xs ∘ depth) d ∎
 
     islim-xs : isShLim FMSet xs-elems
-    islim-xs d = cong (!^ (suc d)) (sym (elements-path (suc d))) ∙∙ (base .isChainLimit d) ∙∙ elements-path d
+    islim-xs d = cong (!^ (suc d)) (sym (elements-path (suc d))) ∙∙ (base .is-lim d) ∙∙ elements-path d

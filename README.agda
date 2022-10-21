@@ -132,29 +132,43 @@ module _ {A : Type} (setA : isSet A) (R : A → A → Type) (linR : isLinOrder R
 -- 4 The Final Coalgebra in Sets
 
 -- 4.1 As an ω-Limit
-open import Multiset.Chains.FunctorChain
+open import Multiset.Limit.TerminalChain as TerminalChain
   using
-    ( Lim -- The limit of a type-functor
+    ( Functor -- A "functor" on types
+    ; ch -- The chain 1 ← F(1) ← F²(1) ← ...
+    ; Lim -- The type of limits of such a chain
+    ; ShLim -- The limits of the shifted chain F(1) ← F²(1) ← F³(1) ← ...
+    ; pres -- The limit-preservation map
+    ; isLimitPreserving
     )
+module _ (F : Type → Type) {{FunctorF : Functor F}} where
+
+  -- The limit-preservation maps into the shifted limit.
+  _ : F (Lim F) → ShLim F
+  _ = pres F
+
+  -- If F preserves limits of this shape, it admits a fixpoint:
+  _ : isLimitPreserving F → F (Lim F) ≃ Lim F
+  _ = TerminalChain.fix
+
 open import Multiset.Inductive.Limit
   using
     ( diag-ysᶜ-islim-alternating
-    ; zip-inj⇒complete
+    ; pres-inj⇒complete
     )
-  renaming ( zip₁ to pres ) -- The limit preservation map
 
 Lemma2 = diag-ysᶜ-islim-alternating
 
 -- Injectivity of pres implies LLPO.
 -- We prove completeness, which implies LLPO.
-Theorem2 = zip-inj⇒complete
+Theorem2 = pres-inj⇒complete
 
 open import Multiset.ListQuotient.ToInjectivity
-  using (llpo⇒zip-inj)
+  using (llpo⇒pres-inj)
 
 -- Using the equivalent type (List X / Perm), we can show that
 -- LLPO implies the injectivity of the limit-preservation map.
-Theorem3 = llpo⇒zip-inj
+Theorem3 = llpo⇒pres-inj
 
 open import Multiset.OverSet.Limit using (module Surjectivity)
 
@@ -197,10 +211,9 @@ Proposition5 = Bij≃FinSet
 open import Multiset.OverBij
   using
     ( Bag
-    ; bagLimitIso
-    ; module Unzip
+    ; bagLimitEquiv
     ; zipUnzipIso
-    ; zipUnzipIsoInv≡unzipped
+    ; zipUnzipIsoInv≡pres
     )
 
 -- The improved bag functor is small:
@@ -215,13 +228,9 @@ _ = Bag
 -- The limit preservation map is an equivalence.
 Theorem9 = zipUnzipIso
 
--- The theorem constructs an explicit isomorphism
--- in a series of steps.
-Bag-pres = Unzip.unzipped
-
 -- The map underlying the isomorphism in Theorem 9 is indeed the limit preservation map.
-_ : zipUnzipIso .Iso.inv ≡ Unzip.unzipped
-_ = zipUnzipIsoInv≡unzipped
+_ : zipUnzipIso .Iso.inv ≡ pres Bag
+_ = zipUnzipIsoInv≡pres
 
 open import Multiset.OverSet.Fixpoint using (FMSetFixSetTruncTree)
 
