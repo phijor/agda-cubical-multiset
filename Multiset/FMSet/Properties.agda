@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverSet.Properties where
+module Multiset.FMSet.Properties where
 
 open import Multiset.Prelude
 open import Multiset.Util.Path using (subst⁻Domain)
@@ -71,7 +71,7 @@ open import Multiset.Util
     ( Path→cong
     ; Π⊥≡elim
     )
-open import Multiset.OverSet.Base
+open import Multiset.FMSet.Base
 
 open BinaryRelation
 

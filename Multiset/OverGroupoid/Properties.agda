@@ -4,7 +4,7 @@ module Multiset.OverGroupoid.Properties where
 
 open import Multiset.OverGroupoid.Base as OverGroupoid
   renaming (FMSet to Tote ; FMSetPath to TotePath)
-open import Multiset.OverSet
+open import Multiset.FMSet
   using (FMSet ; isSetFMSet ; _∼_ ; SymmetricAction)
 
 open import Cubical.Foundations.Prelude

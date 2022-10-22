@@ -1,11 +1,11 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverSet.Fixpoint where
+module Multiset.FMSet.Fixpoint where
 
 open import Multiset.Prelude
 open import Multiset.Util.SetTruncation using (setTruncEquiv)
 open import Multiset.OverGroupoid as OverGroupoid using (FMSet≃∥Tote∥₂) renaming (FMSet to Tote)
-open import Multiset.OverSet as OverSet
+open import Multiset.FMSet as FMSet
 
 open import Multiset.Bij
 open import Multiset.OverBij.Base as OverBij
@@ -41,7 +41,7 @@ module _ (does-not-compute : (Σ[ x ∈ Bij ] (Vect BagLim x)) ≃ (Σ[ B ∈ Fi
 
   FMSetFixSetTruncTree : (FMSet ∥ BagLim ∥₂) ≃ ∥ BagLim ∥₂
   FMSetFixSetTruncTree =
-    (FMSet ∥ BagLim ∥₂) ≃⟨ isoToEquiv OverSet.STInvarianceIso ⟩
+    (FMSet ∥ BagLim ∥₂) ≃⟨ isoToEquiv FMSet.STInvarianceIso ⟩
     (FMSet BagLim)      ≃⟨ FMSet≃∥Tote∥₂ ⟩
     (∥ Tote BagLim ∥₂)  ≃⟨ setTruncEquiv (invEquiv step) ⟩
     (∥ BagLim ∥₂)       ■ where

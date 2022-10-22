@@ -75,7 +75,7 @@ import Multiset.ListQuotient.Base
 
 -- 3.3 As an Analytic Functor
 
-import Multiset.OverSet.Base
+import Multiset.FMSet.Base
   using (_∼_ ; FMSet)
   renaming (SymmetricAction to SymAct)
 
@@ -94,8 +94,8 @@ elim∥_∥₂-fin = elimₙ
 elim∥_∥₂-finᵝ = elimₙ-comp
 
 -- Theorem 1: FMSet is invariant under set truncation.
-import Multiset.OverSet.Properties using (module STInvariance)
-open Multiset.OverSet.Properties.STInvariance
+import Multiset.FMSet.Properties using (module STInvariance)
+open Multiset.FMSet.Properties.STInvariance
   renaming (STInvarianceEquiv to FMSet∥-∥₂≃FMSet)
 
 
@@ -170,7 +170,7 @@ open import Multiset.ListQuotient.ToInjectivity
 -- LLPO implies the injectivity of the limit-preservation map.
 Theorem3 = llpo⇒pres-inj
 
-open import Multiset.OverSet.Limit using (module Surjectivity)
+open import Multiset.FMSet.Limit using (module Surjectivity)
 
 -- The limit preservation map is surjective.
 ∥Theorem4∥ = Surjectivity.inhFibers
@@ -232,7 +232,7 @@ Theorem9 = zipUnzipIso
 _ : zipUnzipIso .Iso.inv ≡ pres Bag
 _ = zipUnzipIsoInv≡pres
 
-open import Multiset.OverSet.Fixpoint using (FMSetFixSetTruncTree)
+open import Multiset.FMSet.Fixpoint using (FMSetFixSetTruncTree)
 
 -- The fixpoint of FMSet,  (FMSet ∥ BagLim ∥₂) ≃ ∥ BagLim ∥₂
 -- NOTE: The proof is complete, but Agda loops when trying to type-check the equivalence.
@@ -240,7 +240,7 @@ open import Multiset.OverSet.Fixpoint using (FMSetFixSetTruncTree)
 -- which should not pose a problem at all!
 Theorem10 = FMSetFixSetTruncTree
 
-open import Multiset.OverSet.Finality using (isContrAna)
+open import Multiset.FMSet.Finality using (isContrAna)
 
 -- Assuming the axiom of choice, ∥ BagLim ∥₂ is the final
 -- coalgebra of FMSet in sets, i.e. the space of coalgebra

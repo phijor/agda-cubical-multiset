@@ -1,12 +1,12 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverSet.Limit where
+module Multiset.FMSet.Limit where
 
 open import Multiset.Prelude
 open import Multiset.Util using (!_)
 
-open import Multiset.OverSet.Base as FMSet
-open import Multiset.OverSet.Properties as FMSet
+open import Multiset.FMSet.Base as FMSet
+open import Multiset.FMSet.Properties as FMSet
 
 open import Multiset.Limit.Chain as Chain
 open import Multiset.Limit.TerminalChain as TerminalChain hiding (cut ; pres)

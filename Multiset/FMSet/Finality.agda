@@ -1,12 +1,12 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverSet.Finality where
+module Multiset.FMSet.Finality where
 
 open import Cubical.Foundations.Everything
 open import Multiset.Prelude
 open import Multiset.Util.SetTruncation using (setTruncEquiv)
 open import Multiset.OverGroupoid as OverGroupoid renaming (FMSet to Tote)
-open import Multiset.OverSet as OverSet
+open import Multiset.FMSet as FMSet
 
 open import Multiset.Bij
 open import Multiset.OverBij.Base as OverBij
@@ -68,10 +68,10 @@ module _
 
 -- -- ∥ Bag Y ∥₂ is naturally equivalent to FMSet Y, which follows from Theorems 6 and 8.
 -- -- For reasons beyond our understanding, Agda has trouble type-checking a particular
--- -- equivalence, so we postulate it here.  See the comment in Multiset.OverSet.Fixpoint
+-- -- equivalence, so we postulate it here.  See the comment in Multiset.FMSet.Fixpoint
 -- -- for an explanation of what goes wrong.
    (e : {Y : Type} → ∥ Bag Y ∥₂ ≃ FMSet Y)
-   (eNat : ∀{Y Z} (f : Y → Z)→ equivFun e ∘ ST.map (OverBij.map f) ≡ OverSet.map f ∘ equivFun e)
+   (eNat : ∀{Y Z} (f : Y → Z)→ equivFun e ∘ ST.map (OverBij.map f) ≡ FMSet.map f ∘ equivFun e)
 
 -- -- The consequences of the axiom of choice that we need
    (recColl : {A : Type}{B : A → Type}
@@ -163,33 +163,33 @@ module _
   ana₂ c = recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (invEq e ∘ c)
 
   ana₂Eq : {X : Type} (c : X → FMSet X) 
-    → ana₂ c ≡ equivFun unfold ∘ OverSet.map (ana₂ c) ∘ c
+    → ana₂ c ≡ equivFun unfold ∘ FMSet.map (ana₂ c) ∘ c
   ana₂Eq c =
-    elimCollProp₂ (λ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ≡ equivFun unfold ∘ OverSet.map (recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c) ∘ equivFun e ∘ c)
+    elimCollProp₂ (λ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ≡ equivFun unfold ∘ FMSet.map (recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c) ∘ equivFun e ∘ c)
                  (λ c → isSetΠ (λ _ → isSetSetTrunc) _ _)
                  (λ c → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c
                         ∙ cong (∣_∣₂ ∘_) (anaEq c)
                         ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ x ∘ ST.map (OverBij.map (ana c)) ∘ ∣_∣₂ ∘ c) (sym (funExt (retEq e)))
                         ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (eNat (ana c))
-                        ∙ cong (λ x → x ∘ OverSet.map (ana c) ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (cong equivFun unfoldEq))
+                        ∙ cong (λ x → x ∘ FMSet.map (ana c) ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (cong equivFun unfoldEq))
                         ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (funExt (mapComp ∣_∣₂ (ana c))) 
-                        ∙ cong (λ x → equivFun unfold ∘ OverSet.map x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c)))
+                        ∙ cong (λ x → equivFun unfold ∘ FMSet.map x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c)))
                  (invEq e ∘ c)
-    ∙ cong (λ x → equivFun unfold ∘ OverSet.map (ana₂ c) ∘ x ∘ c) (funExt (secEq e))
+    ∙ cong (λ x → equivFun unfold ∘ FMSet.map (ana₂ c) ∘ x ∘ c) (funExt (secEq e))
 
 
   ana₂Uniq : {X : Type} (c : X → FMSet X)
     → (h : X → ∥ BagLim ∥₂)
-    → h ≡ equivFun unfold ∘ OverSet.map h ∘ c
+    → h ≡ equivFun unfold ∘ FMSet.map h ∘ c
     → ana₂ c ≡ h
   ana₂Uniq {X} c h eq =
-    elimCollProp₂ (λ c → (h : X → ∥ BagLim ∥₂) → h ≡ equivFun unfold ∘ OverSet.map h ∘ equivFun e ∘ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ≡ h)
+    elimCollProp₂ (λ c → (h : X → ∥ BagLim ∥₂) → h ≡ equivFun unfold ∘ FMSet.map h ∘ equivFun e ∘ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ≡ h)
                  (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _)))
-                 (λ c → elimCollProp₂ (λ h → h ≡ equivFun unfold ∘ OverSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ h)
+                 (λ c → elimCollProp₂ (λ h → h ≡ equivFun unfold ∘ FMSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ h)
                                       (λ _ → isPropΠ (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _))
                                       λ h eq → let eq' = eq
-                                                         ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (funExt (OverSet.mapComp ∣_∣₂ h)))
-                                                         ∙ cong (λ x → x ∘ OverSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c) (cong equivFun unfoldEq)
+                                                         ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (funExt (FMSet.mapComp ∣_∣₂ h)))
+                                                         ∙ cong (λ x → x ∘ FMSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c) (cong equivFun unfoldEq)
                                                          ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (sym (eNat h))
                                                          ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ x ∘ ST.map (OverBij.map h) ∘ ∣_∣₂ ∘ c) (funExt (retEq e)) in
                                                 elimCollProp₁ (λ _ → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ ∣_∣₂ ∘ h)
@@ -198,11 +198,11 @@ module _
                                                               (λ x → Iso.fun PathIdTrunc₀Iso (funExt⁻ eq' x)))
                  _
                  h
-                 (eq ∙ cong (λ x → equivFun unfold ∘ OverSet.map h ∘ x ∘ c) (sym (funExt (secEq e))))
+                 (eq ∙ cong (λ x → equivFun unfold ∘ FMSet.map h ∘ x ∘ c) (sym (funExt (secEq e))))
 
   
   isContrAna : ∀ {X : Type} → (c : X → FMSet X)
-    → isContr (Σ[ h ∈ (X → ∥ BagLim ∥₂) ] h ≡ equivFun unfold ∘ OverSet.map h ∘ c)
+    → isContr (Σ[ h ∈ (X → ∥ BagLim ∥₂) ] h ≡ equivFun unfold ∘ FMSet.map h ∘ c)
   isContrAna c =
     ( (ana₂ c , ana₂Eq c) -- existence
     , λ { (h , is-ana)

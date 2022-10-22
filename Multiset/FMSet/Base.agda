@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverSet.Base where
+module Multiset.FMSet.Base where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv as Equiv

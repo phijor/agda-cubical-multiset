@@ -559,7 +559,7 @@ module _ where
   fromList = List.foldr M._∷_ ε
 
 -- module _ where
---   open import Multiset.OverSet as FMSet
+--   open import Multiset.FMSet as FMSet
 --     using (FMSet)
 
 --   toFMSet : M X → FMSet X
