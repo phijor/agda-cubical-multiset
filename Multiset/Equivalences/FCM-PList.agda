@@ -2,9 +2,9 @@
 
 open import Multiset.Prelude
 
-module Multiset.Equivalences.Inductive-PList {X : Type} where
+module Multiset.Equivalences.FCM-PList {X : Type} where
 
-open import Multiset.Inductive as M
+open import Multiset.FCM as M
   using (M ; _⊕_)
 open import Multiset.Ordering.Order as PList
   using (Perm ; stop ; perm)

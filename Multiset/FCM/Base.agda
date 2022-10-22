@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.Inductive.Base where
+module Multiset.FCM.Base where
 
 open import Multiset.Prelude
 

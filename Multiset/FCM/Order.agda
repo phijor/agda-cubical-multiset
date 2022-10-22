@@ -1,9 +1,9 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.Inductive.Order where
+module Multiset.FCM.Order where
 
 open import Multiset.Prelude
-open import Multiset.Inductive.Base as M
+open import Multiset.FCM.Base as M
 
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function

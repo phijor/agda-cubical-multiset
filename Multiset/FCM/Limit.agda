@@ -1,13 +1,13 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.Inductive.Limit where
+module Multiset.FCM.Limit where
 
 open import Multiset.Prelude
 open import Multiset.Util using (!_ ; isInjective)
 
-open import Multiset.Inductive.Base as M
-open import Multiset.Inductive.Properties as M
-open import Multiset.Inductive.Logic as M using (_∈_)
+open import Multiset.FCM.Base as M
+open import Multiset.FCM.Properties as M
+open import Multiset.FCM.Logic as M using (_∈_)
 
 open import Multiset.Limit.Chain
 open import Multiset.Limit.TerminalChain as TerminalChain

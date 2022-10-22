@@ -1,4 +1,4 @@
-module Multiset.Inductive.AlternativeLimit where
+module Multiset.FCM.AlternativeLimit where
 
 open import Multiset.Prelude
 open import Multiset.Util using (!_)

@@ -1,10 +1,10 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.Inductive.Logic where
+module Multiset.FCM.Logic where
 
 open import Multiset.Prelude
-open import Multiset.Inductive.Base as M
-open import Multiset.Inductive.Properties as M
+open import Multiset.FCM.Base as M
+open import Multiset.FCM.Properties as M
   -- hiding (isSingleton ; isSingleton-η ; isEmpty)
 
 open import Cubical.Foundations.Equiv

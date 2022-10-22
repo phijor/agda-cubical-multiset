@@ -6,7 +6,7 @@ open import Cubical.Data.Nat
 open import Cubical.Data.Unit
 open import Cubical.Data.Sigma
 
-open import Multiset.Inductive.Base renaming (map to mapM)
+open import Multiset.FCM.Base renaming (map to mapM)
 open import Multiset.Limits
 
 -- Iterated application of the Multiset functor.

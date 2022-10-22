@@ -2,9 +2,9 @@
 
 open import Multiset.Prelude
 
-module Multiset.Equivalences.Inductive-HeadPList {X : Type} where
+module Multiset.Equivalences.FCM-HeadPList {X : Type} where
 
-open import Multiset.Inductive as M
+open import Multiset.FCM as M
   using (M ; _⊕_)
 
 open import Cubical.Foundations.Equiv using (_≃_)

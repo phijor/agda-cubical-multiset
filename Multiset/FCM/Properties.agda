@@ -1,10 +1,10 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.Inductive.Properties where
+module Multiset.FCM.Properties where
 
 open import Multiset.Prelude
 open import Multiset.Util using (!_)
-open import Multiset.Inductive.Base as M
+open import Multiset.FCM.Base as M
 
 -- open import Multiset.Util.Logic using
 --   ( _xor_

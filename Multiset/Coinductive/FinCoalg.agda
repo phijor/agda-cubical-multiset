@@ -19,8 +19,8 @@ open import Cubical.HITs.SetQuotients
 open import Cubical.Relation.Binary
 open BinaryRelation
 open isEquivRel
-open import Multiset.Inductive.Base
-open import Multiset.Inductive.Properties
+open import Multiset.FCM.Base
+open import Multiset.FCM.Properties
 
 -- ================================================ 
 

@@ -49,7 +49,7 @@ import Cubical.HITs.SetQuotients as SQ
 -- 3.1 The free commutative monoid
 
 -- Definition as a HIT
-import Multiset.Inductive
+import Multiset.FCM
   renaming
     (M to FCM)
   using
@@ -63,11 +63,11 @@ open import Multiset.Ordering.Order
   renaming (Mset to List[_]/Perm)
 
 -- Equivalences of FCM and lists module permutations.
-import Multiset.Equivalences.Inductive-PList
+import Multiset.Equivalences.FCM-PList
 
 -- Equivalences of FCM and a HIT of head-permuted lists,
 -- defined in Cubical.HITs.FiniteMultiset.
-import Multiset.Equivalences.Inductive-HeadPList
+import Multiset.Equivalences.FCM-HeadPList
 
 -- Relational lifting
 import Multiset.ListQuotient.Base
@@ -151,7 +151,7 @@ module _ (F : Type → Type) {{FunctorF : Functor F}} where
   _ : isLimitPreserving F → F (Lim F) ≃ Lim F
   _ = TerminalChain.fix
 
-open import Multiset.Inductive.Limit
+open import Multiset.FCM.Limit
   using
     ( diag-ysᶜ-islim-alternating
     ; pres-inj⇒complete

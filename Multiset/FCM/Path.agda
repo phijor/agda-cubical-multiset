@@ -1,7 +1,7 @@
-module Multiset.Inductive.Path where
+module Multiset.FCM.Path where
 
 open import Multiset.Prelude
-open import Multiset.Inductive.Base as M
+open import Multiset.FCM.Base as M
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function using (_∘_)

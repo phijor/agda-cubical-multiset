@@ -5,7 +5,7 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Structure
 
-open import Multiset.Inductive.Base
+open import Multiset.FCM.Base
   using (M)
   renaming (map to mapM)
 

@@ -1,7 +1,7 @@
-module Multiset.Inductive.Decidable where
+module Multiset.FCM.Decidable where
 
 open import Multiset.Prelude
-open import Multiset.Inductive.Base as M
+open import Multiset.FCM.Base as M
 
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
@@ -66,7 +66,7 @@ private
     X :  Type ℓ
 
 module _ {p : X → hProp ℓ} (p? : ∀ x → Dec ⟨ p x ⟩) where
-  open import Multiset.Inductive.Properties
+  open import Multiset.FCM.Properties
 
   any? : ∀ xs → Dec ⟨ any p xs ⟩
   any? = M.ind (λ xs → isPropDec (str (any p xs))) dec-ε dec-η dec-⊕ where
