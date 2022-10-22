@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverBij.Base where
+module Multiset.Bag.Base where
 
 open import Multiset.Bij as Bij
 

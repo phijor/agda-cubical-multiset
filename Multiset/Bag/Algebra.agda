@@ -1,8 +1,8 @@
-module Multiset.OverBij.Algebra where
+module Multiset.Bag.Algebra where
 
-open import Multiset.OverBij.Base
+open import Multiset.Bag.Base
   renaming (map to bagMap)
-open import Multiset.OverBij.Properties
+open import Multiset.Bag.Properties
   using
     ( module Unzip
     ; module Zip

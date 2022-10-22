@@ -1,14 +1,14 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverBij.Properties where
+module Multiset.Bag.Properties where
 
 open import Multiset.Prelude
 open import Multiset.Util using (!_)
-open import Multiset.OverBij.Base as OverBij
+open import Multiset.Bag.Base
   using
     ( Bag ; BagIsoΣ
     ; ⟅_⟆ ; ⟅⟆-syntax
-    ; map
+    ; map ; mapId ; map∘map
     ; Idx
     ; Vect
     ; BagPathExt ; BagPathP
@@ -51,9 +51,9 @@ open Limit using (elements ; is-lim)
 
 instance
   BagFunctor : Functor Bag
-  BagFunctor .Functor.map = OverBij.map
-  BagFunctor .Functor.map-id = OverBij.mapId
-  BagFunctor .Functor.map-comp g f xs = sym (OverBij.map∘map f g xs)
+  BagFunctor .Functor.map = map
+  BagFunctor .Functor.map-id = mapId
+  BagFunctor .Functor.map-comp g f xs = sym (map∘map f g xs)
 
 BagUnit≃Bij : Bag Unit ≃ Bij
 BagUnit≃Bij = isoToEquiv BagIsoΣ ∙ₑ Σ.Σ-contractSnd {B = λ (x : Bij) → Idx x → Unit} (λ _ → isContrΠUnit) where

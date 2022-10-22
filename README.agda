@@ -208,7 +208,7 @@ Proposition5 : Bij ≃ FinSet _
 Proposition5 = Bij≃FinSet
 
 -- ...and the improved Bag-functor:
-open import Multiset.OverBij
+open import Multiset.Bag
   using
     ( Bag
     ; bagLimitEquiv

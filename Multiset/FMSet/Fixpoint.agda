@@ -8,14 +8,14 @@ open import Multiset.OverGroupoid as OverGroupoid using (FMSet≃∥Tote∥₂) 
 open import Multiset.FMSet as FMSet
 
 open import Multiset.Bij
-open import Multiset.OverBij.Base as OverBij
+open import Multiset.Bag.Base as Bag
   using
     ( Bag
     ; Vect
     ; BagIsoΣ
     ; ⟨Bij→FinSet⟩≃Idx
     )
-open import Multiset.OverBij.Properties as OverBij
+open import Multiset.Bag.Properties as Bag
   using (bagLimitEquiv ; BagLim)
 
 

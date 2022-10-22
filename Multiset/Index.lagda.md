@@ -18,7 +18,7 @@ open import Multiset.FiniteChoice
 open import Multiset.Inductive
 open import Multiset.OverGroupoid
 open import Multiset.FMSet
-open import Multiset.OverBij
+open import Multiset.Bag
 
 open import Multiset.Equiv
 

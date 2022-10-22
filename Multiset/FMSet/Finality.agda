@@ -9,14 +9,14 @@ open import Multiset.OverGroupoid as OverGroupoid renaming (FMSet to Tote)
 open import Multiset.FMSet as FMSet
 
 open import Multiset.Bij
-open import Multiset.OverBij.Base as OverBij
+open import Multiset.Bag.Base as Bag
   using
     ( Bag
     ; Vect
     ; BagIsoΣ
     ; ⟨Bij→FinSet⟩≃Idx
     )
-open import Multiset.OverBij.Properties as OverBij
+open import Multiset.Bag.Properties as Bag
   using (BagLim ; bagLimitEquiv)
 
 
@@ -60,10 +60,10 @@ module _
 -- -- BagLim is the final coalgebra of Bag [Ahrens 2015]
   (ana : {X : Type} → (c : X → Bag X) → X → BagLim)
   (anaEq : {X : Type} (c : X → Bag X) 
-    → ana c ≡ OverBij.fix⁺ ∘ OverBij.map (ana c) ∘ c)
+    → ana c ≡ Bag.fix⁺ ∘ Bag.map (ana c) ∘ c)
   (anaUniq : {X : Type} (c : X → Bag X)
     → (h : X → BagLim)
-    → h ≡ OverBij.fix⁺ ∘ (OverBij.map h) ∘ c
+    → h ≡ Bag.fix⁺ ∘ (Bag.map h) ∘ c
     → ana c ≡ h)
 
 -- -- ∥ Bag Y ∥₂ is naturally equivalent to FMSet Y, which follows from Theorems 6 and 8.
@@ -71,7 +71,7 @@ module _
 -- -- equivalence, so we postulate it here.  See the comment in Multiset.FMSet.Fixpoint
 -- -- for an explanation of what goes wrong.
    (e : {Y : Type} → ∥ Bag Y ∥₂ ≃ FMSet Y)
-   (eNat : ∀{Y Z} (f : Y → Z)→ equivFun e ∘ ST.map (OverBij.map f) ≡ FMSet.map f ∘ equivFun e)
+   (eNat : ∀{Y Z} (f : Y → Z)→ equivFun e ∘ ST.map (Bag.map f) ≡ FMSet.map f ∘ equivFun e)
 
 -- -- The consequences of the axiom of choice that we need
    (recColl : {A : Type}{B : A → Type}
@@ -169,8 +169,8 @@ module _
                  (λ c → isSetΠ (λ _ → isSetSetTrunc) _ _)
                  (λ c → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c
                         ∙ cong (∣_∣₂ ∘_) (anaEq c)
-                        ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ x ∘ ST.map (OverBij.map (ana c)) ∘ ∣_∣₂ ∘ c) (sym (funExt (retEq e)))
-                        ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (eNat (ana c))
+                        ∙ cong (λ x → ST.map Bag.fix⁺ ∘ x ∘ ST.map (Bag.map (ana c)) ∘ ∣_∣₂ ∘ c) (sym (funExt (retEq e)))
+                        ∙ cong (λ x → ST.map Bag.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (eNat (ana c))
                         ∙ cong (λ x → x ∘ FMSet.map (ana c) ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (cong equivFun unfoldEq))
                         ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (funExt (mapComp ∣_∣₂ (ana c))) 
                         ∙ cong (λ x → equivFun unfold ∘ FMSet.map x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c)))
@@ -190,8 +190,8 @@ module _
                                       λ h eq → let eq' = eq
                                                          ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (funExt (FMSet.mapComp ∣_∣₂ h)))
                                                          ∙ cong (λ x → x ∘ FMSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c) (cong equivFun unfoldEq)
-                                                         ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (sym (eNat h))
-                                                         ∙ cong (λ x → ST.map OverBij.fix⁺ ∘ x ∘ ST.map (OverBij.map h) ∘ ∣_∣₂ ∘ c) (funExt (retEq e)) in
+                                                         ∙ cong (λ x → ST.map Bag.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (sym (eNat h))
+                                                         ∙ cong (λ x → ST.map Bag.fix⁺ ∘ x ∘ ST.map (Bag.map h) ∘ ∣_∣₂ ∘ c) (funExt (retEq e)) in
                                                 elimCollProp₁ (λ _ → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ ∣_∣₂ ∘ h)
                                                               (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _)
                                                               (λ eq'' → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ∙ cong (∣_∣₂ ∘_) (anaUniq c h (funExt eq'')))
