@@ -1,9 +1,8 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverGroupoid.Properties where
+module Multiset.Tote.Properties where
 
-open import Multiset.OverGroupoid.Base as OverGroupoid
-  renaming (FMSet to Tote ; FMSetPath to TotePath)
+open import Multiset.Tote.Base as Tote
 open import Multiset.FMSet
   using (FMSet ; isSetFMSet ; _∼_ ; SymmetricAction)
 
@@ -44,11 +43,11 @@ private
     ℓ : Level
     X : Type ℓ
 
-isGroupoidFMSet : isGroupoid X → isGroupoid (Tote X)
-isGroupoidFMSet h = isOfHLevelΣ 3 isGroupoidFinSet λ _ → isOfHLevelΠ 3 (λ _ → h)
+isGroupoidTote : isGroupoid X → isGroupoid (Tote X)
+isGroupoidTote h = isOfHLevelΣ 3 isGroupoidFinSet λ _ → isOfHLevelΠ 3 (λ _ → h)
 
-isOfHLevel₊₃FMSet : (n : ℕ) → (isOfHLevel (3 + n) X) → isOfHLevel (3 + n) (Tote X)
-isOfHLevel₊₃FMSet n h = isOfHLevelΣ (3 + n) lem λ _ → isOfHLevelΠ (3 + n) (λ _ → h) where
+isOfHLevel₊₃Tote : (n : ℕ) → (isOfHLevel (3 + n) X) → isOfHLevel (3 + n) (Tote X)
+isOfHLevel₊₃Tote n h = isOfHLevelΣ (3 + n) lem λ _ → isOfHLevelΠ (3 + n) (λ _ → h) where
   lem : ∀ {ℓ} → isOfHLevel (3 + n) (FinSet ℓ)
   lem = subst (λ k → isOfHLevel k (FinSet _)) (ℕ.+-comm n 3) (isOfHLevelPlus n FinSet.isGroupoidFinSet)
 
@@ -101,7 +100,7 @@ Tote→FMSet {X = X} ((Y , n , e) , v) = n , (PT.rec→Set SQ.squash/ from-equiv
     is-permutation _ = refl
 
     sect : ∣ (Fin n , n , ∣ idEquiv (Fin n) ∣) , v ∘ invEq α ∣₂ ≡ ∣ (Y , n , ∣ α ∣) , v ∣₂
-    sect = cong ∣_∣₂ (OverGroupoid.FMSetPathP≃ (invEquiv α) is-permutation)
+    sect = cong ∣_∣₂ (TotePathP≃ (invEquiv α) is-permutation)
 
   f : ∥ Tote X ∥₂ → ∥ Tote X ∥₂
   f x = FMSet→∥Tote∥₂ (∥Tote∥₂→FMSet x)

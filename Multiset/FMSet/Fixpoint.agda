@@ -4,7 +4,7 @@ module Multiset.FMSet.Fixpoint where
 
 open import Multiset.Prelude
 open import Multiset.Util.SetTruncation using (setTruncEquiv)
-open import Multiset.OverGroupoid as OverGroupoid using (FMSet≃∥Tote∥₂) renaming (FMSet to Tote)
+open import Multiset.Tote as Tote using (Tote ; FMSet≃∥Tote∥₂)
 open import Multiset.FMSet as FMSet
 
 open import Multiset.Bij

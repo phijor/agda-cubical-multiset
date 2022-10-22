@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.OverGroupoid.Base where
+module Multiset.Tote.Base where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
@@ -55,31 +55,31 @@ FinSet₀ : Type₁
 FinSet₀ = FinSet ℓ-zero
 
 
-FMSet : Type ℓ → Type (ℓ-max ℓ (ℓ-suc ℓ-zero))
-FMSet X = Σ[ Y ∈ FinSet₀ ] (⟨ Y ⟩ → X)
+Tote : Type ℓ → Type (ℓ-max ℓ (ℓ-suc ℓ-zero))
+Tote X = Σ[ Y ∈ FinSet₀ ] (⟨ Y ⟩ → X)
 
-FMSetPath : ∀ {V W : Type}
+TotePath : ∀ {V W : Type}
   → {finV : isFinSet V}
   → {finW : isFinSet W}
   → {v : V → X}
   → {w : W → X}
   → (p : V ≡ W)
   → (P : PathP (λ i → p i → X) v w)
-  → Path (FMSet X) ((V , finV) , v) (((W , finW) , w))
-FMSetPath p P = ΣPathP ((Σ≡Prop (λ _ → isPropIsFinSet) p) , P)
+  → Path (Tote X) ((V , finV) , v) (((W , finW) , w))
+TotePath p P = ΣPathP ((Σ≡Prop (λ _ → isPropIsFinSet) p) , P)
 
-FMSetPathP≃ : ∀ {V W : Type}
+TotePathP≃ : ∀ {V W : Type}
   → {finV : isFinSet V}
   → {finW : isFinSet W}
   → {v : V → X}
   → {w : W → X}
   → (α : V ≃ W)
   → (eq : ∀ k → v k ≡ w (equivFun α k))
-  → Path (FMSet X) ((V , finV) , v) (((W , finW) , w))
-FMSetPathP≃ α eq = FMSetPath (ua α) (ua→ eq)
+  → Path (Tote X) ((V , finV) , v) (((W , finW) , w))
+TotePathP≃ α eq = TotePath (ua α) (ua→ eq)
 
 
-_∷_ : X → FMSet X → FMSet X
+_∷_ : X → Tote X → Tote X
 x ∷ ((Y , n , finY) , v) =
   ( ( Unit ⊎ Y
     , (suc n)

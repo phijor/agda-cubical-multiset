@@ -5,7 +5,7 @@ module Multiset.FMSet.Finality where
 open import Cubical.Foundations.Everything
 open import Multiset.Prelude
 open import Multiset.Util.SetTruncation using (setTruncEquiv)
-open import Multiset.OverGroupoid as OverGroupoid renaming (FMSet to Tote)
+open import Multiset.Tote as Tote
 open import Multiset.FMSet as FMSet
 
 open import Multiset.Bij

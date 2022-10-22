@@ -183,11 +183,11 @@ open import Multiset.FMSet.Limit using (module Surjectivity)
 
 -- 5 The Finite Bag Functor in Groupoids
 
-open import Multiset.OverGroupoid
-  using (FMSet≃∥Tote∥₂)
-  renaming
-    ( FMSet to Tote -- The type of large bags.
-    ; isGroupoidFMSet to isGroupoidTote
+open import Multiset.Tote
+  using
+    ( Tote -- The type of large bags.
+    ; FMSet≃∥Tote∥₂
+    ; isGroupoidTote
     )
 
 -- Note that the universe level goes up by one:
