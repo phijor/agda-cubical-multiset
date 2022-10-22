@@ -7,7 +7,7 @@ open import Multiset.Util
 
 open import Multiset.Bij
 
-open import Multiset.Chains
+open import Multiset.Limit.Chain
 open import Multiset.Limits
 open import Multiset.Tree
 
