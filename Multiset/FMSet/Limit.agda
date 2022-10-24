@@ -25,7 +25,7 @@ open import Cubical.Data.SumFin.Base using (Fin ; isSetFin)
 open import Cubical.Data.Unit as Unit using (isSetUnit)
 
 instance
-  FunctorFMSet : Functor FMSet
+  FunctorFMSet : Functor {ℓ = ℓ-zero} FMSet
   FunctorFMSet .Functor.map = FMSet.map
   FunctorFMSet .Functor.map-id = FMSet.mapId
   FunctorFMSet .Functor.map-comp = λ { g f xs → sym (mapComp g f xs) }

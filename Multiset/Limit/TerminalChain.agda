@@ -13,24 +13,24 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Nat.Base hiding (_^_)
 
-record Functor (F : Type → Type) : Type₁ where
+record Functor {ℓ} (F : Type ℓ → Type ℓ) : Type (ℓ-suc ℓ) where
   field
-    map : ∀ {X Y : Type} → (X → Y) → (F X → F Y)
+    map : ∀ {X Y : Type ℓ} → (X → Y) → (F X → F Y)
     map-id : ∀ {X} x → map (idfun X) x ≡ x
     map-comp : ∀ {X Y Z}
       → (g : Y → Z)
       → (f : X → Y)
       → ∀ x → map (g ∘ f) x ≡ map g (map f x)
 
-module _ (F : Type → Type) {{ FunctorF : Functor F }} where
+module _ {ℓ} (F : Type ℓ → Type ℓ) {{ FunctorF : Functor F }} where
   open Chain
   open Limit
     using (elements ; is-lim)
 
   open Functor FunctorF using (map ; map-id ; map-comp)
 
-  _^_ : ℕ → Type
-  _^_ zero = Unit
+  _^_ : ℕ → Type ℓ
+  _^_ zero = Unit*
   _^_ (suc n) = F (_^_ n)
 
   infixl 7 _^_
@@ -39,14 +39,14 @@ module _ (F : Type → Type) {{ FunctorF : Functor F }} where
     F^_ = _^_
 
   _map-!^_ : ∀ n → F^ suc n → F^ n
-  _map-!^_ zero = !_
+  _map-!^_ zero = λ _ → tt*
   _map-!^_ (suc n) = map (_map-!^_ n)
 
   private
     !^ : ∀ n → F^ suc n → F^ n
     !^ = _map-!^_
 
-  ch : Chain ℓ-zero
+  ch : Chain ℓ
   ch .Ob = _^_
   ch .π = _map-!^_
 
@@ -55,10 +55,10 @@ module _ (F : Type → Type) {{ FunctorF : Functor F }} where
   Lim = Limit ch
   ShLim = Limit sh
 
-  isLim : (el : (n : ℕ) → F^ n) → Type
+  isLim : (el : (n : ℕ) → F^ n) → Type ℓ
   isLim = isLimit ch
 
-  isShLim : (el : (n : ℕ) → F^ suc n) → Type
+  isShLim : (el : (n : ℕ) → F^ suc n) → Type ℓ
   isShLim = isLimit sh
 
   LimPathPExt = LimitPathPExt ch

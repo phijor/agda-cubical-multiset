@@ -23,6 +23,8 @@
 
   \maketitle
 
+  \setcounter{tocdepth}{1}
+
   The powerset and multiset (or bag) functor, delivering the set of
   subsets (resp. multisubsets) of a given set, are fundamental
   mathematical tools in the behavioural analysis of nondeterministic
@@ -68,7 +70,8 @@
   final coalgebra or not.
 
   We formalized our work in \emph{Cubical Agda} \cite{Vezzosi2019},
-  which is a particular implementation of Homotopy Type Theory
+  and the code is freely available at \url{https://github.com/phijor/agda-cubical-multiset}.
+  Cubical Agda is a particular implementation of HoTT
   with support for the univalence principle (\enquote{equivalence of types is equivalent to equality of types}, which is a provable theorem in Cubical Agda)
   and higher inductive types.
   A distinguishing feature of Cubical Agda is that the identity type on a type $A$
@@ -87,10 +90,10 @@
       $\IsGpd A \DefEq ∀ (a, b : A)\Where \IsSet(a = b)$ is inhabited.
   \end{itemize}
   We stress that, when mentioning \enquote{sets} or \enquote{groupoids}, we always refer to these definitions.
-
   In ordinary MLTT, the principle of uniqueness of identity proofs (UIP) implies that all types are sets.
-  This is not true for arbitrary types in Homotopy Type Theory.
-  Using \emph{higher inductive types}, one can obtain a set from any type:
+  In HoTT, this is not true for arbitrary types.
+
+  Using \emph{higher inductive types}, any type can be \emph{truncated} to obtain a set:
   \begin{definition}
     For any type $A$, the set-truncation $\SetTrunc{A}$ is the type inductively defined by
     \begin{center}
@@ -110,7 +113,10 @@
   \end{definition}
   This type is a \enquote{higher} inductive type since the rule $\SetTruncSquash$ produces an identification $p = q$ instead of an element of $\SetTrunc{A}$.
   By definition, $\SetTruncSquash : \IsSet \SetTrunc{A}$.
-  Similarly, higher inductive types allow us to model quotient types,
+  Similarly, the \emph{propositional truncation} of $A$ is the higher inductive type $\PropTrunc{A}$
+  with a constructor $\PropTruncCon : A → \PropTrunc{A}$
+  and a rule $\PropTruncSquash : \IsProp \PropTrunc{A}$.
+  Higher inductive types also allow us to model quotient types,
   in particular set-quotients:
 
   \begin{definition}
@@ -137,9 +143,6 @@
     \end{center}
     and forms a set by $\SetQuotSquash$.
   \end{definition}
-  Similarly, the \emph{propositional truncation} of $A$ is the higher inductive type $\PropTrunc{A}$
-  with a constructor $\PropTruncCon : A → \PropTrunc{A}$
-  and a rule $\PropTruncSquash : \IsProp \PropTrunc{A}$.
 
   \subsection*{Finite Bags in Sets}
   In a first attempt, we define
@@ -147,11 +150,11 @@
     \FMSet X
       \DefEq{}
       \sum\Var{k} : ℕ\Where
-        \SetQuot[(\Fin \Var{k} \to X)][\sim_\Var{sz}],
+        \SetQuot[(\Fin \Var{k} \to X)][\sim_\Var{k}],
   \end{align*}
-  where $\Fin \Var{k}$ is the type of numbers $<k$ and $(\SymmetricAction{\Var{sz}}[][])$ relates
-  $v, w : \Fin \Var{sz} → X$ iff there merely exists a permutation $\sigma$
-  such that $v \circ \sigma = w$. So a finite bag consists of a number $k$ (its size) and an equivalence class of $k$-elements of $X$, where the relation $(\SymmetricAction{\Var{sz}}[][])$ expresses that the order of the elements does not matter. 
+  where $\Fin \Var{k}$ is the type of numbers $<k$ and $(\SymmetricAction{\Var{k}}[][])$ relates
+  $v, w : \Fin \Var{k} → X$ iff there merely exists a permutation $\sigma$
+  such that $v \circ \sigma = w$. So a finite bag consists of a number $k$ (its size) and an equivalence class of $k$-elements of $X$, where the relation $(\SymmetricAction{\Var{k}}[][])$ expresses that the order of the elements does not matter. 
   $\FMSet{X}$ is a set, regardless of the homotopy level of $X$.
   Additionally, $\FMSet$ is invariant under set-truncation, i.e.
   $\FMSet \SetTrunc{X} ≃ \FMSet X$.
@@ -160,8 +163,8 @@
   Trying to construct the final coalgebra of $\FMSet$ as the limit of
   the chain (\ref{eq:chain}) (as traditionally done in a classical
   metatheory) is problematic. The first step in the construction
-  would be showing that $\FMSet$ preserves $\omega$-limits. In the
-  case of the chain (\ref{eq:chain}) can be reduced to show that the
+  would be showing that $\FMSet$ preserves $\omega$-limits.
+  In the case of the chain (\ref{eq:chain}), this reduces to showing that the
   map $ \Op{pres}\colon \FMSet (\lim_{n < \omega} \FMSet^n
   1) \to \lim_{n < \omega} (\FMSet^{n+1} 1)$, defined via the
   universal property of the limit, is an equivalence of types. This is not the case in HoTT, since the latter is an inherently non-constructive principle:
@@ -238,21 +241,23 @@
   Here, $\operatorname{id}$ is the identity-equivalence, $(\circ)$ composition of equivalences,
   $\Refl : \Obj n = \Obj n$ a reflexivity proof of identity and $(\bullet)$ is transitivity of $(=)$.
 
-  With this in mind, we define, for any type $X$, the type
+  With this in mind we define, for any type $X$, the type
   \[
     \FMGpd X \DefEq
       \sum x : \Bij\Where \langle x \rangle → X,
   \]
-  where $\langle\_\rangle : \Bij → \Type$ obtains the type corresponding to $x : \Bij$ from the
-  equivalence $\Bij ≃ \FinSet$.
-  Since $\FinSet$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
-  By identifying the higher structure of $\FMGpd$, we recover $\FMSet$:
+  where $\langle x \rangle : \Type$ is the type obtained from the equivalence $\Bij ≃ \FinSet$.
+  Since $\Bij$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
+  We conjecture that $\Bag X$ can be proved equivalent to the
+  \emph{free symmetric monoidal groupoid} on $X$ defined as a HIT by Piceghello \cite{Piceghello2021},
+  which would serve as an alternative proof of MacLane's coherence for symmetric monoidal categories.
+  In any case, we recover $\FMSet$ by truncating the higher structure of $\FMGpd$:
   \begin{theorem}
     For any type $X$, there is an equivalence $\SetTrunc{\FMGpd X} ≃ \FMSet X$.
   \end{theorem}
 
   
-  Following \cite{Kock2012}, we argue that this is the correct perspective on bags in Homotopy Type Theory,
+  Following \cite{Kock2012}, we argue that this is the correct perspective on bags in HoTT,
   and substantiate the claim by the following unproblematic construction of the final coalgebra of $\FMGpd$:
 
   \begin{theorem}\label{thm:FMGpdLim}
@@ -262,13 +267,18 @@
   \end{theorem}
   This theorem is a direct consequence of a general result by Ahrens
   et al. \cite{Ahrens2015}, since $\FMGpd$ is a polynomial functor in
-  groupoids, and all polynomial functors admit a final coalgebra in
-  HoTT, independently of the their homotopy level.  The existence of
-  $L_{\FMGpd}$ requires $\FMGpd$ to be defined in terms of $\Bij$,
-  otherwise it is not typeable in a universe of fixed size.
+  groupoids and all polynomial functors admit a final coalgebra in
+  HoTT, independently of the their homotopy level.
+  When defined in terms of $\Bij$, $\FMGpd$ is a small type family,
+  and so is $L_{\FMGpd}$.
+  It would be a large type, had we defined it in terms of $\FinSet$.
 
   One might wonder whether the final coalgebra in groupoids can be used to define a final coalgebra also in sets.
-  We are able to show that the set-truncation of the groupoid-limit \SetTrunc{L_{\FMGpd}} is a fixpoint of $\FMSet$, i.e. $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$. But further showing that this is the final coalgebra of the set-based bag functor $\FMSet$ seems to require the full axiom of choice.
+  We are able to show that the set-truncation of the groupoid-limit \SetTrunc{L_{\FMGpd}} is a fixpoint of $\FMSet$, i.e. $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$.
+  But further showing that this is the final coalgebra of the set-based bag functor $\FMSet$ again appears to be non-constructive:
+  \begin{theorem}
+    Assuming the (full) axiom of choice, $\SetTrunc{L_{\FMGpd}}$ is the final coalgebra of $\FMSet$.
+  \end{theorem}
 
   \section*{Acknowledgments}
   This work was supported by the Estonian Research Council grant PSG749.
