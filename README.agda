@@ -43,6 +43,7 @@ open import Cubical.Data.FinSet using (FinSet)
 import Cubical.Data.Nat as Nat using (ℕ)
 import Cubical.Data.List as List
 import Cubical.HITs.SetQuotients as SQ
+open import Cubical.HITs.SetTruncation as ST using (∥_∥₂)
 
 -- 3. The Finite Bag Functor in Sets
 
@@ -170,6 +171,7 @@ open import Multiset.ListQuotient.ToInjectivity
 -- LLPO implies the injectivity of the limit-preservation map.
 Theorem3 = llpo⇒pres-inj
 
+open import Multiset.FMSet.Base using (FMSet)
 open import Multiset.FMSet.Limit using (module Surjectivity)
 
 -- The limit preservation map is surjective.
@@ -211,21 +213,25 @@ Proposition5 = Bij≃FinSet
 open import Multiset.Bag
   using
     ( Bag
+    ; BagLim
     ; bagLimitEquiv
     ; zipUnzipIso
     ; zipUnzipIsoInv≡pres
+    ; Bag≃Tote
     )
 
 -- The improved bag functor is small:
 _ : Type → Type
 _ = Bag
 
--- XXX: The proof of Proposition 6 (Bag X ≃ Tote X) runs into an issue when typechecking.
--- See the note on Theorem 10 below.
+-- The "small" and "large" types of bags are equivalent:
+Proposition6 : {X : Type} → Bag X ≃ Tote X
+Proposition6 = Bag≃Tote
 
 -- 6 The Final Coalgebra in Groupoids
 
 -- The limit preservation map is an equivalence.
+Theorem9 : Iso (ShLim Bag) (Bag (Lim Bag))
 Theorem9 = zipUnzipIso
 
 -- The map underlying the isomorphism in Theorem 9 is indeed the limit preservation map.
@@ -234,10 +240,8 @@ _ = zipUnzipIsoInv≡pres
 
 open import Multiset.FMSet.Fixpoint using (FMSetFixSetTruncTree)
 
--- The fixpoint of FMSet,  (FMSet ∥ BagLim ∥₂) ≃ ∥ BagLim ∥₂
--- NOTE: The proof is complete, but Agda loops when trying to type-check the equivalence.
--- Ironically, this happens when trying to show (Σ A B) ≃ (Σ A B') from ∀ x → B x ≃ B' x,
--- which should not pose a problem at all!
+-- The limit obtained from Theorem 9 is also a fixpoint for FMSet.
+Theorem10 : FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂
 Theorem10 = FMSetFixSetTruncTree
 
 open import Multiset.FMSet.Finality using (isContrAna)

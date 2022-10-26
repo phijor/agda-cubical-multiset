@@ -27,6 +27,7 @@ private
 
 abstract
   open import Cubical.Foundations.Equiv
+  open import Cubical.Foundations.Isomorphism
 
   Idx : Bij → Type ℓ-zero
   Idx = λ x → ⟨ Bij→FinSet x ⟩
@@ -36,6 +37,9 @@ abstract
 
   Idx≃⟨Bij→FinSet⟩ : ∀ x → (Idx x) ≃ ⟨ Bij→FinSet x ⟩
   Idx≃⟨Bij→FinSet⟩ x = idEquiv _
+
+  Idx→-⟨Bij→FinSet⟩→-Iso : (X : Type ℓ) → (x : Bij) → Iso (Idx x → X) (⟨ Bij→FinSet x ⟩ → X)
+  Idx→-⟨Bij→FinSet⟩→-Iso X x = idIso
 
   ⟨Bij→FinSet⟩≃Idx : ∀ x → ⟨ Bij→FinSet x ⟩ ≃ (Idx x)
   ⟨Bij→FinSet⟩≃Idx x = idEquiv _

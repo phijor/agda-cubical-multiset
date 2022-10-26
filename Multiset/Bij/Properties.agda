@@ -2,6 +2,7 @@
 
 module Multiset.Bij.Properties where
 
+open import Multiset.Prelude
 open import Multiset.Bij.Base as Bij
 open import Multiset.Bij.Path as Bij
 open import Multiset.Util.Square
@@ -64,10 +65,7 @@ private
     FinPath→FinSetPath = Σ≡Prop isPropIsFinSet′
 
     FinPath→FinSetPathCong : (p : ⟦ m ⟧ ≡ ⟦ n ⟧) → FinPath→FinSetPath (cong ⟨_⟩ p) ≡ p
-    FinPath→FinSetPathCong p =
-      FinPath→FinSetPath (cong ⟨_⟩ p)     ≡⟨⟩
-      Σ≡Prop isPropIsFinSet′ (cong ⟨_⟩ p) ≡⟨ ΣSquarePProp isPropIsFinSet′ refl ⟩
-      p ∎
+    FinPath→FinSetPathCong p = ΣSquarePProp isPropIsFinSet′ refl
 
     open Iso
     FinPath≅FinSetPath : Iso (Fin m ≡ Fin n) (⟦ m ⟧ ≡ ⟦ n ⟧)
@@ -82,11 +80,12 @@ private
   FinPath→FinSetPathRefl : ∀ {n} → FinPath→FinSetPath (refl {x = Fin n}) ≡ refl {x = ⟦ n ⟧}
   FinPath→FinSetPathRefl = ΣSquarePProp isPropIsFinSet′ refl
 
-  FinPath→FinSetPathComp : ∀ {m n o}
-    → (p : Fin m ≡ Fin n)
-    → (q : Fin n ≡ Fin o)
-    → FinPath→FinSetPath (p ∙ q) ≡ FinPath→FinSetPath p ∙ FinPath→FinSetPath q
-  FinPath→FinSetPathComp p q = ΣSquarePProp isPropIsFinSet′ refl
+  abstract
+    FinPath→FinSetPathComp : ∀ {m n o}
+      → (p : Fin m ≡ Fin n)
+      → (q : Fin n ≡ Fin o)
+      → FinPath→FinSetPath (p ∙ q) ≡ FinPath→FinSetPath p ∙ FinPath→FinSetPath q
+    FinPath→FinSetPathComp p q = ΣSquarePProp isPropIsFinSet′ refl
 
 Bij→FinSet : Bij → FinSet₀
 Bij→FinSet = rec isGroupoidFinSet obj* hom* id-coh* comp-coh* where
@@ -99,18 +98,19 @@ Bij→FinSet = rec isGroupoidFinSet obj* hom* id-coh* comp-coh* where
   hom* : {m n : ℕ} → (α : Fin m ≃ Fin n) → obj* m ≡ obj* n
   hom* α = path* (ua α)
 
-  id-coh* : ∀ n → hom* (idEquiv (Fin n)) ≡ refl
-  id-coh* n =
-    FinPath→FinSetPath (ua (idEquiv (Fin n))) ≡⟨ cong FinPath→FinSetPath uaIdEquiv ⟩
-    FinPath→FinSetPath refl                   ≡⟨ FinPath→FinSetPathRefl ⟩
-    refl ∎
+  abstract
+    id-coh* : ∀ n → hom* (idEquiv (Fin n)) ≡ refl
+    id-coh* n =
+      FinPath→FinSetPath (ua (idEquiv (Fin n))) ≡⟨ cong FinPath→FinSetPath uaIdEquiv ⟩
+      FinPath→FinSetPath refl                   ≡⟨ FinPath→FinSetPathRefl ⟩∎
+      refl ∎
 
-  comp-coh* : ∀ {m n o : ℕ} (α : Fin m ≃ Fin n) (β : Fin n ≃ Fin o)
-    → hom* (α ∙ₑ β) ≡ hom* α ∙ hom* β
-  comp-coh* α β =
-    FinPath→FinSetPath (ua (α ∙ₑ β)) ≡⟨ cong FinPath→FinSetPath (uaCompEquiv α β) ⟩
-    FinPath→FinSetPath (ua α ∙ ua β) ≡⟨ FinPath→FinSetPathComp (ua α) (ua β) ⟩
-    hom* α ∙ hom* β ∎
+    comp-coh* : ∀ {m n o : ℕ} (α : Fin m ≃ Fin n) (β : Fin n ≃ Fin o)
+      → hom* (α ∙ₑ β) ≡ hom* α ∙ hom* β
+    comp-coh* α β =
+      FinPath→FinSetPath (ua (α ∙ₑ β)) ≡⟨ cong FinPath→FinSetPath (uaCompEquiv α β) ⟩
+      FinPath→FinSetPath (ua α ∙ ua β) ≡⟨ FinPath→FinSetPathComp (ua α) (ua β) ⟩∎
+      hom* α ∙ hom* β ∎
 
 module _ {m n : ℕ} where
   Bij→FinSetCongHom : (α : Fin m ≃ Fin n) → cong Bij→FinSet (hom α) ≡ FinPath→FinSetPath (ua α)
@@ -154,8 +154,16 @@ isSurjectionBij→FinSet (Y , n , ∣α∣) = PT.elim {P = λ ∣α∣ → ∥ f
   inhFiber : (α : Y ≃ Fin n) → ∥ fiber Bij→FinSet (Y , n , ∣ α ∣₁) ∥₁
   inhFiber α = ∣ (obj n) , (Σ≡Prop (λ _ → isPropIsFinSet) (sym (ua α))) ∣₁
 
+isEquiv-Bij→FinSet : isEquiv Bij→FinSet
+isEquiv-Bij→FinSet = isEmbedding×isSurjection→isEquiv (isEmbeddingBij→FinSet , isSurjectionBij→FinSet)
+
 Bij≃FinSet : Bij ≃ FinSet₀
-Bij≃FinSet = Bij→FinSet , isEmbedding×isSurjection→isEquiv (isEmbeddingBij→FinSet , isSurjectionBij→FinSet)
+Bij≃FinSet = Bij→FinSet , is-equiv where abstract
+  is-equiv : isEquiv Bij→FinSet
+  is-equiv = isEquiv-Bij→FinSet
+
+Bij-FinSet-Iso : Iso Bij FinSet₀
+Bij-FinSet-Iso = equivToIso Bij≃FinSet
 
 FinSet→Bij : FinSet₀ → Bij
 FinSet→Bij = invEq Bij≃FinSet

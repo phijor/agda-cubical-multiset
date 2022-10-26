@@ -12,7 +12,9 @@ open import Multiset.Bag.Base
     ; Idx
     ; Vect
     ; BagPathExt ; BagPathP
+    ; Idx→-⟨Bij→FinSet⟩→-Iso
     )
+open import Multiset.Tote using (Tote)
 open import Multiset.Bij as Bij
 open import Multiset.Limit.Chain as Chain using (Limit ; lim ; Chain)
 open import Multiset.Limit.TerminalChain as TerminalChain hiding (cut ; pres)
@@ -182,3 +184,10 @@ fix⁻ : Lim Bag → Bag (Lim Bag)
 fix⁻ = invEq bagLimitEquiv
 
 BagLim = Lim Bag
+
+module _ {ℓ} {X : Type ℓ} where
+  Bag-Tote-Iso : Iso (Bag X) (Tote X)
+  Bag-Tote-Iso = BagIsoΣ ∙≅ Σ.Σ-cong-iso Bij-FinSet-Iso (Idx→-⟨Bij→FinSet⟩→-Iso X)
+
+  Bag≃Tote : Bag X ≃ Tote X
+  Bag≃Tote = isoToEquiv Bag-Tote-Iso

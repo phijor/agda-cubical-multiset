@@ -2,6 +2,7 @@
 
 module Multiset.Bij.Path where
 
+open import Multiset.Prelude
 open import Multiset.Bij.Base as Bij
 
 open import Multiset.Util.Square
@@ -64,7 +65,7 @@ Fin≃PathComp : ∀ {m n o : ℕ} (k : ℕ)
       Fin≃Path k (α ∙ₑ β) ≡ Fin≃Path k α ∙ Fin≃Path k β
 Fin≃PathComp k α β = ΣSquarePProp ((λ _ → isPropΠ2 (λ _ _ → isPropIsProp)))
   ( cong (_≃ Fin k) (ua (α ∙ₑ β)) ≡⟨ cong (cong (_≃ Fin k)) (uaCompEquiv α β) ⟩
-    cong (_≃ Fin k) (ua α ∙ ua β) ≡⟨ cong-∙ (_≃ Fin k) (ua α) (ua β) ⟩
+    cong (_≃ Fin k) (ua α ∙ ua β) ≡⟨ cong-∙ (_≃ Fin k) (ua α) (ua β) ⟩∎
     cong (_≃ Fin k) (ua α) ∙ cong (_≃ Fin k) (ua β) ∎
   )
 
@@ -148,7 +149,7 @@ decodeIdEquiv {n = n} =
 decode∘encodeRefl : ∀ {n} → decode (obj n) (encode refl) ≡ refl
 decode∘encodeRefl {n = n} =
   decode (obj n) (encode refl) ≡⟨ cong (decode (obj n)) encodeRefl ⟩
-  decode (obj n) (idEquiv _)   ≡⟨ decodeIdEquiv ⟩
+  decode (obj n) (idEquiv _)   ≡⟨ decodeIdEquiv ⟩∎
   refl ∎
 
 decode∘encode : ∀ {n} {x : Bij} (p : obj n ≡ x) → decode x (encode p) ≡ p
@@ -162,7 +163,7 @@ decode∘encode {n} {x = x} = elimProp {P = λ x → (p : obj n ≡ x) → decod
 encode∘decodeIdEquiv : ∀ {m} → encode (decode (obj m) (idEquiv (Fin m))) ≡ idEquiv (Fin m)
 encode∘decodeIdEquiv {m = m} =
   encode (decode (obj m) (idEquiv (Fin m))) ≡⟨ cong encode decodeIdEquiv ⟩
-  encode refl                               ≡⟨ encodeRefl ⟩
+  encode refl                               ≡⟨ encodeRefl ⟩∎
   idEquiv (Fin m)                           ∎
 
 encode∘decode : ∀ {m} {x}
