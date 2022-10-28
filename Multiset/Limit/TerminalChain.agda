@@ -6,21 +6,13 @@ open import Multiset.Prelude
 open import Multiset.Util using (!_)
 open import Multiset.Util.Square using (kiteFiller)
 open import Multiset.Limit.Chain
+open import Multiset.Functor public
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Nat.Base hiding (_^_)
-
-record Functor {ℓ} (F : Type ℓ → Type ℓ) : Type (ℓ-suc ℓ) where
-  field
-    map : ∀ {X Y : Type ℓ} → (X → Y) → (F X → F Y)
-    map-id : ∀ {X} x → map (idfun X) x ≡ x
-    map-comp : ∀ {X Y Z}
-      → (g : Y → Z)
-      → (f : X → Y)
-      → ∀ x → map (g ∘ f) x ≡ map g (map f x)
 
 module _ {ℓ} (F : Type ℓ → Type ℓ) {{ FunctorF : Functor F }} where
   open Chain
