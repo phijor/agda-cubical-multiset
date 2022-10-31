@@ -243,41 +243,41 @@
 
   With this in mind we define, for any type $X$, the type
   \[
-    \FMGpd X \DefEq
+    \Bag X \DefEq
       \sum x : \Bij\Where \langle x \rangle → X,
   \]
   where $\langle x \rangle : \Type$ is the type obtained from the equivalence $\Bij ≃ \FinSet$.
-  Since $\Bij$ is a groupoid, each $\FMGpd X$ has a homotopy level of at least that of a groupoid.
+  Since $\Bij$ is a groupoid, each $\Bag X$ has a homotopy level of at least that of a groupoid.
   We conjecture that $\Bag X$ can be proved equivalent to the
   \emph{free symmetric monoidal groupoid} on $X$ defined as a HIT by Piceghello \cite{Piceghello2021},
   which would serve as an alternative proof of MacLane's coherence for symmetric monoidal categories.
-  In any case, we recover $\FMSet$ by truncating the higher structure of $\FMGpd$:
+  In any case, we recover $\FMSet$ by truncating the higher structure of $\Bag$:
   \begin{theorem}
-    For any type $X$, there is an equivalence $\SetTrunc{\FMGpd X} ≃ \FMSet X$.
+    For any type $X$, there is an equivalence $\SetTrunc{\Bag X} ≃ \FMSet X$.
   \end{theorem}
 
   
   Following \cite{Kock2012}, we argue that this is the correct perspective on bags in HoTT,
-  and substantiate the claim by the following unproblematic construction of the final coalgebra of $\FMGpd$:
+  and substantiate the claim by the following unproblematic construction of the final coalgebra of $\Bag$:
 
   \begin{theorem}\label{thm:FMGpdLim}
-    Let $L_{\FMGpd} \DefEq \lim_{n < \omega} \FMGpd^n 1$.
+    Let $L_{\Bag} \DefEq \lim_{n < \omega} \Bag^n 1$.
     The limit-preservation map $\Op{pres}$ is an equivalence of groupoids.
-    In particular, the limit $L_{\FMGpd}$ is a fixpoint of $\FMGpd$ and its final coalgebra.
+    In particular, the limit $L_{\Bag}$ is a fixpoint of $\Bag$ and its final coalgebra.
   \end{theorem}
   This theorem is a direct consequence of a general result by Ahrens
-  et al. \cite{Ahrens2015}, since $\FMGpd$ is a polynomial functor in
+  et al. \cite{Ahrens2015}, since $\Bag$ is a polynomial functor in
   groupoids and all polynomial functors admit a final coalgebra in
   HoTT, independently of the their homotopy level.
-  When defined in terms of $\Bij$, $\FMGpd$ is a small type family,
-  and so is $L_{\FMGpd}$.
+  When defined in terms of $\Bij$, $\Bag$ is a small type family,
+  and so is $L_{\Bag}$.
   It would be a large type, had we defined it in terms of $\FinSet$.
 
   One might wonder whether the final coalgebra in groupoids can be used to define a final coalgebra also in sets.
-  We are able to show that the set-truncation of the groupoid-limit \SetTrunc{L_{\FMGpd}} is a fixpoint of $\FMSet$, i.e. $\FMSet \SetTrunc{L_{\FMGpd}} ≃ \SetTrunc{L_{\FMGpd}}$.
+  We are able to show that the set-truncation of the groupoid-limit \SetTrunc{L_{\Bag}} is a fixpoint of $\FMSet$, i.e. $\FMSet \SetTrunc{L_{\Bag}} ≃ \SetTrunc{L_{\Bag}}$.
   But further showing that this is the final coalgebra of the set-based bag functor $\FMSet$ again appears to be non-constructive:
   \begin{theorem}
-    Assuming the (full) axiom of choice, $\SetTrunc{L_{\FMGpd}}$ is the final coalgebra of $\FMSet$.
+    Assuming the (full) axiom of choice, $\SetTrunc{L_{\Bag}}$ is the final coalgebra of $\FMSet$.
   \end{theorem}
 
   \section*{Acknowledgments}
