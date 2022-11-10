@@ -20,15 +20,16 @@ agdaPackages.mkDerivation {
   everythingFile = "./Multiset/Index.lagda.md";
   buildInputs = [ cubical ];
 
+  outputs = [ "out" "html" ];
+
   buildPhase = ''
     runHook preBuild
 
     # Make sure the README builds with --safe
-    agda --safe README.agda
+    agda --html --html-dir=$html --safe README.agda
 
-    # Build all modules using extra flags
-    # FIXME: Figure out why this fails with 'Cannot set OPTIONS pragma --sized-types with safe flag.'
-    # agda --sized-types ./Multiset/Coinductive.agda
+    # Build all modules that are not --safe compatible
+    agda --html --html-dir=$html ./Multiset/Coinductive.agda
 
     runHook postBuild
   '';
