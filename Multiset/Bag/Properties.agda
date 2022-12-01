@@ -52,7 +52,7 @@ open Bag using (card ; members)
 open Limit using (elements ; is-lim)
 
 instance
-  BagFunctor : Functor Bag
+  BagFunctor : Functor {ℓ-zero} Bag
   BagFunctor .Functor.map = map
   BagFunctor .Functor.map-id = mapId
   BagFunctor .Functor.map-comp g f xs = sym (map∘map f g xs)
@@ -183,6 +183,7 @@ fix⁺ = equivFun bagLimitEquiv
 fix⁻ : Lim Bag → Bag (Lim Bag)
 fix⁻ = invEq bagLimitEquiv
 
+BagLim : Type
 BagLim = Lim Bag
 
 module _ {ℓ} {X : Type ℓ} where

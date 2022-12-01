@@ -36,7 +36,7 @@ open import Cubical.HITs.PropositionalTruncation as PT
 open Limit using (elements ; is-lim)
 
 instance
-  FunctorM : Functor M
+  FunctorM : Functor {ℓ-zero} M
   FunctorM .Functor.map = map
   FunctorM .Functor.map-id = mapId
   FunctorM .Functor.map-comp = mapComp

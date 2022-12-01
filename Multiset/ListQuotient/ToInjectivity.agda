@@ -71,7 +71,7 @@ rep!^ (suc n) k k≤n x with ≤-suc-cases k n k≤n
 
 limitPath : ∀ {lim₁ lim₂} → (∀ n → lim₁ .elements n ≡ lim₂ .elements n) → lim₁ ≡ lim₂
 limitPath = isSet→LimPath M
-  λ { 0 → Unit.isSetUnit
+  λ { 0 → Unit.isSetUnit*
     ; (suc n) → isSetM
     }
 
