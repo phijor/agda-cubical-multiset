@@ -74,6 +74,11 @@ import Multiset.Equivalences.FCM-HeadPList
 import Multiset.ListQuotient.Base
   using (DRelator ; Relator)
 
+-- Equivalence of lists modulo permutation and
+-- lists modulo the relational lifting of equality.
+import Multiset.Equivalences.PList-RelatorList
+  using (List/Perm≃List/Relator≡)
+
 -- 3.3 As an Analytic Functor
 
 import Multiset.FMSet.Base

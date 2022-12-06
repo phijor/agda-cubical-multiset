@@ -3,6 +3,7 @@
 module Multiset.Ordering.PermEquiv where
 
 open import Cubical.Foundations.Everything
+open import Cubical.Functions.FunExtEquiv
 open import Cubical.Data.List as List
 open import Cubical.HITs.PropositionalTruncation as PT
 open import Multiset.ListQuotient.Base
@@ -83,3 +84,7 @@ Relator=→∥Perm∥₁ (cons p , q) =
                    (isPropRelator _≡_ _ _)
                    (PT.rec (isPropRelator _≡_ _ _) Perm→Relator=)
                    Relator=→∥Perm∥₁
+
+∥Perm∥₁≡Relator≡ : {A : Type} →
+  (λ xs ys → ∥ Perm xs ys ∥₁) ≡ Relator _≡_
+∥Perm∥₁≡Relator≡ {A} = funExt₂ λ { xs ys → ua (∥Perm∥₁≃Relator= {A = A} {xs = xs} {ys = ys}) }
