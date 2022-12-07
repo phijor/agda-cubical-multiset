@@ -253,9 +253,9 @@ open import Multiset.Bag
     ( Bag
     ; BagLim
     ; bagLimitEquiv
-    ; zipUnzipIso
-    ; zipUnzipIsoInv≡pres
+    ; isLimitPreservingBag
     ; Bag≃Tote
+    ; isGroupoidBagLim
     )
 
 -- The improved bag functor is small:
@@ -268,13 +268,19 @@ Proposition6 = Bag≃Tote
 
 -- 6 The Final Coalgebra in Groupoids
 
--- The limit preservation map is an equivalence.
-Theorem9 : Iso (ShLim Bag) (Bag (Lim Bag))
-Theorem9 = zipUnzipIso
+-- The limit of the bag functor is a groupoid:
+_ : isGroupoid BagLim
+_ = isGroupoidBagLim
 
--- The map underlying the isomorphism in Theorem 9 is indeed the limit preservation map.
-_ : zipUnzipIso .Iso.inv ≡ pres Bag
-_ = zipUnzipIsoInv≡pres
+module Theorem9 where
+  -- Bag preserves limits of terminal co-chains,
+  -- i.e. the limit preservation map is an equivalence.
+  _ : isLimitPreserving Bag
+  _ = isLimitPreservingBag
+
+  -- TODO:
+  -- From the above and ???, it follows that `Lim Bag` is the
+  -- final coalgebra of Bag.
 
 open import Multiset.FMSet.Fixpoint using (FMSetFixSetTruncTree)
 

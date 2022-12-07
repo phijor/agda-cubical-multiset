@@ -55,6 +55,8 @@ module _ {ℓ} (F : Type ℓ → Type ℓ) {{ FunctorF : Functor F }} where
   Lim = Limit ch
   ShLim = Limit sh
 
+  isOfHLevelLim = isOfHLevelLimit ch
+
   isLim : (el : (n : ℕ) → F^ n) → Type ℓ
   isLim = isLimit ch
 

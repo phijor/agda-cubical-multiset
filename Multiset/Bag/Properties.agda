@@ -13,6 +13,7 @@ open import Multiset.Bag.Base
     ; Vect
     ; BagPathExt ; BagPathP
     ; Idx→-⟨Bij→FinSet⟩→-Iso
+    ; isGroupoidBag
     )
 open import Multiset.Tote using (Tote)
 open import Multiset.Bij as Bij
@@ -28,6 +29,8 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Isomorphism
   renaming (compIso to infixl 20 _∙≅_)
 open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.HLevels
+  using (isContr→isOfHLevel ; isOfHLevelRespectEquiv)
 open import Cubical.Foundations.Path
 open import Cubical.Foundations.Transport
 open import Cubical.Foundations.Function using (_∘_)
@@ -40,8 +43,9 @@ open import Cubical.Data.Nat as ℕ
   using (ℕ ; zero ; suc)
 open import Cubical.Data.Unit as Unit
   using
-    ( Unit
-    ; tt
+    ( Unit*
+    ; tt*
+    ; isContrUnit*
     )
 
 private
@@ -57,10 +61,10 @@ instance
   BagFunctor .Functor.map-id = mapId
   BagFunctor .Functor.map-comp g f xs = sym (map∘map f g xs)
 
-BagUnit≃Bij : Bag Unit ≃ Bij
-BagUnit≃Bij = isoToEquiv BagIsoΣ ∙ₑ Σ.Σ-contractSnd {B = λ (x : Bij) → Idx x → Unit} (λ _ → isContrΠUnit) where
-  isContrΠUnit : {X : Type} → isContr (X → Unit)
-  isContrΠUnit {X} = !_ , λ f → refl
+BagUnit≃Bij : ∀ {ℓ} → Bag (Unit* {ℓ = ℓ}) ≃ Bij
+BagUnit≃Bij = isoToEquiv BagIsoΣ ∙ₑ Σ.Σ-contractSnd {B = λ (x : Bij) → Idx x → Unit*} (λ _ → isContrΠUnit) where
+  isContrΠUnit : {X : Type} → isContr (X → Unit*)
+  isContrΠUnit {X} = (λ _ → tt*) , λ f → refl
 
 private
   !^ : ∀ n → Bag ^ (suc n) → Bag ^ n
@@ -185,6 +189,14 @@ fix⁻ = invEq bagLimitEquiv
 
 BagLim : Type
 BagLim = Lim Bag
+
+isGroupoidBag^ : ∀ n → isGroupoid (Bag ^ n)
+isGroupoidBag^ 0 = isContr→isOfHLevel 3 isContrUnit*
+isGroupoidBag^ 1 = isOfHLevelRespectEquiv 3 (invEquiv BagUnit≃Bij) isGroupoidBij
+isGroupoidBag^ (suc (suc n)) = isGroupoidBag (isGroupoidBag^ (suc n))
+
+isGroupoidBagLim : isGroupoid BagLim
+isGroupoidBagLim = isOfHLevelLim Bag 3 isGroupoidBag^
 
 module _ {ℓ} {X : Type ℓ} where
   Bag-Tote-Iso : Iso (Bag X) (Tote X)
