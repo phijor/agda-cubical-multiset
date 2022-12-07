@@ -166,34 +166,34 @@ module Surjectivity where
         approx-!-rel : ∀ d → (!^ d) ∘ (approx (depth (suc d))) ∼ approx (depth d)
         approx-!-rel d = effective sz (islim-[approx] d)
 
-        σs : ∀ d → Fin sz ≃ Fin sz
-        σs d = chose-perm sz d (approx-!-rel d) .size
+        σ[_] : ∀ d → Fin sz ≃ Fin sz
+        σ[_] d = chose-perm sz d (approx-!-rel d) .fst
 
-        σs⁺ : ∀ d → Fin sz → Fin sz
-        σs⁺ d = equivFun (σs d)
+        σ[_]⁺ : ∀ d → Fin sz → Fin sz
+        σ[_]⁺ d = equivFun σ[ d ]
 
-        σs⁻ : ∀ d → Fin sz → Fin sz
-        σs⁻ d = invEq (σs d)
+        σ[_]⁻ : ∀ d → Fin sz → Fin sz
+        σ[_]⁻ d = invEq σ[ d ]
 
-        σs-rel : ∀ d → !^ d ∘ approx (depth (suc d)) ≡ approx (depth d) ∘ σs⁺ d
-        σs-rel d = chose-perm sz d (approx-!-rel d) .snd
+        σ-rel : ∀ d → !^ d ∘ approx (depth (suc d)) ≡ approx (depth d) ∘ σ[ d ]⁺
+        σ-rel d = chose-perm sz d (approx-!-rel d) .snd
 
-        ρs : ∀ (d : ℕ) → Fin sz ≃ Fin sz
-        ρs zero = idEquiv _
-        ρs (suc d) = ρs d ∙ₑ invEquiv (σs d)
+        σ*[_] : ∀ (d : ℕ) → Fin sz ≃ Fin sz
+        σ*[_] zero = idEquiv _
+        σ*[_] (suc d) = σ*[ d ] ∙ₑ invEquiv σ[ d ]
 
-        ρs⁺ : ∀ d → Fin sz → Fin sz
-        ρs⁺ d = equivFun (ρs d)
+        σ*[_]⁺ : ∀ d → Fin sz → Fin sz
+        σ*[_]⁺ d = equivFun σ*[ d ]
 
         approx' : ∀ k d → FMSet ^ d
-        approx' k d = approx (depth d) (ρs⁺ d k)
+        approx' k d = approx (depth d) (σ*[ d ]⁺ k)
 
         islim-approx' : ∀ k → isLim FMSet (λ d → approx' k d)
         islim-approx' k d =
-          !^ d (approx (depth (suc d)) $ ρs⁺ (suc d) k) ≡⟨ funExt⁻ (σs-rel d) (ρs⁺ (suc d) k) ⟩
-          (approx (depth d) $ σs⁺ d $ ρs⁺ (suc d) k)    ≡⟨⟩
-          (approx (depth d) $ σs⁺ d $ σs⁻ d $ ρs⁺ d k)  ≡⟨ cong (approx (depth d)) (secEq (σs d) (ρs⁺ d k)) ⟩
-          (approx (depth d) $                 ρs⁺ d k)  ≡⟨⟩
+          !^ d (approx (depth (suc d)) $ σ*[ suc d ]⁺ k)       ≡⟨ funExt⁻ (σ-rel d) (σ*[ suc d ]⁺ k) ⟩
+          (approx (depth d) $ σ[ d ]⁺ $ σ*[ suc d ]⁺       k)  ≡⟨⟩
+          (approx (depth d) $ σ[ d ]⁺ $ σ[ d ]⁻ $ σ*[ d ]⁺ k)  ≡⟨ cong (approx (depth d)) (secEq σ[ d ] (σ*[ d ]⁺ k)) ⟩
+          (approx (depth d) $                     σ*[ d ]⁺ k)  ≡⟨⟩
           approx' k d ∎
 
         preimage-members : (Fin sz → Lim FMSet)
@@ -204,13 +204,13 @@ module Surjectivity where
         preimage = (sz , [ preimage-members ]∼)
 
         approx'∼approx : ∀ d → (λ k → approx' k d) ∼ approx (depth d)
-        approx'∼approx d = FMSet.invariantˡ sz (ρs d)
+        approx'∼approx d = FMSet.invariantˡ sz σ*[ d ]
 
         preimage-in-fiber : ∀ n → pres preimage .elements n ≡ (sz , [ approx (depth n) ]∼)
         preimage-in-fiber n =
-          pres preimage .elements n ≡⟨⟩
+          pres preimage .elements n         ≡⟨⟩
           (sz , [ (λ x → (approx' x n)) ]∼) ≡⟨ FMSetPath _ _ (approx'∼approx n) ⟩
-          (sz , [ approx (depth n) ]∼) ∎
+          (sz , [ approx (depth n) ]∼)      ∎
 
   inhFibers : (base : ShLim FMSet) → ∥ fiber pres base ∥₁
   inhFibers base = subst (λ l → ∥ fiber pres l ∥₁) (shiftedLimitPath (sym ∘ elements-path)) (ConstSize.inhFibers (base .elements 0 .size) xs islim-xs) where
