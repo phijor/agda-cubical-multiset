@@ -5,9 +5,11 @@ module Multiset.Ordering.PermEquiv where
 open import Cubical.Foundations.Everything
 open import Cubical.Functions.FunExtEquiv
 open import Cubical.Data.List as List
+open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as PT
 open import Multiset.ListQuotient.Base
 open import Multiset.Ordering.Order
+open import Multiset.ListQuotient.FMSetEquiv
 
 
 -- Proof of equivalence between ∥ Perm xs ys ∥₁ and Relator _≡_ xs ys
@@ -88,3 +90,55 @@ Relator=→∥Perm∥₁ (cons p , q) =
 ∥Perm∥₁≡Relator≡ : {A : Type} →
   (λ xs ys → ∥ Perm xs ys ∥₁) ≡ Relator _≡_
 ∥Perm∥₁≡Relator≡ {A} = funExt₂ λ { xs ys → ua (∥Perm∥₁≃Relator= {A = A} {xs = xs} {ys = ys}) }
+
+-- ====================================================
+
+
+permDRelatorΣ : ∀{ℓ}{X : Type ℓ} xs {ys : List X} {x y}
+  → DRelatorΣ _≡_ (xs ++ x ∷ y ∷ ys) (xs ++ y ∷ x ∷ ys)
+permDRelatorΣ [] =
+  cons (_ , refl , there (here refl) ,
+         cons (_ , refl , here refl , reflDRelatorΣ (λ _ → refl) _))
+permDRelatorΣ (x ∷ xs) =
+  cons (_ , refl , here refl , permDRelatorΣ xs)
+
+Perm→RelatorΣ= : {A : Type} {xs ys : List A}
+  → Perm xs ys → RelatorΣ _≡_ xs ys
+Perm→RelatorΣ= stop = reflRelatorΣ (λ _ → refl) _
+Perm→RelatorΣ= (perm p) =
+  transDRelatorΣ _∙_ (permDRelatorΣ _) (Perm→RelatorΣ= p .fst) ,
+  transDRelatorΣ _∙_ (Perm→RelatorΣ= p .snd) (permDRelatorΣ _)
+
+--removeDRelatorΣ'' : ∀{ℓ}{X : Type ℓ}
+--  → {R : X → X → Type ℓ}
+--  → (∀ x → R x x)
+--  → ∀ {xs} {x : X} (m : x ∈ xs)
+--  → DRelatorΣ R (x ∷ remove xs m) xs
+--removeDRelatorΣ'' {R = R} reflR (here eq) =
+--  cons (_ , subst (R _) eq (reflR _) , here refl , reflDRelatorΣ reflR _)
+--removeDRelatorΣ'' {R = R} reflR (there m) =
+--  cons (_ , reflR _ , there m , reflDRelatorΣ reflR _)
+--
+--emptyDRelatorΣ : {A : Type} {ys : List A}
+--  → DRelatorΣ _≡_ ys [] → ys ≡ []
+--emptyDRelatorΣ nil = refl
+--emptyDRelatorΣ (cons (y , eq , () , p))
+--
+--RelatorΣ=→Perm : {A : Type} {xs ys : List A}
+--  → RelatorΣ _≡_ xs ys → Perm xs ys
+--RelatorΣ=→Perm (nil , q) =
+--  subst (Perm []) (sym (emptyDRelatorΣ q)) stop
+--RelatorΣ=→Perm (cons (y , eq , y∈ys , p') , q) with memDRelatorΣ y∈ys q
+--... | (y' , eq' , here x , q') =
+--  transP (congPerm (RelatorΣ=→Perm (p' , q')))
+--         (subst (λ z → Perm (z ∷ remove _ y∈ys) _)
+--                (sym eq)
+--                (removePerm y∈ys))
+--... | (y' , eq' , there m , q') =
+--  transP (congPerm (RelatorΣ=→Perm (p' , transDRelatorΣ _∙_ q'
+--                                                        (subst (λ z → DRelatorΣ _≡_ (z ∷ _) _)
+--                                                               (sym eq' ∙ sym eq)
+--                                                               (removeDRelatorΣ'' (λ _ → refl) m)))))
+--         (subst (λ z → Perm (z ∷ remove _ y∈ys) _)
+--                (sym eq)
+--                (removePerm y∈ys))
