@@ -88,8 +88,8 @@ module _
 
   open ChoiceForTheorem11 ac32 ac
   open Hyps setX (isGroupoidBag (isSet→isGroupoid setX))
-  module Hyps' = Hyps {Y = BagLim} setX {!!} 
-  module Hyps2' {c : X → Bag X} {h : X → BagLim} = Hyps2 (λ x → h x ≡ (Bag.fix⁺ ∘ Bag.map h ∘ c) x) setX (λ x → {!!})
+  module Hyps' = Hyps {Y = BagLim} setX isGroupoidBagLim
+  module Hyps2' {c : X → Bag X} {h : X → BagLim} = Hyps2 (λ x → h x ≡ (Bag.fix⁺ ∘ Bag.map h ∘ c) x) setX (λ x → isGroupoidBagLim _ _)
 
   unfold : FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂
   unfold = compEquiv STInvariance.STInvarianceEquiv (compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv))
