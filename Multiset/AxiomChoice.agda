@@ -14,6 +14,7 @@ open import Cubical.Functions.Logic hiding (⊥)
 open import Cubical.HITs.SetQuotients renaming (rec to recQ; elim to elimQ)
 open import Cubical.HITs.PropositionalTruncation as PropTrunc
   renaming (map to ∥map∥; rec to ∥rec∥)
+open import Cubical.HITs.SetTruncation as ST
 open import Cubical.Relation.Binary hiding (Rel)
 open BinaryRelation
 
@@ -107,7 +108,7 @@ module _ (θInv : ∀ A {B} (R : B → B → Type) → (A → B / R) → [ A ⇒
   ac A R f =
     ∥map∥ (λ { (g , eq) → g , eq ∙ sectionθ A R f }) (ac' A R (θInv A R f))
 
-module _ (ac : ∀ (A : Type) {B : Type} (R : B → B → Type)
+module InvSec (ac : ∀ (A : Type) {B : Type} (R : B → B → Type)
              → isPropValued R → isEquivRel R
              → (f : A → B / R) → ∃[ g ∈ (A → B) ] [_] ∘ g ≡ f) where
 
@@ -220,7 +221,7 @@ module _ (ac : ∀ (A : Type) {B : Type} (R : B → B → Type)
 
 
 -- Connecting two "dependent" versions of choice 
-module _ (ac-d : (A : Type) {B : A → Type}
+module InvSecD (ac-d : (A : Type) {B : A → Type}
                (R : ∀ a → B a → B a → Type)
                (Rprop : ∀ a → isPropValued (R a))
                (Reqr : ∀ a → isEquivRel (R a))
@@ -322,6 +323,132 @@ module _ {A : Type} (B : A → Type)
              (λ _ _ _ → isProp→PathP (λ _ → propC _) _ _)
 
 
+module ChoiceForTheorem7
+         (ac : {A : Type} {B : A → Type} (R : (a : A) → B a → Type)
+           → isSet A → (∀ a → isSet (B a)) → (∀ a b → isProp (R a b))
+           → ((a : A) → ∥ (Σ[ b ∈ B a ] R a b ) ∥₁)
+           → ∥ Σ[ f ∈ ((a : A) → B a) ] ((a : A) → R a (f a)) ∥₁)
+         where
+
+  module Hyps {X Y : Type} (R : Y → Y → Type)
+              (setX : isSet X) (setY : isSet Y)
+              (propR : isPropValued R) (eqR : isEquivRel R)
+              where
+
+    [surjective] : (g : X → Y / R) → ∃[ f ∈ (X → Y) ] ((x : X) → [ f x ] ≡ g x)
+    [surjective] g = 
+      ac (λ x y → [ y ] ≡ g x)
+         setX (λ _ → setY) (λ _ _ → squash/ _ _)
+         (elimProp {P = λ z → ∥ (Σ-syntax Y (λ y → [ y ] ≡ z)) ∥₁}
+                   (λ _ → squash₁)
+                   (λ y → ∣ y , refl ∣₁)
+           ∘ g)
+           
+    θInvSec : (f : X → Y / R) → Σ ([ X ⇒ Y ]/ R) (λ g → θ X R g ≡ f)
+    θInvSec f = 
+      ∥rec∥ (SectionIsProp X R propR eqR f)
+            (λ { (g , eq) → [ g ] , funExt eq })
+            ([surjective] f)
+
+    θInv : (X → Y / R) → [ X ⇒ Y ]/ R
+    θInv = fst ∘ θInvSec
+
+    sectionθ : (f : X → Y / R) → θ X R (θInv f) ≡ f
+    sectionθ = snd ∘ θInvSec
+
+
+
+module ChoiceForTheorem11
+         (ac32 : {A : Type} {B : A → Type} (R : (a : A) → B a → Type)
+           → isSet A → (∀ a → isGroupoid (B a)) → (∀ a b → isProp (R a b))
+           → ((a : A) → ∥ (Σ[ b ∈ B a ] R a b ) ∥₂)
+           → ∥ Σ[ f ∈ ((a : A) → B a) ] ((a : A) → R a (f a)) ∥₂)
+         (ac : {A : Type} (B : A → Type)
+           → isSet A → (∀ a → isSet (B a))
+           → ((a : A) → ∥ B a ∥₁)
+           → ∥ ((a : A) → B a) ∥₁)          
+         where
+
+  ∥θ∥₂ : {A B : Type} → ∥ (A → B) ∥₂ → A → ∥ B ∥₂
+  ∥θ∥₂ = ST.rec (isSetΠ (λ _ → squash₂)) (∣_∣₂ ∘_)
+
+  ∥θ∥₁ : {X : Type} {Y : X → Type} → ∥ ((x : X) → Y x) ∥₁ → (x : X) → ∥ Y x ∥₁
+  ∥θ∥₁ = PropTrunc.rec (isPropΠ (λ _ → squash₁)) (∣_∣₁ ∘_)
+
+  module Hyps {X : Type} {Y : Type} (setX : isSet X) (grpdY : isGroupoid Y) where
+  
+    ∥surjective∥₂ : (g : X → ∥ Y ∥₂) → ∥ Σ[ f ∈ (X → Y) ] ((x : X) → ∣ f x ∣₂ ≡ g x) ∥₂
+    ∥surjective∥₂ g =
+      ac32 (λ x y → ∣ y ∣₂ ≡ g x)
+         setX (λ _ → grpdY) (λ _ _ → squash₂ _ _)
+         (ST.elim {B = λ z → ∥ Σ[ y ∈ Y ] (∣ y ∣₂ ≡ z) ∥₂}
+                  (λ _ → squash₂)
+                  (λ y → ∣ y , refl ∣₂)
+                  ∘ g)
+  
+    ∥θ∥₂InvSec :  (g : X → ∥ Y ∥₂) → Σ[ f ∈ ∥ (X → Y) ∥₂ ] ∥θ∥₂ f ≡ g
+    ∥θ∥₂InvSec g =
+      ST.rec (isSetΣ squash₂ (λ _ → isProp→isSet (isSetΠ (λ _ → squash₂) _ _)))
+             (λ { (f , eq) → ∣ f ∣₂ , funExt eq  })
+             (∥surjective∥₂ g)
+  
+    ∥θ∥₂Inv :  (X → ∥ Y ∥₂) → ∥ (X → Y) ∥₂
+    ∥θ∥₂Inv g = ∥θ∥₂InvSec g .fst
+  
+    ∥θ∥₂Sec :  (g : X → ∥ Y ∥₂) → ∥θ∥₂ (∥θ∥₂Inv g) ≡ g
+    ∥θ∥₂Sec g = ∥θ∥₂InvSec g .snd
+  
+    ∥θ∥₂-inj : (f f' : ∥ (X → Y) ∥₂) → ∥θ∥₂ f ≡ ∥θ∥₂ f' → f ≡ f'
+    ∥θ∥₂-inj =
+      ST.elim2 (λ _ _ → isSetΠ λ _ → isProp→isSet (squash₂ _ _))
+               λ f f' eq →
+                 PathIdTrunc₀Iso .Iso.inv
+                   (∥map∥ funExt
+                          (ac (λ x → f x ≡ f' x)
+                               setX (λ _ → grpdY _ _)
+                               (λ x → PathIdTrunc₀Iso .Iso.fun (λ i → eq i x))))
+  
+    ∥θ∥₂Inv-β : (f : X → Y) → ∥θ∥₂Inv (∣_∣₂ ∘ f) ≡ ∣ f ∣₂
+    ∥θ∥₂Inv-β f = ∥θ∥₂-inj (∥θ∥₂Inv (∣_∣₂ ∘ f)) ∣ f ∣₂ (∥θ∥₂Sec (∣_∣₂ ∘ f))
+  
+    recColl₂ : {A : Type} → isSet A
+      → ((X → Y) → A)
+      → (X → ∥ Y ∥₂) → A
+    recColl₂ setA h g = ST.rec setA h (∥θ∥₂Inv g)
+  
+    recCollβ₂ : {A : Type} (setA : isSet A)
+      → (g : (X → Y) → A)
+      → (f : X → Y) → recColl₂ setA g (∣_∣₂ ∘ f) ≡ g f
+    recCollβ₂ {A} setA h f = cong (ST.rec setA h) (∥θ∥₂Inv-β f)
+  
+    elimCollProp₂' : (B : (X → ∥ Y ∥₂) → Type) → (∀ c → isProp (B c))
+      → ((c : X → Y) → B (∣_∣₂ ∘ c))
+      → (c : ∥ (X → Y) ∥₂) → B (∥θ∥₂ c)
+    elimCollProp₂' B propB h = ST.elim (λ _ → isProp→isSet (propB _)) h
+  
+    elimCollProp₂ : (B : (X → ∥ Y ∥₂) → Type) → (∀ c → isProp (B c))
+      → ((c : X → Y) → B (∣_∣₂ ∘ c))
+      → (c : X → ∥ Y ∥₂) → B c
+    elimCollProp₂ B propB h c =
+      subst B (∥θ∥₂Sec c) (elimCollProp₂' B propB h (∥θ∥₂Inv c))
+
+  module Hyps2 {X : Type} (Y : X → Type)
+               (setX : isSet X) (setY : ∀ x → isSet (Y x))
+               where
+
+    ∥θ∥₁Inv : ((x : X) → ∥ Y x ∥₁) → ∥ ((x : X) → Y x) ∥₁
+    ∥θ∥₁Inv = ac Y setX setY
+    
+    elimCollProp₁' :  (B : ((x : X) → ∥ Y x ∥₁) → Type) → (∀ c → isProp (B c))
+      → ((c : (x : X) → Y x) → B (∣_∣₁ ∘ c))
+      → (c : ∥ ((x : X) → Y x) ∥₁) → B (∥θ∥₁ c)
+    elimCollProp₁' B propB h = PropTrunc.elim (λ _ → propB _) h
+
+    elimCollProp₁ :  (B : ((x : X) → ∥ Y x ∥₁) → Type) → (∀ c → isProp (B c))
+      → ((c : (x : X) → Y x) → B (∣_∣₁ ∘ c))
+      → (c : (x : X) → ∥ Y x ∥₁) → B c
+    elimCollProp₁ B propB h c =
+      subst B (isPropΠ (λ _ → squash₁) _ _) (elimCollProp₁' B propB h (∥θ∥₁Inv c))
 
 
 {-

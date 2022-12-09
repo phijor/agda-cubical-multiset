@@ -20,6 +20,7 @@ open import Cubical.HITs.SetQuotients
 open import Cubical.Relation.Binary
 open BinaryRelation
 open isEquivRel
+open import Multiset.AxiomChoice
 
 open import Multiset.ListQuotient.Base
 
@@ -33,6 +34,13 @@ open Tree public
 
 subtrees-1 : List (Tree ∞) → Tree ∞
 subtrees-1 xs = thunk xs
+
+isSetTree : ∀ i → isSet (Tree i)
+subtrees (isSetTree s x y p q j k) {s'} =
+  isOfHLevelList 0 (isSetTree s')
+    (subtrees x) (subtrees y)
+    (λ i → subtrees (p i)) (λ i → subtrees (q i))
+    j k
 
 -- tree bisimilarity
 record Bisim (i : Size) (xs ys : Tree i) : Type where
@@ -313,21 +321,6 @@ M-νM-FixpointIso .Iso.leftInv = νM→MνM→νM
 M-νM-FixpointEquiv : M νM ≃ νM
 M-νM-FixpointEquiv = isoToEquiv M-νM-FixpointIso
 
--- pointwise lifting of a relation to a function space
-PW : {X A B : Type} (R : A → B → Type) → (X → A) → (X → B) → Type
-PW R f g = ∀ x → R (f x) (g x)
-
--- the quotient a function space by the pointwise lifted relation
-[_⇒_]/_ : (A B : Type) (R : B → B → Type) → Type
-[ A ⇒ B ]/ R = (A → B) / PW R
-
--- a function sending equivalence classes of function wrt. pointwise
--- lifted relation and functions into equivalence classes
-θ : ∀ A {B} (R : B → B → Type) → [ A ⇒ B ]/ R → A → B / R
-θ A R = recQ (isSetΠ (λ _ → squash/)) (λ c x → [ c x ])
-  λ c c' r → funExt (λ x → eq/ _ _ (r x))
-
-
 -- two quotients of function spaces
 [_⇒M_] : (A B : Type) → Type
 [ A ⇒M B ] = [ A ⇒ (List B) ]/ Relator _≡_
@@ -380,97 +373,92 @@ subtreesE (anaTreeRel c cRel j r) {k} = mapRelator' (anaTreeRel c cRel k) (cRel 
 -- split epimorphism; this is equivalent to full axiom of choice (the
 -- equivalence is proved in the end of the file AxiomChoice.agda)
 
-module _ (θInv : ∀ A {B} (R : B → B → Type) → (A → B / R) → [ A ⇒ B ]/ R)
-         (sectionθ : ∀ A {B} (R : B → B → Type) → section (θ A R) (θInv A R)) where
+open import Multiset.AxiomChoice
 
-  θ1 : ∀{X} → [ X ⇒M X ] → X → M X
+module _
+       (ac : {A : Type} {B : A → Type} (R : (a : A) → B a → Type)
+           → isSet A → (∀ a → isSet (B a)) → (∀ a b → isProp (R a b))
+           → ((a : A) → ∥ (Σ[ b ∈ B a ] R a b ) ∥₁)
+           → ∥ Σ[ f ∈ ((a : A) → B a) ] ((a : A) → R a (f a)) ∥₁)
+        (X : Type) (setX : isSet X)
+        where
+
+  open ChoiceForTheorem7 ac
+  open Hyps (Relator {X = X} _≡_) setX
+            (isOfHLevelList 0 setX) (isPropRelator _≡_)
+            (isEquivRelRelator isEquivRel≡)
+       renaming (θInv to θ1Inv; sectionθ to sectionθ1)
+
+  open Hyps (ExtEq ∞) setX
+            (isSetTree ∞) isPropExtEq isEquivRelExtEq
+       renaming (θInv to θ2Inv; sectionθ to sectionθ2)
+
+  θ1 : [ X ⇒M X ] → X → M X
   θ1 = θ _ _
 
-  θ1Inv : ∀ {X} → (X → M X) → [ X ⇒M X ]
-  θ1Inv = θInv _ _
-
-  sectionθ1 : ∀{X} (f : X → M X) → θ1 (θ1Inv f) ≡ f
-  sectionθ1 = sectionθ _ _
-
-  θ2 : ∀{X} → [ X ⇒νM] → X → νM
+  θ2 : [ X ⇒νM] → X → νM
   θ2 = θ _ _
 
-  θ2-ns : ∀{X} → [ X ⇒νM] → X → νM
-  θ2-ns = θ _ _
-
-  θ2Inv : ∀ {X} → (X → νM) → [ X ⇒νM]
-  θ2Inv = θInv _ _ 
-
-  θ2Inv-ns : ∀ {X} → (X → νM) → [ X ⇒νM]
-  θ2Inv-ns = θInv _ _ 
-
-  sectionθ2 : ∀{X} (f : X → νM) → θ2 (θ2Inv f) ≡ f
-  sectionθ2 = sectionθ _ _
-
-  sectionθ2-ns : ∀{X} (f : X → νM) → θ2-ns (θ2Inv-ns f) ≡ f
-  sectionθ2-ns = sectionθ _ _
-
-  anaM : {X : Type} (c : X → M X)
-    → X → νM
+  anaM : (c : X → M X) → X → νM
   anaM c = anaM' (θ1Inv c)
 
 
 -- the anamorphism is a coalgebra morphism
-  anaMEq' : {X : Type} (c : [ X ⇒M X ])
+  anaMEq' : (c : [ X ⇒M X ])
     → ∀ x → νM→MνM (anaM' c x) ≡ mapM (anaM' c) (θ1 c x)
   anaMEq' = elimPropQ (λ _ → isPropΠ (λ _ → squash/ _ _)) 
      (λ c x → cong [_] (mapListComp (c x)))
 
-  anaMEq : {X : Type} (c : X → M X)
+  anaMEq : (c : X → M X)
     → ∀ x → νM→MνM (anaM c x) ≡ mapM (anaM c) (c x)
   anaMEq c x =
     anaMEq' (θ1Inv c) x ∙ cong (λ f → mapM (anaM c) (f x)) (sectionθ1 c)
 
-  anaMUniq''' : {X : Type} (Xset : isSet X) (c : X → List X)
+  anaMUniq''' : (c : X → List X)
     → (f : X → Tree ∞) 
     → (feq : ∀ x → Relator (ExtEq ∞) (subtrees (f x)) (mapList f (c x)))
     → ∀ s x → ExtEq s (f x) (anaTree c ∞ x)
-  subtreesE (anaMUniq''' Xset c f feq s x) {s'} =
-    transDRelator (transExtEq s') (feq x .fst) (mapRelator-fun (symExtEq s') (anaMUniq''' Xset c f feq s') (c x) .fst) ,
-    transDRelator (transExtEq s') (mapRelator-fun (symExtEq s') (anaMUniq''' Xset c f feq s') (c x) .snd) (feq x .snd)
+  subtreesE (anaMUniq''' c f feq s x) {s'} =
+    transDRelator (transExtEq s') (feq x .fst) (mapRelator-fun (symExtEq s') (anaMUniq''' c f feq s') (c x) .fst) ,
+    transDRelator (transExtEq s') (mapRelator-fun (symExtEq s') (anaMUniq''' c f feq s') (c x) .snd) (feq x .snd)
 
-  anaMUniq'' : {X : Type} (Xset : isSet X) (c : X → List X)
+  anaMUniq'' : (c : X → List X)
     → (f : [ X ⇒νM]) (feq : ∀ x → νM→MνM (θ2 f x) ≡ mapM (θ2 f) [ c x ])
     → ∀ x → θ2 f x ≡ anaM' [ c ] x
-  anaMUniq'' Xset c =
+  anaMUniq'' c =
     elimPropQ
       (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → squash/ _ _)))
       (λ f feq x → eq/ _ _
-        (anaMUniq''' Xset c f
+        (anaMUniq''' c f
                      (λ y → effectiveRelator isPropExtEq isEquivRelExtEq
                        (subst (Relator _≡_ (mapList [_] (subtrees (f y))))
                               (sym (mapListComp (c y)))
                               (effective (isPropRelator _) (isEquivRelRelator (equivRel (λ _ → refl) (λ _ _ → sym) (λ _ _ _ → _∙_))) _ _ (feq y))))
                      _ x))
           
-  anaMUniq' : {X : Type} (Xset : isSet X) (c : [ X ⇒M X ])
+  anaMUniq' : (c : [ X ⇒M X ])
     → (f : X → νM) (feq : ∀ x → νM→MνM (f x) ≡ mapM f (θ1 c x))
     → ∀ x → f x ≡ anaM' c x
-  anaMUniq' Xset =
+  anaMUniq' =
     elimPropQ
       (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → squash/ _ _))))
       (λ c f feq x →
          (λ i → sym (sectionθ2 f) i x)
-         ∙ anaMUniq'' Xset c (θ2Inv f)
+         ∙ anaMUniq'' c (θ2Inv f)
                           (λ y → (λ i → νM→MνM (sectionθ2 f i y) )
                                   ∙ feq y
                                   ∙ cong (λ g → [ mapList g (c y) ]) (sym (sectionθ2 f)))
                           x)
 
-  anaMUniq : {X : Type} (Xset : isSet X) (c : X → M X)
+  anaMUniq : (c : X → M X)
     → (f : X → νM) (feq : ∀ x → νM→MνM (f x) ≡ mapM f (c x))
     → f ≡ anaM c
-  anaMUniq Xset c f feq = funExt λ x → 
-    anaMUniq' Xset (θ1Inv c) f
+  anaMUniq c f feq = funExt λ x → 
+    anaMUniq' (θ1Inv c) f
       (λ y → feq y ∙ λ i → mapM f (sectionθ1 c (~ i) y))
       x
 
-  isContrAna : {X : Type} → isSet X
+  isContrAna : isSet X
     → (c : X → M X)
     → isContr (Σ[ f ∈ (X → νM) ] (∀ x → νM→MνM (f x) ≡ mapM f (c x)))
-  isContrAna setX c = (anaM c , anaMEq c) , λ { (f , feq) → Σ≡Prop (λ c → isPropΠ λ x → squash/ _ _) (sym (anaMUniq setX c f feq)) }
+  isContrAna setX c = (anaM c , anaMEq c) , λ { (f , feq) → Σ≡Prop (λ c → isPropΠ λ x → squash/ _ _) (sym (anaMUniq c f feq)) }
