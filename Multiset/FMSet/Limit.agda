@@ -15,14 +15,17 @@ open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Isomorphism using (section)
 open import Cubical.Foundations.HLevels using (isPropΠ)
+open import Cubical.Foundations.Univalence using (ua→;ua→⁻)
 
-open import Cubical.HITs.SetQuotients as SQ using (_/_)
+open import Cubical.HITs.SetQuotients as SQ using (_/_; [_])
 open import Cubical.HITs.PropositionalTruncation as PT
   using (∥_∥₁ ; ∣_∣₁)
 
 open import Cubical.Data.Nat.Base as Nat hiding (_^_)
-open import Cubical.Data.SumFin.Base using (Fin ; isSetFin)
+open import Cubical.Data.SumFin.Base using (Fin ; isSetFin; inl; inr)
 open import Cubical.Data.Unit as Unit using (isSetUnit)
+open import Cubical.Data.Empty as Empty
+open import Multiset.ListQuotient.FMSetEquiv
 
 instance
   FunctorFMSet : Functor {ℓ = ℓ-zero} FMSet
@@ -72,6 +75,36 @@ record Depth : Type where
 
 open Depth
 
+open import Multiset.Ordering.Order
+open import Multiset.Ordering.FMSetOrder
+
+isSetFMSet^ : ∀ n → isSet (FMSet ^ n)
+isSetFMSet^ zero = Unit.isSetUnit*
+isSetFMSet^ (suc n) = isSetFMSet
+
+⊥Rel : {A : Type} → A → A → Type
+⊥Rel _ _ = Empty.⊥
+
+isLinOrder⊥Rel : isLinOrder {A = Unit*} ⊥Rel
+isLinOrder⊥Rel =
+  record { asymR = λ { () }
+         ; transR = λ { () }
+         ; propR = λ { () }
+         ; totR = λ _ _ → inr (inr refl)
+         }
+
+open MsetLinOrder
+open SortingFMSet
+
+LexFMSet^ : ∀ n → FMSet ^ n → FMSet ^ n → Type
+linLexFMSet^ : ∀ n → isLinOrder (LexFMSet^ n)
+
+LexFMSet^ zero = ⊥Rel
+LexFMSet^ (suc n) = LexFMSet (isSetFMSet^ n) (LexFMSet^ n) (linLexFMSet^ n)
+
+linLexFMSet^ zero = isLinOrder⊥Rel
+linLexFMSet^ (suc n) = linLexFMSet (isSetFMSet^ n) (LexFMSet^ n) (linLexFMSet^ n)
+
 module _ (sz : ℕ) where
   IVec : Depth → Type
   IVec d = Fin sz → FMSet ^ (undepth d)
@@ -79,11 +112,30 @@ module _ (sz : ℕ) where
   R : ∀ d → (IVec d) → (IVec d) → Type _
   R d = SymmetricAction {X = FMSet ^ (undepth d)} sz
 
-module Surjectivity
-  (choice : ∀ sz → (∀ n → IVec sz n / R sz n) → (∀ n → IVec sz n) / PW-d (R sz))
-  (choice-sec : ∀ sz → section (θ-d (R sz)) (choice sz))
-  (chose-perm : ∀ {X : Type} sz {v w : Fin sz → X} → v ∼ w → Σ[ σ ∈ (Fin sz ≃ Fin sz) ] v ≡ w ∘ (equivFun σ))
-  where
+  sort^ : ∀ n → IVec n / R n → IVec n
+  sort^ (depth zero) x _ = tt*
+  sort^ (depth (suc n)) =
+    sortPVect isSetFMSet _ (linLexFMSet^ (suc n)) sz
+
+  section-sort^ : ∀ n (x : IVec n / R n) → SQ.[ sort^ n x ] ≡ x
+  section-sort^ (depth zero) = SQ.elimProp (λ _ → _/_.squash/ _ _) (λ _ → refl)
+  section-sort^ (depth (suc n)) =
+    sortPVect-section isSetFMSet _ (linLexFMSet^ (suc n)) sz
+
+  choice : (∀ n → IVec n / R n) → (∀ n → IVec n) / PW-d R
+  choice x = SQ.[ (λ n → sort^ n (x n)) ]
+
+  choice-sec : section (θ-d R) choice
+  choice-sec x = funExt (λ n → section-sort^ n (x n))
+
+  chose-perm : ∀ d {v w : Fin sz → FMSet ^ d}
+    → v ∼ w → Σ[ σ ∈ (Fin sz ≃ Fin sz) ] v ≡ w ∘ (equivFun σ)
+  chose-perm d {v}{w} r = cp .fst , funExt (λ k → ua→⁻ (cp .snd) k)
+    where
+      cp : SymmetricActionΣ sz v w
+      cp = canonicalS (isSetFMSet^ d) (LexFMSet^ d) (linLexFMSet^ d) sz v w r
+
+module Surjectivity where
 
   module ConstSize (sz : ℕ) (xs : (d : Depth) → PVect (FMSet ^ (undepth d)) sz) where
     constSzLim : (d : Depth) → FMSet ^ (suc (undepth d))
@@ -115,7 +167,7 @@ module Surjectivity
         approx-!-rel d = effective sz (islim-[approx] d)
 
         σs : ∀ d → Fin sz ≃ Fin sz
-        σs d = chose-perm sz (approx-!-rel d) .size
+        σs d = chose-perm sz d (approx-!-rel d) .size
 
         σs⁺ : ∀ d → Fin sz → Fin sz
         σs⁺ d = equivFun (σs d)
@@ -124,7 +176,7 @@ module Surjectivity
         σs⁻ d = invEq (σs d)
 
         σs-rel : ∀ d → !^ d ∘ approx (depth (suc d)) ≡ approx (depth d) ∘ σs⁺ d
-        σs-rel d = chose-perm sz (approx-!-rel d) .snd
+        σs-rel d = chose-perm sz d (approx-!-rel d) .snd
 
         ρs : ∀ (d : ℕ) → Fin sz ≃ Fin sz
         ρs zero = idEquiv _

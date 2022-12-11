@@ -222,6 +222,39 @@ module SortingFMSet {A : Type} (setA : isSet A)
       sa : Perm xs ys → SymmetricActionΣ n v w
       sa p = canonicalS' n v w (lengthRelatorΣ (Perm→RelatorΣ= p)) (sa' p)
 
-      abstract
-        isSet→Path : ∀ x → isSet (PathP (λ i → ua x i → A) v w)
-        isSet→Path x = isOfHLevelPathP 2 (isSet→ setA) v w
+-- Proposition 3
+  open MsetLinOrder setA R linR
+  open ListLinOrder setA R linR
+
+  LexFMSet : FMSet A → FMSet A → Type
+  LexFMSet xs ys =
+    LexMset (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= xs))
+            (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= ys))
+
+  totLexFMSet : ∀ xs ys → LexFMSet xs ys ⊎ (LexFMSet ys xs ⊎ (xs ≡ ys))
+  totLexFMSet xs ys =
+    recTotR LexMset
+            inl
+            (inr ∘ inl)
+            (λ eq → inr (inr
+              (xs
+                 ≡⟨ sym (List/Relator=→FMSet→List/Relator= (xs .fst) (xs .snd)) ⟩
+               List/Relator=→FMSet (FMSet→List/Relator= xs)
+                 ≡⟨ cong′ List/Relator=→FMSet (sym (equivToIso List/Perm≃List/Relator≡ .Iso.rightInv (FMSet→List/Relator= xs))) ⟩
+               List/Relator=→FMSet (equivFun List/Perm≃List/Relator≡ (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= xs)))
+                 ≡⟨ (λ i → List/Relator=→FMSet (equivFun List/Perm≃List/Relator≡ (eq i))) ⟩
+               List/Relator=→FMSet (equivFun List/Perm≃List/Relator≡ (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= ys)))
+                 ≡⟨ cong′ List/Relator=→FMSet (equivToIso List/Perm≃List/Relator≡ .Iso.rightInv (FMSet→List/Relator= ys)) ⟩
+               List/Relator=→FMSet (FMSet→List/Relator= ys)
+                 ≡⟨ List/Relator=→FMSet→List/Relator= (ys .fst) (ys .snd) ⟩
+               ys
+               ∎)))
+            (totLexMset (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= xs))
+                        (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= ys)))
+
+  linLexFMSet : isLinOrder LexFMSet
+  linLexFMSet =
+    record { asymR = asymLex
+           ; transR = transLex
+           ; propR = propLex
+           ; totR = totLexFMSet }
