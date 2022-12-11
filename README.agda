@@ -38,10 +38,11 @@ module README where
 open import Multiset.Prelude
 
 open import Cubical.Foundations.Isomorphism using (Iso)
-open import Cubical.Foundations.Equiv using (_≃_)
+open import Cubical.Foundations.Equiv
 open import Cubical.Data.FinSet using (FinSet)
+open import Cubical.Data.SumFin using (Fin)
 import Cubical.Data.Nat as Nat using (ℕ)
-import Cubical.Data.List as List
+open import Cubical.Data.List as List using (List)
 import Cubical.HITs.SetQuotients as SQ
 open import Cubical.HITs.SetTruncation as ST using (∥_∥₂)
 
@@ -50,11 +51,9 @@ open import Cubical.HITs.SetTruncation as ST using (∥_∥₂)
 -- 3.1 The free commutative monoid
 
 -- Definition as a HIT
-import Multiset.FCM
+open import Multiset.FCM as FCM
   renaming
     (M to FCM)
-  using
-    (rec ; elim)
 
 -- 3.2 As a Quotient of Lists
 
@@ -62,28 +61,60 @@ import Multiset.FCM
 open import Multiset.Ordering.Order
   using (Perm)
   renaming (Mset to List[_]/Perm)
+import Multiset.Ordering.PermEquiv
+import Multiset.Ordering.FMSetOrder
 
 -- Equivalences of FCM and lists module permutations.
-import Multiset.Equivalences.FCM-PList
+open import Multiset.Equivalences.FCM-PList
+  using ()
+  renaming (M≃PList to FCM≃List/Perm)
+
+_ : ∀ {X} → FCM X ≃ List[ X ]/Perm
+_ = FCM≃List/Perm
 
 -- Equivalences of FCM and a HIT of head-permuted lists,
 -- defined in Cubical.HITs.FiniteMultiset.
-import Multiset.Equivalences.FCM-HeadPList
+open import Cubical.HITs.FiniteMultiset.Base using () renaming (FMSet to HeadPList)
+open import Multiset.Equivalences.FCM-HeadPList
+  using ()
+  renaming (M≃HeadPList to FCM≃HeadPList)
+
+_ : ∀ {X : Type} → FCM X ≃ HeadPList X
+_ = FCM≃HeadPList
 
 -- Relational lifting
-import Multiset.ListQuotient.Base
+open import Multiset.ListQuotient.Base
   using (DRelator ; Relator)
+import Multiset.ListQuotient.FMSetEquiv
 
 -- Equivalence of lists modulo permutation and
 -- lists modulo the relational lifting of equality.
-import Multiset.Equivalences.PList-RelatorList
+open import Multiset.Equivalences.PList-RelatorList
   using (List/Perm≃List/Relator≡)
+
+_ : ∀ {X} → List[ X ]/Perm ≃ (List X SQ./ Relator _≡_)
+_ = List/Perm≃List/Relator≡
 
 -- 3.3 As an Analytic Functor
 
-import Multiset.FMSet.Base
+open import Multiset.FMSet.Base
   using (_∼_ ; FMSet)
   renaming (SymmetricAction to SymAct)
+
+open import Multiset.ListQuotient.FMSetEquiv
+  using (FMSet≃List/Relator=)
+
+_ : ∀ {X} → FMSet X ≃ List X SQ./ Relator _≡_
+_ = FMSet≃List/Relator=
+
+-- The four presentations of finite multisets
+-- are provably equivalent:
+_ : ∀ X → FCM X ≃ FMSet X
+_ = λ X →
+  FCM X                   ≃⟨ FCM≃List/Perm ⟩
+  List[ X ]/Perm          ≃⟨ List/Perm≃List/Relator≡ ⟩
+  List X SQ./ Relator _≡_ ≃⟨ invEquiv FMSet≃List/Relator= ⟩
+  FMSet X ■
 
 open import Multiset.FiniteChoice
   using
@@ -92,7 +123,8 @@ open import Multiset.FiniteChoice
     )
 
 -- The equivalence built from `box`:
-Lemma1 : _
+Lemma1 : ∀ {n} {ℓ} (Y : Fin n → Type ℓ)
+  → ((n₁ : Fin n) → ∥ Y n₁ ∥₂) ≃ ∥ ((k : Fin n) → Y k) ∥₂
 Lemma1 = setFinChoice≃
 
 -- The finite choice principle obtained from Lemma 1:
@@ -104,6 +136,8 @@ import Multiset.FMSet.Properties using (module STInvariance)
 open Multiset.FMSet.Properties.STInvariance
   renaming (STInvarianceEquiv to FMSet∥-∥₂≃FMSet)
 
+Theorem1 : ∀ {ℓ} {X : Type ℓ} → FMSet ∥ X ∥₂ ≃ FMSet X
+Theorem1 = FMSet∥-∥₂≃FMSet
 
 -- 3.4 Definable Quotients and Sorting
 open import Multiset.Ordering.Order
@@ -124,7 +158,7 @@ module _ {A : Type} (setA : isSet A) (R : A → A → Type) (linR : isLinOrder R
   sortPerm-section : ∀ xs → SQ.[ S.sortMset xs ] ≡ xs
   sortPerm-section = S.sortMset-section
 
--- TODO: Proposition 1 & 2
+  -- TODO: Proposition 1 & 2
 
   module L = ListLinOrder setA R linR
 

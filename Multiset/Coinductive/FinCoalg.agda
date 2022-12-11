@@ -68,6 +68,10 @@ anaMUniq : {X : Type} (c : X → M X)
   → f ≡ anaM c ∞
 anaMUniq c f eq i x = anaMUniq' c (λ _ → f) (λ { _ _ → eq }) ∞ x i
 
+-- isContr' : {X : Type} (c : X → M X)
+--   → isContr (Σ[ f ∈ (X → νM ∞) ] ∀ x → subtreesM (f x) {∞} ≡ map f (c x))
+-- isContr' c = (anaM c ∞ , anaMEq c) , λ where (f , f-ana) → ΣPathP (sym (anaMUniq c f λ {s} → {!f-ana !}) , {! !})
+
 -- ================================================ 
 
 -- Coinduction principle:
