@@ -469,3 +469,8 @@ module _ (θInv : ∀ A {B} (R : B → B → Type) → (A → B / R) → [ A ⇒
     anaMUniq' Xset (θ1Inv c) f
       (λ y → feq y ∙ λ i → mapM f (sectionθ1 c (~ i) y))
       x
+
+  isContrAna : {X : Type} → isSet X
+    → (c : X → M X)
+    → isContr (Σ[ f ∈ (X → νM) ] (∀ x → νM→MνM (f x) ≡ mapM f (c x)))
+  isContrAna setX c = (anaM c , anaMEq c) , λ { (f , feq) → Σ≡Prop (λ c → isPropΠ λ x → squash/ _ _) (sym (anaMUniq setX c f feq)) }
