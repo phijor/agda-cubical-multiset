@@ -37,11 +37,11 @@ module README where
 
 open import Multiset.Prelude
 
-open import Cubical.Foundations.Isomorphism using (Iso)
+open import Cubical.Foundations.Isomorphism using (Iso ; section)
 open import Cubical.Foundations.Equiv
 open import Cubical.Data.FinSet using (FinSet)
 open import Cubical.Data.SumFin using (Fin)
-import Cubical.Data.Nat as Nat using (ℕ)
+open import Cubical.Data.Nat as Nat using (ℕ)
 open import Cubical.Data.List as List using (List)
 import Cubical.HITs.SetQuotients as SQ
 open import Cubical.HITs.SetTruncation as ST using (∥_∥₂)
@@ -62,7 +62,6 @@ open import Multiset.Ordering.Order
   using (Perm)
   renaming (Mset to List[_]/Perm)
 import Multiset.Ordering.PermEquiv
-import Multiset.Ordering.FMSetOrder
 
 -- Equivalences of FCM and lists module permutations.
 open import Multiset.Equivalences.FCM-PList
@@ -97,12 +96,13 @@ _ = List/Perm≃List/Relator≡
 
 -- 3.3 As an Analytic Functor
 
-open import Multiset.FMSet.Base
-  using (_∼_ ; FMSet)
+open import Multiset.FMSet.Base as FMSet
+  using (_∼_ ; FMSet ; PVect)
   renaming (SymmetricAction to SymAct)
 
 open import Multiset.ListQuotient.FMSetEquiv
   using (FMSet≃List/Relator=)
+  renaming (SymmetricActionΣ to SymAct')
 
 _ : ∀ {X} → FMSet X ≃ List X SQ./ Relator _≡_
 _ = FMSet≃List/Relator=
@@ -143,31 +143,30 @@ Theorem1 = FMSet∥-∥₂≃FMSet
 open import Multiset.Ordering.Order
   using
     ( isLinOrder -- Definition of a linear order
-    ; module Sorting -- Contains insertion sort
-    ; module ListLinOrder
     )
+open import Multiset.Ordering.FMSetOrder
+  using (module SortingFMSet)
 
 module _ {A : Type} (setA : isSet A) (R : A → A → Type) (linR : isLinOrder R) where
-  module S = Sorting setA R linR
+  module S = SortingFMSet setA R linR
 
-  -- Extracting a sorted list from a list modulo permutation
-  sortPerm : List[ A ]/Perm → List.List A
-  sortPerm = S.sortMset
+  -- Extracting a vector from a finite multiset by sorting:
+  sortFMSet : FMSet A → Σ[ n ∈ ℕ ] (Fin n → A)
+  sortFMSet = S.sortFMSet
 
-  -- Extraction is a section of the set quotient constructor
-  sortPerm-section : ∀ xs → SQ.[ S.sortMset xs ] ≡ xs
-  sortPerm-section = S.sortMset-section
+  -- Sorting members of a multisets (vectors up to permutation) is derived from the above:
+  sortPVect : ∀ n → PVect A n → (Fin n → A)
+  sortPVect = S.sortPVect
 
-  -- TODO: Proposition 1 & 2
+  -- Sorting is a section of the set quotient constructor
+  Proposition1 : ∀ n → section SQ.[_] (sortPVect n)
+  Proposition1 = S.sortPVect-section
 
-  module L = ListLinOrder setA R linR
-
-  -- Lexicographic order on lists
-  Lex : List.List A → List.List A → Type
-  Lex = L.Lex
-
-  linLex : isLinOrder Lex
-  linLex = L.linLex
+  -- For linearly ordered A, the propositional truncation of SymAct can be removed.
+  Proposition2 : ∀ n (v w : Fin n → A)
+    → SymAct n v w
+    → SymAct' n v w
+  Proposition2 = S.canonicalS
 
 -- 4 The Final Coalgebra in Sets
 

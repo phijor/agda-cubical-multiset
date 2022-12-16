@@ -82,7 +82,7 @@ module SortingFMSet {A : Type} (setA : isSet A)
     Vec→FinVec (List→Vec (sortMset (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= (n , x))))) ∘ SumFin→Fin
 
   abstract
-    sortFMSet-section : (x : FMSet A) → (_ , [ sortFMSet x .snd ]) ≡ x
+    sortFMSet-section : (x : FMSet A) → ⟅ [ sortFMSet x .members ] ⟆ ≡ x
     sortFMSet-section x =
       (_ , [ sortFMSet x .snd ])
         ≡⟨ refl ⟩
@@ -98,9 +98,9 @@ module SortingFMSet {A : Type} (setA : isSet A)
   sortPVect : ∀ n → PVect A n → SumFin n → A
   sortPVect n x = subst (λ m → SumFin m → A) (lengthSortPVect n x) (sortFMSet (n , x) .snd)
 
--- Proposition 1
+  -- Proposition 1
   abstract
-    sortPVect-section : ∀ n (x : PVect A n) → [ sortPVect n x ] ≡ x
+    sortPVect-section : ∀ n → section [_] (sortPVect n)
     sortPVect-section n x =
       lem (lengthSortPVect n x) (sortFMSet (n , x) .snd)
       ∙ (subst (PVect A) (lengthSortPVect n x) [ sortFMSet (n , x) .snd ]
