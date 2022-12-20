@@ -458,7 +458,6 @@ module _
       (λ y → feq y ∙ λ i → mapM f (sectionθ1 c (~ i) y))
       x
 
-  isContrAna : isSet X
-    → (c : X → M X)
+  isContrAna : (c : X → M X)
     → isContr (Σ[ f ∈ (X → νM) ] (∀ x → νM→MνM (f x) ≡ mapM f (c x)))
-  isContrAna setX c = (anaM c , anaMEq c) , λ { (f , feq) → Σ≡Prop (λ c → isPropΠ λ x → squash/ _ _) (sym (anaMUniq c f feq)) }
+  isContrAna c = (anaM c , anaMEq c) , λ { (f , feq) → Σ≡Prop (λ c → isPropΠ λ x → squash/ _ _) (sym (anaMUniq c f feq)) }
