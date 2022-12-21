@@ -58,6 +58,10 @@ FinSet₀ = FinSet ℓ-zero
 Tote : Type ℓ → Type (ℓ-max ℓ (ℓ-suc ℓ-zero))
 Tote X = Σ[ Y ∈ FinSet₀ ] (⟨ Y ⟩ → X)
 
+map : ∀ {ℓ ℓ'} → {X : Type ℓ} {Y : Type ℓ'}
+  → (f : X → Y) → Tote X → Tote Y
+map f (B , v)= B , f ∘ v
+
 TotePath : ∀ {V W : Type}
   → {finV : isFinSet V}
   → {finW : isFinSet W}

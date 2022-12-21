@@ -3,7 +3,7 @@
 module Multiset.Tote.Properties where
 
 open import Multiset.Tote.Base as Tote
-open import Multiset.FMSet
+open import Multiset.FMSet as FMSet
   using (FMSet ; isSetFMSet ; _∼_ ; SymmetricAction)
 
 open import Cubical.Foundations.Prelude
@@ -127,5 +127,13 @@ FMSet-∥Tote∥₂-Iso .inv = ∥Tote∥₂→FMSet
 FMSet-∥Tote∥₂-Iso .rightInv = ∥Tote∥₂→FMSet→∥Tote∥₂
 FMSet-∥Tote∥₂-Iso .leftInv = FMSet→∥Tote∥₂→FMSet
 
+isNatural-FMSet-∥Tote∥₂-Iso : ∀ {X Y : Type ℓ} (f : X → Y)
+  → FMSet→∥Tote∥₂ ∘ FMSet.map f ≡ ST.map (Tote.map f) ∘ FMSet→∥Tote∥₂
+isNatural-FMSet-∥Tote∥₂-Iso f = funExt (FMSet.elimProp (λ (xs : FMSet _) → isSetSetTrunc _ _) λ {sz} xs → refl)
+
 FMSet≃∥Tote∥₂ : FMSet X ≃ ∥ Tote X ∥₂
 FMSet≃∥Tote∥₂ = isoToEquiv FMSet-∥Tote∥₂-Iso
+
+isNatural-FMSet≃∥Tote∥₂ : ∀ {X Y : Type ℓ} (f : X → Y)
+  → (equivFun FMSet≃∥Tote∥₂) ∘ FMSet.map f ≡ ST.map (Tote.map f) ∘ (equivFun FMSet≃∥Tote∥₂)
+isNatural-FMSet≃∥Tote∥₂ = isNatural-FMSet-∥Tote∥₂-Iso
