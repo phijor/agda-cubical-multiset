@@ -102,11 +102,49 @@ module _ {ℓ} (F : Type ℓ → Type ℓ) {{ FunctorF : Functor F }} where
     map (!^ n ∘ cut (suc n)) x       ≡⟨ cong (λ f → map f x) (cut-is-lim n) ⟩∎
     map (cut n) x ∎
 
-isLimitPreserving : (F : Type → Type) → {{ Functor F }} → Type
+isLimitPreserving : ∀ {ℓ} (F : Type ℓ → Type ℓ) → {{ Functor F }} → Type ℓ
 isLimitPreserving F = isEquiv (pres F)
 
-fix : ∀ {F}
-  → {{FunctorF : Functor F}}
-  → isLimitPreserving F
-  → F (Lim F) ≃ Lim F
-fix {F = F} is-lim-pres = (pres F , is-lim-pres) ∙ₑ ShLim≃Lim F
+module Fixpoint {ℓ} {F : Type ℓ → Type ℓ} {{FunctorF : Functor F}} (is-lim-pres : isLimitPreserving F) where
+  open Functor FunctorF
+
+  fix : F (Lim F) ≃ Lim F
+  fix = (pres F , is-lim-pres) ∙ₑ ShLim≃Lim F
+
+  fix⁺ : F (Lim F) → Lim F
+  fix⁺ = equivFun fix
+
+  fix⁻ : Lim F → F (Lim F)
+  fix⁻ = invEq fix
+
+  fix⁺-step' : ∀ n x → map (cut F n) x ≡ cut F (suc n) (fix⁺ x)
+  fix⁺-step' n x =
+    map (cut _ n) x ≡⟨ cong-map (funExt⁻ (sym $ cut-is-lim F n)) x ⟩
+    map (F map-!^ n ∘ (cut F (suc n))) x ≡⟨ map-comp _ _ x ⟩
+    map (F map-!^ n) (map (cut F (suc n)) x) ≡⟨⟩
+    map (F map-!^ n) (pres F x .Limit.elements (suc n)) ≡⟨⟩
+    (F map-!^ (suc n)) (pres F x .Limit.elements (suc n)) ≡⟨⟩
+    cut F (suc n) (ShLim→Lim F (pres F x)) ≡⟨⟩
+    cut F (suc n) (fix⁺ x) ∎
+
+  fix⁺-step : ∀ n x → map (cut F n) x ≡ cut F (suc n) (fix⁺ x)
+  fix⁺-step n x = cong-map (funExt⁻ (sym $ cut-is-lim F n)) x ∙ map-comp _ _ x
+
+  -- private
+  --   fix⁺-step-coh : ∀ n {x} → isProp (F ^ suc n) → fix⁺-step' n x ≡ fix⁺-step n x
+  --   fix⁺-step-coh n {x} setF = {! setF _ _!}
+
+  fix⁻-step : ∀ n x → map (cut F n) (fix⁻ x) ≡ cut F (suc n) x
+  fix⁻-step n x =
+    map (cut F n) (fix⁻ x)        ≡⟨ fix⁺-step n (fix⁻ x) ⟩
+    cut F (suc n) (fix⁺ $ fix⁻ x) ≡⟨ cong (cut F (suc n)) (secEq fix x) ⟩∎
+    cut F (suc n) x ∎
+
+  fix⁺-step-ext : ∀ n → map (cut F n) ≡ cut F (suc n) ∘ fix⁺
+  fix⁺-step-ext = funExt ∘ fix⁺-step
+
+  fix⁻-step-ext : ∀ n → map (cut F n) ∘ fix⁻ ≡ cut F (suc n)
+  fix⁻-step-ext = funExt ∘ fix⁻-step
+
+open Fixpoint public
+  using (fix ; fix⁺)

@@ -7,6 +7,7 @@ open import Multiset.Functor
 
 open import Cubical.Foundations.Function using (idfun ; _∘_)
 open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism
 
 private
@@ -19,6 +20,13 @@ module _ {ℓ} (F : Type ℓ → Type ℓ) {{FunctorF : Functor F}} where
 
   isCoalgebraMorphism : ∀ {A B} → (α : A → F A) → (β : B → F B) → (f : A → B) → Type _
   isCoalgebraMorphism α β f = β ∘ f ≡ F[ f ] ∘ α
+
+  isSet→isPropIsCoalgebraMorphism : ∀ {A B}
+    → (α : A → F A) → (β : B → F B) → (f : A → B)
+    → isSet (F B) → isProp (isCoalgebraMorphism α β f)
+  isSet→isPropIsCoalgebraMorphism {A} {B} α β f setF = setA→FB (β ∘ f) (F[ f ] ∘ α) where
+    setA→FB : isSet (A → F B)
+    setA→FB = isSet→ setF
 
   CoalgebraMorphism : ∀ {A B} → (α : A → F A) → (β : B → F B) → Type _
   CoalgebraMorphism α β = Σ[ f ∈ (_ → _) ] isCoalgebraMorphism α β f

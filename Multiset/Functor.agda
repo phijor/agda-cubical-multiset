@@ -26,8 +26,8 @@ record Functor {ℓ} (F : Type ℓ → Type ℓ) : Type (ℓ-suc ℓ) where
   map-comp-ext g f = funExt (map-comp g f)
 
   cong-map-ext : ∀ {X Y} → {f g : X → Y}
-    → f ≡ g → map f ≡ map g
-  cong-map-ext p = cong map p
+    → f ≡ g → ∀ x → map f x ≡ map g x
+  cong-map-ext p x = cong (λ h → map h x) p
 
   cong-map : ∀ {X Y} → {f g : X → Y}
     → (∀ x → f x ≡ g x) → ∀ x → map f x ≡ map g x
