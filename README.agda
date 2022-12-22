@@ -217,11 +217,7 @@ open import Multiset.FMSet.Limit using (module Surjectivity)
 
 -- 4.2 As a Quotient of the Final List-Coalgebra
 
-import Multiset.FMSet.Finality using (isContrAna)
-
-Theorem7 = Multiset.FMSet.Finality.isContrAna
-
--- See the module Multiset.Coinductive for the other results of this section.
+-- See the module Multiset.Coinductive for the results of this section.
 -- They aren't included here since they are defined using Agda's sized types,
 -- which are enabled with the --sized-types flag.
 
