@@ -3,6 +3,14 @@
 module Multiset.ListQuotient.VecFinality where
 
 open import Multiset.Prelude
+open import Multiset.Util.Vec as ΣVec
+  using
+    ( ΣVec
+    ; mk-vec
+    ; ΣVecPathP
+    ; module VecExt
+    ; ΣVecIsoΣ
+    )
 open import Multiset.Limit.Chain
   using
     ( lim
@@ -37,80 +45,15 @@ open import Multiset.ListQuotient.Base
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function using (_∘_ ; ∘-assoc ; flip)
 open import Cubical.Foundations.Isomorphism
-open import Cubical.Foundations.HLevels
-open import Cubical.Foundations.Transport using (substCommSlice ; substComposite)
-import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sigma as Sigma using (ΣPathP ; _×_)
 open import Cubical.Data.Nat.Base as Nat using (ℕ ; suc ; zero)
-open import Cubical.Data.Nat.Properties as Nat using ()
-open import Cubical.Data.Nat.Properties using (snotz)
 open import Cubical.Data.FinData as Fin using (Fin) renaming (zero to fzero ; suc to fsuc)
 open import Cubical.Data.Unit.Base using (Unit* ; Unit ; tt*)
 open import Cubical.Data.Unit.Properties using (isOfHLevelUnit*)
 open import Cubical.Data.Vec as Vec
   using (Vec ; [] ; _∷_ ; module VecPath)
-  renaming
-    ( FinVec→Vec to lookup⁻¹
-    ; FinVec→Vec→FinVec to lookup-right-inv
-    ; Vec→FinVec→Vec to lookup-left-inv
-    )
 
-ΣVec : Type → Type
-ΣVec A = Σ ℕ (Vec A)
-
-length : {A : Type} → ΣVec A → ℕ
-length = fst
-
-vec : {A : Type} → (as : ΣVec A) → Vec A (length as)
-vec = snd
-
-Index : {A : Type} → (xs : ΣVec A) → Type
-Index xs = Fin (length xs)
-
-module ΣVec where
-  private
-    variable
-      A B C : Type
-
-  isOfHLevelVec : (h : HLevel) (n : ℕ)
-                  → isOfHLevel (suc (suc h)) A → isOfHLevel (suc (suc h)) (Vec A n)
-  isOfHLevelVec h zero ofLevelA [] [] =
-    isOfHLevelRespectEquiv (suc h)
-      (invEquiv (Vec.VecPath.≡Vec≃codeVec [] []))
-      (isOfHLevelUnit* (suc h))
-  isOfHLevelVec h (suc n) ofLevelA (x ∷ v) (x' ∷ v') =
-    isOfHLevelRespectEquiv (suc h)
-      (invEquiv (Vec.VecPath.≡Vec≃codeVec _ _))
-      (isOfHLevelΣ (suc h) (ofLevelA x x') (λ _ → isOfHLevelVec h n ofLevelA v v'))
-
-  isSetVec : ∀ {n} → isSet A → isSet (Vec A n)
-  isSetVec = isOfHLevelVec 0 _
-
-  module _ {A B : Type} where
-    lookup-map : (f : A → B) → ∀ {n} (xs : Vec A n) k → Vec.lookup k (Vec.map f xs) ≡ f (Vec.lookup k xs)
-    lookup-map f (x ∷ xs) (fzero) = refl {x = f x}
-    lookup-map f (x ∷ xs) (fsuc k) = lookup-map f xs k
-
-    lookup⁻¹-map : (f : A → B) → ∀ {n} (xs : Fin.FinVec A n) → Vec.map f (lookup⁻¹ xs) ≡ lookup⁻¹ (f ∘ xs)
-    lookup⁻¹-map f {zero} xs = refl {x = []}
-    lookup⁻¹-map f {suc n} xs = cong (f (xs fzero) ∷_) (lookup⁻¹-map f (xs ∘ fsuc))
-
-  map : (f : A → B) → ΣVec A → ΣVec B
-  map f (n , xs)= n , Vec.map f xs
-
-  vec-map-id : ∀ {n} → (xs : Vec A n) → Vec.map (λ x → x) xs ≡ xs
-  vec-map-id [] = refl
-  vec-map-id (x ∷ xs) = cong (x ∷_) (vec-map-id xs)
-
-  vec-map-comp : (g : B → C) (f : A → B) → ∀ {n} → (xs : Vec A n) → Vec.map (g ∘ f) xs ≡ Vec.map g (Vec.map f xs)
-  vec-map-comp g f [] = refl
-  vec-map-comp g f (x ∷ xs) = cong (g (f x) ∷_) (vec-map-comp g f xs)
-
-  map-id : ∀ xs → map (λ (x : A) → x) xs ≡ xs
-  map-id (n , xs) = ΣPathP (refl , vec-map-id xs)
-
-  map-comp : (g : B → C) (f : A → B) → (xs : ΣVec A) → map (g ∘ f) xs ≡ map g (map f xs)
-  map-comp g f (n , xs) = ΣPathP (refl , vec-map-comp g f xs)
+open ΣVec.ΣVec
 
 Vec' : ℕ → Type → Type
 Vec' n A = Vec A n
@@ -118,20 +61,19 @@ Vec' n A = Vec A n
 instance
   FunctorVec : ∀ {n} → Functor {ℓ-zero} (Vec' n)
   FunctorVec .Functor.map = Vec.map
-  FunctorVec .Functor.map-id = ΣVec.vec-map-id
-  FunctorVec .Functor.map-comp = λ g f as → ΣVec.vec-map-comp g f as
+  FunctorVec .Functor.map-id = VecExt.vec-map-id
+  FunctorVec .Functor.map-comp = λ g f as → VecExt.vec-map-comp g f as
 
   FunctorΣVec : Functor {ℓ-zero} ΣVec
   FunctorΣVec .Functor.map = ΣVec.map
   FunctorΣVec .Functor.map-id = ΣVec.map-id
   FunctorΣVec .Functor.map-comp = ΣVec.map-comp
 
-isSetΣVec : ∀ {A} → isSet A → isSet (ΣVec A)
-isSetΣVec setA = isSetΣ Nat.isSetℕ λ n → ΣVec.isOfHLevelVec 0 n setA
+open Functor ⦃...⦄
 
 isSetΣVec^ : ∀ n → isSet (ΣVec ^ n)
 isSetΣVec^ zero = isOfHLevelUnit* 2
-isSetΣVec^ (suc n) = isSetΣVec (isSetΣVec^ n)
+isSetΣVec^ (suc n) = ΣVec.isSetΣVec (isSetΣVec^ n)
 
 !^ : (n : ℕ) → ΣVec ^ (suc n) → ΣVec ^ n
 !^ = ΣVec map-!^_
@@ -149,7 +91,7 @@ width : ShLim ΣVec → (d : ℕ) → ℕ
 width tree d = length $ tree .Limit.elements d
 
 vecs : (tree : ShLim ΣVec) → (d : ℕ) → Vec (ΣVec ^ d) (width tree d)
-vecs tree d = tree .Limit.elements d .snd
+vecs tree d = tree .Limit.elements d .vec
 
 widthConstSuc : ∀ (tree : ShLim ΣVec) n → width tree n ≡ width tree (suc n)
 widthConstSuc (lim tree is-lim) n = cong length (sym $ is-lim n)
@@ -158,16 +100,22 @@ open Iso
 
 pres-Iso : Iso (ShLim ΣVec) (ΣVec (Lim ΣVec))
 pres-Iso =
-  ShLim ΣVec                        Iso⟨ toTraceFirstIso ⟩
-  TraceFirst                        Iso⟨ invIso (Sigma.Σ-cong-iso-fst (invIso TraceIso)) ⟩
-  Σ ℕ (OverTrace ∘ constTrace)      Iso⟨ Sigma.Σ-cong-iso-snd toVecLimit ⟩
-  Σ ℕ (Limit ∘ vecChain)            Iso⟨ Sigma.Σ-cong-iso-snd toFinVecOfLimits ⟩
-  Σ ℕ (Fin.FinVec (Lim ΣVec))       Iso⟨ Sigma.Σ-cong-iso-snd Vec.FinVecIsoVec ⟩
+  let snd-iso : ∀ n → Iso (OverTrace (constTrace n)) (Vec (Lim ΣVec) n)
+      snd-iso n =
+        OverTrace (constTrace n)  Iso⟨ toVecLimit n ⟩
+        Limit (vecChain n)        Iso⟨ toFinVecOfLimits n ⟩
+        Fin.FinVec (Lim ΣVec) n   Iso⟨ Vec.FinVecIsoVec n ⟩
+        Vec (Lim ΣVec) n          ∎Iso
+  in
+  ShLim ΣVec                    Iso⟨ toTraceFirstIso ⟩
+  TraceFirst                    Iso⟨ invIso (Sigma.Σ-cong-iso-fst (invIso TraceIso)) ⟩
+  Σ ℕ (OverTrace ∘ constTrace)  Iso⟨ Sigma.Σ-cong-iso-snd snd-iso ⟩
+  Σ ℕ (Vec (Lim ΣVec))          Iso⟨ invIso ΣVecIsoΣ ⟩
   ΣVec (Lim ΣVec) ∎Iso
   where
 
   open import Multiset.Util.Trace as Trace
-    using (Trace ; step ; connect ; constTrace ; TraceIso ; start ; to0)
+    using (Trace ; step ; connect ; constTrace ; TraceIso)
 
   OverTrace : Trace ℕ → Type
   OverTrace as =
@@ -192,15 +140,17 @@ pres-Iso =
     vecs-coh n = cong vec (sym (tree .Limit.is-lim n))
   toTraceFirstIso .inv (trace , vecs , vecs-coh) = lim elements is-lim where
     elements : (n : ℕ) → ΣVec ^ (suc n)
-    elements n = trace .step n , vecs n
+    elements n = mk-vec {length = trace .step n} $ vecs n
 
     is-lim : ∀ n → !^ (suc n) (elements (suc n)) ≡ elements n
-    is-lim n = sym $ ΣPathP (trace .connect n , vecs-coh n)
+    is-lim n = sym $ ΣVecPathP (trace .connect n) (vecs-coh n)
   toTraceFirstIso .rightInv _ = refl
   toTraceFirstIso .leftInv _ = refl
 
   module _ (sz : ℕ) where
     open Limit
+    open VecExt using (lookup-map ; lookup⁻¹ ; lookup-right-inv ; lookup-left-inv)
+
     vecChain : Chain _
     vecChain .Chain.Ob n = Vec (ΣVec ^ n) sz
     vecChain .Chain.π n = Vec.map (!^ n)
@@ -215,7 +165,7 @@ pres-Iso =
     toFinVecOfLimits-fun (lim elements is-lim) k = lim (Vec.lookup k ∘ elements) is-lim' where
       is-lim' : isLim ΣVec (Vec.lookup k ∘ elements)
       is-lim' n =
-        (!^ n) (Vec.lookup k $ elements (suc n))           ≡⟨ sym (ΣVec.lookup-map (!^ n) (elements (suc n)) k) ⟩
+        (!^ n) (Vec.lookup k $ elements (suc n))           ≡⟨ sym (lookup-map (!^ n) (elements (suc n)) k) ⟩
         (Vec.lookup k $ Vec.map (!^ n) (elements (suc n))) ≡⟨ cong (Vec.lookup k) (is-lim n) ⟩∎
         (Vec.lookup k $ elements n) ∎
 
@@ -227,7 +177,7 @@ pres-Iso =
 
         f-is-lim : ∀ k → isLim ΣVec (f-elements k)
         f-is-lim k n =
-          (!^ n) (Vec.lookup k $ vec .elements (suc n))           ≡⟨ sym (ΣVec.lookup-map (!^ n) (vec .elements (suc n)) k) ⟩
+          (!^ n) (Vec.lookup k $ vec .elements (suc n))           ≡⟨ sym (VecExt.lookup-map (!^ n) (vec .elements (suc n)) k) ⟩
           (Vec.lookup k $ Vec.map (!^ n) (vec .elements (suc n))) ≡⟨ cong (Vec.lookup k) (vec .is-lim n) ⟩∎
           (Vec.lookup k $ vec .elements n) ∎
 
@@ -236,8 +186,6 @@ pres-Iso =
         f k .is-lim = f-is-lim k
 
       module _ (vec : Fin.FinVec (Lim ΣVec) sz) where
-        open Functor ⦃...⦄
-
         f⁻¹-elements : ∀ n → Vec (ΣVec ^ n) sz
         f⁻¹-elements n = Vec.map (cut n) (lookup⁻¹ vec)
 
@@ -257,24 +205,24 @@ pres-Iso =
       go .rightInv vec-of-lim = funExt λ { k → isSet→LimitPathExt _ isSetΣVec^ (right-inv k) } where
         right-inv : ∀ k n → f-elements (f⁻¹ vec-of-lim) k n ≡ vec-of-lim k .elements n
         right-inv k n =
-          Vec.lookup k (Vec.map (cut n) (lookup⁻¹ vec-of-lim))  ≡⟨ ΣVec.lookup-map (cut n) (lookup⁻¹ vec-of-lim) k ⟩
+          Vec.lookup k (Vec.map (cut n) (lookup⁻¹ vec-of-lim))  ≡⟨ VecExt.lookup-map (cut n) (lookup⁻¹ vec-of-lim) k ⟩
           (cut n $ Vec.lookup k (lookup⁻¹ vec-of-lim))          ≡⟨ cong (cut n) (funExt⁻ (lookup-right-inv vec-of-lim) k) ⟩
           (cut n $ vec-of-lim k) ∎
-      go .leftInv lim-of-vec = isSet→LimitPathExt vecChain (λ k → ΣVec.isSetVec (isSetΣVec^ k)) left-inv where
+      go .leftInv lim-of-vec = isSet→LimitPathExt vecChain (λ k → VecExt.isSetVec (isSetΣVec^ k)) left-inv where
         left-inv : ∀ n → f⁻¹ (f lim-of-vec) .elements n ≡ lim-of-vec .elements n
         left-inv n =
-          Vec.map (cut n) (lookup⁻¹ (f lim-of-vec)) ≡⟨ ΣVec.lookup⁻¹-map (cut n) _ ⟩
-          lookup⁻¹ (cut n ∘ f lim-of-vec) ≡⟨⟩
-          lookup⁻¹ (λ k → f-elements lim-of-vec k n) ≡⟨⟩
-          lookup⁻¹ (λ k → (Vec.lookup k $ lim-of-vec .elements n)) ≡⟨ lookup-left-inv _ ⟩
+          Vec.map (cut n) (lookup⁻¹ (f lim-of-vec))                 ≡⟨ VecExt.lookup⁻¹-map (cut n) _ ⟩
+          lookup⁻¹ (cut n ∘ f lim-of-vec)                           ≡⟨⟩
+          lookup⁻¹ (λ k → f-elements lim-of-vec k n)                ≡⟨⟩
+          lookup⁻¹ (λ k → (Vec.lookup k $ lim-of-vec .elements n))  ≡⟨ lookup-left-inv _ ⟩
           lim-of-vec .elements n ∎
 
 presIsoInv≡pres : pres-Iso .inv ≡ pres
 presIsoInv≡pres = funExt λ vec → TerminalChain.isSet→ShLimPath ΣVec (isSetΣVec^ ∘ suc) (goal vec) where
-  module _ (vec : ΣVec (Lim ΣVec)) where abstract
+  module _ (xs : ΣVec (Lim ΣVec)) where abstract
     open Limit
-    goal : ∀ n → pres-Iso .inv vec .elements n ≡ pres vec .elements n
-    goal n = ΣPathP (refl , cong (Vec.map (cut n)) (lookup-left-inv (vec .snd)))
+    goal : ∀ n → pres-Iso .inv xs .elements n ≡ pres xs .elements n
+    goal n = ΣVecPathP refl $ cong (Vec.map (cut n)) (VecExt.lookup-left-inv (xs .vec))
 
 isLimitPreservingΣVec : isLimitPreserving ΣVec
 isLimitPreservingΣVec = subst isEquiv presIsoInv≡pres (isoToIsEquiv (invIso pres-Iso))
@@ -293,9 +241,6 @@ LimΣVecPathExt : ∀ {l₁ l₂ : Lim ΣVec} → (∀ n → l₁ .elements n �
 LimΣVecPathExt = isSet→LimitPathExt _ isSetΣVec^
 
 module _ {C : Type} (γ : C → ΣVec C) where
-
-  open Functor ⦃...⦄
-
   step : (n : ℕ) → C → ΣVec ^ n
   step zero _ = tt*
   step (suc n) c = map (step n) (γ c)
@@ -303,7 +248,7 @@ module _ {C : Type} (γ : C → ΣVec C) where
   is-lim-step : ∀ c → isLimit (TerminalChain.ch ΣVec) (flip step c)
   is-lim-step c zero = refl
   is-lim-step c (suc n) = goal where abstract
-    goal : ΣVec.map (!^ n) (step (suc $ suc n) c) ≡ step (suc n) c
+    goal : map (!^ n) (step (suc $ suc n) c) ≡ step (suc n) c
     goal =
       (map (!^ n) $ map (step (suc n)) $ γ c) ≡⟨ sym (map-comp (!^ n) _ (γ c)) ⟩
       (map (!^ n ∘ step (suc n)) $ γ c)       ≡⟨ cong (λ f → map f (γ c)) (funExt λ c' → is-lim-step c' n) ⟩
@@ -314,24 +259,24 @@ module _ {C : Type} (γ : C → ΣVec C) where
   unfold c .is-lim = is-lim-step c
 
   abstract
-    step-unfold : ∀ c n → step n c ≡ fix⁺ (ΣVec.map unfold (γ c)) .elements n
+    step-unfold : ∀ c n → step n c ≡ fix⁺ (map unfold (γ c)) .elements n
     step-unfold c zero = refl {x = tt*}
     step-unfold c (suc n) =
-      ΣVec.map (step n) (γ c)                                       ≡⟨⟩
-      ΣVec.map (cut n ∘ unfold) (γ c)                               ≡⟨ map-comp (cut n) unfold _ ⟩
-      ΣVec.map (cut n)              (ΣVec.map unfold (γ c))         ≡⟨ cong-map-ext (sym $ TerminalChain.cut-is-lim _ n) _ ⟩
-      ΣVec.map (!^ n ∘ cut (suc n)) (ΣVec.map unfold (γ c))         ≡⟨ map-comp (!^ n) (cut (suc n)) _ ⟩
-      ΣVec.map (!^ n) (map (cut (suc n)) $ ΣVec.map unfold (γ c))   ≡⟨⟩
-      !^ (suc n) (pres (ΣVec.map unfold (γ c)) .elements (suc n))   ≡⟨⟩
-      ShLim→Lim _ (pres (ΣVec.map unfold (γ c))) .elements (suc n)  ≡⟨⟩
-      fix⁺ (ΣVec.map unfold (γ c)) .elements (suc n) ∎
+      map (step n) (γ c)                                      ≡⟨⟩
+      map (cut n ∘ unfold) (γ c)                              ≡⟨ map-comp (cut n) unfold _ ⟩
+      map (cut n)              (map unfold (γ c))             ≡⟨ cong-map-ext {{FunctorΣVec}} (sym $ TerminalChain.cut-is-lim _ n) _ ⟩
+      map (!^ n ∘ cut (suc n)) (map unfold (γ c))             ≡⟨ map-comp (!^ n) (cut (suc n)) _ ⟩
+      map (!^ n) (map (cut (suc n)) $ map unfold (γ c))       ≡⟨⟩
+      !^ (suc n) (pres (map unfold (γ c)) .elements (suc n))  ≡⟨⟩
+      ShLim→Lim _ (pres (map unfold (γ c))) .elements (suc n) ≡⟨⟩
+      fix⁺ (map unfold (γ c)) .elements (suc n) ∎
 
     unfold-fix⁺ : ∀ c → unfold c ≡ fix⁺ (map unfold (γ c))
     unfold-fix⁺ c = isSet→LimitPathExt _ isSetΣVec^ (step-unfold c)
 
   isCoalgebraMorphismUnfold : isCoalgebraMorphism ΣVec γ fix⁻ unfold
   isCoalgebraMorphismUnfold = funExt goal where abstract
-    goal : ∀ c → fix⁻ (unfold c) ≡ map unfold (γ c)
+    goal : ∀ c → fix⁻ (unfold c) ≡ ΣVec.map unfold (γ c)
     goal c =
       fix⁻ (unfold c) ≡⟨ cong fix⁻ (unfold-fix⁺ c) ⟩
       fix⁻ (fix⁺ (ΣVec.map unfold (γ c))) ≡⟨ retEq ΣVecLimitEquiv (ΣVec.map unfold (γ c)) ⟩
@@ -339,8 +284,6 @@ module _ {C : Type} (γ : C → ΣVec C) where
 
 isTerminalFix⁻ : isTerminal ΣVec fix⁻
 isTerminalFix⁻ {B = B} β = ana , anaEq where
-  open Functor FunctorΣVec
-
   open TerminalChain.Fixpoint isLimitPreservingΣVec
     using (fix⁺-step-ext)
 
@@ -350,7 +293,7 @@ isTerminalFix⁻ {B = B} β = ana , anaEq where
   anaEq : ∀ f → ana ≡ f
   anaEq (f , f-is-mor) = Sigma.Σ≡Prop isPropIsCoalgebraMorphism' eq where
     isPropIsCoalgebraMorphism' : (u : B → Lim ΣVec) → isProp (isCoalgebraMorphism ΣVec β fix⁻ u)
-    isPropIsCoalgebraMorphism' u = isSet→isPropIsCoalgebraMorphism ΣVec β fix⁻ u (isSetΣVec isSetLimΣVec)
+    isPropIsCoalgebraMorphism' u = isSet→isPropIsCoalgebraMorphism ΣVec β fix⁻ u (ΣVec.isSetΣVec isSetLimΣVec)
 
     eq : unfold β ≡ f
     eq = funExt $ LimΣVecPathExt ∘ λ b n → funExt⁻ (goal n) b where
