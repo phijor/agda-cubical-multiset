@@ -502,11 +502,11 @@ RelatorV→DRelator R (x ∷ xs) ys (cons p) =
               p)
 
 data RelatorV' {ℓ}{X Y : Type ℓ} (R : X → Y → Type ℓ)
-     : {n m : ℕ} → n ≡ m → Vec X n → Vec Y m → Type ℓ where
-  nil  : RelatorV' R refl [] []
-  cons : ∀{n m} {eq : n ≡ m} {x xs ys}
-    → (p : ∃[ y ∈ Y ] R x y × (Σ[ m ∈ y ∈V ys ] RelatorV' R eq xs (removeV ys m)))
-    → RelatorV' R (cong suc eq) (x ∷ xs) ys
+     : {n m : ℕ} → Vec X n → Vec Y m → Type ℓ where
+  nil  : RelatorV' R [] []
+  cons : ∀{n m x} {xs : Vec X n} {ys : Vec Y (suc m)}
+    → (p : ∃[ y ∈ Y ] R x y × (Σ[ m ∈ y ∈V ys ] RelatorV' R xs (removeV ys m)))
+    → RelatorV' R (x ∷ xs) ys
 
 data RelatorV'Σ {ℓ}{X Y : Type ℓ} (R : X → Y → Type ℓ)
      : {n m : ℕ} → n ≡ m → Vec X n → Vec Y m → Type ℓ where
@@ -545,17 +545,15 @@ remove→removeV' (here eq) = sym (substRefl {B = Vec _} _)
 remove→removeV' (there m) = remove→removeV m
 
 RelatorV'N : ∀ {ℓ}{X Y : Type ℓ} (R : X → Y → Type ℓ)
-  → {n m m' : ℕ} (eq : n ≡ m)
+  → {n m m' : ℕ} 
   → {xs : Vec X n} {ys : Vec Y m}
   → (eq' : m ≡ m') {ys' : Vec Y m'}
   → ys' ≡ subst (Vec Y) eq' ys
-  → RelatorV' R (eq ∙ eq') xs ys'
-  → RelatorV' R eq xs ys
-RelatorV'N R {n}{m' = m'} =
-  J (λ m eq → {xs : Vec _ n} {ys : Vec _ m} (eq' : m ≡ m') {ys' : Vec _ m'} → ys' ≡ subst (Vec _) eq' ys → RelatorV' R (eq ∙ eq') xs ys' → RelatorV' R eq xs ys)
-    (λ {xs}{ys} →
-    J (λ m eq → {ys' : Vec _ m} → ys' ≡ subst (Vec _) eq ys → RelatorV' R (refl ∙ eq) xs ys' → RelatorV' R refl xs ys)
-      λ {ys'} eq r → subst (RelatorV' R refl xs) (eq ∙ substRefl {B = Vec _} ys) (subst (λ z → RelatorV' R z xs ys') (sym (rUnit _)) r))
+  → RelatorV' R xs ys'
+  → RelatorV' R xs ys
+RelatorV'N R {n}{m' = m'} {xs} {ys} =
+    J (λ m eq → {ys' : Vec _ m} → ys' ≡ subst (Vec _) eq ys → RelatorV' R xs ys' → RelatorV' R xs ys)
+      λ eq r → subst (RelatorV' R xs) (eq ∙ substRefl {B = Vec _} ys) r 
 
 RelatorV'ΣN : ∀ {ℓ}{X Y : Type ℓ} (R : X → Y → Type ℓ)
   → {n m m' : ℕ} (eq : n ≡ m)
@@ -573,18 +571,16 @@ RelatorV'ΣN R {n}{m' = m'} =
 
 DRelator→RelatorV' : ∀{ℓ}{X : Type ℓ} (R : X → X → Type ℓ)
   → (xs ys : List X) (eq : List.length xs ≡ List.length ys)
-  → DRelator R xs ys → RelatorV' R eq (List→Vec xs) (List→Vec ys)
-DRelator→RelatorV' R .[] [] eq nil = subst (λ x → RelatorV' R x [] []) (isSetℕ _ _ _ _) nil
-DRelator→RelatorV' R .[] (x ∷ xs) eq nil = Empty.rec (znots eq)
+  → DRelator R xs ys → RelatorV' R (List→Vec xs) (List→Vec ys)
+DRelator→RelatorV' R .[] [] eq nil = nil 
+DRelator→RelatorV' R .[] (x ∷ xs) eq nil = Empty.rec (znots eq) 
 DRelator→RelatorV' R .(_ ∷ _) [] eq (cons p) = Empty.rec (snotz eq)
 DRelator→RelatorV' R (x ∷ xs) (y' ∷ ys) eq (cons p) =
-  subst (λ p → RelatorV' R p (x ∷ List→Vec xs) (y' ∷ List→Vec ys))
-        (isSetℕ _ _ _ _)
         (cons (∥map∥ (λ { (y , r , m , rs) →
-          let rs' : RelatorV' R (eq' ∙ length-remove' m) (List→Vec xs) (List→Vec (remove (y' ∷ ys) m))
+          let rs' : RelatorV' R (List→Vec xs) (List→Vec (remove (y' ∷ ys) m))
               rs' = DRelator→RelatorV' R xs (remove (y' ∷ ys) m) (eq' ∙ length-remove' m) rs
-              rs'' : RelatorV' R eq' (List→Vec xs) (removeV (List→Vec (y' ∷ ys)) (∈→∈V m))
-              rs'' = RelatorV'N R eq' (length-remove' m) (remove→removeV' m) rs'
+              rs'' : RelatorV' R (List→Vec xs) (removeV (List→Vec (y' ∷ ys)) (∈→∈V m))
+              rs'' = RelatorV'N R (length-remove' m) (remove→removeV' m) rs'
           in y , r , ∈→∈V m , rs'' })
                      p))
   where
@@ -611,20 +607,25 @@ DRelatorΣ→RelatorV'Σ R (x ∷ xs) (y' ∷ ys) eq (cons (y , r , m , rs)) =
 
 RelatorV'→RelatorV : ∀{ℓ}{X : Type ℓ} (R : X → X → Type ℓ)
   → {n m : ℕ} (eq : n ≡ m) (xs : Vec X n) (ys : Vec X m)
-  → RelatorV' R eq xs ys → RelatorV R m (subst (Vec X) eq xs) ys
-RelatorV'→RelatorV R .refl .[] .[] nil = subst (λ z → RelatorV R 0 z []) (sym (substRefl {B = Vec _} [])) nil
-RelatorV'→RelatorV {X = X} R {m = suc m} .(cong suc eq) (x ∷ xs) ys (cons {eq = eq} p) =
-  J (λ a eq → (ys : Vec _ (suc a))
-               (p : ∃[ y ∈ _ ] R x y × (Σ[ m ∈ y ∈V ys ] RelatorV' R eq xs (removeV ys m)))
-               → RelatorV R (suc a) (subst (Vec X) (cong suc eq) (x ∷ xs)) ys)
-  (λ ys' p' → subst (λ z → RelatorV R (suc _) z ys')
-                     (sym (substRefl {B = Vec _} (x ∷ xs)))
-                     (cons (∥map∥ (λ { (y , r , y∈ , rs) →
-                         y , r , y∈ , subst (λ z → RelatorV R _ z (removeV ys' y∈))
-                                            (substRefl {B = Vec X} xs)
-                                            (RelatorV'→RelatorV R refl xs _ rs) })
-                                  p')))
-  eq ys p
+  → RelatorV' R xs ys → RelatorV R m (subst (Vec X) eq xs) ys
+RelatorV'→RelatorV R eq .[] .[] nil = subst (λ z → RelatorV R 0 z []) (sym (isSet-subst {B = Vec _} isSetℕ eq [])) nil
+RelatorV'→RelatorV {X = X} R {n = suc n} {m = suc m} eq (x ∷ xs) ys (cons p) =
+  subst (λ eq → RelatorV R (suc m) (subst (Vec X) eq (x ∷ xs)) ys) (isSetℕ _ _ (cong suc eq') eq)
+    (J (λ a eq → (ys : Vec _ (suc a))
+                (p : ∃[ y ∈ _ ] R x y × (Σ[ m ∈ y ∈V ys ] RelatorV' R xs (removeV ys m)))
+                → RelatorV R (suc a) (subst (Vec X) (cong suc eq) (x ∷ xs)) ys)
+       (λ ys' p' → subst (λ z → RelatorV R (suc _) z ys')
+                        (sym (substRefl {B = Vec _} (x ∷ xs)))
+                        (cons (∥map∥ (λ { (y , r , y∈ , rs) →
+                              y , r , y∈ , subst (λ z → RelatorV R _ z (removeV ys' y∈))
+                                                 (substRefl {B = Vec X} xs)
+                                                 (RelatorV'→RelatorV R refl xs _ rs) })
+                                      p')))
+       eq' ys p)
+
+  where
+    eq' : n ≡ m
+    eq' = injSuc eq
 
 RelatorV'Σ→RelatorVΣ : ∀{ℓ}{X : Type ℓ} (R : X → X → Type ℓ)
   → {n m : ℕ} (eq : n ≡ m) (xs : Vec X n) (ys : Vec X m)
@@ -690,7 +691,7 @@ Relator=→SymAct xs ys rs =
   RelatorF=→SymAct _ (Vec→FinVec (List→Vec ys))
                    (RelatorV→RelatorF _≡_ _ _
                                       (RelatorV'→RelatorV _≡_ (lengthRelator rs) (List→Vec xs) _
-                                                          (DRelator→RelatorV' _≡_ _ _ _ (rs .fst))))
+                                                          (DRelator→RelatorV' _≡_ _ _ (lengthRelator rs) (rs .fst))))
 
 RelatorΣ=→SymActΣ : {X : Type}
   → (xs ys : List X)
