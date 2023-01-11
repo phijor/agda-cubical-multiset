@@ -178,14 +178,10 @@ isEquivUnzip = isoToIsEquiv (invIso zipUnzipIso)
 isLimitPreservingBag : isLimitPreserving Bag
 isLimitPreservingBag = subst isEquiv zipUnzipIsoInv≡pres isEquivUnzip
 
-bagLimitEquiv : Bag (Lim Bag) ≃ Lim Bag
-bagLimitEquiv = TerminalChain.fix isLimitPreservingBag
-
-fix⁺ : Bag (Lim Bag) → Lim Bag
-fix⁺ = equivFun bagLimitEquiv
-
-fix⁻ : Lim Bag → Bag (Lim Bag)
-fix⁻ = invEq bagLimitEquiv
+open TerminalChain.Fixpoint isLimitPreservingBag
+  using (fix⁺ ; fix⁻)
+  renaming (fix to bagLimitEquiv)
+  public
 
 BagLim : Type
 BagLim = Lim Bag
