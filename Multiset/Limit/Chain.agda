@@ -97,6 +97,10 @@ module _ (C : Chain ℓ) where
   ofCone : Cone A → A → Limit
   ofCone (cone leg commutes) a = lim (λ n → leg n a) λ n → funExt⁻ (commutes n) a
 
+  isPropChain→Limit : (∀ n → isProp (C .Ob n)) → (e : (n : ℕ) → C .Ob n) → Limit
+  isPropChain→Limit propC e .elements = e
+  isPropChain→Limit propC e .is-lim n = propC n (C .π n (e (suc n))) (e n)
+
 universalPropertyIso : {C : Chain ℓ} → Iso (A → Limit C) (Cone C A)
 universalPropertyIso .fun = toCone _
 universalPropertyIso .inv = ofCone _
