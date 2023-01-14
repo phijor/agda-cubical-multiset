@@ -29,7 +29,6 @@ open import Cubical.Foundations.GroupoidLaws using (cong-∙)
 open import Cubical.Foundations.Function using (_∘_ ; flip ; idfun)
 
 open import Cubical.Foundations.Structure
-open import Cubical.Syntax.⟨⟩
 
 open import Cubical.Functions.FunExtEquiv
   using (funExtDep)

@@ -2,23 +2,13 @@
 
 let
   inherit (pkgs) agdaPackages;
-
-  cubical = agdaPackages.cubical.overrideAttrs (oldAttrs: {
-    version = "0.4prece3120d";
-    src = pkgs.fetchFromGitHub {
-      owner = "agda";
-      repo = "cubical";
-      rev = "ce3120d3f8d692847b2744162bcd7a01f0b687eb";
-      sha256 = "sha256-VkbL/wfT45lrX1vSnZn3qtSlr+aBSW4IKrRWNOTWfl8=";
-    };
-  });
 in
 agdaPackages.mkDerivation {
   pname = "Multiset";
   version = "0.1.0";
   src = builtins.path { path = path; name = "agda-cubical-multiset"; };
   everythingFile = "./Multiset/Index.lagda.md";
-  buildInputs = [ cubical ];
+  buildInputs = [ agdaPackages.cubical ];
 
   outputs = [ "out" "html" ];
 

@@ -405,8 +405,7 @@ decRelator decEq xs ys with decDRelator decEq xs ys
 
 decEqM : ∀ {X} (decEq : Discrete X) → Discrete (M X)
 decEqM decEq =
-  discreteSetQuotients (discreteList decEq)
-                       (isPropRelator _)
-                       (isEquivRelRelator isEquivRel≡)
-                       (decRelator decEq)
+  discreteSetQuotients
+    (isEquivRelRelator isEquivRel≡)
+    (decRelator decEq)
 

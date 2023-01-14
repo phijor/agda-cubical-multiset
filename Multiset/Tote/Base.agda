@@ -16,7 +16,6 @@ open import Cubical.Foundations.Function
     )
 
 open import Cubical.Foundations.Structure
-open import Cubical.Syntax.⟨⟩
 
 open import Cubical.Data.Unit as Unit
   using

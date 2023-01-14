@@ -5,8 +5,8 @@
 --
 -- This library has been tested with the following software versions:
 --  * Agda v2.6.2.2
---  * The Cubical library, commit ce3120d3f (25th May 2022):
---      https://github.com/agda/cubical/tree/ce3120d3f8d692847b2744162bcd7a01f0b687eb
+--  * The Cubical library, version 0.4 (23th Nov 2022):
+--      https://github.com/agda/cubical/releases/tag/v0.4
 --
 -- Type checking the code
 -- ----------------------

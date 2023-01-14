@@ -21,7 +21,7 @@ open import Cubical.Foundations.Structure
 open import Cubical.Foundations.Path
 open import Cubical.Foundations.GroupoidLaws hiding (assoc)
 open import Cubical.Foundations.Function using (_∘_ ; flip)
-open import Cubical.Syntax.⟨⟩
+open import Cubical.Foundations.Structure
 open import Cubical.Functions.Logic as Logic
   renaming
     (¬_ to ¬ₚ_)

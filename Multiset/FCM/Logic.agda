@@ -11,7 +11,7 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Structure
 open import Cubical.Foundations.Function
-open import Cubical.Syntax.⟨⟩
+open import Cubical.Foundations.Structure
 open import Cubical.Functions.Logic as Logic
   renaming
     (¬_ to ¬ₚ_
