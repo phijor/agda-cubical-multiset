@@ -392,31 +392,23 @@ module _ where
     goal .rcons* {a = a} {as} {bs} b aRb b∈bs rel-remove cont = bisim approx where
       approx : ∀ n → Approx n (cut n (fix⁺ $ (a Σ∷ mk-vec as))) (cut n (fix⁺ bs))
       approx zero = tt
-      approx (suc n) = Relator.rcons PT.∣ bₙ , aₙ∼bₙ , bₙ∈bs′ₙ , subst2 (Relator (Approx n)) {! sym (bsₙ≡bs′ₙ)!} {! !} (cont .elements (suc n)) ∣₁ where
-        -- This is propositionally equal to (cut n b), but involves less substitutions
-        -- to fill the remaining goals.
-        aₙ : ΣVec ^ n
-        aₙ = !^ n (cut (suc n) a)
+      approx (suc n) = Relator.rcons PT.∣ bₙ , a′ₙ∼bₙ , bₙ∈bs′ₙ , subst (Relator (Approx n) _) rel-remove′ (cont .elements (suc n)) ∣₁ where
+        aₙ a′ₙ : ΣVec ^ n
+        aₙ = cut n a
+        a′ₙ = !^ n (cut (suc n) a)
 
-        -- Similarly:
-        _ : !^ n (cut (suc n) b) ≡ cut n b
-        _ = b .is-lim n
+        bₙ b′ₙ : ΣVec ^ n
+        bₙ = cut n b
+        b′ₙ = !^ n (cut (suc n) b)
 
-        bₙ : ΣVec ^ n
-        bₙ = !^ n (cut (suc n) b)
-
-        b′ₙ = cut n b
-        bsₙ = map (cut n) bs
-        bs′ₙ = cut (suc n) (fix⁺ bs)
+        a′ₙ∼bₙ : Approx n a′ₙ bₙ
+        a′ₙ∼bₙ = subst (λ - → Approx n - bₙ) (sym $ a .is-lim n) (aRb .elements n)
 
         bₙ≡b′ₙ : b′ₙ ≡ bₙ
-        bₙ≡b′ₙ = sym (b .is-lim n)
+        bₙ≡b′ₙ = b .is-lim n
 
-        b′ₙ∈bsₙ : b′ₙ ∈ bsₙ
-        b′ₙ∈bsₙ = ΣVec.∈-map (cut n) b∈bs
-
-        aₙ∼bₙ : Approx n aₙ bₙ
-        aₙ∼bₙ = subst2 (Approx n) (sym (a .is-lim n)) bₙ≡b′ₙ (aRb .elements n)
+        bsₙ = map (cut n) bs
+        bs′ₙ = cut (suc n) (fix⁺ bs)
 
         bsₙ≡bs′ₙ : bsₙ ≡ bs′ₙ
         bsₙ≡bs′ₙ =
@@ -424,8 +416,19 @@ module _ where
           map (!^ n ∘ cut (suc n)) bs       ≡⟨ ΣVec.map-comp (!^ n) (cut (suc n)) bs ⟩
           map (!^ n) (map (cut (suc n)) bs) ∎
 
+        bₙ∈bsₙ : bₙ ∈ bsₙ
+        bₙ∈bsₙ = ΣVec.∈-map (cut n) b∈bs
+
         bₙ∈bs′ₙ : bₙ ∈ bs′ₙ
-        bₙ∈bs′ₙ = transport (cong₂ _∈_ bₙ≡b′ₙ bsₙ≡bs′ₙ) b′ₙ∈bsₙ
+        bₙ∈bs′ₙ = subst (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ
+
+        rel-remove′ : cut (suc n) (fix⁺ (ΣVec.remove bs b∈bs)) ≡ ΣVec.remove bs′ₙ bₙ∈bs′ₙ
+        rel-remove′ =
+          ΣVec.map (!^ n) (ΣVec.map (cut (suc n)) $ ΣVec.remove bs b∈bs) ≡⟨ sym $ map-comp (!^ n) (cut (suc n)) _ ⟩
+          ΣVec.map (!^ n ∘ cut (suc n)) (ΣVec.remove bs b∈bs) ≡⟨ cong-map-ext (TerminalChain.cut-is-lim _ n) _ ⟩
+          ΣVec.map (cut n)              (ΣVec.remove bs b∈bs) ≡⟨ ΣVec.map-remove (cut n) b∈bs ⟩
+          ΣVec.remove bsₙ  bₙ∈bsₙ   ≡⟨ congP₂ (λ _ → ΣVec.remove) bsₙ≡bs′ₙ (subst-filler (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ) ⟩
+          ΣVec.remove bs′ₙ bₙ∈bs′ₙ  ∎
 
 infixr 9 _T∷_
 _T∷_ : (a : Tree) → (as : Tree) → Tree
