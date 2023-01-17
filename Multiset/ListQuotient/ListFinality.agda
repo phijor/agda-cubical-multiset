@@ -1,20 +1,15 @@
 {-# OPTIONS --safe #-}
 
-module Multiset.ListQuotient.VecFinality where
+module Multiset.ListQuotient.ListFinality where
 
 open import Multiset.Prelude
 open import Multiset.Util.Vec as ΣVec
   using
     ( ΣVec
     ; mk-vec
-    ; Σ[]
-    ; _Σ∷_
     ; ΣVecPathP
     ; module VecExt
     ; ΣVecIsoΣ
-    ; Relator
-    ; isPropRelator
-    ; _∈_
     )
 open import Multiset.Limit.Chain
   using
@@ -22,7 +17,6 @@ open import Multiset.Limit.Chain
     ; Limit
     ; Chain
     ; isSet→LimitPathExt
-    ; isPropChain→Limit
     ; isLimit
     ; isOfHLevelLimit
     )
@@ -46,32 +40,32 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     ; Lim→ShLim
     ; ShLim→Lim
     )
-open import Multiset.ListQuotient.Base hiding (Relator ; isPropRelator ; _∈_ ; [])
-open import Multiset.ListQuotient.FMSetEquiv
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function using (_∘_ ; ∘-assoc ; flip)
 open import Cubical.Foundations.Isomorphism
-open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Univalence using (ua)
-open import Cubical.Data.Sigma as Sigma using (ΣPathP ; _×_)
+open import Cubical.Data.Sigma
+  using
+    ( ΣPathP
+    ; Σ≡Prop
+    ; _×_
+    ; Σ-cong-iso-fst
+    ; Σ-cong-iso-snd
+    )
 open import Cubical.Data.Nat.Base as Nat using (ℕ ; suc ; zero)
-open import Cubical.Data.FinData as Fin using (Fin) renaming (zero to fzero ; suc to fsuc)
+open import Cubical.Data.FinData as Fin
+  using (Fin)
+  renaming (zero to fzero ; suc to fsuc)
 open import Cubical.Data.Unit.Base using (Unit* ; Unit ; tt* ; tt)
 open import Cubical.Data.Unit.Properties as Unit using (isOfHLevelUnit*)
-open import Cubical.Data.Vec as Vec
-  using (Vec ; module VecPath)
-open import Cubical.HITs.PropositionalTruncation as PT using ()
-open import Cubical.HITs.SetQuotients as SQ using () renaming (_/_ to _/₂_)
-open import Cubical.Relation.Binary using (module BinaryRelation)
+open import Cubical.Data.Vec.Base as Vec using (Vec)
+open import Cubical.Data.Vec.Properties as Vec using (FinVecIsoVec)
 
 open ΣVec.ΣVec
 
-Vec' : ℕ → Type → Type
-Vec' n A = Vec A n
-
 instance
-  FunctorVec : ∀ {n} → Functor {ℓ-zero} (Vec' n)
+  FunctorVec : ∀ {n} → Functor {ℓ-zero} (λ A → Vec A n)
   FunctorVec .Functor.map = Vec.map
   FunctorVec .Functor.map-id = VecExt.vec-map-id
   FunctorVec .Functor.map-comp = λ g f as → VecExt.vec-map-comp g f as
@@ -133,8 +127,8 @@ abstract
           Vec (Lim ΣVec) n          ∎Iso
     in
     ShLim ΣVec                    Iso⟨ toTraceFirstIso ⟩
-    TraceFirst                    Iso⟨ invIso (Sigma.Σ-cong-iso-fst (invIso TraceIso)) ⟩
-    Σ ℕ (OverTrace ∘ constTrace)  Iso⟨ Sigma.Σ-cong-iso-snd snd-iso ⟩
+    TraceFirst                    Iso⟨ invIso (Σ-cong-iso-fst (invIso TraceIso)) ⟩
+    Σ ℕ (OverTrace ∘ constTrace)  Iso⟨ Σ-cong-iso-snd snd-iso ⟩
     Σ ℕ (Vec (Lim ΣVec))          Iso⟨ invIso ΣVecIsoΣ ⟩
     ΣVec (Lim ΣVec) ∎Iso
     where
@@ -245,6 +239,9 @@ open TerminalChain.Fixpoint isLimitPreservingΣVec
   renaming (fix to ΣVecLimitEquiv)
   public
 
+ΣVecLimitPath : ΣVec (Lim ΣVec) ≡ Lim ΣVec
+ΣVecLimitPath = ua ΣVecLimitEquiv
+
 isSetLimΣVec : isSet (Lim ΣVec)
 isSetLimΣVec = isOfHLevelLimit _ 2 isSetΣVec^
 
@@ -304,7 +301,7 @@ isTerminalFix⁻ {B = B} β = ana , anaEq where
   ana = unfold β , isCoalgebraMorphismUnfold β
 
   anaEq : ∀ f → ana ≡ f
-  anaEq (f , f-is-mor) = Sigma.Σ≡Prop isPropIsCoalgebraMorphism' eq where abstract
+  anaEq (f , f-is-mor) = Σ≡Prop isPropIsCoalgebraMorphism' eq where abstract
     isPropIsCoalgebraMorphism' : (u : B → Lim ΣVec) → isProp (isCoalgebraMorphism ΣVec β fix⁻ u)
     isPropIsCoalgebraMorphism' u = isSet→isPropIsCoalgebraMorphism ΣVec β fix⁻ u (ΣVec.isSetΣVec isSetLimΣVec)
 
@@ -320,127 +317,3 @@ isTerminalFix⁻ {B = B} β = ana , anaEq where
         map (cut n) ∘ (fix⁻ ∘ f)  ≡⟨ sym (∘-assoc (map (cut n)) fix⁻ f) ⟩
         (map (cut n) ∘ fix⁻) ∘ f  ≡⟨ cong (_∘ f) (fix⁻-step-ext n) ⟩
         cut (suc n) ∘ f ∎
-
-Approx : (n : ℕ) → (s t : ΣVec ^ n) → Type
-Approx zero = λ { tt* tt* → Unit }
-Approx (suc n) = Relator (Approx n)
-
-isPropApprox : ∀ n (s t : ΣVec ^ n) → isProp (Approx n s t)
-isPropApprox zero s t = Unit.isPropUnit
-isPropApprox (suc n) s t = isPropRelator {! !}
-
-Approx-π : ∀ n {s t} → Approx (suc n) s t → Approx n (!^ n s) (!^ n t)
-Approx-π zero _ = tt
-Approx-π (suc n) rel = ΣVec.Relator-map (Approx (suc n)) _ (Approx-π n) rel
-
-RelatorLim^ : ℕ → (s t : Lim ΣVec) → Type
-RelatorLim^ n s t = Approx n (cut n s) (cut n t)
-
-isPropRelatorLim^ : ∀ s t n → isProp (RelatorLim^ n s t)
-isPropRelatorLim^ s t n = isPropApprox n (cut n s) (cut n t)
-
-module _ (s t : Lim ΣVec) where
-  RelatorLimSuc→RelatorLim : ∀ n → RelatorLim^ (suc n) s t → RelatorLim^ n s t
-  RelatorLimSuc→RelatorLim n rel = subst2 (Approx n) (s .is-lim n) (t .is-lim n) (Approx-π n rel)
-
-  RelatorChain : Chain ℓ-zero
-  RelatorChain .Chain.Ob n = RelatorLim^ n s t
-  RelatorChain .Chain.π = RelatorLimSuc→RelatorLim
-
-  Bisim : Type
-  Bisim = Limit RelatorChain
-
-  isPropBisim : isProp Bisim
-  isPropBisim = isOfHLevelLimit _ 1 (isPropRelatorLim^ s t)
-
-bisim : {s t : Lim ΣVec} → (∀ n → RelatorLim^ n s t) → Bisim s t
-bisim {s} {t} = isPropChain→Limit (RelatorChain s t) (isPropRelatorLim^ s t)
-
-infix 5 _≈_ -- _≈[_]_
-_≈_ = Bisim
-
--- syntax RelatorLim^ s t n = s ≈[ n ] t
-
-module _ where
-  open BinaryRelation
-
-  isReflApprox : ∀ n → isRefl (Approx n)
-  isReflApprox zero = λ { tt* → tt }
-  isReflApprox (suc n) = ΣVec.isReflRelator (isReflApprox n)
-  
-  isReflBisim : isRefl Bisim
-  isReflBisim t = bisim {s = t} {t = t} λ { n → (isReflApprox n (t .elements n)) }
-
-  BisimApproxEquiv : ∀ {s t} → Bisim s t ≃ (∀ n → Approx n (cut n s) (cut n t))
-  BisimApproxEquiv {s} {t} = propBiimpl→Equiv (isPropBisim _ _) (isPropΠ (isPropRelatorLim^ s t)) elements bisim
-
-Unorderedtree : Type _
-Unorderedtree = Tree /₂ Bisim
-
-module _ (a b : Tree) (cs : ΣVec Tree) where
-  ∷-swap-approx : Relator Bisim (a Σ∷ b Σ∷ cs) (b Σ∷ a Σ∷ cs)
-  ∷-swap-approx = ΣVec.Relator-∷-swap isReflBisim a b
-
-module _ where
-  open ΣVec.RelatorElim
-
-  fix⁺-preserves-bisim : ∀ {s t} → Relator Bisim s t → Bisim (fix⁺ s) (fix⁺ t)
-  fix⁺-preserves-bisim = elim goal where
-    goal : ΣVec.RelatorElim Bisim (λ {m} {n} {s} {t} rel → Bisim (fix⁺ (mk-vec s)) (fix⁺ (mk-vec t)))
-    goal .is-prop _ = isPropBisim _ _
-    goal .rnil* = isReflBisim (fix⁺ Σ[])
-    goal .rcons* {a = a} {as} {bs} b aRb b∈bs rel-remove cont = bisim approx where
-      approx : ∀ n → Approx n (cut n (fix⁺ $ (a Σ∷ mk-vec as))) (cut n (fix⁺ bs))
-      approx zero = tt
-      approx (suc n) = Relator.rcons PT.∣ bₙ , a′ₙ∼bₙ , bₙ∈bs′ₙ , subst (Relator (Approx n) _) rel-remove′ (cont .elements (suc n)) ∣₁ where
-        aₙ a′ₙ : ΣVec ^ n
-        aₙ = cut n a
-        a′ₙ = !^ n (cut (suc n) a)
-
-        bₙ b′ₙ : ΣVec ^ n
-        bₙ = cut n b
-        b′ₙ = !^ n (cut (suc n) b)
-
-        a′ₙ∼bₙ : Approx n a′ₙ bₙ
-        a′ₙ∼bₙ = subst (λ - → Approx n - bₙ) (sym $ a .is-lim n) (aRb .elements n)
-
-        bₙ≡b′ₙ : b′ₙ ≡ bₙ
-        bₙ≡b′ₙ = b .is-lim n
-
-        bsₙ = map (cut n) bs
-        bs′ₙ = cut (suc n) (fix⁺ bs)
-
-        bsₙ≡bs′ₙ : bsₙ ≡ bs′ₙ
-        bsₙ≡bs′ₙ =
-          map (cut n) bs                    ≡⟨ sym (cong-map-ext (TerminalChain.cut-is-lim _ n) bs) ⟩
-          map (!^ n ∘ cut (suc n)) bs       ≡⟨ ΣVec.map-comp (!^ n) (cut (suc n)) bs ⟩
-          map (!^ n) (map (cut (suc n)) bs) ∎
-
-        bₙ∈bsₙ : bₙ ∈ bsₙ
-        bₙ∈bsₙ = ΣVec.∈-map (cut n) b∈bs
-
-        bₙ∈bs′ₙ : bₙ ∈ bs′ₙ
-        bₙ∈bs′ₙ = subst (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ
-
-        rel-remove′ : cut (suc n) (fix⁺ (ΣVec.remove bs b∈bs)) ≡ ΣVec.remove bs′ₙ bₙ∈bs′ₙ
-        rel-remove′ =
-          ΣVec.map (!^ n) (ΣVec.map (cut (suc n)) $ ΣVec.remove bs b∈bs) ≡⟨ sym $ map-comp (!^ n) (cut (suc n)) _ ⟩
-          ΣVec.map (!^ n ∘ cut (suc n)) (ΣVec.remove bs b∈bs) ≡⟨ cong-map-ext (TerminalChain.cut-is-lim _ n) _ ⟩
-          ΣVec.map (cut n)              (ΣVec.remove bs b∈bs) ≡⟨ ΣVec.map-remove (cut n) b∈bs ⟩
-          ΣVec.remove bsₙ  bₙ∈bsₙ   ≡⟨ congP₂ (λ _ → ΣVec.remove) bsₙ≡bs′ₙ (subst-filler (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ) ⟩
-          ΣVec.remove bs′ₙ bₙ∈bs′ₙ  ∎
-
-infixr 9 _T∷_
-_T∷_ : (a : Tree) → (as : Tree) → Tree
-_T∷_ a = subst (λ A → A → A) (ua ΣVecLimitEquiv) (a Σ∷_)
-
-module _ (a b : Tree) (cs : Tree) where
-  T∷-swap-approx : ∀ n → RelatorLim^ n (a T∷ b T∷ cs) (b T∷ a T∷ cs)
-  T∷-swap-approx zero = tt
-  T∷-swap-approx (suc n) = goal where
-    goal : Relator (Approx n) _ _
-    goal = {! (cut (suc n) (a T∷ b T∷ cs))!}
-
-  T∷-swap : a T∷ b T∷ cs ≈ b T∷ a T∷ cs
-  T∷-swap .elements n = {! !}
-  T∷-swap .is-lim = {! !}

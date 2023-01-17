@@ -3,105 +3,185 @@
 module Multiset.ListQuotient.Finality where
 
 open import Multiset.Prelude
-open import Multiset.Limit.Chain using (lim ; Limit)
+open import Multiset.ListQuotient.ListFinality
+  using
+    ( FunctorΣVec
+    ; !^
+    ; cut
+    ; Tree
+    ; fix⁺
+    ; ΣVecLimitPath
+    ; pres
+    )
+
+open import Multiset.Util.Vec as ΣVec
+  using
+    ( ΣVec
+    ; mk-vec
+    ; Σ[]
+    ; _Σ∷_
+    ; ∈-map
+    ; remove
+    ; map-remove
+    ; Relator
+    ; Relator-map
+    ; isPropRelator
+    ; isReflRelator
+    ; Relator-∷-swap
+    ; _∈_
+    )
+open import Multiset.Limit.Chain
+  using
+    ( lim
+    ; Limit
+    ; Chain
+    ; isPropChain→Limit
+    ; isOfHLevelLimit
+    )
 open import Multiset.Limit.TerminalChain as TerminalChain
-  using (Functor ; Lim ; ShLim ; _^_ ; _map-!^_)
-open import Multiset.ListQuotient.Base
+  using
+    ( Functor
+    ; Lim
+    ; _^_
+    )
 
+open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function using (_∘_)
-import Cubical.Data.Empty as Empty
+open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat.Base as Nat using (ℕ ; suc ; zero)
-open import Cubical.Data.Nat.Properties using (snotz)
-open import Cubical.Data.SumFin as Fin using (Fin ; fzero ; fsuc)
-open import Cubical.Data.Unit.Base using (Unit*)
-open import Cubical.Data.List as List
-  using (List ; [] ; _∷_)
+open import Cubical.Data.Unit.Base using (Unit* ; Unit ; tt* ; tt)
+open import Cubical.Data.Unit.Properties using (isPropUnit ; isOfHLevelUnit*)
+open import Cubical.HITs.PropositionalTruncation as PT using ()
+open import Cubical.HITs.SetQuotients as SQ using () renaming (_/_ to _/₂_)
+open import Cubical.Relation.Binary using (module BinaryRelation)
 
-module ListExt where
-  private
-    variable
-      ℓ : Level
-      A : Type ℓ
+open ΣVec.ΣVec
+open Limit using (elements ; is-lim)
+open Functor ⦃...⦄
 
-  map-id : (xs : List A) → List.map (λ x → x) xs ≡ xs
-  map-id [] = refl
-  map-id (x ∷ xs) = cong (x ∷_) (map-id xs)
+Approx : (n : ℕ) → (s t : ΣVec ^ n) → Type
+Approx zero = λ { tt* tt* → Unit }
+Approx (suc n) = Relator (Approx n)
 
-  map-comp : {X Y Z : Type ℓ}
-    → (g : Y → Z) → (f : X → Y)
-    → ∀ xs → List.map (g ∘ f) xs ≡ List.map g (List.map f xs)
-  map-comp g f [] = refl
-  map-comp g f (x ∷ xs) = cong (g (f x) ∷_) (map-comp g f xs)
+isPropApprox : ∀ n (s t : ΣVec ^ n) → isProp (Approx n s t)
+isPropApprox zero s t = isPropUnit
+isPropApprox (suc n) s t = isPropRelator (Approx n)
 
-  length-map : {A B : Type ℓ} → (f : A → B)
-    → ∀ xs → List.length (List.map f xs) ≡ List.length xs
-  length-map f [] = refl
-  length-map f (x ∷ xs) = cong suc (length-map f xs)
+Approx-π : ∀ n {s t} → Approx (suc n) s t → Approx n (!^ n s) (!^ n t)
+Approx-π zero _ = tt
+Approx-π (suc n) rel = Relator-map (Approx (suc n)) _ (Approx-π n) rel
 
-  lookup : (xs : List A) → (k : Fin (List.length xs)) → A
-  lookup (x ∷ xs) fzero = x
-  lookup (x ∷ xs) (fsuc k) = lookup xs k
+RelatorLim^ : ℕ → (s t : Lim ΣVec) → Type
+RelatorLim^ n s t = Approx n (cut n s) (cut n t)
 
-  enumerate' : {A B : Type ℓ}
-    → (xs : List A)
-    → (k : Fin (List.length xs))
-    → (f : Fin (List.length xs) → A → B) → List B
-  enumerate' [] k f = []
-  enumerate' (x ∷ xs) k f = {! enumerate' xs (fsuc k) !}
+isPropRelatorLim^ : ∀ s t n → isProp (RelatorLim^ n s t)
+isPropRelatorLim^ s t n = isPropApprox n (cut n s) (cut n t)
 
-  enumerate : {A B : Type ℓ}
-    → (xs : List A) → (f : Fin (List.length xs) → A → B) → List B
-  enumerate [] f = []
-  enumerate (x ∷ xs) f = enumerate' (x ∷ xs) {! !} f
+module _ (s t : Lim ΣVec) where
+  RelatorLimSuc→RelatorLim : ∀ n → RelatorLim^ (suc n) s t → RelatorLim^ n s t
+  RelatorLimSuc→RelatorLim n rel = subst2 (Approx n) (s .is-lim n) (t .is-lim n) (Approx-π n rel)
 
-  safe-head : {A : Type ℓ} → (xs : List A) → {k : ℕ} → suc k ≡ List.length xs → A
-  safe-head [] p = Empty.rec (snotz p)
-  safe-head (x ∷ xs) p = x
+  RelatorChain : Chain ℓ-zero
+  RelatorChain .Chain.Ob n = RelatorLim^ n s t
+  RelatorChain .Chain.π = RelatorLimSuc→RelatorLim
 
-  choice : {B : (n : ℕ) → Type ℓ}
-    → (xs : (n : ℕ) → List (B n))
-    → (len : ℕ)
-    → (∀ n → len ≡ List.length (xs n))
-    → List (∀ n → B n)
-  choice xs zero const-len = []
-  choice xs (suc len) const-len = (λ n → safe-head (xs n) (const-len n)) ∷ {! choice (xs ∘ suc) (len) const-len !}
+  Bisim : Type
+  Bisim = Limit RelatorChain
 
-instance
-  FunctorList : Functor {ℓ-zero} List
-  FunctorList .Functor.map = List.map
-  FunctorList .Functor.map-id = ListExt.map-id
-  FunctorList .Functor.map-comp = ListExt.map-comp
+  isPropBisim : isProp Bisim
+  isPropBisim = isOfHLevelLimit _ 1 (isPropRelatorLim^ s t)
 
-Tree : Type
-Tree = Lim List
+bisim : {s t : Lim ΣVec} → (∀ n → RelatorLim^ n s t) → Bisim s t
+bisim {s} {t} = isPropChain→Limit (RelatorChain s t) (isPropRelatorLim^ s t)
 
-pres : List (Lim List) → ShLim List
-pres = TerminalChain.pres List
+infix 5 _≈_
+_≈_ = Bisim
 
-width : ShLim List → (d : ℕ) → ℕ
-width tree d = List.length $ tree .Limit.elements d
+syntax Approx n s t = s ≈[ n ] t
 
-widthConstSuc : ∀ (tree : ShLim List) n → width tree n ≡ width tree (suc n)
-widthConstSuc (lim tree is-lim) n =
-    List.length (tree n)                                  ≡⟨ cong (List.length) (sym (is-lim n)) ⟩
-    List.length (List.map (List map-!^ n) (tree (suc n))) ≡⟨ ListExt.length-map (List map-!^ n) (tree (suc n)) ⟩∎
-    List.length (tree (suc n)) ∎
+module _ where
+  open BinaryRelation
 
-widthConst : ∀ (tree : ShLim List) n → width tree 0 ≡ width tree n
-widthConst tree zero = refl
-widthConst tree (suc n) = widthConst tree n ∙ widthConstSuc tree n
+  isReflApprox : ∀ n → isRefl (Approx n)
+  isReflApprox zero = λ { tt* → tt }
+  isReflApprox (suc n) = isReflRelator (isReflApprox n)
+  
+  isReflBisim : isRefl Bisim
+  isReflBisim t = bisim {s = t} {t = t} λ { n → (isReflApprox n (t .elements n)) }
 
-subtree : (tree : ShLim List) → (k : Fin (width tree 0)) → Lim List
-subtree tree k .Limit.elements n = ListExt.lookup (tree .Limit.elements n) (subst Fin (widthConst tree n) k)
-subtree tree k .Limit.is-lim n = {! tree .Limit.elements n  !}
+  BisimApproxEquiv : ∀ {s t} → Bisim s t ≃ (∀ n → Approx n (cut n s) (cut n t))
+  BisimApproxEquiv {s} {t} = propBiimpl→Equiv (isPropBisim _ _) (isPropΠ (isPropRelatorLim^ s t)) elements bisim
 
-pres⁻¹ : ShLim List → List (Lim List)
-pres⁻¹ (lim approx is-lim) = {!approx !} where
-  approx₀ : List Unit*
-  approx₀ = approx 0
+Unorderedtree : Type _
+Unorderedtree = Tree /₂ Bisim
 
-  approx-length : ∀ n → List.length (approx n) ≡ List.length (approx (suc n))
-  approx-length n =
-    List.length (approx n)                                  ≡⟨ cong (List.length) (sym (is-lim n)) ⟩
-    List.length (List.map (List map-!^ n) (approx (suc n))) ≡⟨ ListExt.length-map (List map-!^ n) (approx (suc n)) ⟩∎
-    List.length (approx (suc n)) ∎
+module _ (a b : Tree) (cs : ΣVec Tree) where
+  ∷-swap-approx : Relator Bisim (a Σ∷ b Σ∷ cs) (b Σ∷ a Σ∷ cs)
+  ∷-swap-approx = Relator-∷-swap isReflBisim a b
+
+module _ where
+  open ΣVec.RelatorElim
+
+  fix⁺-preserves-bisim : ∀ {s t} → Relator Bisim s t → Bisim (fix⁺ s) (fix⁺ t)
+  fix⁺-preserves-bisim = elim goal where
+    goal : ΣVec.RelatorElim Bisim (λ {m} {n} {s} {t} rel → Bisim (fix⁺ (mk-vec s)) (fix⁺ (mk-vec t)))
+    goal .is-prop _ = isPropBisim _ _
+    goal .rnil* = isReflBisim (fix⁺ Σ[])
+    goal .rcons* {a = a} {as} {bs} b aRb b∈bs rel-remove cont = bisim approx where abstract
+      approx : ∀ n → (cut n $ fix⁺ (a Σ∷ mk-vec as)) ≈[ n ] (cut n $ fix⁺ bs)
+      approx zero = tt
+      approx (suc n) = Relator.rcons PT.∣ bₙ , a′ₙ∼bₙ , bₙ∈bs′ₙ , subst (Relator (Approx n) _) rel-remove′ (cont .elements (suc n)) ∣₁ where
+        aₙ a′ₙ : ΣVec ^ n
+        aₙ = cut n a
+        a′ₙ = !^ n (cut (suc n) a)
+
+        aₙ≡a′ₙ : a′ₙ ≡ aₙ
+        aₙ≡a′ₙ = a .is-lim n
+
+        bₙ b′ₙ : ΣVec ^ n
+        bₙ = cut n b
+        b′ₙ = !^ n (cut (suc n) b)
+
+        a′ₙ∼bₙ : a′ₙ ≈[ n ] bₙ
+        a′ₙ∼bₙ = subst (λ · → · ≈[ n ] bₙ) (sym aₙ≡a′ₙ) (aRb .elements n)
+
+        bₙ≡b′ₙ : b′ₙ ≡ bₙ
+        bₙ≡b′ₙ = b .is-lim n
+
+        bsₙ bs′ₙ : ΣVec (ΣVec ^ n)
+        bsₙ = map (cut n) bs
+        bs′ₙ = cut (suc n) (fix⁺ bs)
+
+        bsₙ≡bs′ₙ : bsₙ ≡ bs′ₙ
+        bsₙ≡bs′ₙ = sym $
+          map (!^ n) (map (cut (suc n)) bs) ≡⟨ pres bs .is-lim n ⟩∎
+          map (cut n) bs ∎
+
+        bₙ∈bsₙ : bₙ ∈ bsₙ
+        bₙ∈bsₙ = ∈-map (cut n) b∈bs
+
+        bₙ∈bs′ₙ : bₙ ∈ bs′ₙ
+        bₙ∈bs′ₙ = subst (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ
+
+        rel-remove′ : cut (suc n) (fix⁺ (remove bs b∈bs)) ≡ remove bs′ₙ bₙ∈bs′ₙ
+        rel-remove′ =
+          (map (!^ n) $ map (cut (suc n)) $ remove bs b∈bs) ≡⟨ pres (remove bs b∈bs) .is-lim n ⟩
+          (map (cut n)                    $ remove bs b∈bs) ≡⟨ map-remove (cut n) b∈bs ⟩
+          remove bsₙ  bₙ∈bsₙ   ≡⟨ congP₂ (λ i → remove) bsₙ≡bs′ₙ (subst-filler (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ) ⟩
+          remove bs′ₙ bₙ∈bs′ₙ  ∎
+
+
+infixr 9 _T∷_
+_T∷_ : (a : Tree) → (as : Tree) → Tree
+_T∷_ a = subst (λ A → A → A) ΣVecLimitPath (a Σ∷_)
+
+module _ (a b : Tree) (cs : Tree) where
+  T∷-swap-approx : ∀ n → RelatorLim^ n (a T∷ b T∷ cs) (b T∷ a T∷ cs)
+  T∷-swap-approx zero = tt
+  T∷-swap-approx (suc n) = goal where
+    goal : Relator (Approx n) _ _
+    goal = {! !}
+
+  T∷-swap : a T∷ b T∷ cs ≈ b T∷ a T∷ cs
+  T∷-swap .elements n = {! !}
+  T∷-swap .is-lim = {! !}

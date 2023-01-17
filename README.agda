@@ -82,6 +82,7 @@ _ : ∀ {X : Type} → FCM X ≃ HeadPList X
 _ = FCM≃HeadPList
 
 -- Relational lifting
+import Multiset.ListQuotient
 open import Multiset.ListQuotient.Base
   using (DRelator ; Relator)
 import Multiset.ListQuotient.FMSetEquiv
