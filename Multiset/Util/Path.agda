@@ -4,12 +4,15 @@ module Multiset.Util.Path where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Path
+open import Cubical.Foundations.Equiv using (equivToIso)
+open import Cubical.Foundations.Isomorphism using (Iso)
 open import Cubical.Foundations.Transport
   using
     ( subst⁻
     ; transport⁻
     ; transport⁻-fillerExt
     ; transport⁻-filler
+    ; substEquiv
     )
 open import Cubical.Functions.FunExtEquiv
   using
@@ -83,3 +86,9 @@ subst⁻Domain : ∀ {ℓ''} {C : Type ℓ''}
   → (p : x₀ ≡ x₁)
   → subst⁻ (λ x → B x → C) p f ≡ λ x → f (subst B p x)
 subst⁻Domain {B = B} {C = C} f p = funExt λ x₁ → transportRefl {A = C} (f (subst B p x₁))
+
+substIso : ∀ {ℓ ℓ'} {A : Type ℓ} {a a' : A}
+  → (P : A → Type ℓ')
+  → (p : a ≡ a')
+  → Iso (P a) (P a')
+substIso P p = equivToIso (substEquiv P p)

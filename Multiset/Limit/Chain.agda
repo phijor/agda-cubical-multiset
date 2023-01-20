@@ -80,6 +80,42 @@ module _ (C : Chain ℓ) where
     set-coh : ∀ n → Square _ _ _ _
     set-coh n = isSet→isSet' (setCh n) _ _ _ (elements≡ n)
 
+  record Limit* : Type ℓ where
+    constructor lim*
+    open Chain
+    field
+      el₀ : C .Ob 0
+      elₛ : (n : ℕ) → C .Ob (suc n)
+      is-lim₀ : C .π 0 (elₛ 0) ≡ el₀
+      is-limₛ : ∀ n → C .π (suc n) (elₛ (suc n)) ≡ elₛ n
+
+  unquoteDecl Limit*IsoΣ = declareRecordIsoΣ Limit*IsoΣ (quote Limit*)
+
+  module _ where
+    open Limit*
+    Limit→Limit* : Limit → Limit*
+    Limit→Limit* l .Limit*.el₀ = l .elements 0
+    Limit→Limit* l .Limit*.elₛ = l .elements ∘ suc
+    Limit→Limit* l .Limit*.is-lim₀ = l .is-lim 0
+    Limit→Limit* l .Limit*.is-limₛ = l .is-lim ∘ suc
+
+    Limit*→Limit : Limit* → Limit
+    Limit*→Limit l* .elements zero = l* .el₀
+    Limit*→Limit l* .elements (suc n) = l* .elₛ n
+    Limit*→Limit l* .is-lim zero = l* .is-lim₀
+    Limit*→Limit l* .is-lim (suc n) = l* .is-limₛ n
+
+    Limit-Limit*-Iso : Iso Limit Limit*
+    Limit-Limit*-Iso .fun = Limit→Limit*
+    Limit-Limit*-Iso .inv = Limit*→Limit
+    Limit-Limit*-Iso .rightInv l* = refl
+    Limit-Limit*-Iso .leftInv l = LimitPathPExt
+      (λ { zero → refl ; (suc n) → refl })
+      (λ { zero → refl ; (suc n) → refl })
+
+    Limit≃Limit* : Limit ≃ Limit*
+    Limit≃Limit* = isoToEquiv Limit-Limit*-Iso
+
   record Cone (A : Type ℓA) : Type (ℓ-max ℓ ℓA) where
     constructor cone
     field

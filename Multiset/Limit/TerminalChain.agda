@@ -108,14 +108,23 @@ isLimitPreserving F = isEquiv (pres F)
 module Fixpoint {ℓ} {F : Type ℓ → Type ℓ} {{FunctorF : Functor F}} (is-lim-pres : isLimitPreserving F) where
   open Functor FunctorF
 
+  pres⁻ : ShLim F → F (Lim F)
+  pres⁻ = invIsEq is-lim-pres
+
   fix : F (Lim F) ≃ Lim F
   fix = (pres F , is-lim-pres) ∙ₑ ShLim≃Lim F
 
   fix⁺ : F (Lim F) → Lim F
   fix⁺ = equivFun fix
 
+  fix⁺≡ShLim→Lim∘pres : fix⁺ ≡ ShLim→Lim F ∘ pres F
+  fix⁺≡ShLim→Lim∘pres = refl
+
   fix⁻ : Lim F → F (Lim F)
   fix⁻ = invEq fix
+
+  fix⁻≡pres⁻∘Lim→ShLim : fix⁻ ≡ pres⁻ ∘ Lim→ShLim F
+  fix⁻≡pres⁻∘Lim→ShLim = refl
 
   fix⁺-step' : ∀ n x → map (cut F n) x ≡ cut F (suc n) (fix⁺ x)
   fix⁺-step' n x =

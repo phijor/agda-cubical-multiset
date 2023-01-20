@@ -9,9 +9,11 @@ open import Multiset.ListQuotient.ListFinality
     ; !^
     ; cut
     ; Tree
-    ; fix⁺
+    ; fix ; fix⁺ ; fix⁻
     ; ΣVecLimitPath
-    ; pres
+    ; pres ; pres⁺ ; pres⁻
+    ; pres-Iso ; pres′ ; pres′⁻ -- ; pres′⁻≡pres⁻
+    ; subtree
     )
 
 open import Multiset.Util.Vec as ΣVec
@@ -24,12 +26,17 @@ open import Multiset.Util.Vec as ΣVec
     ; remove
     ; map-remove
     ; Relator
+    ; RelatorElim
     ; Relator-map
     ; isPropRelator
     ; isReflRelator
     ; Relator-∷-swap
     ; _∈_
     )
+open import Multiset.Util.Relation
+open import Multiset.Util.SetQuotients
+  using (relBiimpl→QuotIso)
+  renaming (map to map/₂)
 open import Multiset.Limit.Chain
   using
     ( lim
@@ -44,20 +51,27 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     ; Lim
     ; _^_
     )
+  hiding (pres)
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Nat.Base as Nat using (ℕ ; suc ; zero)
 open import Cubical.Data.Unit.Base using (Unit* ; Unit ; tt* ; tt)
 open import Cubical.Data.Unit.Properties using (isPropUnit ; isOfHLevelUnit*)
+open import Cubical.Data.List.Base as List using (List)
 open import Cubical.HITs.PropositionalTruncation as PT using ()
-open import Cubical.HITs.SetQuotients as SQ using () renaming (_/_ to _/₂_)
-open import Cubical.Relation.Binary using (module BinaryRelation)
+open import Cubical.HITs.SetQuotients as SQ using () renaming (_/_ to _/₂_ ; [_] to [_]₂ ; eq/ to eq/₂)
+open import Cubical.Relation.Binary using (module BinaryRelation ; pulledbackRel ; RelIso ; Rel)
 
 open ΣVec.ΣVec
 open Limit using (elements ; is-lim)
+open Iso
 open Functor ⦃...⦄
+
+-- Tot : ∀ {ℓ} {X : Type ℓ} → Rel X X ℓ-zero
+-- Tot {X = X} = λ _ _ → Unit
 
 Approx : (n : ℕ) → (s t : ΣVec ^ n) → Type
 Approx zero = λ { tt* tt* → Unit }
@@ -154,7 +168,7 @@ module _ where
 
         bsₙ≡bs′ₙ : bsₙ ≡ bs′ₙ
         bsₙ≡bs′ₙ = sym $
-          map (!^ n) (map (cut (suc n)) bs) ≡⟨ pres bs .is-lim n ⟩∎
+          map (!^ n) (map (cut (suc n)) bs) ≡⟨ pres⁺ bs .is-lim n ⟩∎
           map (cut n) bs ∎
 
         bₙ∈bsₙ : bₙ ∈ bsₙ
@@ -165,10 +179,50 @@ module _ where
 
         rel-remove′ : cut (suc n) (fix⁺ (remove bs b∈bs)) ≡ remove bs′ₙ bₙ∈bs′ₙ
         rel-remove′ =
-          (map (!^ n) $ map (cut (suc n)) $ remove bs b∈bs) ≡⟨ pres (remove bs b∈bs) .is-lim n ⟩
+          (map (!^ n) $ map (cut (suc n)) $ remove bs b∈bs) ≡⟨ pres⁺ (remove bs b∈bs) .is-lim n ⟩
           (map (cut n)                    $ remove bs b∈bs) ≡⟨ map-remove (cut n) b∈bs ⟩
           remove bsₙ  bₙ∈bsₙ   ≡⟨ congP₂ (λ i → remove) bsₙ≡bs′ₙ (subst-filler (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ) ⟩
           remove bs′ₙ bₙ∈bs′ₙ  ∎
+
+  -- TODO:
+  --
+  -- 1. Attempt to prove the two lemmata below, start with the harder one (pres⁺).
+  -- 2. If that fails, redo list-finality proof with FinVec, use RelatorF from FMSetEquiv as the relator.
+  -- 3. ???
+  -- 4. PROFIT
+
+  S : Rel (Limit (TerminalChain.sh ΣVec)) (Limit (TerminalChain.sh ΣVec)) _
+  S = {! !}
+
+  private
+    open TerminalChain using (ShLim→Lim)
+
+  pres⁺-reflects-bisim : ReflectsRel (Relator Bisim) S pres⁺
+  pres⁺-reflects-bisim = {! !}
+
+  ShLim→Lim-reflects : ReflectsRel S Bisim (TerminalChain.ShLim→Lim ΣVec)
+  ShLim→Lim-reflects = {! !}
+
+  fix⁺-reflects-bisim : ∀ {s t} → Bisim (fix⁺ s) (fix⁺ t) → Relator Bisim s t
+  fix⁺-reflects-bisim = ReflectsRelComp (Relator Bisim) S Bisim {f = pres⁺} {g = TerminalChain.ShLim→Lim ΣVec} pres⁺-reflects-bisim ShLim→Lim-reflects
+
+  module _ where
+    fix⁻-pres-bisim : ∀ {s t : Tree} → Bisim s t → Relator Bisim (fix⁻ s) (fix⁻ t)
+    fix⁻-pres-bisim {s} {t} = ReflectsRel→SectionPreservesRel (Relator Bisim) Bisim fix⁺ fix⁻ (secEq fix) fix⁺-reflects-bisim
+
+  fix⁺-lift : ΣVec Tree /₂ pulledbackRel fix⁺ Bisim → Tree /₂ Bisim
+  fix⁺-lift = map/₂ fix⁺ λ { rel → rel }
+
+  fix⁻-lift : Tree /₂ Bisim → ΣVec Tree /₂ pulledbackRel fix⁺ Bisim
+  fix⁻-lift = map/₂ fix⁻ pres-bisim where
+    pres-bisim : ∀ {a} {a'} → a ≈ a' → (fix⁺ $ fix⁻ a) ≈ (fix⁺ $ fix⁻ a')
+    pres-bisim {a} {a'} a≈a' = subst2 _≈_ (sym (secEq fix a)) (sym (secEq fix a')) a≈a'
+
+  fix-lift-iso : Iso (ΣVec Tree /₂ pulledbackRel fix⁺ Bisim) (Tree /₂ Bisim)
+  fix-lift-iso .fun = fix⁺-lift
+  fix-lift-iso .inv = fix⁻-lift
+  fix-lift-iso .rightInv = SQ.elimProp (λ _ → SQ.squash/ _ _) (cong [_]₂ ∘ secEq fix)
+  fix-lift-iso .leftInv = SQ.elimProp (λ _ → SQ.squash/ _ _) (cong [_]₂ ∘ retEq fix)
 
 
 infixr 9 _T∷_
@@ -185,3 +239,29 @@ module _ (a b : Tree) (cs : Tree) where
   T∷-swap : a T∷ b T∷ cs ≈ b T∷ a T∷ cs
   T∷-swap .elements n = {! !}
   T∷-swap .is-lim = {! !}
+
+FMSet : Type → Type
+FMSet X = ΣVec X /₂ (Relator _≡_)
+
+_ : Iso (FMSet Unorderedtree) Unorderedtree
+_ =
+  FMSet Unorderedtree Iso⟨ idIso ⟩
+  ΣVec (Tree /₂ Bisim) /₂ (Relator _≡_) Iso⟨ {! !} ⟩
+  Tree /₂ Bisim  Iso⟨ idIso ⟩
+  Unorderedtree ∎Iso where
+
+  eq/Relator : ∀ {X : Type} {R : X → X → Type}
+    → ∀ {xs ys}
+    → Relator R xs ys
+    → Relator {A = X /₂ R} _≡_ (map [_]₂ xs) (map [_]₂ ys)
+  eq/Relator {R = R} = Relator-map R _≡_ (eq/₂ _ _)
+
+  α : Tree /₂ Bisim → ΣVec (Tree /₂ Bisim) /₂ (Relator _≡_)
+  α = map/₂ (ΣVec.map [_]₂ ∘ fix⁻) λ {a} {a'} a≈a' → eq/Relator (fix⁻-pres-bisim a≈a')
+
+  -- TODO: ΣVecPar : Rel A B → Rel (ΣVec A) (ΣVec B),
+  --
+  -- prove: ΣVec (X /₂ R) ≃ ΣVec X /₂ ΣVecPar R
+
+  β : ΣVec (Tree /₂ Bisim) /₂ (Relator _≡_) → Tree /₂ Bisim
+  β = SQ.rec SQ.squash/ (fix⁺-lift ∘ {! !}) {! !}

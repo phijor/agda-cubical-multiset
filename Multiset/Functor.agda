@@ -7,6 +7,7 @@ open import Multiset.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Isomorphism
+open import Cubical.Foundations.Univalence using (ua)
 
 record Functor {ℓ} (F : Type ℓ → Type ℓ) : Type (ℓ-suc ℓ) where
   field
@@ -69,9 +70,22 @@ module _ {ℓ} (F G : Type ℓ → Type ℓ) {{F' : Functor F}} {{G' : Functor G
   _⇒_ : Type _
   _⇒_ = NatTrans
 
-open NatTrans
+  open NatTrans public
+
+  NatEquiv : Type (ℓ-suc ℓ)
+  NatEquiv = Σ[ η ∈ NatTrans ] (∀ {X} → isEquiv (component η X))
+
+  NatEquiv→Equiv : NatEquiv → ∀ {X} → F X ≃ G X
+  NatEquiv→Equiv (η , is-equiv) {X} = component η X , is-equiv {X}
+
+FunctorSIP₀ : ∀ {ℓ} {F G : Type ℓ → Type ℓ} {{FunctorF : Functor F}} {{FunctorG : Functor G}}
+  → ({X : Type ℓ} → F X ≃ G X) → F ≡ G
+FunctorSIP₀ equivs = funExt λ X → ua (equivs {X})
+
+-- FunctorSIP : ∀ {ℓ} {F G : Type ℓ → Type ℓ} {{FunctorF : Functor F}} {{FunctorG : Functor G}}
+--   → (α : NatEquiv F G) → PathP (λ i → Functor (FunctorSIP₀ (NatEquiv→Equiv F G α) i)) FunctorF FunctorG
+-- FunctorSIP α = {! !}
 
 idNatTrans : ∀ {ℓ} (F : Type ℓ → Type ℓ) {{F' : Functor F}} → F ⇒ F
 idNatTrans F .mor = idfun _
 idNatTrans F .is-nat = λ _ → refl
-
