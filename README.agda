@@ -210,10 +210,11 @@ open import Multiset.ListQuotient.ToInjectivity
 Theorem3 = llpo⇒pres-inj
 
 open import Multiset.FMSet.Base using (FMSet)
-open import Multiset.FMSet.Limit using (module Surjectivity)
+open import Multiset.FMSet.Limit using (module SplitEpimorphism)
 
--- The limit preservation map is surjective.
-∥Theorem4∥ = Surjectivity.inhFibers
+-- The limit preservation map is a split epimorphism.
+Theorem4 : section (pres FMSet) (SplitEpimorphism.pres⁻¹)
+Theorem4 = SplitEpimorphism.pres-section
 
 -- 4.2 As a Quotient of the Final List-Coalgebra
 

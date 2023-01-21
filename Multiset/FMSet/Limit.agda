@@ -66,8 +66,6 @@ isShLim→ConstSize xs islim = prf where
 ShLim→ConstSize : (l : ShLim FMSet) → ∀ n → l .elements n .size ≡ l .elements 0 .size
 ShLim→ConstSize l = isShLim→ConstSize (l .elements) (l .is-lim)
 
-open import Multiset.AxiomChoice using (elimCollProp ; hasChoice ; [_⇒-d_]/_ ; θ-d ; PW-d)
-
 record Depth : Type where
   constructor depth
   field
@@ -122,12 +120,6 @@ module _ (sz : ℕ) where
   section-sort^ (depth (suc n)) =
     sortPVect-section isSetFMSet _ (linLexFMSet^ (suc n)) sz
 
-  choice : (∀ n → IVec n / R n) → (∀ n → IVec n) / PW-d R
-  choice x = SQ.[ (λ n → sort^ n (x n)) ]
-
-  choice-sec : section (θ-d R) choice
-  choice-sec x = funExt (λ n → section-sort^ n (x n))
-
   chose-perm : ∀ d {v w : Fin sz → FMSet ^ d}
     → v ∼ w → Σ[ σ ∈ (Fin sz ≃ Fin sz) ] v ≡ w ∘ (equivFun σ)
   chose-perm d {v}{w} r = cp .fst , funExt (λ k → ua→⁻ (cp .snd) k)
@@ -135,26 +127,17 @@ module _ (sz : ℕ) where
       cp : SymmetricActionΣ sz v w
       cp = canonicalS (isSetFMSet^ d) (LexFMSet^ d) (linLexFMSet^ d) sz v w r
 
-module Surjectivity where
+module SplitEpimorphism where
 
   module ConstSize (sz : ℕ) (xs : (d : Depth) → PVect (FMSet ^ (undepth d)) sz) where
     constSzLim : (d : Depth) → FMSet ^ (suc (undepth d))
     constSzLim d = sz , xs d
 
-    inhFibers : (islim : isShLim FMSet (constSzLim ∘ depth)) → ∥ fiber pres (lim (constSzLim ∘ depth) islim) ∥₁
-    inhFibers = elimCollProp {A = Depth} (λ d → Fin sz → FMSet ^ (undepth d))
-      (λ _ → SymmetricAction sz) (λ _ → isPropValued-∼ sz) (λ _ → isEquivRel-∼ sz)
-      (choice sz) (choice-sec sz)
-      Motive isPropMotive goal xs where
-
-      Motive : (∀ d → (Fin sz → FMSet ^ undepth d) / SymmetricAction sz) → Type
-      Motive = λ approx → (islim : isShLim FMSet λ d → sz , approx (depth d)) → ∥ fiber pres (lim (λ d → sz , approx (depth d)) islim) ∥₁
-
-      isPropMotive : ∀ d → isProp (Motive d)
-      isPropMotive d = isPropΠ λ _ → PT.isPropPropTrunc
-
-      goal : (approx : ∀ d → Fin sz → FMSet ^ undepth d) → Motive (λ d → [ approx d ]∼)
-      goal approx islim = ∣ preimage , shiftedLimitPath preimage-in-fiber ∣₁ where
+    inhFibers' : (approx : ∀ d → Fin sz → FMSet ^ undepth d)
+      → (islim : isShLim FMSet λ d → sz , [ approx (depth d) ]∼)
+      → fiber pres (lim (λ d → sz , [ approx (depth d) ]∼) islim)
+    inhFibers' approx islim = preimage , shiftedLimitPath preimage-in-fiber
+      where
         _ : isShLim FMSet (λ d → ⟅ [ approx (depth d) ]∼ ⟆)
         _ = islim
 
@@ -212,24 +195,47 @@ module Surjectivity where
           (sz , [ (λ x → (approx' x n)) ]∼) ≡⟨ FMSetPath _ _ (approx'∼approx n) ⟩
           (sz , [ approx (depth n) ]∼)      ∎
 
-  inhFibers : (base : ShLim FMSet) → ∥ fiber pres base ∥₁
-  inhFibers base = subst (λ l → ∥ fiber pres l ∥₁) (shiftedLimitPath (sym ∘ elements-path)) (ConstSize.inhFibers (base .elements 0 .size) xs islim-xs) where
+    inhFibers : (islim : isShLim FMSet (constSzLim ∘ depth)) → fiber pres (lim (constSzLim ∘ depth) islim)
+    inhFibers islim =
+      subst (fiber pres)
+            (shiftedLimitPath (λ d → cong (sz ,_) (section-sort^ sz (depth d) (xs (depth d)))))
+            (inhFibers' approx islim-approx)
+      where
+        approx : ∀ d → Fin sz → FMSet ^ undepth d
+        approx d = sort^ sz d (xs d)
 
-    sz = base .elements 0 .size
+        islim-approx : isShLim FMSet (λ d → sz , [ approx (depth d) ]∼)
+        islim-approx d = 
+          sz , map-members (FMSet map-!^ d) [ approx (depth (suc d)) ]∼ ≡⟨ (λ i →  sz , map-members (FMSet map-!^ d) (section-sort^ sz (depth (suc d)) (xs (depth (suc d))) i)) ⟩
+          sz , map-members (FMSet map-!^ d) (xs (depth (suc d)))        ≡⟨ islim d ⟩ 
+          sz , xs (depth d)                                             ≡⟨ (λ i → sz , section-sort^ sz (depth d) (xs (depth d)) (~ i)) ⟩
+          sz , [ approx (depth d) ]∼                                    ∎
+        
+  inhFibers : (base : ShLim FMSet) → fiber pres base
+  inhFibers base = subst (fiber pres) (shiftedLimitPath (sym ∘ elements-path)) (ConstSize.inhFibers (base .elements 0 .size) xs islim-xs) where
 
-    const-sz : ∀ d → base .elements (undepth d) .size ≡ sz
-    const-sz d = ShLim→ConstSize base (undepth d)
+     sz = base .elements 0 .size
 
-    xs : (d : Depth) → PVect (FMSet ^ undepth d) sz
-    xs d = subst (PVect (FMSet ^ undepth d)) (const-sz d) (base .elements (undepth d) .members)
+     const-sz : ∀ d → base .elements (undepth d) .size ≡ sz
+     const-sz d = ShLim→ConstSize base (undepth d)
 
-    xs-elems = ConstSize.constSzLim sz xs ∘ depth
+     xs : (d : Depth) → PVect (FMSet ^ undepth d) sz
+     xs d = subst (PVect (FMSet ^ undepth d)) (const-sz d) (base .elements (undepth d) .members)
 
-    elements-path : ∀ d → base .elements d ≡ xs-elems d
-    elements-path d =
-      base .elements d ≡⟨ FMSetPathP (ShLim→ConstSize base d) (toPathP refl) ⟩
-      (sz , xs (depth d)) ≡⟨⟩
-      (ConstSize.constSzLim (base .elements 0 .size) xs ∘ depth) d ∎
+     xs-elems = ConstSize.constSzLim sz xs ∘ depth
 
-    islim-xs : isShLim FMSet xs-elems
-    islim-xs d = cong (!^ (suc d)) (sym (elements-path (suc d))) ∙∙ (base .is-lim d) ∙∙ elements-path d
+     elements-path : ∀ d → base .elements d ≡ xs-elems d
+     elements-path d =
+       base .elements d ≡⟨ FMSetPathP (ShLim→ConstSize base d) (toPathP refl) ⟩
+       (sz , xs (depth d)) ≡⟨⟩
+       (ConstSize.constSzLim (base .elements 0 .size) xs ∘ depth) d ∎
+
+     islim-xs : isShLim FMSet xs-elems
+     islim-xs d = cong (!^ (suc d)) (sym (elements-path (suc d))) ∙∙ (base .is-lim d) ∙∙ elements-path d
+
+  pres⁻¹ : ShLim FMSet → FMSet (Lim FMSet)
+  pres⁻¹ = fst ∘ inhFibers
+
+  -- pres is a split epimorphism, i.e. it admits a section pres⁻¹.
+  pres-section : section pres pres⁻¹
+  pres-section = snd ∘ inhFibers
