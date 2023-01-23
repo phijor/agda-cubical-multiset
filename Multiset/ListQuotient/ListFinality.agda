@@ -109,6 +109,70 @@ widthConstSuc : ∀ (tree : ShLim ΣVec) n → width tree n ≡ width tree (suc 
 widthConstSuc (lim tree is-lim) n = cong length (sym $ is-lim n)
 
 open Iso
+open Limit
+
+module ConstLength (len₀ : ℕ) (xs : (d : ℕ) → Vec (ΣVec ^ d) len₀) where
+  
+  constLengthApprox : (d : ℕ) → ΣVec ^ (suc d)
+  constLengthApprox d = mk-vec {length = len₀} (xs d)
+
+  module _ (islim : isShLim ΣVec constLengthApprox) where
+
+    constLengthLim : ShLim ΣVec
+    constLengthLim .elements = constLengthApprox
+    constLengthLim .is-lim = islim
+
+    inh' : Fin.FinVec (Lim ΣVec) len₀
+    inh' k .elements = Vec.lookup k ∘ xs
+    inh' k .is-lim d =
+      (!^ d) (Vec.lookup k $ xs (suc d))           ≡⟨ sym (VecExt.lookup-map (!^ d) (xs (suc d)) k) ⟩
+      (Vec.lookup k $ Vec.map (!^ d) (xs (suc d))) ≡⟨ cong (Vec.lookup k) (ΣVec.mk-vec-inj (islim d)) ⟩∎
+      (Vec.lookup k $ xs d) ∎
+
+    inh : ΣVec (Lim ΣVec)
+    inh .length = len₀
+    inh .vec = Vec.FinVec→Vec inh'
+
+    abstract
+      inh∈fiber : pres⁺ inh ≡ constLengthLim
+      inh∈fiber = TerminalChain.isSet→ShLimPath ΣVec (isSetΣVec^ ∘ suc) ptwise where
+        ptwise : ∀ n →  pres⁺ inh .elements n ≡ constLengthApprox n
+        ptwise n = cong mk-vec $
+          Vec.map (cut n) (Vec.FinVec→Vec inh') ≡⟨ VecExt.lookup⁻¹-map (cut n) inh' ⟩
+          Vec.FinVec→Vec (cut n ∘ inh')         ≡⟨ Vec.Vec→FinVec→Vec (xs n) ⟩∎
+          xs n ∎
+
+    inhFibers : fiber pres⁺ constLengthLim
+    inhFibers = inh , inh∈fiber
+    
+
+inhFibers : (base : ShLim ΣVec) → fiber pres⁺ base
+inhFibers base = subst (fiber pres⁺) shlim≡ (ConstLength.inhFibers length₀ approx approx-is-shlim) where
+  length₀ : ℕ
+  length₀ = base .elements 0 .length
+
+  constLength : ∀ d → base .elements d .length ≡ length₀
+  constLength zero = refl
+  constLength (suc d) = cong length (base .is-lim d) ∙ constLength d
+
+  approx : (d : ℕ) → Vec (ΣVec ^ d) length₀
+  approx d = subst (Vec (ΣVec ^ d)) (constLength d) (base .elements d .vec)
+
+  approx≡ : ∀ d → base .elements d ≡ mk-vec (approx d)
+  approx≡ d = ΣVecPathP (constLength d) $ subst-filler (Vec (ΣVec ^ d)) (constLength d) (base .elements d .vec)
+
+  approx-is-shlim : isShLim ΣVec (ConstLength.constLengthApprox length₀ approx)
+  approx-is-shlim = subst (isShLim ΣVec) (funExt approx≡) (base .is-lim)
+
+  shlim≡ : ConstLength.constLengthLim length₀ approx approx-is-shlim ≡ base
+  shlim≡ = TerminalChain.isSet→ShLimPath ΣVec (isSetΣVec^ ∘ suc) (sym ∘ approx≡)
+
+module Direct where
+  pres⁻ : ShLim ΣVec → ΣVec (Lim ΣVec)
+  pres⁻ = fst ∘ inhFibers
+
+  pres-section : section pres⁺ pres⁻
+  pres-section = snd ∘ inhFibers
 
 private
   open import Multiset.Util.Trace as Trace
@@ -151,12 +215,8 @@ pres-Iso =
         (vecs tree n)
         (Vec.map (!^ n) (vecs tree (suc n)))
     vecs-coh n = cong vec (sym (tree .Limit.is-lim n))
-  toTraceFirstIso .inv (trace , vecs , vecs-coh) = lim elements is-lim where
-    elements : (n : ℕ) → ΣVec ^ (suc n)
-    elements n = mk-vec {length = trace .Trace.step n} $ vecs n
-
-    is-lim : ∀ n → !^ (suc n) (elements (suc n)) ≡ elements n
-    is-lim n = sym $ ΣVecPathP (trace .Trace.connect n) (vecs-coh n)
+  toTraceFirstIso .inv (trace , vecs , vecs-coh) .elements n = mk-vec {length = trace .fst n} $ vecs n
+  toTraceFirstIso .inv (trace , vecs , vecs-coh) .is-lim n = sym $ ΣVecPathP (trace .snd n) (vecs-coh n)
   toTraceFirstIso .rightInv _ = refl
   toTraceFirstIso .leftInv _ = refl
 

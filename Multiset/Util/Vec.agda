@@ -161,6 +161,12 @@ module VecPath {ℓ} {A : Type ℓ} where
   ≡Vec-codeVec-Iso v v' .Iso.leftInv v≡v' =
     J (λ v' v≡v' → decode v v' (encode v v' v≡v') ≡ v≡v') (cong (decode _ _) (encodeRefl v) ∙ decodeRefl v) v≡v'
 
+mk-vec-inj : ∀ {n} {xs ys : Vec A n}
+  → mk-vec xs ≡ mk-vec ys
+  → xs ≡ ys
+mk-vec-inj {A = A} {n = n} {xs} {ys} p = subst (λ · → PathP (λ i → Vec A (· i)) xs ys) (isSetℕ _ _ (cong length p) refl) (cong vec p)
+
+
 map : (f : A → B) → ΣVec A → ΣVec B
 map f (mk-vec xs) = mk-vec $ Vec.map f xs
 
