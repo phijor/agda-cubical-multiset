@@ -11,6 +11,7 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat.Base as ℕ
   using (ℕ ; zero ; suc)
 open import Cubical.Data.Sigma
+open import Cubical.Relation.Nullary.Base using (Discrete)
 open import Cubical.Reflection.RecordEquiv
 
 open Iso
@@ -80,6 +81,9 @@ module _ (C : Chain ℓ) where
     set-coh : ∀ n → Square _ _ _ _
     set-coh n = isSet→isSet' (setCh n) _ _ _ (elements≡ n)
 
+  -- discreteLimit : (∀ k → Discrete (C .Ob k)) → Discrete Limit
+  -- discreteLimit disc-ob = {! !}
+
   record Limit* : Type ℓ where
     constructor lim*
     open Chain
@@ -145,3 +149,20 @@ universalPropertyIso .leftInv _ = refl
 
 universalProperty : {C : Chain ℓ} → (A → Limit C) ≃ Cone C A
 universalProperty = isoToEquiv universalPropertyIso
+
+module Completeness {ℓ} (C : Chain ℓ) where
+  open import Cubical.Data.Sum using (_⊎_)
+  open import Cubical.HITs.PropositionalTruncation as PT using (∥_∥₁)
+  open import Multiset.Omniscience
+
+  open Limit
+
+  Complete : Type ℓ
+  Complete = ∀ {x y₁ y₂ : Limit C}
+    → (ys : ℕ → Limit C)
+    → (split : ∀ n → (ys n ≡ y₁) ⊎ (ys n ≡ y₂))
+    → (approx : ∀ n → x .elements n ≡ ys n .elements n)
+    → ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
+
+  -- LLPO→Complete : LLPO → Complete
+  -- LLPO→Complete llpo ys split approx = {! ys !}

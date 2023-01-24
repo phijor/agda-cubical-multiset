@@ -11,7 +11,7 @@ open import Multiset.FCM.Logic as M using (_∈_)
 
 open import Multiset.Limit.Chain
 open import Multiset.Limit.TerminalChain as TerminalChain
-  hiding (cut ; pres)
+  hiding (cut ; pres ; diag)
 
 open import Multiset.Omniscience using (LLPO)
 
@@ -68,7 +68,7 @@ module _ {ℓ} {X : Type ℓ} where
   ⟅,⟆-comm x y = comm (η x) (η y)
 
 diag : (ℕ → Lim M) → (n : ℕ) → M ^ n
-diag z n = cut n (z n)
+diag = TerminalChain.diag M
 
 Complete : Type _
 Complete = {x y₁ y₂ : Lim M}

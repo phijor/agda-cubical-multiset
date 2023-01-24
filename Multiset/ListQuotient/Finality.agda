@@ -6,145 +6,180 @@ open import Multiset.Prelude
 open import Multiset.ListQuotient.ListFinality
   using
     ( FunctorΣVec
+    ; isSetΣVec^
     ; !^
     ; cut
     ; Tree
+    ; isTree
+    ; TreePath
     ; fix ; fix⁺ ; fix⁻
-    ; ΣVecLimitPath
     ; pres ; pres⁺ ; pres⁻
-    ; pres-Iso ; pres′ ; pres′⁻ -- ; pres′⁻≡pres⁻
-    ; subtree
     )
-
-open import Multiset.Util.Vec as ΣVec
+open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
+  using
+    ( Bisim ; _≈_ ; bisim
+    ; RelatorLim^
+    ; isReflBisim
+    ; isTransBisim
+    ; isPropBisim
+    ; ShBisim ; _≈ˢʰ_ ; shbisim
+    ; Approx
+    ; Approx-π
+    ; Bisim→Approx
+    )
+open import Multiset.Util.BoolSequence as Seq using (latch-even)
+open import Multiset.Util.Vec as Vec hiding (_∈_ ; remove)
+open import Multiset.Util.BundledVec as BVec
   using
     ( ΣVec
-    ; mk-vec
-    ; Σ[]
-    ; _Σ∷_
-    ; ∈-map
-    ; remove
-    ; map-remove
-    ; Relator
-    ; RelatorElim
-    ; Relator-map
-    ; isPropRelator
-    ; isReflRelator
-    ; Relator-∷-swap
+    ; []
+    ; _#∷_
     ; _∈_
+    ; remove
+    ; Relator∞ ; Relator
+    ; rnil∞ ; rcons∞
+    ; isReflRelator
+    ; isTransRelator
+    ; isPropRelator
+    ; Relator-map
     )
-open import Multiset.Util.Relation
-open import Multiset.Util.SetQuotients
-  using (relBiimpl→QuotIso)
-  renaming (map to map/₂)
+  renaming
+    ( [_] to #[_]
+    )
 open import Multiset.Limit.Chain
   using
     ( lim
     ; Limit
-    ; Chain
-    ; isPropChain→Limit
-    ; isOfHLevelLimit
     )
 open import Multiset.Limit.TerminalChain as TerminalChain
   using
     ( Functor
-    ; Lim
     ; _^_
     )
-  hiding (pres)
+open import Multiset.Omniscience using (LLPO)
 
-open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function using (_∘_)
-open import Cubical.Foundations.HLevels
-open import Cubical.Foundations.Isomorphism
-open import Cubical.Data.Nat.Base as Nat using (ℕ ; suc ; zero)
-open import Cubical.Data.Unit.Base using (Unit* ; Unit ; tt* ; tt)
-open import Cubical.Data.Unit.Properties using (isPropUnit ; isOfHLevelUnit*)
-open import Cubical.Data.List.Base as List using (List)
-open import Cubical.HITs.PropositionalTruncation as PT using ()
-open import Cubical.HITs.SetQuotients as SQ using () renaming (_/_ to _/₂_ ; [_] to [_]₂ ; eq/ to eq/₂)
-open import Cubical.Relation.Binary using (module BinaryRelation ; pulledbackRel ; RelIso ; Rel)
+open import Cubical.Foundations.Isomorphism using (Iso)
+open import Cubical.Axiom.Omniscience using () renaming (LLPO to LLPO')
+open import Cubical.Data.Bool using (Bool ; true ; false ; if_then_else_ ; isSetBool ; dichotomyBool ; true≢false)
+open import Cubical.Data.Empty as Empty using ()
+open import Cubical.Data.Nat as Nat using (ℕ ; suc ; zero)
+open import Cubical.Data.Nat.Order.Recursive as NatOrder using (_≤_)
+open import Cubical.Data.Unit.Base using (tt*)
+open import Cubical.Data.Sigma.Base using (∃-syntax ; _×_)
+open import Cubical.Data.Sigma.Properties using (Σ≡Prop)
+open import Cubical.Data.Sum as Sum using (_⊎_ ; inl ; inr)
+open import Cubical.HITs.PropositionalTruncation as PT using (∥_∥₁)
+open import Cubical.HITs.PropositionalTruncation.Monad as PT using ()
+open import Cubical.HITs.SetQuotients as SQ
+  using ()
+  renaming
+    ( _/_ to _/₂_
+    )
+open import Cubical.Relation.Nullary.Base using (Dec ; yes ; no ; ¬_)
 
-open ΣVec.ΣVec
+open BVec.ΣVec
 open Limit using (elements ; is-lim)
 open Iso
 open Functor ⦃...⦄
-
--- Tot : ∀ {ℓ} {X : Type ℓ} → Rel X X ℓ-zero
--- Tot {X = X} = λ _ _ → Unit
-
-Approx : (n : ℕ) → (s t : ΣVec ^ n) → Type
-Approx zero = λ { tt* tt* → Unit }
-Approx (suc n) = Relator (Approx n)
-
-isPropApprox : ∀ n (s t : ΣVec ^ n) → isProp (Approx n s t)
-isPropApprox zero s t = isPropUnit
-isPropApprox (suc n) s t = isPropRelator (Approx n)
-
-Approx-π : ∀ n {s t} → Approx (suc n) s t → Approx n (!^ n s) (!^ n t)
-Approx-π zero _ = tt
-Approx-π (suc n) rel = Relator-map (Approx (suc n)) _ (Approx-π n) rel
-
-RelatorLim^ : ℕ → (s t : Lim ΣVec) → Type
-RelatorLim^ n s t = Approx n (cut n s) (cut n t)
-
-isPropRelatorLim^ : ∀ s t n → isProp (RelatorLim^ n s t)
-isPropRelatorLim^ s t n = isPropApprox n (cut n s) (cut n t)
-
-module _ (s t : Lim ΣVec) where
-  RelatorLimSuc→RelatorLim : ∀ n → RelatorLim^ (suc n) s t → RelatorLim^ n s t
-  RelatorLimSuc→RelatorLim n rel = subst2 (Approx n) (s .is-lim n) (t .is-lim n) (Approx-π n rel)
-
-  RelatorChain : Chain ℓ-zero
-  RelatorChain .Chain.Ob n = RelatorLim^ n s t
-  RelatorChain .Chain.π = RelatorLimSuc→RelatorLim
-
-  Bisim : Type
-  Bisim = Limit RelatorChain
-
-  isPropBisim : isProp Bisim
-  isPropBisim = isOfHLevelLimit _ 1 (isPropRelatorLim^ s t)
-
-bisim : {s t : Lim ΣVec} → (∀ n → RelatorLim^ n s t) → Bisim s t
-bisim {s} {t} = isPropChain→Limit (RelatorChain s t) (isPropRelatorLim^ s t)
-
-infix 5 _≈_
-_≈_ = Bisim
-
-syntax Approx n s t = s ≈[ n ] t
-
-module _ where
-  open BinaryRelation
-
-  isReflApprox : ∀ n → isRefl (Approx n)
-  isReflApprox zero = λ { tt* → tt }
-  isReflApprox (suc n) = isReflRelator (isReflApprox n)
-  
-  isReflBisim : isRefl Bisim
-  isReflBisim t = bisim {s = t} {t = t} λ { n → (isReflApprox n (t .elements n)) }
-
-  BisimApproxEquiv : ∀ {s t} → Bisim s t ≃ (∀ n → Approx n (cut n s) (cut n t))
-  BisimApproxEquiv {s} {t} = propBiimpl→Equiv (isPropBisim _ _) (isPropΠ (isPropRelatorLim^ s t)) elements bisim
 
 Unorderedtree : Type _
 Unorderedtree = Tree /₂ Bisim
 
 module _ (a b : Tree) (cs : ΣVec Tree) where
-  ∷-swap-approx : Relator Bisim (a Σ∷ b Σ∷ cs) (b Σ∷ a Σ∷ cs)
-  ∷-swap-approx = Relator-∷-swap isReflBisim a b
+  ∷-swap-approx : Relator Bisim (a #∷ b #∷ cs) (b #∷ a #∷ cs)
+  ∷-swap-approx = BVec.Relator-∷-swap isReflBisim a b
+
+private
+  [_,_] : ∀ {ℓ} {A : Type ℓ} → A → A → ΣVec A
+  [ a , b ] = a #∷ b #∷ []
+
+  [,]-refl : (s t : Tree) → Relator Bisim [ s , t ] [ s , t ]
+  [,]-refl s t = isReflRelator isReflBisim [ s , t ]
+
+  [,]-swap : (s t : Tree) → Relator Bisim [ s , t ] [ t , s ]
+  [,]-swap s t = ∷-swap-approx s t []
+
+diag : (ℕ → Tree) → (n : ℕ) → ΣVec ^ n
+diag = TerminalChain.diag ΣVec
+
+Complete : Type _
+Complete = {x y₁ y₂ : Tree}
+  → (ys : ℕ → Tree)
+  → (split : ∀ n → (ys n ≡ y₁) ⊎ (ys n ≡ y₂))
+  → (approx : ∀ n → (cut n x) ≡ (diag ys n))
+  → ∥ (x ≈ y₁) ⊎ (x ≈ y₂) ∥₁
+
+pres-reflects-≈→Complete : ({ss ts : ΣVec Tree} → pres⁺ ss ≈ˢʰ pres⁺ ts → Relator Bisim ss ts) → Complete
+pres-reflects-≈→Complete preserves {x = x} {y₁} {y₂} ys split approx = goal split where
+  open import Cubical.Data.Sum.Base as Sum using (_⊎_ ; inl ; inr)
+  open import Cubical.Foundations.Transport using (subst⁻)
+
+  open BVec.Reasoning Bisim isReflBisim isTransBisim
+    using (_Rel⟨_⟩_ ; _Rel∎)
+
+  Split : ℕ → Type
+  Split n = (ys n ≡ y₁) ⊎ (ys n ≡ y₂)
+
+  ysᶜ : (n : ℕ) → Split n → Tree
+  ysᶜ n (inl _) = y₂
+  ysᶜ n (inr _) = y₁
+
+  either-≈ : (n : ℕ) → (e : Split n) → Relator Bisim [ ys n , ysᶜ n e ] [ y₁ , y₂ ]
+  either-≈ n (inl ysₙ≡y₁) =
+    [ ys n , y₂ ] Rel⟨ BVec.Relator-cong-∷ isReflBisim ysₙ≡y₁ ⟩
+    [ y₁ , y₂ ] Rel∎
+  either-≈ n (inr ysₙ≡y₂) =
+    [ ys n , y₁ ] Rel⟨ BVec.Relator-cong-∷ isReflBisim ysₙ≡y₂ ⟩
+    [ y₂   , y₁ ] Rel⟨ [,]-swap y₂ y₁ ⟩
+    [ y₁   , y₂ ] Rel∎
+
+  module _ (e : ∀ n → Split n) where
+    approx-xᶜ : (n : ℕ) → ΣVec ^ n
+    approx-xᶜ n = cut n $ ysᶜ n (e n)
+
+    approx-xᶜ-islim : ∀ n → !^ n (approx-xᶜ (suc n)) ≡ approx-xᶜ n
+    approx-xᶜ-islim n with (e (suc n)) | (e n)
+    ... | inl ysₙ₊₁≡y₁ | inl ysₙ≡y₁ = y₂ .is-lim n
+    ... | inl ysₙ₊₁≡y₁ | inr ysₙ≡y₂ = TerminalChain.diag-islim-alternating _ y₂ y₁ x ys approx ysₙ≡y₂ ysₙ₊₁≡y₁
+    ... | inr ysₙ₊₁≡y₂ | inl ysₙ≡y₁ = TerminalChain.diag-islim-alternating _ y₁ y₂ x ys approx ysₙ≡y₁ ysₙ₊₁≡y₂
+    ... | inr ysₙ₊₁≡y₂ | inr ysₙ≡y₂ = y₁ .is-lim n
+
+    xᶜ : Tree
+    xᶜ .elements = approx-xᶜ
+    xᶜ .is-lim = approx-xᶜ-islim
+
+    approxᶜ : ∀ n → cut n xᶜ ≡ cut n (ysᶜ n (e n))
+    approxᶜ n = refl
+
+    pres-pairs : pres⁺ [ x , xᶜ ] ≈ˢʰ pres⁺ [ y₁ , y₂ ]
+    pres-pairs = shbisim goal where module _ (n : ℕ) where
+      step₁ : Relator (Approx n) [ cut n (ys n) , cut n (ysᶜ n (e n)) ] [ cut n y₁ , cut n y₂ ]
+      step₁ = Relator-map _ (Approx n) (Bisim→Approx _ _ n) (either-≈ n (e n))
+
+      goal : Relator (Approx n) [ cut n x , cut n (ysᶜ n (e n)) ] [ cut n y₁ , cut n y₂ ]
+      goal = subst⁻ (λ · → Relator (Approx n) [ · , cut n (ysᶜ n (e n)) ] [ _ , _ ]) (approx n) step₁
+
+    pairs : Relator Bisim [ x , xᶜ ] [ y₁ , y₂ ]
+    pairs = preserves pres-pairs
+
+    eq : ∀ {a b x y} → Relator Bisim [ x , y ] [ a , b ] → ∥ (x ≈ a) ⊎ (x ≈ b) ∥₁
+    eq {x = x} = PT.map λ where
+      (rcons∞ a x≈a Vec.here _) → inl x≈a
+      (rcons∞ b x≈b (Vec.there Vec.here) _) → inr x≈b
+
+    goal : ∥ (x ≈ y₁) ⊎ (x ≈ y₂) ∥₁
+    goal = eq pairs
 
 module _ where
-  open ΣVec.RelatorElim
-
   fix⁺-preserves-bisim : ∀ {s t} → Relator Bisim s t → Bisim (fix⁺ s) (fix⁺ t)
-  fix⁺-preserves-bisim = elim goal where
-    goal : ΣVec.RelatorElim Bisim (λ {m} {n} {s} {t} rel → Bisim (fix⁺ (mk-vec s)) (fix⁺ (mk-vec t)))
-    goal .is-prop _ = isPropBisim _ _
-    goal .rnil* = isReflBisim (fix⁺ Σ[])
-    goal .rcons* {a = a} {as} {bs} b aRb b∈bs rel-remove cont = bisim approx where abstract
-      approx : ∀ n → (cut n $ fix⁺ (a Σ∷ mk-vec as)) ≈[ n ] (cut n $ fix⁺ bs)
-      approx zero = tt
-      approx (suc n) = Relator.rcons PT.∣ bₙ , a′ₙ∼bₙ , bₙ∈bs′ₙ , subst (Relator (Approx n) _) rel-remove′ (cont .elements (suc n)) ∣₁ where
+  fix⁺-preserves-bisim {s} {t} = PT.rec (isPropBisim (fix⁺ s) (fix⁺ t)) go where
+    go : BVec.Relator∞ Bisim s t → Bisim (fix⁺ s) (fix⁺ t)
+    go rnil∞ = isReflBisim (fix⁺ [])
+    go (rcons∞ {a = a} {as = as} {bs} b a≈b b∈bs x₁) = bisim approx where
+      approx : ∀ n → (fix⁺ (a #∷ as)) ≈[ n ] (fix⁺ bs)
+      approx zero = tt*
+      approx (suc n) = BVec.rcons bₙ a′ₙ∼bₙ bₙ∈bs′ₙ (subst (Relator∞ (Approx n) _) rel-remove′ {!  approx (suc n) !}) where
         aₙ a′ₙ : ΣVec ^ n
         aₙ = cut n a
         a′ₙ = !^ n (cut (suc n) a)
@@ -156,8 +191,8 @@ module _ where
         bₙ = cut n b
         b′ₙ = !^ n (cut (suc n) b)
 
-        a′ₙ∼bₙ : a′ₙ ≈[ n ] bₙ
-        a′ₙ∼bₙ = subst (λ · → · ≈[ n ] bₙ) (sym aₙ≡a′ₙ) (aRb .elements n)
+        a′ₙ∼bₙ : Approx n a′ₙ bₙ
+        a′ₙ∼bₙ = subst (λ · → Approx n · bₙ) (sym aₙ≡a′ₙ) (a≈b .elements n)
 
         bₙ≡b′ₙ : b′ₙ ≡ bₙ
         bₙ≡b′ₙ = b .is-lim n
@@ -172,96 +207,271 @@ module _ where
           map (cut n) bs ∎
 
         bₙ∈bsₙ : bₙ ∈ bsₙ
-        bₙ∈bsₙ = ∈-map (cut n) b∈bs
+        bₙ∈bsₙ = BVec.∈-map (cut n) b∈bs
 
         bₙ∈bs′ₙ : bₙ ∈ bs′ₙ
         bₙ∈bs′ₙ = subst (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ
 
-        rel-remove′ : cut (suc n) (fix⁺ (remove bs b∈bs)) ≡ remove bs′ₙ bₙ∈bs′ₙ
+        rel-remove′ : cut (suc n) (fix⁺ (BVec.remove bs b∈bs)) ≡ BVec.remove bs′ₙ bₙ∈bs′ₙ
         rel-remove′ =
           (map (!^ n) $ map (cut (suc n)) $ remove bs b∈bs) ≡⟨ pres⁺ (remove bs b∈bs) .is-lim n ⟩
-          (map (cut n)                    $ remove bs b∈bs) ≡⟨ map-remove (cut n) b∈bs ⟩
+          (map (cut n)                    $ remove bs b∈bs) ≡⟨ BVec.map-remove (cut n) b∈bs ⟩
           remove bsₙ  bₙ∈bsₙ   ≡⟨ congP₂ (λ i → remove) bsₙ≡bs′ₙ (subst-filler (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ) ⟩
           remove bs′ₙ bₙ∈bs′ₙ  ∎
-
-  -- TODO:
-  --
-  -- 1. Attempt to prove the two lemmata below, start with the harder one (pres⁺).
-  -- 2. If that fails, redo list-finality proof with FinVec, use RelatorF from FMSetEquiv as the relator.
-  -- 3. ???
-  -- 4. PROFIT
-
-  S : Rel (Limit (TerminalChain.sh ΣVec)) (Limit (TerminalChain.sh ΣVec)) _
-  S = {! !}
-
-  private
-    open TerminalChain using (ShLim→Lim)
-
-  pres⁺-reflects-bisim : ReflectsRel (Relator Bisim) S pres⁺
-  pres⁺-reflects-bisim = {! !}
-
-  ShLim→Lim-reflects : ReflectsRel S Bisim (TerminalChain.ShLim→Lim ΣVec)
-  ShLim→Lim-reflects = {! !}
-
-  fix⁺-reflects-bisim : ∀ {s t} → Bisim (fix⁺ s) (fix⁺ t) → Relator Bisim s t
-  fix⁺-reflects-bisim = ReflectsRelComp (Relator Bisim) S Bisim {f = pres⁺} {g = TerminalChain.ShLim→Lim ΣVec} pres⁺-reflects-bisim ShLim→Lim-reflects
-
-  module _ where
-    fix⁻-pres-bisim : ∀ {s t : Tree} → Bisim s t → Relator Bisim (fix⁻ s) (fix⁻ t)
-    fix⁻-pres-bisim {s} {t} = ReflectsRel→SectionPreservesRel (Relator Bisim) Bisim fix⁺ fix⁻ (secEq fix) fix⁺-reflects-bisim
-
-  fix⁺-lift : ΣVec Tree /₂ pulledbackRel fix⁺ Bisim → Tree /₂ Bisim
-  fix⁺-lift = map/₂ fix⁺ λ { rel → rel }
-
-  fix⁻-lift : Tree /₂ Bisim → ΣVec Tree /₂ pulledbackRel fix⁺ Bisim
-  fix⁻-lift = map/₂ fix⁻ pres-bisim where
-    pres-bisim : ∀ {a} {a'} → a ≈ a' → (fix⁺ $ fix⁻ a) ≈ (fix⁺ $ fix⁻ a')
-    pres-bisim {a} {a'} a≈a' = subst2 _≈_ (sym (secEq fix a)) (sym (secEq fix a')) a≈a'
-
-  fix-lift-iso : Iso (ΣVec Tree /₂ pulledbackRel fix⁺ Bisim) (Tree /₂ Bisim)
-  fix-lift-iso .fun = fix⁺-lift
-  fix-lift-iso .inv = fix⁻-lift
-  fix-lift-iso .rightInv = SQ.elimProp (λ _ → SQ.squash/ _ _) (cong [_]₂ ∘ secEq fix)
-  fix-lift-iso .leftInv = SQ.elimProp (λ _ → SQ.squash/ _ _) (cong [_]₂ ∘ retEq fix)
-
-
-infixr 9 _T∷_
-_T∷_ : (a : Tree) → (as : Tree) → Tree
-_T∷_ a = subst (λ A → A → A) ΣVecLimitPath (a Σ∷_)
-
-module _ (a b : Tree) (cs : Tree) where
-  T∷-swap-approx : ∀ n → RelatorLim^ n (a T∷ b T∷ cs) (b T∷ a T∷ cs)
-  T∷-swap-approx zero = tt
-  T∷-swap-approx (suc n) = goal where
-    goal : Relator (Approx n) _ _
-    goal = {! !}
-
-  T∷-swap : a T∷ b T∷ cs ≈ b T∷ a T∷ cs
-  T∷-swap .elements n = {! !}
-  T∷-swap .is-lim = {! !}
 
 FMSet : Type → Type
 FMSet X = ΣVec X /₂ (Relator _≡_)
 
-_ : Iso (FMSet Unorderedtree) Unorderedtree
-_ =
-  FMSet Unorderedtree Iso⟨ idIso ⟩
-  ΣVec (Tree /₂ Bisim) /₂ (Relator _≡_) Iso⟨ {! !} ⟩
-  Tree /₂ Bisim  Iso⟨ idIso ⟩
-  Unorderedtree ∎Iso where
+-- The sequence corresponding to the infinite tree in which each node
+-- has exactly one subtree.
+module long where
+  node : ∀ n → ΣVec ^ n
+  node zero = tt*
+  node (suc n) = #[ node n ]
 
-  eq/Relator : ∀ {X : Type} {R : X → X → Type}
-    → ∀ {xs ys}
-    → Relator R xs ys
-    → Relator {A = X /₂ R} _≡_ (map [_]₂ xs) (map [_]₂ ys)
-  eq/Relator {R = R} = Relator-map R _≡_ (eq/₂ _ _)
+  is-tree : isTree node
+  is-tree zero = refl
+  is-tree (suc n) = cong #[_] (is-tree n)
 
-  α : Tree /₂ Bisim → ΣVec (Tree /₂ Bisim) /₂ (Relator _≡_)
-  α = map/₂ (ΣVec.map [_]₂ ∘ fix⁻) λ {a} {a'} a≈a' → eq/Relator (fix⁻-pres-bisim a≈a')
-
-  -- TODO: ΣVecPar : Rel A B → Rel (ΣVec A) (ΣVec B),
+  -- Anything that approximates node is already node, up to a path.
   --
-  -- prove: ΣVec (X /₂ R) ≃ ΣVec X /₂ ΣVecPar R
+  -- NOTE: This only works since (ΣVec ^ n) is a set and bisimilarity is Prop-valued.
+  -- If instead we were to define bisimilarity in a proof-relevant vay (i.e. using Relator∞),
+  -- this might not be necessary: Extracting the witness of being Relator∞-related to a singleton
+  -- can be done without any assumtion of truncation on the relation being lifted.
+  approx-node→≡node : ∀ n → (t : ΣVec ^ n) → Approx n t (node n) → t ≡ node n
+  approx-node→≡node zero tt* _ = refl
+  approx-node→≡node (suc n) t approx = t≡#[nodeₙ] where
+    t-is-singleton : Σ[ (t′ , _) ∈ BVec.isSingleton t ] Approx n t′ (node n)
+    t-is-singleton = BVec.isSet→Relator-singleton→isSingleton (isSetΣVec^ n) (Bisimilarity.isPropApprox n) approx
 
-  β : ΣVec (Tree /₂ Bisim) /₂ (Relator _≡_) → Tree /₂ Bisim
-  β = SQ.rec SQ.squash/ (fix⁺-lift ∘ {! !}) {! !}
+    t′ : ΣVec ^ n
+    t′ = t-is-singleton .fst .fst
+
+    approx-t′-node : Approx n t′ (node n)
+    approx-t′-node = t-is-singleton .snd
+
+    t≡#[nodeₙ] : t ≡ #[ node n ]
+    t≡#[nodeₙ] =
+      t           ≡⟨ t-is-singleton .fst .snd ⟩
+      #[ t′ ]     ≡⟨ cong #[_] (approx-node→≡node n t′ approx-t′-node) ⟩
+      #[ node n ] ∎
+
+
+long : Tree
+long .elements = long.node
+long .is-lim = long.is-tree
+
+-- Any tree that is bisimilar to the long tree is already the long tree, up to a path:
+≈long→≡long : ∀ {t : Tree} → t ≈ long → t ≡ long
+≈long→≡long {t} t≈long = TreePath λ n → long.approx-node→≡node n (cut n t) (t≈long .elements n)
+
+-- Given a sequence a : ℕ → Bool, we define a variant (long? a) of long,
+-- which is equal to long if the sequence a contains only value false,
+-- but its height stop growing if there is n : ℕ such that (a n) is
+-- the first true in a.
+
+module long? where
+  node₀ : (a₀ : Bool) → (a : ℕ → Bool) → ∀ n → ΣVec ^ n
+  node₀ _ _ zero = tt*
+  node₀ true a (suc n) = []
+  node₀ false a (suc n) = #[ node₀ (Seq.head a) (Seq.tail a) n ]
+
+  is-tree₀ : (a₀ : Bool) → (a : ℕ → Bool) → isTree (node₀ a₀ a)
+  is-tree₀ a₀ a zero = refl
+  is-tree₀ true a (suc n) = refl {x = []}
+  is-tree₀ false a (suc n) = cong #[_] (is-tree₀ (Seq.head a) (Seq.tail a) n)
+
+  node : (a : ℕ → Bool) → ∀ n → ΣVec ^ n
+  node a = node₀ (Seq.head a) (Seq.tail a)
+
+  is-tree : (a : ℕ → Bool) → isTree (node a)
+  is-tree a = is-tree₀ (Seq.head a) (Seq.tail a)
+
+long? : (a : ℕ → Bool) → Tree
+long? a .elements = long?.node a
+long? a .is-lim = long?.is-tree a
+
+long?≠long : (a : ℕ → Bool) (aP : isProp (Σ[ n ∈ ℕ ] a n ≡ true))
+  → ∀ n → long? a .elements (suc n) ≡ long .elements (suc n) → a n ≡ false
+long?≠long a aP zero p with a 0
+... | false = refl
+... | true = Empty.rec $ BVec.[]-#∷-disjoint p
+long?≠long a aP (suc n) p with a 0
+... | false = long?≠long (a ∘ suc) (λ { (x , q) (y , r) → Σ≡Prop (λ _ → isSetBool _ _) (Nat.injSuc (cong fst (aP (_ , q) (_ , r)))) }) n (BVec.isInjectiveCons p)
+... | true = Empty.rec $ BVec.[]-#∷-disjoint p
+
+long?-long-connect : (as : ℕ → Bool) (aP : isProp (Σ[ n ∈ ℕ ] as n ≡ true))
+  → ∀ n → as (suc n) ≡ true
+  → !^ n (long?.node as (suc n)) ≡ long.node n
+long?-long-connect as aP zero _ = refl
+long?-long-connect as aP (suc n) asₙ₊₁≡true with dichotomyBool (Seq.head as)
+... | inl as₀≡true = Empty.rec (Nat.znots (cong fst (aP (_ , as₀≡true) (_ , asₙ₊₁≡true))))
+... | inr as₀≡false =
+  !^ (suc n) (long?.node₀ (Seq.head as) (Seq.tail as) (suc (suc n)))  ≡⟨ cong (λ · → !^ (suc n) (long?.node₀ · (Seq.tail as) (suc (suc n)))) as₀≡false ⟩
+  !^ (suc n) #[ long?.node (Seq.tail as) (suc n) ]                    ≡⟨⟩
+  #[ !^ n (long?.node (Seq.tail as) (suc n)) ]                        ≡⟨ cong #[_] (long?-long-connect (Seq.tail as) aP-tail n asₙ₊₁≡true) ⟩
+  #[ long.node n ] ∎ where
+
+  aP-tail : isProp (Σ[ k ∈ ℕ ] Seq.tail as k ≡ true)
+  aP-tail (k , asₖ₊₁≡true) (l , asₗ₊₁≡true) = Σ≡Prop (λ n → isSetBool (Seq.tail as n) true) (Nat.injSuc goal) where
+    goal : suc k ≡ suc l
+    goal = cong fst (aP (suc k , asₖ₊₁≡true) (suc l , asₗ₊₁≡true))
+
+complete⇒llpo : Complete → LLPO
+complete⇒llpo complete as as-true-once = PT.map
+  (Sum.map x≈l→as-evens-false {! !})
+  (complete {x = x} {y₁ = long} {y₂ = long? as} approx split is-approx)
+  where
+
+  approx : ℕ → Tree
+  approx = latch-even as long (long? as)
+
+  private
+    ≤-suc : ∀ m {n} → m ≤ n → m ≤ suc n
+    ≤-suc zero _ = _
+    ≤-suc (suc m) {suc n} p = ≤-suc m p
+
+  abstract
+    module _ {n : ℕ} (¬≤n-true : ¬ (Σ[ k ∈ ℕ ] (k ≤ n) × (as k ≡ true))) where
+      -- Praise be decidability: The assumtion ¬≤n-true implies
+      -- that `as` is constantly `false` for all `k ≤ n`:
+      all-≤n-false : ∀ k → k ≤ n → as k ≡ false
+      all-≤n-false k k≤n with (dichotomyBool (as k))
+      ... | inr asₖ≡false = asₖ≡false
+      ... | inl asₖ≡true = Empty.rec (¬≤n-true (k , k≤n , asₖ≡true))
+
+      -- This implies that `latch-even as ...` is `long` for all positions `k ≤ n`:
+      latch-even-const-long : ∀ k → k ≤ n → latch-even as long (long? as) k ≡ long
+      latch-even-const-long = Seq.latch-even-until as n all-≤n-false
+
+      approxₙ≡long : approx n ≡ long
+      approxₙ≡long = latch-even-const-long n (NatOrder.≤-refl n)
+
+      -- We can extend the hypothesis one more step:
+      ¬≤false-suc : as (suc n) ≡ false → ¬ (Σ[ k ∈ ℕ ] (k ≤ suc n) × (as k ≡ true))
+      ¬≤false-suc asₙ₊₁≡false (k , k≤n+1 , asₖ≡true) with NatOrder.≤-split {m = k} {n = suc n} k≤n+1
+      ... | inl k≤n = ¬≤n-true (k , k≤n , asₖ≡true)
+      ... | inr k≡n+1 = true≢false (sym asₖ≡true ∙∙ cong as k≡n+1 ∙∙ asₙ₊₁≡false)
+
+    -- The proof below (`diag-approx-is-tree`) is done by wild case-bashing,
+    -- but all cases factor through the following line of reasoning:
+    approx-flip-flop : {n : ℕ} → (flip flop : _)
+      → (approx (suc n) ≡ flip)
+      --^ The n+1ˢᵗ approximation is `flip`
+      → (!^ n (cut (suc n) flip) ≡ cut n flop)
+      --^ `flip` and `flop` are related by a triangle in the limit cone
+      → (approx n ≡ flop)
+      --^ The nᵗʰ approximation is `flop`
+      → !^ n (diag approx (suc n)) ≡ diag approx n
+    approx-flip-flop {n = n} flip flop step₁ step₂ step₃ =
+      !^ n (cut (suc n) $ approx (suc n)) ≡⟨ cong (!^ n ∘ cut (suc n)) step₁ ⟩
+      !^ n (cut (suc n) $ flip )          ≡⟨ step₂ ⟩
+      cut n flop                          ≡⟨ sym (cong (cut n) step₃) ⟩
+      cut n (approx n) ∎
+
+    diag-approx-is-tree : isTree (diag approx)
+    diag-approx-is-tree n with Seq.true-before? as n
+    -- `as` is not true for any `k ≤ n`:
+    ... | no ¬≤n-true with dichotomyBool (as (suc n))
+    ... | inl asₙ₊₁≡true with Nat.evenOrOdd (suc n)
+    ... | inl even-n+1 = approx-flip-flop (long? as) long
+      (Seq.latch-even-at as (suc n) even-n+1 asₙ₊₁≡true)
+      (long?-long-connect as as-true-once n asₙ₊₁≡true)
+      (approxₙ≡long ¬≤n-true)
+    ... | inr odd-n+1 = approx-flip-flop long long
+      lemma
+      (long .is-lim n)
+      (approxₙ≡long ¬≤n-true)
+      where
+        force-odds-false-until-n+1 : ∀ k → k ≤ suc n → Seq.force-odds-false as k ≡ false
+        force-odds-false-until-n+1 k k≤n+1 with NatOrder.≤-split {m = k} {n = suc n} k≤n+1
+        ... | inl k≤n = Seq.force-odds-false-const-until as n (all-≤n-false ¬≤n-true) k k≤n
+        ... | inr k≡n+1 =
+          Seq.force-odds-false as k ≡⟨ cong (Seq.force-odds-false as) k≡n+1 ⟩
+          Seq.force-odds-false as (suc n) ≡⟨ Seq.force-odds-false-at-odd as {suc n} odd-n+1 ⟩
+          false ∎
+
+        lemma : latch-even as long (long? as) (suc n) ≡ long
+        lemma =
+          (if as 0 then long? as else Seq.latch long (long? as) (Seq.tail (Seq.force-odds-false as)) n)
+            ≡⟨ Seq.if-false (all-≤n-false ¬≤n-true 0 _) ⟩
+          (Seq.latch long (long? as) (Seq.tail (Seq.force-odds-false as)) n)
+            ≡⟨ Seq.latch-until _ n (Seq.UpTo-tail (_≡ false) n force-odds-false-until-n+1) n (NatOrder.≤-refl n) ⟩∎
+          long ∎
+
+    diag-approx-is-tree n | no ¬≤n-true | inr asₙ₊₁≡false = approx-flip-flop long long
+      lemma
+      (long .is-lim n)
+      (approxₙ≡long ¬≤n-true)
+      where
+        -- `force-odds-false` is false for all `k ≤ n + 1`, since we assume `as k ≡ false` for all `k ≤ n` and `k = n + 1`.
+        force-odds-false-until-n+1 : ∀ k → k ≤ suc n → Seq.force-odds-false as k ≡ false
+        force-odds-false-until-n+1 = Seq.force-odds-false-const-until as (suc n) (all-≤n-false (¬≤false-suc ¬≤n-true asₙ₊₁≡false))
+
+        -- A shorthand:
+        long′ : Tree
+        long′ = Seq.latch long (long? as) (Seq.tail (Seq.force-odds-false as)) n
+
+        -- Knowing that `as₀ ≡ false`, expand the definition of `latch-even` and use the previous observation
+        -- to rewrite it into `long`:
+        lemma : latch-even as long (long? as) (suc n) ≡ long
+        lemma =
+          (if as 0 then long? as else long′) ≡⟨ Seq.if-false (all-≤n-false ¬≤n-true 0 _) ⟩
+          long′                              ≡⟨ Seq.latch-until _ n (Seq.UpTo-tail (_≡ false) n force-odds-false-until-n+1) n (NatOrder.≤-refl n) ⟩∎
+          long ∎
+
+    -- There exists some `k ≤ n` such that `as` is true:
+    diag-approx-is-tree n | yes (k , k≤n , asₖ≡true) with Nat.evenOrOdd k
+    -- If that k is even, `diag approx` is `long? as` at both positions `n` and `suc n`:
+    ... | inl even-k = approx-flip-flop (long? as) (long? as)
+      (Seq.latch-even-after as (suc n) before-1+n)
+      (long? as .is-lim n)
+      (Seq.latch-even-after as n before-n)
+      where
+      before-1+n : Seq.Before as (suc n) (λ k aₖ → Nat.isEvenT k × (aₖ ≡ true))
+      before-1+n = k , ≤-suc k k≤n , even-k , asₖ≡true
+
+      before-n : Seq.Before as n (λ k aₖ → Nat.isEvenT k × (aₖ ≡ true))
+      before-n = k , k≤n , even-k , asₖ≡true
+    -- In case the `k` is odd, `diag approx` has to be `long` at every position:
+    ... | inr odd-k = approx-flip-flop long long
+      (latch-even-const-l (suc n))
+      (long .is-lim n)
+      (latch-even-const-l n)
+      where
+
+      -- latch-even has to be long:
+      -- * `as` is true at most once
+      -- * it is true at k
+      -- * k is odd, and latch-even never returns (long? as) in that case.
+      latch-even-const-l : ∀ n → latch-even as long (long? as) n ≡ long
+      latch-even-const-l = Seq.latch-even-const-true-once as as-true-once (k , odd-k , asₖ≡true)
+
+  x : Tree
+  x .elements = diag approx
+  x .is-lim = diag-approx-is-tree
+
+  is-approx : ∀ n → x .elements n ≡ diag approx n
+  is-approx n = refl
+
+  split : ∀ n → (approx n ≡ long) ⊎ (approx n ≡ (long? as))
+  split n = Seq.latch-even-dichotomy as long (long? as) n
+
+  x≈l→as-evens-false : x ≈ long → ∀ n → Nat.isEvenT n → as n ≡ false
+  x≈l→as-evens-false x≈l n even = long?≠long as as-true-once n bad where
+    x≡l : x ≡ long
+    x≡l = ≈long→≡long x≈l
+
+    lem : long?.node₀ (Seq.head as) (Seq.tail as) (suc n) ≡ #[ long.node n ]
+    lem with (Seq.head as)
+    ... | false = {! !}
+    ... | true = {! !}
+
+    -- TODO: Use x≡l to port the original proof.
+    bad : long?.node as (suc n) ≡ long.node (suc n)
+    bad =
+      long?.node as (suc n) ≡⟨⟩
+      long?.node₀ (Seq.head as) (Seq.tail as) (suc n) ≡⟨ {! !} ⟩
+      #[ long.node n ] ≡⟨⟩
+      long.node (suc n) ∎

@@ -6,7 +6,26 @@ open import Multiset.Prelude
 
 open import Cubical.Foundations.Function using (idfun ; _∘_)
 open import Cubical.Foundations.Isomorphism
-open import Cubical.Relation.Binary.Base using (Rel)
+open import Cubical.Data.Unit.Base using (Unit* ; tt*)
+open import Cubical.Data.Unit.Properties using (isPropUnit* ; isOfHLevelUnit*)
+open import Cubical.Relation.Binary.Base using (Rel ; module BinaryRelation)
+
+Tot : ∀ {ℓ} → (A : Type ℓ) → (ℓR : Level) → Rel A A ℓR
+Tot A _ = λ _ _ → Unit*
+
+module _ {ℓ} {A : Type ℓ} {ℓR} where
+  open BinaryRelation (Tot A ℓR)
+  isPropTot : ∀ a b → isProp (Tot A ℓR a b)
+  isPropTot a b = isPropUnit*
+
+  isReflTot : isRefl
+  isReflTot _ = tt*
+
+  isSymTot : isSym
+  isSymTot _ _ tt* = tt*
+
+  isTransTot : isTrans
+  isTransTot _ _ _ tt* tt* = tt*
 
 private
   variable

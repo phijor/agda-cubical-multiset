@@ -3,124 +3,124 @@
 module Multiset.Util.Vec where
 
 open import Multiset.Prelude
-open import Multiset.Limit.Chain
-  using
-    ( lim
-    ; Limit
-    ; Chain
-    ; isSet→LimitPathExt
-    ; isLimit
-    ; isOfHLevelLimit
-    )
 
 open import Cubical.Foundations.Equiv using (invEquiv)
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Sigma.Base
-import Cubical.Data.Empty.Base as Empty
 open import Cubical.Data.Nat.Base as Nat using (ℕ ; suc ; zero)
-open import Cubical.Data.Nat.Properties as Nat using (isSetℕ ; injSuc)
 open import Cubical.Data.FinData as Fin using (Fin) renaming (zero to fzero ; suc to fsuc)
 open import Cubical.Data.Unit.Base using (Unit*)
 open import Cubical.Data.Unit.Properties using (isOfHLevelUnit* ; isContrUnit*)
-open import Cubical.Data.Vec.Base as Vec using (Vec ; [] ; _∷_)
-open import Cubical.Data.Vec.Properties as Vec hiding (module VecPath)
-open import Cubical.Relation.Nullary.Base using (¬_)
-open import Cubical.Relation.Binary.Base using (Rel ; PropRel)
-open import Cubical.Relation.Binary.Properties using (pulledbackRel)
-open import Cubical.Reflection.RecordEquiv using (declareRecordIsoΣ)
-open import Cubical.HITs.PropositionalTruncation as PT using ()
-
-record ΣVec {ℓ} (A : Type ℓ) : Type ℓ where
-  constructor mk-vec
-  pattern
-  field
-    {length} : ℕ
-    vec : Vec A length
-
-open ΣVec
-
-unquoteDecl ΣVecIsoΣ = declareRecordIsoΣ ΣVecIsoΣ (quote ΣVec)
-
-ΣVecPathP : ∀ {ℓ} {A : Type ℓ}
-  → {xs ys : ΣVec A}
-  → (p : xs .length ≡ ys .length)
-  → PathP (λ i → Vec A (p i)) (xs .vec) (ys .vec)
-  → xs ≡ ys
-ΣVecPathP p q i = mk-vec {length = p i} (q i)
+open import Cubical.Data.Vec.Base as Vec using (Vec ; _∷_ ; [])
+open import Cubical.Data.Vec.Properties as Vec renaming (module VecPath to VecPath')
+open import Cubical.HITs.PropositionalTruncation as PT using (∥_∥₁ ; ∣_∣₁)
+open import Cubical.Relation.Binary.Base using (Rel ; PropRel ; module BinaryRelation)
 
 private
   variable
     ℓ : Level
     A B C : Type ℓ
 
-pattern Σ[] = mk-vec []
+open import Cubical.Data.Vec.Properties
+  renaming
+    ( FinVec→Vec to lookup⁻¹
+    ; FinVec→Vec→FinVec to lookup-right-inv
+    ; Vec→FinVec→Vec to lookup-left-inv
+    ; module VecPath to VecPath'
+    ) public
 
-infixr 9 _Σ∷_
-_Σ∷_ : A → ΣVec A → ΣVec A
-a Σ∷ as = mk-vec (a ∷ as .vec)
+isOfHLevelVec : (h : HLevel) (n : ℕ)
+                → isOfHLevel (suc (suc h)) A → isOfHLevel (suc (suc h)) (Vec A n)
+isOfHLevelVec h zero ofLevelA [] [] =
+  isOfHLevelRespectEquiv (suc h)
+    (invEquiv (VecPath'.≡Vec≃codeVec [] []))
+    (isOfHLevelUnit* (suc h))
+isOfHLevelVec h (suc n) ofLevelA (x ∷ v) (x' ∷ v') =
+  isOfHLevelRespectEquiv (suc h)
+    (invEquiv (VecPath'.≡Vec≃codeVec _ _))
+    (isOfHLevelΣ (suc h) (ofLevelA x x') (λ _ → isOfHLevelVec h n ofLevelA v v'))
 
-module VecExt where
-  open import Cubical.Data.Vec.Properties
-    using (module VecPath)
-  open import Cubical.Data.Vec.Properties
-    renaming
-      ( FinVec→Vec to lookup⁻¹
-      ; FinVec→Vec→FinVec to lookup-right-inv
-      ; Vec→FinVec→Vec to lookup-left-inv
-      ) public
+isSetVec : ∀ {n} → isSet A → isSet (Vec A n)
+isSetVec = isOfHLevelVec 0 _
 
-  isOfHLevelVec : (h : HLevel) (n : ℕ)
-                  → isOfHLevel (suc (suc h)) A → isOfHLevel (suc (suc h)) (Vec A n)
-  isOfHLevelVec h zero ofLevelA [] [] =
-    isOfHLevelRespectEquiv (suc h)
-      (invEquiv (VecPath.≡Vec≃codeVec [] []))
-      (isOfHLevelUnit* (suc h))
-  isOfHLevelVec h (suc n) ofLevelA (x ∷ v) (x' ∷ v') =
-    isOfHLevelRespectEquiv (suc h)
-      (invEquiv (VecPath.≡Vec≃codeVec _ _))
-      (isOfHLevelΣ (suc h) (ofLevelA x x') (λ _ → isOfHLevelVec h n ofLevelA v v'))
+vec-map-id : ∀ {n} → (xs : Vec A n) → Vec.map (λ x → x) xs ≡ xs
+vec-map-id [] = refl
+vec-map-id (x ∷ xs) = cong (x ∷_) (vec-map-id xs)
 
-  isSetVec : ∀ {n} → isSet A → isSet (Vec A n)
-  isSetVec = isOfHLevelVec 0 _
+vec-map-comp : (g : B → C) (f : A → B) → ∀ {n} → (xs : Vec A n) → Vec.map (g ∘ f) xs ≡ Vec.map g (Vec.map f xs)
+vec-map-comp g f [] = refl
+vec-map-comp g f (x ∷ xs) = cong (g (f x) ∷_) (vec-map-comp g f xs)
 
-  vec-map-id : ∀ {n} → (xs : Vec A n) → Vec.map (λ x → x) xs ≡ xs
-  vec-map-id [] = refl
-  vec-map-id (x ∷ xs) = cong (x ∷_) (vec-map-id xs)
+isInjectiveSingleton : ∀ {ℓ} {A : Type ℓ} {x y : A} → x ∷ [] ≡ y ∷ [] → x ≡ y
+isInjectiveSingleton singl-path = VecPath'.encode _ _ singl-path .fst
 
-  vec-map-comp : (g : B → C) (f : A → B) → ∀ {n} → (xs : Vec A n) → Vec.map (g ∘ f) xs ≡ Vec.map g (Vec.map f xs)
-  vec-map-comp g f [] = refl
-  vec-map-comp g f (x ∷ xs) = cong (g (f x) ∷_) (vec-map-comp g f xs)
+data _∈_ {ℓ} {A : Type ℓ} (a : A) : {n : ℕ} → Vec A n → Type ℓ where
+  here : ∀ {n} {as : Vec A n} → a ∈ (a ∷ as)
+  there : ∀{n b} {as : Vec A n} → a ∈ as → a ∈ (b ∷ as)
 
-  data _∈_ {ℓ} {A : Type ℓ} (a : A) : {n : ℕ} → Vec A n → Type ℓ where
-    here : ∀ {n} {as : Vec A n} → a ∈ (a ∷ as)
-    there : ∀{n b} {as : Vec A n} → a ∈ as → a ∈ (b ∷ as)
+remove : ∀ {n} {a : A} (as : Vec A (suc n)) → a ∈ as → Vec A n
+remove (x ∷ xs) here = xs
+remove (y ∷ x ∷ xs) (there m) = y ∷ remove (x ∷ xs) m
 
-  remove : ∀ {n} {a : A} (as : Vec A (suc n)) → a ∈ as → Vec A n
-  remove (x ∷ xs) here = xs
-  remove (y ∷ x ∷ xs) (there m) = y ∷ remove (x ∷ xs) m
+remove-less : ∀ {n} {a a' : A} {as : Vec A (suc n)}
+  → (a'∈as : a' ∈ as)
+  → a ∈ remove as a'∈as → a ∈ as
+remove-less {as = _ ∷ _ ∷ as} here p = there p
+remove-less {as = _ ∷ _ ∷ as} (there _) here = here
+remove-less {n = suc n} {as = _ ∷ _ ∷ as} (there p) (there q) = there (remove-less {n = n} p q)
 
-  module _ {A B : Type} where
-    lookup-map : (f : A → B) → ∀ {n} (xs : Vec A n) k → Vec.lookup k (Vec.map f xs) ≡ f (Vec.lookup k xs)
-    lookup-map f (x ∷ xs) (fzero) = refl {x = f x}
-    lookup-map f (x ∷ xs) (fsuc k) = lookup-map f xs k
+remove-remove-less : ∀ {n} {a b : A} {as : Vec A (suc n)}
+  → (a∈as : a ∈ as)
+  → (b∈as-a : b ∈ remove as a∈as)
+  → a ∈ remove as (remove-less a∈as b∈as-a)
+remove-remove-less (here {as = _ ∷ _}) b∈as-a = here
+remove-remove-less (there {as = _ ∷ _} a∈as) here = a∈as
+remove-remove-less (there {as = as@(_ ∷ _)} a∈as) (there b∈as-a) = there (remove-remove-less {as = as} a∈as b∈as-a)
 
-    lookup⁻¹-map : (f : A → B) → ∀ {n} (xs : Fin.FinVec A n) → Vec.map f (lookup⁻¹ xs) ≡ lookup⁻¹ (f ∘ xs)
-    lookup⁻¹-map f {zero} xs = refl {x = []}
-    lookup⁻¹-map f {suc n} xs = cong (f (xs fzero) ∷_) (lookup⁻¹-map f (xs ∘ fsuc))
+remove-there : ∀ {n} {a a' : A} {as : Vec A (suc n)}
+  → (a'∈as : a' ∈ as)
+  → remove (a ∷ as) (there a'∈as) ≡ a ∷ (remove as a'∈as)
+remove-there here = refl
+remove-there (there _) = refl
 
-  isContrVec : ∀ {ℓ} {A : Type ℓ} {n} → isContr A → isContr (Vec A n)
-  isContrVec {A = A} contrA = center* , contr* where
-    center* : ∀ {n} → Vec A n
-    center* = Vec.replicate (contrA .fst)
+remove-par : ∀ {n} {a b : A} {as : Vec A (suc (suc n))}
+  → (a∈as : a ∈ as)
+  → (b∈as-a : b ∈ remove as a∈as)
+  → let
+      b∈as = remove-less a∈as b∈as-a
+      a∈as-b = remove-remove-less a∈as b∈as-a
+    in
+      remove (remove as a∈as) b∈as-a ≡ remove (remove as b∈as) a∈as-b
+remove-par (here {as = a ∷ as}) b∈as-a = refl {x = remove (a ∷ as) b∈as-a}
+remove-par (there {as = a ∷ as} m) here = refl {x = remove (a ∷ as) m}
+remove-par {n = suc n} (there {b = b} {as = as@(_ ∷ _ ∷ _)} m) (there k) =
+  remove (b ∷ remove as m) (there k)                                        ≡⟨ remove-there {a = b} k ⟩
+  b ∷ remove (remove as m) k                                                ≡⟨ cong (b ∷_) (remove-par m k) ⟩
+  b ∷ remove (remove as (remove-less m k)) (remove-remove-less m k)         ≡⟨ sym (remove-there (remove-remove-less m k)) ⟩
+  remove (_ ∷ remove as (remove-less m k)) (there (remove-remove-less m k)) ∎
 
-    contr* : ∀ {n} (as : Vec A n) → center* ≡ as
-    contr* [] = refl
-    contr* (a ∷ as) = cong₂ _∷_ (contrA .snd a) (contr* as)
+module _ {A B : Type} where
+  lookup-map : (f : A → B) → ∀ {n} (xs : Vec A n) k → Vec.lookup k (Vec.map f xs) ≡ f (Vec.lookup k xs)
+  lookup-map f (x ∷ xs) (fzero) = refl {x = f x}
+  lookup-map f (x ∷ xs) (fsuc k) = lookup-map f xs k
 
-  isContrVecUnit* : ∀ {ℓ} {n} → isContr (Vec {ℓ} Unit* n)
-  isContrVecUnit* = isContrVec isContrUnit*
+  lookup⁻¹-map : (f : A → B) → ∀ {n} (xs : Fin.FinVec A n) → Vec.map f (lookup⁻¹ xs) ≡ lookup⁻¹ (f ∘ xs)
+  lookup⁻¹-map f {zero} xs = refl {x = []}
+  lookup⁻¹-map f {suc n} xs = cong (f (xs fzero) ∷_) (lookup⁻¹-map f (xs ∘ fsuc))
+
+isContrVec : ∀ {ℓ} {A : Type ℓ} {n} → isContr A → isContr (Vec A n)
+isContrVec {A = A} contrA = center* , contr* where
+  center* : ∀ {n} → Vec A n
+  center* = Vec.replicate (contrA .fst)
+
+  contr* : ∀ {n} (as : Vec A n) → center* ≡ as
+  contr* [] = refl
+  contr* (a ∷ as) = cong₂ _∷_ (contrA .snd a) (contr* as)
+
+isContrVecUnit* : ∀ {ℓ} {n} → isContr (Vec {ℓ} Unit* n)
+isContrVecUnit* = isContrVec isContrUnit*
 
 module VecPath {ℓ} {A : Type ℓ} where
   open import Cubical.Data.Unit
@@ -145,7 +145,7 @@ module VecPath {ℓ} {A : Type ℓ} where
 
   decode : {n : ℕ} → (v v' : Vec A n) → (r : Code v v') → (v ≡ v')
   decode [] [] _ = refl
-  decode (a ∷ v) (a' ∷ v') (p , q) = cong₂ _∷_ p (decode v v' q)
+  decode (a ∷ v) (a' ∷ v') (p , q) = cong₂ Vec._∷_ p (decode v v' q)
 
   decodeRefl : {n : ℕ} → (v : Vec A n) → decode v v (reflEncode v) ≡ refl
   decodeRefl [] = refl
@@ -161,139 +161,70 @@ module VecPath {ℓ} {A : Type ℓ} where
   ≡Vec-codeVec-Iso v v' .Iso.leftInv v≡v' =
     J (λ v' v≡v' → decode v v' (encode v v' v≡v') ≡ v≡v') (cong (decode _ _) (encodeRefl v) ∙ decodeRefl v) v≡v'
 
-mk-vec-inj : ∀ {n} {xs ys : Vec A n}
-  → mk-vec xs ≡ mk-vec ys
-  → xs ≡ ys
-mk-vec-inj {A = A} {n = n} {xs} {ys} p = subst (λ · → PathP (λ i → Vec A (· i)) xs ys) (isSetℕ _ _ (cong length p) refl) (cong vec p)
+{-
+module _ {ℓ ℓR} {A B : Type ℓ} (R : Rel A B ℓR) where
+  data Relator∞ : {n : ℕ} → Rel (Vec A n) (Vec B n) (ℓ-max ℓ ℓR) where
+    rnil∞ : Relator∞ [] []
+    rcons∞ : ∀ {n} {a : A} {as : Vec A n} {bs : Vec B (suc n)}
+      → (b : B)
+      → R a b
+      → (b∈bs : b ∈ bs)
+      → Relator∞ as (remove bs b∈bs)
+      → Relator∞ (a ∷ as) bs
 
+  Relator : {n : ℕ} → Rel (Vec A n) (Vec B n) _
+  Relator as bs = ∥ Relator∞ as bs ∥₁
 
-map : (f : A → B) → ΣVec A → ΣVec B
-map f (mk-vec xs) = mk-vec $ Vec.map f xs
+  pattern rnil = ∣ rnil∞ ∣₁
+  pattern rcons b aRb b∈bs rel = ∣ rcons∞ b aRb b∈bs rel ∣₁
 
-map-id : ∀ xs → map (λ (x : A) → x) xs ≡ xs
-map-id (mk-vec xs) = ΣVecPathP refl $ VecExt.vec-map-id xs
+module _ {ℓ ℓ'} {A B : Type ℓ} (R : Rel A B ℓ') {n : ℕ} where
+  isPropRelator : {as : Vec A n} {bs : Vec B n} → isProp (Relator R as bs)
+  isPropRelator = PT.isPropPropTrunc
 
-map-comp : (g : B → C) (f : A → B) → (xs : ΣVec A) → map (g ∘ f) xs ≡ map g (map f xs)
-map-comp g f (mk-vec xs) = ΣVecPathP refl $ VecExt.vec-map-comp g f xs
-
-isSetΣVec : ∀ {ℓ} {A : Type ℓ} → isSet A → isSet (ΣVec A)
-abstract
-  isSetΣVec {A = A} setA = isOfHLevelRetractFromIso 2 ΣVecIsoΣ isSetΣℕVec where
-    isSetΣℕVec : isSet (Σ ℕ (Vec A))
-    isSetΣℕVec = isSetΣ isSetℕ λ n → VecExt.isOfHLevelVec 0 n setA
-
-
-open Iso
-ΣVecMapIso : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'}
-  → Iso A B
-  → Iso (ΣVec A) (ΣVec B)
-ΣVecMapIso isom .fun = map (isom .fun)
-ΣVecMapIso isom .inv = map (isom .inv)
-ΣVecMapIso isom .rightInv bs = sym (map-comp _ _ bs) ∙∙ cong (λ · → map · bs) (funExt (isom .rightInv)) ∙∙ map-id bs
-ΣVecMapIso isom .leftInv as = sym (map-comp _ _ as) ∙∙ cong (λ · → map · as) (funExt (isom .leftInv)) ∙∙ map-id as
-
-module _ {ℓ} {A : Type ℓ} (contrA : isContr A) where
-  ΣVecContr-ℕ-Iso : Iso (ΣVec A) ℕ
-  ΣVecContr-ℕ-Iso .fun = length
-  ΣVecContr-ℕ-Iso .inv n .length = n
-  ΣVecContr-ℕ-Iso .inv n .vec = Vec.replicate {n = n} (contrA .fst)
-  ΣVecContr-ℕ-Iso .rightInv _ = refl
-  ΣVecContr-ℕ-Iso .leftInv a = ΣVecPathP refl (VecExt.isContrVec contrA .snd (a .vec))
-
-ΣVecUnit*-ℕ-Iso : ∀ {ℓ} → Iso (ΣVec {ℓ} Unit*) ℕ
-ΣVecUnit*-ℕ-Iso = ΣVecContr-ℕ-Iso isContrUnit*
-
-_∈_ : ∀ {ℓ} {A : Type ℓ} (a : A) → (as : ΣVec A) → Type ℓ
-a ∈ as = a VecExt.∈ as .vec
-
-remove : ∀ {a : A} (as : ΣVec A) → a ∈ as → ΣVec A
-remove {a = a} (mk-vec {suc l} as) m = mk-vec (VecExt.remove as m)
-
-remove-length : ∀ {a : A} {as : ΣVec A} {n}
-  → as .length ≡ suc n
-  → (a∈as : a ∈ as)
-  → remove as a∈as .length ≡ n
-remove-length {as = mk-vec (_ ∷ _)} as-length _ = injSuc as-length
-
-∈-map : ∀ {a as} (f : A → B) → a ∈ as → f a ∈ map f as
-∈-map f VecExt.here = VecExt.here
-∈-map f (VecExt.there m) = VecExt.there (∈-map f m)
-
-map-remove : ∀ {a : A} {as} (f : A → B)
-  → (a∈as : a ∈ as)
-  → map f (remove as a∈as) ≡ remove (map f as) (∈-map f a∈as)
-map-remove {as = mk-vec (x ∷ _)} f VecExt.here = refl
-map-remove {as = mk-vec (x ∷ _ ∷ _)} f (VecExt.there a∈as) = cong (f x Σ∷_) (map-remove f a∈as)
-
-¬∈-length-zero : ∀ {a : A} {as : ΣVec A} → as .length ≡ 0 → ¬ a ∈ as
-¬∈-length-zero {as = mk-vec (_ ∷ _)} as-length _ = Nat.snotz as-length
-
-data Relator {ℓ ℓ'} {A B : Type ℓ} (R : A → B → Type ℓ')
-  : ΣVec A → ΣVec B → Type (ℓ-max ℓ ℓ') where
-
-  rnil : Relator R Σ[] Σ[]
-  rcons : {a : A} {as : ΣVec A} {bs : ΣVec B}
-    → (∃b : ∃[ b ∈ B ] (R a b × (Σ[ m ∈ (b ∈ bs) ] Relator R as (remove bs m))))
-    → Relator R (a Σ∷ as) bs
-
-module _ {ℓ ℓ'} {A B : Type ℓ} (R : Rel A B ℓ') where
-  isPropRelator : ∀ {as} {bs} → isProp (Relator R as bs)
-
-  abstract
-    isPropRelator rnil rnil = refl
-    isPropRelator (rcons ∃b₁) (rcons ∃b₂) = cong rcons (PT.isPropPropTrunc ∃b₁ ∃b₂)
-
-  PropRelator : PropRel (ΣVec A) (ΣVec B) (ℓ-max ℓ ℓ')
+  PropRelator : PropRel (Vec A n) (Vec B n) (ℓ-max ℓ ℓ')
   PropRelator = Relator R , λ as bs → isPropRelator {as} {bs}
 
-  record RelatorElim {ℓP} (P : ∀ {m n} {as : Vec A m} {bs : Vec B n} → (Relator R (mk-vec as) (mk-vec bs)) → Type ℓP) : Type (ℓ-max ℓP (ℓ-max ℓ ℓ')) where
-    no-eta-equality
-    field
-      is-prop : ∀ {as bs} (r : Relator R as bs) → isProp (P r)
-      rnil* : P rnil
-      rcons* : ∀ {n} {a} {as : Vec A n} {bs}
-        → (b : B)
-        → (aRb : R a b)
-        → (b∈bs : b ∈ bs)
-        → (rel-remove : Relator R (mk-vec as) (remove bs b∈bs))
-        → P rel-remove
-        → P (rcons PT.∣ b , aRb , b∈bs , rel-remove ∣₁)
+module _ (open BinaryRelation) {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (refl-≈ : isRefl R) where
+  private
+    variable
+      n : ℕ
 
-    elim-wf : ∀ {m n} {as : Vec A m} {bs : Vec B n} → (r : Relator R (mk-vec as) (mk-vec bs)) → P r
-    elim-wf rnil = rnil*
-    elim-wf {m = suc m} {as = (_ ∷ as)} {bs} (rcons ∃b) = PT.elim (is-prop ∘ rcons) (λ { (b , aRb , b∈bs , rel) → rcons* b aRb b∈bs rel (elim-wf rel) }) ∃b
+  isReflRelator∞ : isRefl (Relator∞ R {n})
+  isReflRelator∞ [] = rnil∞
+  isReflRelator∞ (x ∷ xs) = rcons∞ x (refl-≈ x) here (isReflRelator∞ xs)
 
-    elim : ∀ {as : ΣVec A} {bs : ΣVec B} → (r : Relator R as bs) → P r
-    elim {as = mk-vec as} {bs = mk-vec bs} = elim-wf {as = as} {bs = bs}
+  isReflRelator : isRefl (Relator R {n})
+  isReflRelator = PT.∣_∣₁ ∘ isReflRelator∞
 
-open import Cubical.Relation.Binary using (module BinaryRelation)
-module _ (open BinaryRelation) {ℓ} {A : Type ℓ} {R : Rel A A ℓ} (is-refl : isRefl R) where
-  open VecExt using (here ; there)
-    
-  isReflRelator : isRefl (Relator R)
-  isReflRelator Σ[] = rnil
-  isReflRelator (mk-vec (x ∷ xs)) = rcons PT.∣ x , is-refl x , here , isReflRelator (mk-vec xs) ∣₁
+  Path→Relator∞ : {as bs : Vec A n}
+    → as ≡ bs
+    → Relator∞ R as bs
+  Path→Relator∞ as≡bs = subst (Relator∞ _ _) as≡bs (isReflRelator∞ _)
 
-  Relator-∷-swap : ∀ a b {cs}
-    → Relator R (a Σ∷ b Σ∷ cs) (b Σ∷ a Σ∷ cs)
-  Relator-∷-swap a b = rcons PT.∣ a , is-refl a , there here , isReflRelator _ ∣₁
-
-module _ {ℓ} {A A' B B' : Type ℓ}
-  (R : Rel A B ℓ) (S : Rel A' B' ℓ)
-  {f : A → A'} {g : B → B'}
-  (f-rel : ∀ {a b} → R a b → S (f a) (g b)) where abstract
-  Relator-map : ∀ {as bs}
+  ∥Path∥→Relator : {as bs : Vec A n}
+    → PT.∥ as ≡ bs ∥₁
     → Relator R as bs
-    → Relator S (map f as) (map g bs)
-  Relator-map {as} {bs} = RelatorElim.elim rec where
-    open RelatorElim
-    rec : RelatorElim R (λ {m n} {as} {bs} r → Relator S (map f (mk-vec as)) (map g (mk-vec bs)))
-    rec .is-prop = λ _ → isPropRelator S
-    rec .rnil* = rnil
-    rec .rcons* b aRb b∈bs rel-remove cont = rcons PT.∣ g b , f-rel aRb , ∈-map g b∈bs , subst (Relator S _) (map-remove g b∈bs) cont ∣₁
+  ∥Path∥→Relator = PT.map Path→Relator∞
 
-module _ {ℓ} {A B : Type ℓ} {R : Rel A A ℓ} (α : Iso A B) where
-  RelatorIso : ∀ {as bs}
-    → Relator R as bs
-    → Relator (pulledbackRel (α .inv) R) (map (α .fun) as) (map (α .fun) bs)
-  RelatorIso = Relator-map R (pulledbackRel (α .inv) R) λ {a} {a'} → subst2 R (sym (α .leftInv a)) (sym (α .leftInv a'))
+  module _ {a a' : A} {as : Vec A n} (aRa' : R a a') where
+    Relator∞-subst-head : Relator∞ R (a ∷ as) (a' ∷ as)
+    Relator∞-subst-head = rcons∞ a' aRa' here (isReflRelator∞ _)
+
+    Relator-subst-head : Relator R (a ∷ as) (a' ∷ as)
+    Relator-subst-head = PT.∣ Relator∞-subst-head ∣₁
+
+  Relator∞-cong-∷ : ∀ {a b} {as : Vec A n}
+    → a ≡ b
+    → Relator∞ R (a ∷ as) (b ∷ as)
+  Relator∞-cong-∷ {a = a} {b} {as} a≡b = rcons∞ b (subst (R a) a≡b (refl-≈ a)) here (isReflRelator∞ as)
+
+  Relator-cong-∷ : ∀ {a b} {as : Vec A n}
+    → a ≡ b
+    → Relator R (a ∷ as) (b ∷ as)
+  Relator-cong-∷ a≡b = PT.∣ Relator∞-cong-∷ a≡b ∣₁
+
+  Relator-∷-swap : ∀ a b {cs : Vec A n}
+    → Relator R (a ∷ b ∷ cs) (b ∷ a ∷ cs)
+  Relator-∷-swap a b = rcons a (refl-≈ a) (there here) (isReflRelator∞ _)
+-}

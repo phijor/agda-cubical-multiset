@@ -102,6 +102,27 @@ module _ {ℓ} (F : Type ℓ → Type ℓ) {{ FunctorF : Functor F }} where
     map (!^ n ∘ cut (suc n)) x       ≡⟨ cong (λ f → map f x) (cut-is-lim n) ⟩∎
     map (cut n) x ∎
 
+  diag : (ℕ → Lim) → (n : ℕ) → F^ n
+  diag ys n = cut n (ys n)
+
+  diag-islim-alternating : {n : ℕ}
+    → (l r : Lim)
+    → (x : Lim)
+    → (ys : ℕ → Lim)
+    → (approx : ∀ n → cut n x ≡ diag ys n)
+    → (ysₙ≡l : ys n ≡ l)
+    → (ysₙ₊₁≡r : ys (suc n) ≡ r)
+    → !^ n (cut (suc n) l) ≡ cut n r
+  diag-islim-alternating {n = n} l r x ys approx ysₙ≡l ysₙ₊₁≡r =
+    !^ n (cut (suc n) l)   ≡⟨ l .is-lim n ⟩
+    cut n l                ≡⟨ cong (cut n) (sym ysₙ≡l) ⟩
+    diag ys n              ≡⟨ sym (approx n) ⟩
+    cut n x                ≡⟨ sym (x .is-lim n) ⟩
+    !^ n (cut (suc n) x)   ≡⟨ cong (!^ n) (approx (suc n)) ⟩
+    !^ n (diag ys (suc n)) ≡⟨ cong (!^ n ∘ cut (suc n)) ysₙ₊₁≡r ⟩
+    !^ n (cut (suc n) r)   ≡⟨ r .is-lim n ⟩
+    cut n r ∎
+
 isLimitPreserving : ∀ {ℓ} (F : Type ℓ → Type ℓ) → {{ Functor F }} → Type ℓ
 isLimitPreserving F = isEquiv (pres F)
 
