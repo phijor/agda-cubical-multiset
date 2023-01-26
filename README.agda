@@ -194,14 +194,13 @@ module _ (F : Type → Type) {{FunctorF : Functor F}} where
 open import Multiset.FCM.Limit
   using
     ( diag-ysᶜ-islim-alternating
-    ; pres-inj⇒complete
+    ; pres-inj⇒llpo
     )
 
 Lemma2 = diag-ysᶜ-islim-alternating
 
 -- Injectivity of pres implies LLPO.
--- We prove completeness, which implies LLPO.
-Theorem2 = pres-inj⇒complete
+Theorem2 = pres-inj⇒llpo
 
 open import Multiset.ListQuotient.ToInjectivity
   using (llpo⇒pres-inj)
