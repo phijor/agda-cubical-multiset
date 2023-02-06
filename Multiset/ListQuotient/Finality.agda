@@ -288,9 +288,40 @@ module long? where
   is-tree : (a : ℕ → Bool) → isTree (node a)
   is-tree a = is-tree₀ (Seq.head a) (Seq.tail a)
 
+  approx-node→≡node : (a : ℕ → Bool) → ∀ n → (t : ΣVec ^ n) → Approx n t (node a n) → t ≡ node a n
+  approx-node→≡node a zero tt* _ = refl
+  approx-node→≡node a (suc n) t approx with (a 0)
+  ... | true = BVec.isSet→Relator-empty→isEmpty (isSetΣVec^ n) approx
+  ... | false = t≡#[nodeₙ] where
+    a′ = Seq.tail a
+
+    t-is-singleton : Σ[ (t′ , _) ∈ BVec.isSingleton t ] Approx n t′ (node a′ n)
+    t-is-singleton = BVec.isSet→Relator-singleton→isSingleton (isSetΣVec^ n) (Bisimilarity.isPropApprox n) approx
+
+    t′ : ΣVec ^ n
+    t′ = t-is-singleton .fst .fst
+
+    approx-t′-node : Approx n t′ (node a′ n)
+    approx-t′-node = t-is-singleton .snd
+
+    t≡#[nodeₙ] : t ≡ #[ node a′ n ]
+    t≡#[nodeₙ] =
+      t               ≡⟨ t-is-singleton .fst .snd ⟩
+      #[ t′ ]         ≡⟨ cong #[_] (approx-node→≡node a′ n t′ approx-t′-node) ⟩
+      #[ node a′ n ]  ∎
+
+
 long? : (a : ℕ → Bool) → Tree
 long? a .elements = long?.node a
 long? a .is-lim = long?.is-tree a
+
+-- Like above: If a tree is bisimilar to the potentially finite singleton-tree,
+-- they're already the same up to a path:
+≈long?→≡long? : ∀ {t : Tree}
+  → (as : ℕ → Bool)
+  → t ≈ long? as
+  → t ≡ long? as
+≈long?→≡long? {t} as t≈long? = TreePath λ n → long?.approx-node→≡node as n (cut n t) (t≈long? .elements n)
 
 long?≠long : (a : ℕ → Bool) (aP : isProp (Σ[ n ∈ ℕ ] a n ≡ true))
   → ∀ n → long? a .elements (suc n) ≡ long .elements (suc n) → a n ≡ false
@@ -318,9 +349,9 @@ long?-long-connect as aP (suc n) asₙ₊₁≡true with dichotomyBool (Seq.head
     goal : suc k ≡ suc l
     goal = cong fst (aP (suc k , asₖ₊₁≡true) (suc l , asₗ₊₁≡true))
 
-complete⇒llpo : Complete → LLPO
-complete⇒llpo complete as as-true-once = PT.map
-  (Sum.map x≈l→as-evens-false {! !})
+complete→llpo : Complete → LLPO
+complete→llpo complete as as-true-once = PT.map
+  (Sum.map x≈l→as-evens-false x≈long?→as-odds-false)
   (complete {x = x} {y₁ = long} {y₂ = long? as} approx split is-approx)
   where
 
@@ -459,19 +490,30 @@ complete⇒llpo complete as as-true-once = PT.map
   split n = Seq.latch-even-dichotomy as long (long? as) n
 
   x≈l→as-evens-false : x ≈ long → ∀ n → Nat.isEvenT n → as n ≡ false
-  x≈l→as-evens-false x≈l n even = long?≠long as as-true-once n bad where
+  x≈l→as-evens-false x≈l n even-n with dichotomyBool (as n)
+  ... | inr asₙ≡false = asₙ≡false
+  ... | inl asₙ≡true = long?≠long as as-true-once n bad where
     x≡l : x ≡ long
     x≡l = ≈long→≡long x≈l
 
-    lem : long?.node₀ (Seq.head as) (Seq.tail as) (suc n) ≡ #[ long.node n ]
-    lem with (Seq.head as)
-    ... | false = {! !}
-    ... | true = {! !}
-
-    -- TODO: Use x≡l to port the original proof.
     bad : long?.node as (suc n) ≡ long.node (suc n)
     bad =
-      long?.node as (suc n) ≡⟨⟩
-      long?.node₀ (Seq.head as) (Seq.tail as) (suc n) ≡⟨ {! !} ⟩
-      #[ long.node n ] ≡⟨⟩
-      long.node (suc n) ∎
+      long?.node as (suc n)   ≡⟨ cong (cut (suc n)) (sym (Seq.latch-even-after as (suc n) (n , ≤-suc n (NatOrder.≤-refl n) , even-n , asₙ≡true))) ⟩
+      cut (suc n) x           ≡⟨ cong (cut (suc n)) x≡l ⟩
+      cut (suc n) long ∎
+
+  x≈long?→as-odds-false : x ≈ long? as → ∀ n → Nat.isOddT n → as n ≡ false
+  x≈long?→as-odds-false x≈long? n odd-n with dichotomyBool (as n)
+  ... | inr asₙ≡false = asₙ≡false
+  ... | inl asₙ≡true = long?≠long as as-true-once n (sym bad) where
+    x≡long? : x ≡ long? as
+    x≡long? = ≈long?→≡long? as x≈long?
+
+    bad : long.node (suc n) ≡ long?.node as (suc n)
+    bad =
+      cut (suc n) long        ≡⟨ cong (cut (suc n)) (sym (Seq.latch-even-const-true-once as as-true-once (n , odd-n , asₙ≡true) (suc n))) ⟩
+      cut (suc n) x           ≡⟨ cong (cut (suc n)) x≡long? ⟩
+      cut (suc n) (long? as)  ∎
+
+pres-reflects-≈→LLPO : ({ss ts : ΣVec Tree} → pres⁺ ss ≈ˢʰ pres⁺ ts → Relator Bisim ss ts) → LLPO
+pres-reflects-≈→LLPO reflects = complete→llpo (pres-reflects-≈→Complete reflects)

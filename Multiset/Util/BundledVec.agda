@@ -88,6 +88,12 @@ mk-vec-inj {A = A} {n = n} {xs} {ys} p = subst (λ · → PathP (λ i → Vec A 
 []-#∷-disjoint : ∀ {a : A} {as : ΣVec A} → ¬ ([] ≡ a #∷ as)
 []-#∷-disjoint p = Nat.znots (cong length p)
 
+isEmpty : ΣVec A → Type _
+isEmpty as = as ≡ []
+
+isSet→isPropIsEmpty : isSet A → {as : ΣVec A} → isProp (isEmpty as)
+isSet→isPropIsEmpty setA = isSet→isSetΣVec setA _ _
+
 isInjectiveCons : ∀ {a b : A} {as : ΣVec A} → a #∷ as ≡ b #∷ as → a ≡ b
 isInjectiveCons p = cong Vec.head (ΣVecPath→vecPath p)
 
@@ -377,6 +383,12 @@ module _ {ℓ ℓ'} {A B : Type ℓ} {R : Rel A B ℓ'} where
     → Relator∞ R as []
     → as ≡ []
   Relator∞-empty→isEmpty rnil∞ = refl
+
+  isSet→Relator-empty→isEmpty : {as : ΣVec A}
+    → isSet A
+    → Relator R as []
+    → as ≡ []
+  isSet→Relator-empty→isEmpty setA = PT.rec (isSet→isPropIsEmpty setA) Relator∞-empty→isEmpty
 
   Relator∞-singleton→isSingleton : {as : ΣVec A} {b : B}
     → Relator∞ R as [ b ]
