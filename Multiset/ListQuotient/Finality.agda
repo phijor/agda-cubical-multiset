@@ -28,7 +28,8 @@ open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
     ; Bisim→Approx
     )
 open import Multiset.Util.BoolSequence as Seq using (latch-even)
-open import Multiset.Util.Vec as Vec hiding (_∈_ ; remove)
+open import Multiset.Util.Relation using (ReflectsRel)
+open import Multiset.Util.Vec as Vec using ()
 open import Multiset.Util.BundledVec as BVec
   using
     ( ΣVec
@@ -88,8 +89,8 @@ open Limit using (elements ; is-lim)
 open Iso
 open Functor ⦃...⦄
 
-Unorderedtree : Type _
-Unorderedtree = Tree /₂ Bisim
+UnorderedTree : Type _
+UnorderedTree = Tree /₂ Bisim
 
 module _ (a b : Tree) (cs : ΣVec Tree) where
   ∷-swap-approx : Relator Bisim (a #∷ b #∷ cs) (b #∷ a #∷ cs)
@@ -115,8 +116,8 @@ Complete = {x y₁ y₂ : Tree}
   → (approx : ∀ n → (cut n x) ≡ (diag ys n))
   → ∥ (x ≈ y₁) ⊎ (x ≈ y₂) ∥₁
 
-pres-reflects-≈→Complete : ({ss ts : ΣVec Tree} → pres⁺ ss ≈ˢʰ pres⁺ ts → Relator Bisim ss ts) → Complete
-pres-reflects-≈→Complete preserves {x = x} {y₁} {y₂} ys split approx = goal split where
+pres-reflects-≈→Complete : ReflectsRel _≈ˢʰ_ (Relator _≈_) pres⁺ → Complete
+pres-reflects-≈→Complete reflects {x = x} {y₁} {y₂} ys split approx = goal split where
   open import Cubical.Data.Sum.Base as Sum using (_⊎_ ; inl ; inr)
   open import Cubical.Foundations.Transport using (subst⁻)
 
@@ -166,7 +167,7 @@ pres-reflects-≈→Complete preserves {x = x} {y₁} {y₂} ys split approx = g
       goal = subst⁻ (λ · → Relator (Approx n) [ · , cut n (ysᶜ n (e n)) ] [ _ , _ ]) (approx n) step₁
 
     pairs : Relator Bisim [ x , xᶜ ] [ y₁ , y₂ ]
-    pairs = preserves pres-pairs
+    pairs = reflects pres-pairs
 
     eq : ∀ {a b x y} → Relator Bisim [ x , y ] [ a , b ] → ∥ (x ≈ a) ⊎ (x ≈ b) ∥₁
     eq {x = x} = PT.map λ where
@@ -223,9 +224,6 @@ module _ where
           (map (cut n)                    $ remove bs b∈bs) ≡⟨ BVec.map-remove (cut n) b∈bs ⟩
           remove bsₙ  bₙ∈bsₙ   ≡⟨ congP₂ (λ i → remove) bsₙ≡bs′ₙ (subst-filler (bₙ ∈_) bsₙ≡bs′ₙ bₙ∈bsₙ) ⟩
           remove bs′ₙ bₙ∈bs′ₙ  ∎
-
-FMSet : Type → Type
-FMSet X = ΣVec X /₂ (Relator _≡_)
 
 -- The sequence corresponding to the infinite tree in which each node
 -- has exactly one subtree.
@@ -520,5 +518,8 @@ complete→llpo complete as as-true-once = PT.map
       cut (suc n) x           ≡⟨ cong (cut (suc n)) x≡long? ⟩
       cut (suc n) (long? as)  ∎
 
-pres-reflects-≈→LLPO : ({ss ts : ΣVec Tree} → pres⁺ ss ≈ˢʰ pres⁺ ts → Relator Bisim ss ts) → LLPO
+pres-reflects-≈→LLPO : ReflectsRel _≈ˢʰ_ (Relator _≈_) pres⁺ → LLPO
 pres-reflects-≈→LLPO reflects = complete→llpo (pres-reflects-≈→Complete reflects)
+
+FMSet : ∀ {ℓ} → Type ℓ → Type ℓ
+FMSet X = ΣVec X /₂ (Relator _≡_)

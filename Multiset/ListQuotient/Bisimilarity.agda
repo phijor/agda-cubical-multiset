@@ -56,10 +56,7 @@ open Limit using (elements ; is-lim)
 open Iso
 open Functor ⦃...⦄
 
--- Tot : ∀ {ℓ} {X : Type ℓ} → Rel X X ℓ-zero
--- Tot {X = X} = λ _ _ → Unit
-
-Approx : (n : ℕ) → (s t : ΣVec ^ n) → Type
+Approx : (n : ℕ) → Rel (ΣVec ^ n) (ΣVec ^ n) ℓ-zero
 Approx zero = Tot Unit* _
 Approx (suc n) = Relator (Approx n)
 
