@@ -205,6 +205,7 @@ Theorem2 = pres-inj⇒complete
 
 open import Multiset.ListQuotient.ToInjectivity
   using (llpo⇒pres-inj)
+open import Multiset.ListQuotient.Finality using (pres-reflects-≈→LLPO)
 
 -- Using the equivalent type (List X / Perm), we can show that
 -- LLPO implies the injectivity of the limit-preservation map.
