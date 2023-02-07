@@ -9,65 +9,47 @@ open import Multiset.ListQuotient.ListFinality
     ; !^
     ; cut
     ; Tree
-    ; fix ; fix⁺ ; fix⁻
-    ; ΣVecLimitPath
-    ; pres ; pres⁺ ; pres⁻
-    ; pres-Iso ; pres′ ; pres′⁻
-    ; subtree
     )
 
-open import Multiset.Util using (isInjective)
-open import Multiset.Util.Vec as Vec hiding (_∈_ ; remove)
 open import Multiset.Util.BundledVec as BVec
   using
     ( ΣVec
-    ; []
-    ; _#∷_
-    ; _∈_
-    ; remove
-    ; Relator∞ ; Relator
-    ; rnil∞ ; rcons∞
+    ; Relator
     ; isReflRelator
     ; isTransRelator
     ; isPropRelator
     ; Relator-map
     )
 open import Multiset.Util.Relation
-open import Multiset.Util.SetQuotients
-  using (relBiimpl→QuotIso)
-  renaming (map to map/₂)
+  using
+    ( Tot
+    ; isPropTot
+    ; isReflTot
+    ; isTransTot
+    )
 open import Multiset.Limit.Chain
   using
     ( lim
     ; Limit
     ; Chain
-    ; shift
     ; isPropChain→Limit
     ; isOfHLevelLimit
-    ; module Completeness
     )
 open import Multiset.Limit.TerminalChain as TerminalChain
   using
     ( Functor
     ; Lim
     ; ShLim
-    ; ShLim→Lim
     ; _^_
     )
-  -- hiding (pres)
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Nat.Base as Nat using (ℕ ; suc ; zero)
-open import Cubical.Data.Unit.Base using (Unit* ; Unit ; tt* ; tt)
-open import Cubical.Data.Unit.Properties using (isOfHLevelUnit*)
-open import Cubical.Data.Sum using (_⊎_ ; inl ; inr)
-open import Cubical.Data.List.Base as List using (List)
-open import Cubical.HITs.PropositionalTruncation as PT using ()
-open import Cubical.HITs.SetQuotients as SQ using () renaming (_/_ to _/₂_ ; [_] to [_]₂ ; eq/ to eq/₂)
-open import Cubical.Relation.Binary using (module BinaryRelation ; pulledbackRel ; RelIso ; Rel)
+open import Cubical.Data.Unit.Base using (Unit* ; tt*)
+open import Cubical.Relation.Binary using (module BinaryRelation ; Rel)
 
 open BVec.ΣVec
 open Limit using (elements ; is-lim)

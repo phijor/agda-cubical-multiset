@@ -60,8 +60,14 @@ open import Multiset.Omniscience using (LLPO)
 
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Isomorphism using (Iso)
-open import Cubical.Axiom.Omniscience using () renaming (LLPO to LLPO')
-open import Cubical.Data.Bool using (Bool ; true ; false ; if_then_else_ ; isSetBool ; dichotomyBool ; true≢false)
+open import Cubical.Data.Bool
+  using
+    ( Bool ; true ; false
+    ; if_then_else_
+    ; isSetBool
+    ; dichotomyBool
+    ; true≢false
+    )
 open import Cubical.Data.Empty as Empty using ()
 open import Cubical.Data.Nat as Nat using (ℕ ; suc ; zero)
 open import Cubical.Data.Nat.Order.Recursive as NatOrder using (_≤_)
@@ -70,7 +76,6 @@ open import Cubical.Data.Sigma.Base using (∃-syntax ; _×_)
 open import Cubical.Data.Sigma.Properties using (Σ≡Prop)
 open import Cubical.Data.Sum as Sum using (_⊎_ ; inl ; inr)
 open import Cubical.HITs.PropositionalTruncation as PT using (∥_∥₁)
-open import Cubical.HITs.PropositionalTruncation.Monad as PT using ()
 open import Cubical.HITs.SetQuotients as SQ
   using ()
   renaming
@@ -174,7 +179,7 @@ pres-reflects-≈→Complete preserves {x = x} {y₁} {y₂} ys split approx = g
 module _ where
   fix⁺-preserves-bisim : ∀ {s t} → Relator Bisim s t → Bisim (fix⁺ s) (fix⁺ t)
   fix⁺-preserves-bisim {s} {t} = PT.rec (isPropBisim (fix⁺ s) (fix⁺ t)) go where
-    go : BVec.Relator∞ Bisim s t → Bisim (fix⁺ s) (fix⁺ t)
+    go : Relator∞ Bisim s t → Bisim (fix⁺ s) (fix⁺ t)
     go rnil∞ = isReflBisim (fix⁺ [])
     go (rcons∞ {a = a} {as = as} {bs} b a≈b b∈bs x₁) = bisim approx where
       approx : ∀ n → (fix⁺ (a #∷ as)) ≈[ n ] (fix⁺ bs)

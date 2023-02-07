@@ -5,7 +5,7 @@ module Multiset.ListQuotient.ListFinality where
 open import Multiset.Prelude
 open import Multiset.Util.Path using (substIso)
 open import Multiset.Functor using (NatTrans ; NatEquiv)
-open import Multiset.Util.Vec as VecExt
+open import Multiset.Util.Vec as VecExt using ()
 open import Multiset.Util.BundledVec as BVec
   using
     ( ΣVec
@@ -18,9 +18,6 @@ open import Multiset.Limit.Chain as Chain
   using
     ( lim
     ; Limit
-    ; Limit*
-    ; Limit-Limit*-Iso
-    ; Limit*IsoΣ
     ; Chain
     ; isSet→LimitPathExt
     ; isLimit
@@ -43,7 +40,6 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     ; isShLim
     ; isLim
     ; isLimitPreserving
-    ; Lim→ShLim
     ; ShLim→Lim
     )
 
@@ -57,15 +53,12 @@ open import Cubical.Data.Sigma as Sigma
   using
     ( ΣPathP
     ; Σ≡Prop
-    ; _×_
     ; Σ-cong-iso-fst
     ; Σ-cong-iso-snd
     )
 open import Cubical.Data.Nat.Base as Nat using (ℕ ; suc ; zero ; _+_)
-open import Cubical.Data.FinData as Fin
-  using (Fin)
-  renaming (zero to fzero ; suc to fsuc)
-open import Cubical.Data.Unit.Base using (Unit* ; Unit ; tt* ; tt)
+open import Cubical.Data.FinData as Fin using (FinVec)
+open import Cubical.Data.Unit.Base using (Unit* ; tt*)
 open import Cubical.Data.Unit.Properties as Unit using (isOfHLevelUnit*)
 open import Cubical.Data.Vec.Base as Vec using (Vec)
 open import Cubical.Data.Vec.Properties as Vec using (FinVecIsoVec)
@@ -172,7 +165,7 @@ module ConstLength (len₀ : ℕ) (xs : (d : ℕ) → Vec (ΣVec ^ d) len₀) wh
     constLengthLim .elements = constLengthApprox
     constLengthLim .is-lim = islim
 
-    inh' : Fin.FinVec (Lim ΣVec) len₀
+    inh' : FinVec (Lim ΣVec) len₀
     inh' k .elements = Vec.lookup k ∘ xs
     inh' k .is-lim d =
       (!^ d) (Vec.lookup k $ xs (suc d))           ≡⟨ sym (VecExt.lookup-map (!^ d) (xs (suc d)) k) ⟩
@@ -194,28 +187,6 @@ module ConstLength (len₀ : ℕ) (xs : (d : ℕ) → Vec (ΣVec ^ d) len₀) wh
 
     inhFibers : fiber pres⁺ constLengthLim
     inhFibers = inh , inh∈fiber
-
-    --inhFibersPath : ∀ y → inhFibers ≡ y
-    --inhFibersPath (x , p) = Σ≡Prop (λ x → Chain.isSetLimit _ (isSetΣVec^ ∘ suc) (pres⁺ x) constLengthLim) goal where
-    --  len≡ : ∀ n → pres⁺ x .elements n .length ≡ len₀
-    --  len≡ n = cong (λ x → x .elements n .length) p
-
-    --  vec≡' : (n : ℕ) → PathP (λ i → Vec (ΣVec ^ n) (len≡ n i)) (pres⁺ x .elements n .vec) (xs n)
-    --  vec≡' n = cong (λ x → x .elements n .vec) p
-
-    --  vec≡ : PathP (λ i → Fin.FinVec (Lim ΣVec) (len≡ 0 (~ i))) inh' λ k → Vec.lookup k (x .vec)
-    --  vec≡ = funExtDep λ k₀≡k₁ → {! x!} -- JDep {B = Fin} (λ l len₀≡l (k : Fin l) p → {! !}) {! !} (sym (len≡ 0)) k₀≡k₁
-    --    -- funExtDep λ _ → isSet→LimitPathExt (TerminalChain.ch ΣVec) isSetΣVec^ λ n → {! !}
-    --    --
-    --  vec≡₂ : PathP (λ y → Vec (Lim ΣVec) (len≡ 0 (~ y))) (lookup⁻¹ inh') (x .vec)
-    --  vec≡₂ = {! JDep {x = ?}!}
-
-    --  goal : inh ≡ x
-    --  goal = ΣVecPathP (sym $ len≡ 0) {!  !}
-
-    --contrFibers : isContr (fiber pres⁺ constLengthLim)
-    --contrFibers = inhFibers , {! !}
-    
 
 inhFibers : (base : ShLim ΣVec) → fiber pres⁺ base
 inhFibers base = subst (fiber pres⁺) shlim≡ (ConstLength.inhFibers length₀ approx approx-is-shlim) where
@@ -263,7 +234,7 @@ pres-Iso =
       snd-iso n =
         OverTrace (constTrace n)  Iso⟨ toVecLimit n ⟩
         Limit (vecChain n)        Iso⟨ toFinVecOfLimits n ⟩
-        Fin.FinVec (Lim ΣVec) n   Iso⟨ Vec.FinVecIsoVec n ⟩
+        FinVec (Lim ΣVec) n   Iso⟨ Vec.FinVecIsoVec n ⟩
         Vec (Lim ΣVec) n          ∎Iso
   in
   ShLim ΣVec                    Iso⟨ toTraceFirstIso ⟩
@@ -305,10 +276,10 @@ pres-Iso =
     toVecLimit .rightInv _ = refl
     toVecLimit .leftInv _ = refl
 
-    toFinVecOfLimits : Iso (Limit vecChain) (Fin.FinVec (Lim ΣVec) sz)
+    toFinVecOfLimits : Iso (Limit vecChain) (FinVec (Lim ΣVec) sz)
     toFinVecOfLimits = go where
       module _ (vec : Limit vecChain) where
-        f-elements : Fin.FinVec (∀ n → ΣVec ^ n) sz
+        f-elements : FinVec (∀ n → ΣVec ^ n) sz
         f-elements k = Vec.lookup k ∘ (vec .elements)
 
         f-is-lim : ∀ k → isTree (f-elements k)
@@ -317,11 +288,11 @@ pres-Iso =
           (Vec.lookup k $ Vec.map (!^ n) (vec .elements (suc n))) ≡⟨ cong (Vec.lookup k) (vec .is-lim n) ⟩∎
           (Vec.lookup k $ vec .elements n) ∎
 
-        f : Fin.FinVec (Lim ΣVec) sz
+        f : FinVec (Lim ΣVec) sz
         f k .elements = f-elements k
         f k .is-lim = f-is-lim k
 
-      module _ (vec : Fin.FinVec (Lim ΣVec) sz) where
+      module _ (vec : FinVec (Lim ΣVec) sz) where
         f⁻¹-elements : ∀ n → Vec (ΣVec ^ n) sz
         f⁻¹-elements n = Vec.map (cut n) (lookup⁻¹ vec)
 
@@ -353,83 +324,8 @@ pres-Iso =
           lookup⁻¹ (λ k → (Vec.lookup k $ lim-of-vec .elements n))  ≡⟨ lookup-left-inv _ ⟩
           lim-of-vec .elements n ∎
 
--- -- fix = (pres F , is-lim-pres) ∙ₑ ShLim≃Lim F
--- fix⁻′ : Lim ΣVec → ΣVec (Lim ΣVec)
--- fix⁻′ = {! pres-Iso .fun !} ∘ Lim→ShLim ΣVec
-
--- pres-Iso' : Iso (ShLim ΣVec) (ΣVec (Lim ΣVec))
--- pres-Iso' =
---   let open TerminalChain using (sh ; ch)
---       open Sigma
---       open VecExt using (isContrVec)
---   in
---   Limit (sh ΣVec) Iso⟨ Limit-Limit*-Iso (sh ΣVec) ⟩
---   Limit* (sh ΣVec) Iso⟨ Limit*IsoΣ (sh ΣVec) ⟩
---   Σ[ as₁ ∈ (ΣVec Unit*) ]
---   Σ[ asₛₛ ∈ (∀ n → ΣVec ^ (2 + n)) ]
---   Σ[ _ ∈ (!^ 1 (asₛₛ 0) ≡ as₁) ]
---     (∀ n → !^ (2 + n) (asₛₛ (suc n)) ≡ asₛₛ n)
-
---     Iso⟨ Σ-cong-iso-fst ΣVecIsoΣ ⟩
-
---   Σ[ (n , as₁) ∈ (Σ ℕ (Vec Unit*)) ]
---   Σ[ asₛₛ ∈ (∀ n → ΣVec ^ (2 + n)) ]
---   Σ[ _ ∈ (!^ 1 (asₛₛ 0) ≡ mk-vec as₁) ]
---     (∀ n → !^ (2 + n) (asₛₛ (suc n)) ≡ asₛₛ n)
-
---     Iso⟨ Σ-assoc-Iso {A = ℕ} {B = Vec Unit*} ⟩
-
---   Σ[ n ∈ ℕ ]
---   Σ[ as₁ ∈ (Vec Unit* n) ]
---   Σ[ asₛₛ ∈ (∀ n → ΣVec ^ (2 + n)) ]
---   Σ[ _ ∈ (!^ 1 (asₛₛ 0) ≡ mk-vec as₁) ]
---     (∀ n → !^ (2 + n) (asₛₛ (suc n)) ≡ asₛₛ n)
-
---     Iso⟨ Σ-cong-iso-snd (λ n → invIso (Limit*IsoΣ {!sh ΣVec !})) ⟩
-
---   Σ[ n ∈ ℕ ] {! !}
-  
---     Iso⟨ {! !} ⟩
-
---   ΣVec (
---     Σ[ as₀ ∈ Unit* ]
---     Σ[ asₛ ∈ (∀ n → ΣVec ^ (suc n)) ]
---     Σ[ _ ∈ (tt* ≡ as₀) ] ((n : ℕ) → BVecmap (ΣVec map-!^ n) (asₛ (suc n)) ≡ asₛ n)
---   ) Iso⟨ BVecΣVecMapIso (invIso $ Limit*IsoΣ _) ⟩
-
---   ΣVec (Limit* (ch ΣVec)) Iso⟨ BVecΣVecMapIso $ invIso $ Limit-Limit*-Iso (ch ΣVec) ⟩
---   ΣVec (Lim ΣVec) ∎Iso
-
---     -- Iso⟨ Σ-cong-iso ΣVecUnit*-ℕ-Iso (λ tts* → substIso (λ · → Σ[ asₛₛ ∈ _ ] (!^ 1 (asₛₛ 0) ≡ ·) × _) (sym (ΣVecUnit*-ℕ-Iso .leftInv tts*))) ⟩
-
---   -- Σ[ n ∈ ℕ ]
---   -- Σ[ asₛₛ ∈ (∀ n → ΣVec ^ (2 + n)) ]
---   -- Σ[ _ ∈ (!^ 1 (asₛₛ 0) ≡ mk-vec {length = n} (Vec.replicate tt*)) ]
---     -- (∀ n → !^ (2 + n) (asₛₛ (suc n)) ≡ asₛₛ n)
-
---     -- Iso⟨ Σ-cong-iso-snd (λ n → invIso (Σ-contractFstIso VecExt.isContrVecUnit*)) ⟩
-
 pres′⁺ : ΣVec (Lim ΣVec) → ShLim ΣVec
 pres′⁺ = pres-Iso .inv
-
-pres′⁻ : ShLim ΣVec → ΣVec (Lim ΣVec)
-pres′⁻ = pres-Iso .fun
-
-module _ (tree : ShLim ΣVec) where
-  open Limit
-  open Trace
-
-  -- widthConst : ∀ n → width tree n ≡ width tree 0
-  -- widthConst n = {! !}
-
-  -- lookup : (Fin (width tree 0)) → (n : ℕ) → ΣVec ^ n
-  -- lookup k = λ n → Vec.lookup k
-  --   (subst OverTrace
-  --     (ΣPathP (funExt (λ n → sym (to0 ({!width tree !} , {! !}) {! !})) , {! !}))
-  --     (vecs tree , {! !}) .step n)
-
-  -- pres′⁻-def : pres′⁻ tree ≡ mk-vec (Vec.FinVec→Vec λ k → lim (λ n → lookup k n) {! !})
-  -- pres′⁻-def = refl
 
 pres′⁺≡pres : pres′⁺ ≡ pres⁺
 pres′⁺≡pres = funExt $ TerminalChain.isSet→ShLimPath ΣVec (isSetΣVec^ ∘ suc) ∘ goal where
@@ -452,50 +348,6 @@ pres′≡pres = equivEq pres′⁺≡pres
 open TerminalChain.Fixpoint isLimitPreservingΣVec
   using (fix ; fix⁺ ; fix⁻ ; fix⁻-step-ext ; pres⁻)
   public
-
---pres″⁻ : ShLim ΣVec → ΣVec (Lim ΣVec)
---pres″⁻ tree = mk-vec {length = length₀} lims where
---  open Limit
-
---  open import Cubical.Data.FinData.Base using (FinVec)
-
---  length₀ : ℕ
---  length₀ = width tree 0
-
---  lengthPath : ∀ n → width tree n ≡ length₀
---  lengthPath zero = refl
---  lengthPath (suc n) = (cong length (tree .is-lim n)) ∙ lengthPath n
-
---  -- TODO: Prove that has the limit-property when the path is refl.
---  -- Then use J below to prove the main limit-property.
---  lims'-el-swap : (n : ℕ) → FinVec (ΣVec ^ n) (width tree n)
---  lims'-el-swap n = Vec.Vec→FinVec (tree .elements n .vec)
-
---  is-lim-lims'-el-swap : ∀ n → PathP (λ i → FinVec {!ΣVec ^ ( !} (length (tree .is-lim n i))) {! (!^ n ∘ lims'-el-swap (suc n)) !} (lims'-el-swap n)
---  is-lim-lims'-el-swap n = ?
-
---  lims'-el'' : (n : ℕ) → (length₀ ≡ width tree n) → (k : Fin length₀) → ΣVec ^ n
---  lims'-el'' n p k = Vec.Vec→FinVec (tree .elements n .vec) (subst Fin p k)
-
---  -- is-lim-lims'-el'' : ∀ 
-
---  lims'-el' : (n : ℕ) → (k : Fin $ width tree n) → ΣVec ^ n
---  lims'-el' n = Vec.Vec→FinVec $ tree .elements n .vec
-
---  lims'-el : (n : ℕ) → (k : Fin length₀) → ΣVec ^ n
---  -- lims'-el n = subst (λ ⌜·⌝ → Fin ⌜·⌝ → ΣVec ^ n) (lengthPath n) (lims'-el' n)
---  lims'-el n = lims'-el'' n (sym $ lengthPath n)
-
---  lims' : FinVec (Lim ΣVec) length₀
---  lims' k .elements n = lims'-el n k
---  lims' k .is-lim n = ?
---    --J (λ l length₀≡l → {! !^ n (lims'-el'' (suc n) !}) {! !} (sym (lengthPath n))
---    --
---    -- !^ n (lims'-el'' (suc n) (sym $ (cong length (tree .is-lim n)) ∙ lengthPath n) k) ≡⟨ ? ⟩
---    -- lims'-el n k ∎
-
---  lims : Vec (Lim ΣVec) length₀
---  lims = Vec.FinVec→Vec lims'
 
 ΣVecLimitEquiv : ΣVec (Lim ΣVec) ≃ Lim ΣVec
 ΣVecLimitEquiv = fix
@@ -555,9 +407,6 @@ module _ {C : Type} (γ : C → ΣVec C) where
 
 tree-width : Tree → ℕ
 tree-width = length ∘ fix⁻
-
-subtree : (t : Tree) (k : Fin (tree-width t)) → Tree
-subtree t k = Vec.lookup k (fix⁻ t .vec)
 
 isTerminalFix⁻ : isTerminal ΣVec fix⁻
 isTerminalFix⁻ {B = B} β = ana , anaEq where
