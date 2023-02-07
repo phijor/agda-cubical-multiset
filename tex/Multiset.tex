@@ -1,4 +1,4 @@
-\documentclass[runningheads]{llncs}
+\documentclass[a4paper,USenglish,cleveref]{lipics-v2021}
 
 \usepackage[debug]{multiset}
 
@@ -6,18 +6,43 @@
 
 \usepackage{todonotes}
 
-\begin{document}
+\bibliographystyle{plainurl}
 
 \title{The Final Coalgebra of the Finite Bag Functor in Homotopy Type Theory}
-\author{%
-    Philipp Joram\orcidID{0000-0002-0448-7907} \and
-    Niccol{\`o} Veltri\orcidID{0000-0002-7230-3436}%
-}
-%
-\authorrunning{P. Joram and N. Veltri}
-\institute{Department of Software Science, Tallinn University of Technology, Estonia}
+\titlerunning{Final Coalgebra of Finite Bags in HoTT}
+\author{Philipp Joram}%
+  {Department of Software Science, Tallinn University of Technology, Estonia}
+  {philipp.joram@taltech.ee}%
+  {https://orcid.org/0000-0002-0448-7907}%
+  {}
+\author{Niccol{\`o} Veltri}%
+  {Department of Software Science, Tallinn University of Technology, Estonia}
+  {niccolo.veltri@taltech.ee}%
+  {https://orcid.org/0000-0002-7230-3436}%
+  {}
 
-\maketitle              % typeset the header of the contribution
+\authorrunning{P. Joram and N. Veltri}
+\Copyright{Philipp Joram and Niccol{\`o} Veltri}
+
+\begin{CCSXML}
+  <ccs2012>
+    <concept>
+      <concept_id>10003752.10003790.10011740</concept_id>
+      <concept_desc>Theory of computation~Type theory</concept_desc>
+      <concept_significance>500</concept_significance>
+    </concept>
+  </ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Theory of computation~Type theory\todo{Use proper classification.}}
+
+\acknowledgements{%
+  This work was supported by the Estonian Research Council grant PSG749.
+}
+
+\begin{document}
+
+\maketitle
 
 \begin{abstract}
 
@@ -956,12 +981,7 @@ is better performed using groupoids instead of sets (switching from categorical 
 The construction of the final coalgebra in Section~\ref{sec:coinductive} uses a HIT in the codomain
 of a coinductive type destructor. This is an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). Recent work by Kristensen et al.~\cite{Kristensen2022} seems to indicate that final coalgebras of functors such as $\M$ or $\Op{Pfin}$, which are defined as HITs, should be definable as the \emph{strict} $\omega$-limit of the chain in (\ref{eq:chain}) in the cubical set model, a situation already observed in the category of setoids (\cref{thm:final-setoids}). Strictness means that the limit-property holds on the nose, not only up-to path equality. 
 
-
-\subsubsection{Acknowledgments}
-  This work was supported by the Estonian Research Council grant PSG749.
-
 %\nocite{*}
 
-\bibliographystyle{splncs04}
 \bibliography{Multiset}
 \end{document}

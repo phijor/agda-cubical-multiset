@@ -36,7 +36,8 @@
 \RequirePackage{doi} % Links to DOI in bibliography
 
 \RequirePackage{csquotes}
-\RequirePackage[capitalize]{cleveref} % Load last because... duh, LaTeX.
+\PassOptionsToPackage{capitalize}{cleveref}
+% \RequirePackage[capitalize]{cleveref} % Load last because... duh, LaTeX.
 
 \newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
 \newunicodechar{→}{\ensuremath{\mathrel{\mathnormal\to}}}
