@@ -14,11 +14,15 @@ open import Multiset.ListQuotient.ListFinality
     ; TreePath
     ; fix ; fix⁺ ; fix⁻
     ; pres ; pres⁺ ; pres⁻
+    ; step
+    ; unfold
     )
 open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
   using
     ( Bisim ; _≈_ ; bisim
     ; RelatorLim^
+    ; isReflApprox
+    ; isTransApprox
     ; isReflBisim
     ; isTransBisim
     ; isPropBisim
@@ -28,7 +32,7 @@ open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
     ; Bisim→Approx
     )
 open import Multiset.Util.BoolSequence as Seq using (latch-even)
-open import Multiset.Util.Relation using (ReflectsRel)
+open import Multiset.Util.Relation using (ReflectsRel;PreservesRel)
 open import Multiset.Util.Vec as Vec using ()
 open import Multiset.Util.BundledVec as BVec
   using
@@ -43,6 +47,7 @@ open import Multiset.Util.BundledVec as BVec
     ; isTransRelator
     ; isPropRelator
     ; Relator-map
+    ; Relator∞-map
     )
   renaming
     ( [_] to #[_]
@@ -59,6 +64,7 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     )
 open import Multiset.Omniscience using (LLPO)
 
+open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Isomorphism using (Iso)
 open import Cubical.Data.Bool
@@ -475,3 +481,77 @@ pres-reflects-≈→LLPO reflects = complete→llpo (pres-reflects-≈→Complet
 
 FMSet : ∀ {ℓ} → Type ℓ → Type ℓ
 FMSet X = ΣVec X /₂ (Relator _≡_)
+
+Path→Approx : ∀ n {t u}
+  → t ≡ u
+  → Approx n t u
+Path→Approx n {t} t≡u = subst (Approx n t) t≡u (isReflApprox n t)
+
+Path→Bisim : ∀ {t u} → t ≡ u → t ≈ u
+Path→Bisim {t} t≡u = subst (Bisim t) t≡u (isReflBisim t)
+
+-- fix⁺ is a well-defined setoid morphism
+fix⁺-preserves-≈' : ∀ n {t u}
+  → Relator _≈_ t u
+  → Approx n (!^ n (map (cut n) t)) (!^ n (map (cut n) u))
+fix⁺-preserves-≈' zero _ = tt*
+fix⁺-preserves-≈' (suc n) = PT.map λ r →
+  BVec.Relator∞-trans (isTransApprox n)
+ (BVec.Relator∞-trans (isTransApprox n)
+                      (BVec.Path→Relator∞ (isReflApprox n) (sym (map-comp _ _ _)))                      
+                      (Relator∞-map _ _ goal r))
+                      (BVec.Path→Relator∞ (isReflApprox n) (map-comp _ _ _))
+  where
+    goal : ∀ {t u} → t ≈ u → Approx n (!^ n (cut (suc n) t)) (!^ n (cut (suc n) u))
+    goal {t} {u} r = 
+       isTransApprox n _ _ _
+      (isTransApprox n _ _ _ (Path→Approx n (t .is-lim n))
+                             (r .elements n))
+                             (Path→Approx n (sym (u .is-lim n)))
+
+fix⁺-preserves-≈ : PreservesRel (Relator _≈_) _≈_ fix⁺
+fix⁺-preserves-≈ r = bisim λ n → fix⁺-preserves-≈' n r
+
+module _ {C : Type} (R : C → C → Type)
+         (γ : C → ΣVec C)
+         (γ-preserves-R : PreservesRel R (Relator R) γ)
+         where
+
+-- unfold is a setoid morphism
+  unfold-preserves-R' : ∀ n {x y} → R x y → Approx n (step γ n x) (step γ n y)
+  unfold-preserves-R' zero r = tt*
+  unfold-preserves-R' (suc n) r = PT.map (Relator∞-map R _ (unfold-preserves-R' n)) (γ-preserves-R r)
+
+  unfold-preserves-R : PreservesRel R _≈_ (unfold γ)
+  unfold-preserves-R r = bisim (λ n → unfold-preserves-R' n r)
+
+-- uniqueness of unfold
+  unfold-unique' : (f : C → Tree)
+    → (∀ x → f x ≈ fix⁺ (map f (γ x)))
+    → ∀ x n → Approx n (f x .elements n) (step γ n x)
+  unfold-unique' f feq x zero = tt*
+  unfold-unique' f feq x (suc n) =
+    PT.map (λ r → BVec.Relator∞-trans (isTransApprox n)
+                  (BVec.Relator∞-trans (isTransApprox n)
+                                       r
+                                       (BVec.Path→Relator∞ (isReflApprox n) path)) goal)
+                                       (feq x .elements (suc n))
+    where
+      goal : Relator∞ (Approx n) (map (λ y → f y .elements n) (γ x)) (map (step γ n) (γ x))
+      goal =
+        Relator∞-map _≡_ _
+                     (λ {y} → J (λ z eq → Approx n (f y .elements n) (step γ n z)) (unfold-unique' f feq y n))
+                     (BVec.isReflRelator∞ (λ _ → refl) _)
+
+      path : cut (suc n) (fix⁺ (map f (γ x))) ≡ map (λ y → f y .elements n) (γ x)
+      path =
+        cut (suc n) (fix⁺ (map f (γ x)))   ≡⟨ sym (map-comp _ _ _) ⟩
+        _                                  ≡⟨ sym (map-comp _ _ _) ⟩
+        _                                  ≡⟨ cong (λ g → map g (γ x)) (funExt (λ y → f y .is-lim n)) ⟩
+        map (λ y → f y .elements n) (γ x) ∎
+
+  unfold-unique : (f : C → Tree)
+    → (∀ x → Relator _≈_ (fix⁻ (f x)) (map f (γ x)))
+    → ∀ x → f x ≈ unfold γ x
+  unfold-unique f feq x =
+    bisim (unfold-unique' f (λ y → isTransBisim _ _ _ (Path→Bisim (sym (secEq fix (f y)))) (fix⁺-preserves-≈ (feq y))) x)
