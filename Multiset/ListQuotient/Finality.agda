@@ -16,6 +16,7 @@ open import Multiset.ListQuotient.ListFinality
     ; pres ; pres⁺ ; pres⁻
     ; step
     ; unfold
+    ; isCoalgebraMorphismUnfold
     )
 open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
   using
@@ -32,7 +33,7 @@ open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
     ; Bisim→Approx
     )
 open import Multiset.Util.BoolSequence as Seq using (latch-even)
-open import Multiset.Util.Relation using (ReflectsRel ; PreservesRel)
+open import Multiset.Util.Relation using (ReflectsRel ; PreservesRel ; PreservesRel→SectionReflectsRel)
 open import Multiset.Util.Vec as Vec using ()
 open import Multiset.Util.BundledVec as BVec
   using
@@ -63,7 +64,7 @@ open import Multiset.Limit.TerminalChain as TerminalChain
 open import Multiset.Omniscience using (LLPO)
 
 open import Cubical.Foundations.Function using (_∘_)
-open import Cubical.Foundations.Equiv using (secEq)
+open import Cubical.Foundations.Equiv using (secEq ; retEq)
 open import Cubical.Data.Bool
   using
     ( Bool ; true ; false
@@ -467,6 +468,16 @@ complete→llpo complete as as-true-once = PT.map
 pres-reflects-≈→LLPO : ReflectsRel _≈ˢʰ_ (Relator _≈_) pres⁺ → LLPO
 pres-reflects-≈→LLPO reflects = complete→llpo (pres-reflects-≈→Complete reflects)
 
+fix⁺-reflects-≈→LLPO : ReflectsRel _≈_ (Relator _≈_) fix⁺ → LLPO
+fix⁺-reflects-≈→LLPO reflects = pres-reflects-≈→LLPO goal where
+  goal : ReflectsRel _≈ˢʰ_ (Relator _≈_) pres⁺
+  goal {s} {t} rel = reflects $ bisim λ where
+    zero → tt*
+    (suc n) → subst2 (Relator (Approx n)) (sym (pres⁺ s .is-lim n)) (sym (pres⁺ t .is-lim n)) (rel .elements n)
+
+fix⁻-preserves-≈→LLPO : PreservesRel _≈_ (Relator _≈_) fix⁻ → LLPO
+fix⁻-preserves-≈→LLPO preserves = fix⁺-reflects-≈→LLPO (PreservesRel→SectionReflectsRel _≈_ (Relator _≈_) fix⁻ fix⁺ (retEq fix) preserves)
+
 Path→Approx : ∀ n {t u}
   → t ≡ u
   → Approx n t u
@@ -511,6 +522,13 @@ module _ {C : Type} (R : C → C → Type)
 
   unfold-preserves-R : PreservesRel R _≈_ (unfold γ)
   unfold-preserves-R r = bisim (λ n → unfold-preserves-R' n r)
+
+  -- unfold γ is a coalgebra-morphism from `γ` to `fix⁻`, up to the relation `Relator _≈_`
+  unfold-coalg-morphism-γ-fix⁻ : ∀ x → Relator _≈_ (fix⁻ (unfold γ x)) (map (unfold γ) (γ x))
+  unfold-coalg-morphism-γ-fix⁻ x =
+    let
+      open BVec.Reasoning Bisim isReflBisim isTransBisim using (Path→Rel)
+    in Path→Rel (funExt⁻ (isCoalgebraMorphismUnfold γ) x)
 
 -- uniqueness of unfold
   unfold-unique' : (f : C → Tree)
