@@ -44,6 +44,9 @@
 \newunicodechar{∀}{\ensuremath{\mathnormal\forall\/}}
 \newunicodechar{∃}{\ensuremath{\mathop{\mathnormal\exists\/}}}
 \newunicodechar{≃}{\mathbin{\mathnormal\simeq}}
+\newunicodechar{⁺}{\textsuperscript{+}}
+\newunicodechar{ᶜ}{\textsuperscript{c}}
+\newunicodechar{⇒}{\ensuremath{\Rightarrow}}
 
 \newcommand{\OpFont}{\mathsf}
 
@@ -169,3 +172,7 @@
 \newcommand*{\unfold}{\ensuremath{\mathsf{unfold}}}
 \newcommand*{\fold}{\ensuremath{\mathsf{fold}}}
 \newcommand*{\Bisim}{\ensuremath{\mathsf{Bisim}}}
+
+\NewDocumentCommand{\CodeBaseURL}{}{https://phijor.github.io/agda-cubical-multiset}
+% \NewDocumentCommand{\CodeRef}{m m}{\texttt{#1.#2}}
+\newcommand*{\CodeRef}[2]{\href{https://phijor.github.io/agda-cubical-multiset/#1.html}{\texttt{#2}}}
