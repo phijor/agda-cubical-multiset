@@ -45,6 +45,8 @@
 \newunicodechar{∃}{\ensuremath{\mathop{\mathnormal\exists\/}}}
 \newunicodechar{≃}{\mathbin{\mathnormal\simeq}}
 \newunicodechar{⁺}{\textsuperscript{+}}
+\newunicodechar{⁻}{\textsuperscript{-}}
+\newunicodechar{≈}{\ensuremath{\approx}}
 \newunicodechar{ᶜ}{\textsuperscript{c}}
 \newunicodechar{⇒}{\ensuremath{\Rightarrow}}
 
@@ -74,6 +76,7 @@
 \DeclareMathOperator{\List}{\mathsf{List}}
 \DeclareMathOperator{\DRelator}{\mathsf{DRelator}}
 \DeclareMathOperator{\Relator}{\mathsf{Relator}}
+\DeclareMathOperator{\Approx}{\OpFont{Approx}}
 \DeclareMathOperator{\FMSet}{\mathsf{FMSet}}
 \DeclareMathOperator{\M}{\mathsf{FMC}}
 \DeclareMathOperator{\FMC}{\mathsf{FMC}}
@@ -93,7 +96,7 @@
 \NewDocumentCommand{\Elim}{m}{\Op{elim}_{#1}}
 \NewDocumentCommand{\Map}{m}{\Op{map}_{#1}}
 \NewDocumentCommand{\pres}{m}{\Op{pres}_{#1}}
-\NewDocumentCommand{\coalg}{m}{\Op{unfold}_{#1}}
+\NewDocumentCommand{\coalg}{m}{\Op{coalg}_{#1}}
 
 \NewDocumentCommand{\FinElim}{}{\Elim{\SetTrunc{X}\OpFont{fin}}}
 \NewDocumentCommand{\FinElimComp}{}{\Elim{\SetTrunc{X}\OpFont{fin}}^\beta}

@@ -469,6 +469,10 @@ This can further be extended to a linear order on $\SetQuot[\List X][\Perm]$ as 
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.  
 \end{proposition}
 
+\subsection{TODO: Comparison}
+
+\todo[inline]{Link all equivalent definitions of finite multisets.}
+
 \section{The Final Coalgebra in Sets}\label{sec:final-coalgebra-sets}
 
 We now turn to constructing the final coalgebra of the finite bag functor, given by one of the equivalent definitions in Section~\ref{sec:finite-bags-sets}. %But first, a few basic definitions.
@@ -539,8 +543,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
 \begin{theorem}[\CodeRef{Multiset.FCM.Limit}{pres-inj⇒complete}]\label{lem:InjPresImpliesComplete}
   If $\pres{\FMSet}$ is injective, then \LLPO{} holds.
   \todo[inline]{%
-    Split this into the main theorem (injectivity implies completeness)
-    and a corollary (also implies \LLPO{})
+    Merge \texttt{complete-to-llpo}, and reference that.
   }
 \end{theorem}
 \begin{proof}
@@ -554,7 +557,9 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
   \hspace{.5cm} \to \PropTrunc{x = y_1 + x = y_2}
     \end{array}
   \end{equation}
-  This is a form of \emph{completeness} of two-element subsets of the $\omega$-limit~\cite{Mandelkern1988} which is known to imply \LLPO{}~\cite[{Theorem~7}]{Veltri2021}.
+  This is a form of \emph{completeness} of two-element subsets of the $\omega$-limit.
+  \cite{Mandelkern1988} proves the equivalence of \LLPO{} with completeness of two-element subsets of real numbers.
+  We adapt their proof, for details refer to either~\cite[{Theorem~7}]{Veltri2021} or the formalization~(\CodeRef{Multiset.ListQuotient.Finality}{complete→llpo}).
   
 %  Given an element $ : L_{\M}$\todo{We're implicitly working with the HIT-definition here},
 %  denote by $\ell_n : L_{\M} → \M^n 1$ the projection maps out of the limit.
@@ -610,7 +615,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
 %\end{proof}
 For the proof \cref{lem:LLPOImpliesPresInj}, which employs the functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result \cite[Theorem 9]{Veltri2021}: the injectivity of $\pres{\Op{Pfin}} : \Op{Pfin} \,\Lim{\Op{Pfin}} \to \LimSh{\Op{Pfin}}$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in Theorem 9 of \cite{Veltri2021}.
 
-Nevertheless, we are able to salvage in our constructive setting the fact that $\pres{\FMSet}$ is a split epimorphism, i.e. it has a section/right-inverse. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but strong limit-preservation is equivalent to \LLPO{}.
+Nevertheless, we are able to salvage in our constructive setting the fact that $\pres{\FMSet}$ has a section/right-inverse. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but strong limit-preservation is equivalent to \LLPO{}.
 %irst we show that each set $\FMSet^n 1$ can be endowed with a linear order.
 \begin{lemma}[\CodeRef{Multiset.FMSet.Limit}{linLexFMSet\^}]\label{lem:iter-linear}
 For all $n$, $\FMSet^n 1$ is linearly-ordered.
@@ -620,7 +625,8 @@ Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)
 \end{proof}
 
 \begin{theorem}[\CodeRef{Multiset.FMSet.Limit}{SplitEpimorphism.pres-section}]\label{thm:PresSplitEpi}
- The function $\pres{\FMSet}$ is a split epimorphism.
+ The function $\pres{\FMSet}$ has a section.
+  \todo{Get rid of all mentions of \enquote{split-epimorphism}, in the paper and the code.}
 \end{theorem}
 \begin{proof}
   Let $s : \LimSh{\FMSet}$, we build an element $t : \FMSet \,\Lim{\FMSet}$ in the fiber of $\pres{\FMSet}$ over $s$. The size (i.e. the 1st projection) of the bags $\ell_n\,s$ is the same for all $n$, call it $n^*$. We set the size of $t$ to be $n^*$. Given an index $k : \Fin n^*$, we now search for an element $u\,k : \Lim{\FMSet}$ for defining $t \DefEq (n^*,u)$.
@@ -638,35 +644,48 @@ Assuming \LLPO{} we have $\FMSet \Lim{\FMSet} \simeq \Lim{\FMSet}$, and proving 
 
 \subsection{As a Quotient of the Final $\List$-Coalgebra}\label{sec:final-quotient-set}
 
-It is known that the limit $\Lim{\List} \DefEq \lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}. Let $\coalg{\List}$ be its coalgebra structure.  Using $\Relator$, we can define a setoid-based version of the finite bag functor $\Op{FMSetoid}(X,R) \DefEq (\List X,\Relator R)$~\cite{Danielsson2012}. It is possible to construct a relation on $\Lim{\List}$ so that the resulting setoid is the final coalgebra of in the category of setoids. The desired relation is obtained by first iterating the relator:
-\[
-\Relator^0 s\;t \DefEq 1, \quad
-\Relator^{1+n}\;s\;t \DefEq \Relator \,(\Relator^n)\;(\coalg{\List}\,s)\,(\coalg{\List}\,t)
-\]
-for $s,t : \Lim{\List}$, then taking the limit of the chain of propositions:
+It is known that the limit $\Lim{\List} \DefEq \lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}. Let $\coalg{\List}$ be its coalgebra structure.  Using $\Relator$, we can define a setoid-based version of the finite bag functor $\Op{FMSetoid}(X,R) \DefEq (\List X,\Relator R)$~\cite{Danielsson2012}.
+In order to obtain $\Bisim$, we first iterate the $\Relator$:\todo{motivate this definition}
+\begin{align*}
+  &\Approx^n : \List^n 1 → \List^n 1 → \Type \\
+  &\Approx^0 x\;y \DefEq 1 \\
+  &\Approx^{1+n}\;x\;y \DefEq \Relator \,(\Approx^n)\;x\,y.
+\end{align*}
+and then, for all $s, t : \Lim{\List}$ form the chain of propositions
 \begin{equation}\label{eq:chain-rel}
-    \Relator^0 s\;t \xleftarrow{} {\Relator^1 s\;t}
-      \xleftarrow{} {\Relator^2 s\;t}
-      \xleftarrow{} {\Relator^3 s\;t}
-      \xleftarrow{} %{\Map{F}^3 !}
+  \Approx^0 (\ell_0\; s)\; (\ell_0\; t)
+    \xleftarrow{} {\Approx^1 (\ell_1\; s)\; (\ell_1\; t)}
+    \xleftarrow{} {\Approx^2 (\ell_2\; s)\; (\ell_2\; t)}
+    \xleftarrow{} %{\Map{F}^3 !}
       \cdots
 \end{equation}
 where the backward functions are generated by ! and the fact that $(\forall x,y\Where R \,x\,y \to S \,x\,y)$ implies $\forall xs,ys \Where \Relator  R\;xs\;ys \to \Relator S\;xs\;ys$.
-For all $s,t : \Lim{\List}$, the desired relation $\Bisim\,s\,t$ is the limit of the chain in (\ref{eq:chain-rel}).% i.e. a countable intersection, since all types in the chain are propositions.
-\begin{theorem}\label{thm:final-setoids}
-The setoid $(\Lim{\List},\Bisim)$ has a $\Op{FMSetoid}$-coalgebra structure which is final in the category of setoids.
-  \todo[inline]{%
-    We have formalized a proof that $\pres{\List}$ is \emph{full},
-    but \emph{faithfulness} implies LLPO.
-    The inverse should be similar to \cref{lem:LLPOImpliesPresInj}.
-    Omit proof of finality.
-  }
+The desired relation $\Bisim\,s\,t$ is the limit of the chain in (\ref{eq:chain-rel}).
+
+One might wonder if $\coalg{\List}$ lifts to coalgebra in setoids.
+For this, one needs to show that it is a \emph{setoid-morphism},
+i.e.\@ for all $s, t : \Lim{\List}$, whenever $\Bisim\;s\;t$
+then $\Relator \Bisim\; (\coalg{\List} s)\; (\coalg{\List} t)$.
+
+\begin{theorem}
+  Assuming $\coalg{\List}$ is a setoid-morphism, \LLPO{} holds.
+  \todo{Link \texttt{fix⁻-preserves-≈→LLPO} once in}
 \end{theorem}
-The proof is similar to the one for the finite powerset functor in \cite[{Theorem~1}]{Veltri2021}.
+The proof is similar to \cref{lem:InjPresImpliesComplete}.
+Again, the converse is morally the same as \cref{lem:LLPOImpliesPresInj}.
+Nevertheless, the inverse of $\coalg{\List}$ is always a setoid-morphism.
+Therefore $\coalg{\List}$ is an equivalence of setoids whenever it is a setoid-morphism.
+Under this assumption it is alone the final coalgebra of $\Op{FMSetoid}$ in the category of setoids:
+
+\begin{theorem}\label{thm:final-setoids}
+  Assume $\coalg{\List}$ is a setoid-morphism.
+  Then the setoid $(\Lim{\List},\Bisim)$ has a $\Op{FMSetoid}$-coalgebra structure which is final in the category of setoids.
+\end{theorem}
 
 Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by the relation $\Bisim$ does not give the final coalgebra of the finite bag functor $\FMSet$. We can show that the resulting quotient is a fixpoint, and in particular a coalgebra. But the proof of finality requires the full axiom of choice. 
 \begin{theorem}[\CodeRef{Multiset.ListQuotient.Finality}{fixQ⁺-iso}]\label{thm:fixpoint-quotient}
   For all $X : \Type$, we have $\FMSet(\SetQuot[\Lim{\List}][\Bisim]) \simeq \SetQuot[\Lim{\List}][\Bisim]$.
+  \todo{Make this an equivalence in the code.}
 \end{theorem}
 \begin{theorem}\label{thm:final-quotient}
   Assuming axiom of choice, $\SetQuot[\Lim{\List}][\Bisim]$ is the final coalgebra of $\FMSet$.
@@ -962,7 +981,7 @@ where the relation $\Op{Act} \,P\,a$ is
 \]
 The type $\Op{F}_{A,B,P}\,X$ is a set whenever the type of shapes $A$ is a set. The functor $\FMSet$ corresponds to the instance where $A \DefEq ℕ$, $B \DefEq \Fin$ and $P\,\sigma \DefEq 1$.
 
-We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:PresSplitEpi} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ is not generally a split epimorphism, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:PresSplitEpi} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor. 
+We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:PresSplitEpi} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ does not generally have a section, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:PresSplitEpi} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor. 
 The employment of these propositions can be seen as the invocation of two specific instances of the axiom of countable choice, which happen to be hold in the case of $\FMSet$.
 
 Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A,B,P}$ valued in groupoids, akin to the functor $\Bag$. First, the small HIT construction of the groupoid of finite types $\Bij$ can be generalized:
