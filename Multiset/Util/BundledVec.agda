@@ -359,8 +359,8 @@ module _ {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (open BinaryRelation) 
   isTransRelator : isTrans (Relator R)
   isTransRelator _ _ _ = Relator-trans
 
-module _ {ℓ} {A A' B B' : Type ℓ}
-  (R : Rel A B ℓ) (S : Rel A' B' ℓ)
+module _ {ℓ ℓ' ℓR ℓS} {A B : Type ℓ} {A' B' : Type ℓ'}
+  (R : Rel A B ℓR) (S : Rel A' B' ℓS)
   {f : A → A'} {g : B → B'}
   (f-rel : ∀ {a b} → R a b → S (f a) (g b)) where abstract
   Relator∞-map : ∀ {as bs}
@@ -382,6 +382,9 @@ module _ {ℓ} {A A' B B' : Type ℓ}
 module Reasoning {ℓ ℓ'} {A : Type ℓ} (R : Rel A A ℓ') (open BinaryRelation) (refl-R : isRefl R) (trans-R : isTrans R) where
   private
     _≈_ = Relator R
+
+  Path→Rel : {as bs : ΣVec A} → as ≡ bs → as ≈ bs
+  Path→Rel p = PT.∣ Path→Relator∞ refl-R p ∣₁
 
   _Rel⟨_⟩_ : (as : ΣVec A) {bs cs : ΣVec A} → as ≈ bs → bs ≈ cs → as ≈ cs
   _ Rel⟨ r ⟩ s = Relator-trans trans-R r s

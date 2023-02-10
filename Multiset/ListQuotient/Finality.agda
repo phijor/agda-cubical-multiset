@@ -480,12 +480,14 @@ fix⁺-preserves-≈' : ∀ n {t u}
   → Relator _≈_ t u
   → Approx n (!^ n (map (cut n) t)) (!^ n (map (cut n) u))
 fix⁺-preserves-≈' zero _ = tt*
-fix⁺-preserves-≈' (suc n) = PT.map λ r →
-  BVec.Relator∞-trans (isTransApprox n)
- (BVec.Relator∞-trans (isTransApprox n)
-                      (BVec.Path→Relator∞ (isReflApprox n) (sym (map-comp _ _ _)))
-                      (BVec.Relator∞-map _ _ goal r))
-                      (BVec.Path→Relator∞ (isReflApprox n) (map-comp _ _ _))
+fix⁺-preserves-≈' (suc n) {t} {u} rel =
+  let
+    open BVec.Reasoning (Approx n) (isReflApprox n) (isTransApprox n) using (_Rel⟨_⟩_ ; _Rel∎ ; Path→Rel)
+  in
+  (map (!^ n) (map (cut (suc n)) t))  Rel⟨ Path→Rel (sym (map-comp _ _ _)) ⟩
+  (map (!^ n ∘ cut (suc n)) t)        Rel⟨ Relator-map _ _ goal rel ⟩
+  (map (!^ n ∘ cut (suc n)) u)        Rel⟨ Path→Rel (map-comp _ _ _) ⟩
+  (!^ (suc n) (map (cut (suc n)) u))  Rel∎
   where
     goal : ∀ {t u} → t ≈ u → Approx n (!^ n (cut (suc n) t)) (!^ n (cut (suc n) u))
     goal {t} {u} r =
@@ -516,24 +518,25 @@ module _ {C : Type} (R : C → C → Type)
     → ∀ x n → Approx n (f x .elements n) (step γ n x)
   unfold-unique' f feq x zero = tt*
   unfold-unique' f feq x (suc n) =
-    PT.map (λ r → BVec.Relator∞-trans (isTransApprox n)
-                  (BVec.Relator∞-trans (isTransApprox n)
-                                       r
-                                       (BVec.Path→Relator∞ (isReflApprox n) path)) goal)
-                                       (feq x .elements (suc n))
+    let
+      open BVec.Reasoning (Approx n) (isReflApprox n) (isTransApprox n) using (_Rel⟨_⟩_ ; _Rel∎ ; Path→Rel)
+    in
+    cut (suc n) (f x)                 Rel⟨ feq x .elements (suc n) ⟩
+    cut (suc n) (fix⁺ (map f (γ x)))  Rel⟨ Path→Rel path ⟩
+    map (cut n ∘ f) (γ x)             Rel⟨ goal ⟩
+    map (step γ n) (γ x)              Rel∎
     where
-      goal : Relator∞ (Approx n) (map (λ y → f y .elements n) (γ x)) (map (step γ n) (γ x))
-      goal =
-        Relator∞-map _≡_ _
-                     (λ {y} → J (λ z eq → Approx n (f y .elements n) (step γ n z)) (unfold-unique' f feq y n))
-                     (BVec.isReflRelator∞ (λ _ → refl) _)
+      goal : Relator (Approx n) (map (cut n ∘ f) (γ x)) (map (step γ n) (γ x))
+      goal = Relator-map _≡_ _
+        (λ {y} → J (λ z eq → Approx n (cut n (f y)) (step γ n z)) (unfold-unique' f feq y n))
+        (BVec.isReflRelator (λ _ → refl) _)
 
-      path : cut (suc n) (fix⁺ (map f (γ x))) ≡ map (λ y → f y .elements n) (γ x)
+      path : cut (suc n) (fix⁺ (map f (γ x))) ≡ map (cut n ∘ f) (γ x)
       path =
         cut (suc n) (fix⁺ (map f (γ x)))   ≡⟨ sym (map-comp _ _ _) ⟩
         _                                  ≡⟨ sym (map-comp _ _ _) ⟩
         _                                  ≡⟨ cong (λ g → map g (γ x)) (funExt (λ y → f y .is-lim n)) ⟩
-        map (λ y → f y .elements n) (γ x) ∎
+        map (cut n ∘ f) (γ x) ∎
 
   unfold-unique : (f : C → Tree)
     → (∀ x → Relator _≈_ (fix⁻ (f x)) (map f (γ x)))
