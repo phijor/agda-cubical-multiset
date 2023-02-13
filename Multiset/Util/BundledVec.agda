@@ -479,12 +479,31 @@ module _ {ℓ ℓR} (R : Relation ℓ ℓR) where
   open RelationStr
   open IsRelation
 
-  RelatorRelation : Relation _ _
+  RelatorRelation : Relation ℓ (ℓ-max ℓ ℓR)
   RelatorRelation .fst = ΣVec ⟨ R ⟩
   RelatorRelation .snd .rel = Relator (RelOf R)
   RelatorRelation .snd .is-relation .is-set-carrier = isSetΣVec (str R .is-set-carrier)
   RelatorRelation .snd .is-relation .is-prop-rel _ _ = isPropRelator _
 
+module _ {ℓ ℓR} where
+  open import Multiset.Relation.Category using (RelationEndo)
+  open import Cubical.Categories.Functor
+
+  open Relation using (Rel[_⇒_])
+  open Rel[_⇒_]
+
+  private
+    ℓ' = ℓ-max ℓ ℓR
+
+  Relator-lift : {R S : Relation ℓ ℓ'} → Rel[ R ⇒ S ] → Rel[ RelatorRelation R ⇒ RelatorRelation S ]
+  Relator-lift rel .morphism = map (rel .morphism)
+  Relator-lift rel .preserves-relation = Relator-map _ _ (rel .preserves-relation)
+
+  RelatorFunctor : RelationEndo ℓ ℓ'
+  RelatorFunctor .Functor.F-ob = RelatorRelation
+  RelatorFunctor .Functor.F-hom = Relator-lift
+  RelatorFunctor .Functor.F-id = Relation.Rel⇒Path (funExt map-id)
+  RelatorFunctor .Functor.F-seq f g = Relation.Rel⇒Path (funExt (map-comp (g .morphism) (f .morphism)))
 
 module _ {ℓ ℓ'} {A B : Type ℓ} {R : Rel A B ℓ'} where
 

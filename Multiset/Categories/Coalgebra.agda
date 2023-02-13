@@ -92,5 +92,8 @@ module _ {C : Category ℓC ℓC'} (F : Functor C C) where
   CoalgebrasCategory .⋆Assoc _ _ _ = CoalgebraHom≡ (⋆Assoc C _ _ _)
   CoalgebrasCategory .isSetHom = isSetCoalgebraHom
 
+  isTerminalCoalgebra : Coalgebra → Type _
+  isTerminalCoalgebra = isTerminal CoalgebrasCategory
+
   TerminalCoalgebra : Type _
   TerminalCoalgebra = Terminal CoalgebrasCategory

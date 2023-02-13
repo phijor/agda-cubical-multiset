@@ -333,8 +333,9 @@ pres′⁺≡pres = funExt $ TerminalChain.isSet→ShLimPath ΣVec (isSetΣVec^ 
   goal : ∀ (xs : ΣVec (Lim ΣVec)) n → pres-Iso .inv xs .elements n ≡ pres⁺ xs .elements n
   goal xs n = ΣVecPathP refl $ cong (Vec.map (cut n)) (VecExt.lookup-left-inv (xs .vec))
 
-isLimitPreservingΣVec : isLimitPreserving ΣVec
-isLimitPreservingΣVec = subst isEquiv pres′⁺≡pres (isoToIsEquiv (invIso pres-Iso))
+abstract
+  isLimitPreservingΣVec : isLimitPreserving ΣVec
+  isLimitPreservingΣVec = subst isEquiv pres′⁺≡pres (isoToIsEquiv (invIso pres-Iso))
 
 pres : ΣVec (Lim ΣVec) ≃ ShLim ΣVec
 pres = pres⁺ , isLimitPreservingΣVec
