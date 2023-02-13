@@ -16,6 +16,7 @@ open import Multiset.Util.BundledVec as BVec
     ( ΣVec
     ; Relator
     ; isReflRelator
+    ; isSymRelator
     ; isTransRelator
     ; isPropRelator
     ; Relator-map
@@ -25,6 +26,7 @@ open import Multiset.Util.Relation
     ( Tot
     ; isPropTot
     ; isReflTot
+    ; isSymTot
     ; isTransTot
     )
 open import Multiset.Limit.Chain
@@ -117,6 +119,10 @@ module _ where
   isReflApprox zero = isReflTot
   isReflApprox (suc n) = isReflRelator (isReflApprox n)
 
+  isSymApprox : ∀ n → isSym (Approx n)
+  isSymApprox zero = isSymTot
+  isSymApprox (suc n) = isSymRelator (isSymApprox n)
+
   isTransApprox : ∀ n → isTrans (Approx n)
   isTransApprox zero = isTransTot
   isTransApprox (suc n) = isTransRelator (isTransApprox n)
@@ -124,8 +130,14 @@ module _ where
   isReflBisim : isRefl Bisim
   isReflBisim t = bisim {s = t} {t = t} λ { n → (isReflApprox n (t .elements n)) }
 
+  isSymBisim : isSym Bisim
+  isSymBisim s t s≈t = bisim λ n → isSymApprox n _ _ (s≈t .elements n)
+
   isTransBisim : isTrans Bisim
   isTransBisim s t u s≈t t≈u = bisim {s = s} {t = u} λ n → isTransApprox n _ _ _ (s≈t .elements n) (t≈u .elements n)
+
+  isEquivRelBisim : isEquivRel Bisim
+  isEquivRelBisim = equivRel isReflBisim isSymBisim isTransBisim
 
   BisimApproxEquiv : ∀ {s t} → Bisim s t ≃ (∀ n → Approx n (cut n s) (cut n t))
   BisimApproxEquiv {s} {t} = propBiimpl→Equiv (isPropBisim _ _) (isPropΠ (isPropRelatorLim^ s t)) elements bisim

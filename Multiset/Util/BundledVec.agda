@@ -356,6 +356,9 @@ module _ {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (open BinaryRelation) 
     → Relator R as cs
   Relator-trans = PT.map2 Relator∞-trans
 
+  isTransRelator∞ : isTrans (Relator∞ R)
+  isTransRelator∞ _ _ _ = Relator∞-trans
+
   isTransRelator : isTrans (Relator R)
   isTransRelator _ _ _ = Relator-trans
 
@@ -404,6 +407,19 @@ module _ {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (open BinaryRelation) 
   isSymRelator : isSym (Relator R)
   isSymRelator _ _ = PT.map (isSymRelator∞ _ _)
 
+module _ {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (open BinaryRelation) (equiv-R : isEquivRel R) where
+  isEquivRelRelator∞ : isEquivRel (Relator∞ R)
+  isEquivRelRelator∞ =
+    equivRel (isReflRelator∞ (isEquivRel.reflexive equiv-R))
+            (isSymRelator∞ (isEquivRel.symmetric equiv-R))
+            (isTransRelator∞ (isEquivRel.transitive equiv-R))
+
+  isEquivRelRelator : isEquivRel (Relator R)
+  isEquivRelRelator =
+    equivRel (isReflRelator (isEquivRel.reflexive equiv-R))
+            (isSymRelator (isEquivRel.symmetric equiv-R))
+            (isTransRelator (isEquivRel.transitive equiv-R))
+
 module _ {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (open BinaryRelation)
   (prop-R : isPropValued R)
   (equiv-R : isEquivRel R)
@@ -414,8 +430,8 @@ module _ {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (open BinaryRelation)
   private
     [_]R = SQ.[_] {R = R}
 
-    effective : ∀ {a a' : A} → [ a ]R ≡ [ a' ]R → R a a'
-    effective {a} {a'} = SQ.effective prop-R equiv-R a a'
+  effective : ∀ {a a' : A} → [ a ]R ≡ [ a' ]R → R a a'
+  effective {a} {a'} = SQ.effective prop-R equiv-R a a'
 
   effectiveRelator∞ : ∀ {as bs : ΣVec A}
     → Relator∞ _≡_ (map [_]R as) (map [_]R bs)

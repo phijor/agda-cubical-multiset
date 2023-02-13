@@ -20,10 +20,11 @@ open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
     ; isTransApprox
     ; isReflBisim
     ; isTransBisim
+    ; isEquivRelBisim
     ; isPropBisim
     ; Approx
     )
-open import Multiset.Util.Relation using (ReflectsRel ; PreservesRel ; isSymTot)
+open import Multiset.Util.Relation using (ReflectsRel ; PreservesRel ; isSymTot ; isEquivRelPath)
 open import Multiset.Util.Vec as Vec using ()
 open import Multiset.Util.BundledVec as BVec
   using
@@ -36,6 +37,7 @@ open import Multiset.Util.BundledVec as BVec
     ; isReflRelator
     ; isSymRelator
     ; isTransRelator
+    ; isEquivRelRelator
     ; isPropRelator
     ; Relator-map
     )
@@ -198,30 +200,6 @@ elimΣVecProp2 {R} Y propY reflR f xs ys =
                               f
                               (toΣVecRel reflR xs) (toΣVecRel reflR ys)
 
-open BinaryRelation
-
-isSymApprox : ∀ n → isSym (Approx n)
-isSymApprox zero = isSymTot
-isSymApprox (suc n) = isSymRelator (isSymApprox n)
-
-isSymBisim : isSym Bisim
-isSymBisim s t s≈t = bisim λ n → isSymApprox n _ _ (s≈t .elements n)
-
-isEquivRelRelator : {X : Type} {R : X → X → Type}
-  → isEquivRel R
-  → isEquivRel (Relator R)
-isEquivRelRelator eqR =
-  equivRel (isReflRelator (isEquivRel.reflexive eqR))
-           (isSymRelator (isEquivRel.symmetric eqR))
-           (isTransRelator (isEquivRel.transitive eqR))
-
-
-isEquivRelBisim : isEquivRel Bisim
-isEquivRelBisim =
-  equivRel isReflBisim
-           isSymBisim
-           isTransBisim
-
 fixQ⁺ : FMSet UnorderedTree → UnorderedTree
 fixQ⁺ =
   SQ.rec SQ.squash/
@@ -252,15 +230,14 @@ module _ (fix⁻-preserves-≈ : PreservesRel _≈_ (Relator _≈_) fix⁻) wher
     (fix⁺-preserves-≈ (BVec.effectiveRelator isPropBisim isEquivRelBisim rs))
 
   inj-fixQ⁻ : ∀ t u → fixQ⁻ t ≡ fixQ⁻ u → t ≡ u
-  inj-fixQ⁻ =
-    SQ.elimProp2 (λ _ _ → isPropΠ (λ _ → SQ.squash/ _ _))
-      (λ t u r →
-        SQ.eq/ _ _
-          (inj-fixQ⁻' (SQ.effective (λ _ _ → isPropRelator _)
-                                    (isEquivRelRelator (equivRel (λ _ → refl) (λ _ _ → sym) λ _ _ _ → _∙_))
-                                    _
-                                    _
-                                    r)) )
+  inj-fixQ⁻ = SQ.elimProp2 (λ _ _ → isPropΠ (λ _ → SQ.squash/ _ _)) goal where
+    module _ (t u : Tree) (p : fixQ⁻ SQ.[ t ] ≡ fixQ⁻ SQ.[ u ]) where
+
+      t≈u : t ≈ u
+      t≈u = inj-fixQ⁻' (BVec.effective (λ _ _ → isPropRelator _) (isEquivRelRelator isEquivRelPath) p)
+
+      goal : SQ.[ t ] ≡ SQ.[ u ]
+      goal = SQ.eq/ _ _ t≈u
 
   fixQ⁻fixQ⁺ : ∀ t → fixQ⁻ (fixQ⁺ t) ≡ t
   fixQ⁻fixQ⁺ =

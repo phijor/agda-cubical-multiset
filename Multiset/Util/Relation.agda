@@ -27,6 +27,21 @@ module _ {ℓ} {A : Type ℓ} {ℓR} where
   isTransTot : isTrans
   isTransTot _ _ _ tt* tt* = tt*
 
+  open isEquivRel
+  isEquivRelTot : isEquivRel
+  isEquivRelTot .reflexive = isReflTot
+  isEquivRelTot .symmetric = isSymTot
+  isEquivRelTot .transitive = isTransTot
+
+module _ {ℓ} {A : Type ℓ} where
+  open BinaryRelation (Path A)
+  open isEquivRel
+
+  isEquivRelPath : isEquivRel
+  isEquivRelPath .reflexive a = refl
+  isEquivRelPath .symmetric a b = sym
+  isEquivRelPath .transitive a b c = _∙_
+
 private
   variable
     ℓA ℓB ℓC ℓR ℓS ℓT : Level
