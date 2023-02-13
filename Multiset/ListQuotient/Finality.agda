@@ -537,23 +537,20 @@ module _
       ( morphism to γ
       ; preserves-relation to γ-preserves-R
       )
+  open Rel[_⇒_]
 
   private
     _ : ⟨ C ⟩ → ΣVec ⟨ C ⟩
     _ = γ
 
-  -- module _ {C : Type} (R : C → C → Type)
-  --          (γ : C → ΣVec C)
-  --          (γ-preserves-R : PreservesRel R (Relator R) γ)
-  --          where
+  -- (unfold γ) is a setoid morphism
+  unfold-hom : Rel[ C ⇒ BisimRelation ]
+  unfold-hom .morphism = unfold γ
+  unfold-hom .preserves-relation r = bisim (λ n → approx n r) where
+    approx : ∀ n {x y} → R x y → Approx n (step γ n x) (step γ n y)
+    approx zero r = tt*
+    approx (suc n) r = PT.map (Relator∞-map R _ (approx n)) (γ-preserves-R r)
 
--- unfold is a setoid morphism
-  unfold-preserves-R' : ∀ n {x y} → R x y → Approx n (step γ n x) (step γ n y)
-  unfold-preserves-R' zero r = tt*
-  unfold-preserves-R' (suc n) r = PT.map (Relator∞-map R _ (unfold-preserves-R' n)) (γ-preserves-R r)
-
-  unfold-preserves-R : PreservesRel R _≈_ (unfold γ)
-  unfold-preserves-R r = bisim (λ n → unfold-preserves-R' n r)
 
   -- unfold γ is a coalgebra-morphism from `γ` to `fix⁻`, up to the relation `Relator _≈_`
   unfold-coalg-morphism-γ-fix⁻ : ∀ x → Relator _≈_ (fix⁻ (unfold γ x)) (map (unfold γ) (γ x))
