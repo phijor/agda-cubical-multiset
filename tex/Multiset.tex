@@ -667,9 +667,8 @@ For this, one needs to show that it is a \emph{setoid-morphism},
 i.e.\@ for all $s, t : \Lim{\List}$, whenever $\Bisim\;s\;t$
 then $\Relator \Bisim\; (\coalg{\List} s)\; (\coalg{\List} t)$.
 
-\begin{theorem}
-  Assuming $\coalg{\List}$ is a setoid-morphism, \LLPO{} holds.
-  \todo{Link \texttt{fix⁻-preserves-≈→LLPO} once in}
+\begin{theorem}[\CodeRef{Multiset.ListQuotient.Finality}{fix⁻-preserves-≈→LLPO}]
+  If $\coalg{\List}$ is a setoid-morphism, then \LLPO{} holds.
 \end{theorem}
 The proof is similar to \cref{lem:InjPresImpliesComplete}.
 Again, the converse is morally the same as \cref{lem:LLPOImpliesPresInj}.
@@ -683,9 +682,9 @@ Under this assumption it is alone the final coalgebra of $\Op{FMSetoid}$ in the 
 \end{theorem}
 
 Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by the relation $\Bisim$ does not give the final coalgebra of the finite bag functor $\FMSet$. We can show that the resulting quotient is a fixpoint, and in particular a coalgebra. But the proof of finality requires the full axiom of choice. 
-\begin{theorem}[\CodeRef{Multiset.ListQuotient.Finality}{fixQ⁺-iso}]\label{thm:fixpoint-quotient}
-  For all $X : \Type$, we have $\FMSet(\SetQuot[\Lim{\List}][\Bisim]) \simeq \SetQuot[\Lim{\List}][\Bisim]$.
-  \todo{Make this an equivalence in the code.}
+\begin{theorem}[\CodeRef{Multiset.ListQuotient.Fixpoint}{FMSetFixpointTree/Bisim}]\label{thm:fixpoint-quotient}
+  Assuming $\coalg{\List}$ is a setoid-morphism,
+  $\FMSet(\SetQuot[\Lim{\List}][\Bisim]) \simeq \SetQuot[\Lim{\List}][\Bisim]$.
 \end{theorem}
 \begin{theorem}\label{thm:final-quotient}
   Assuming axiom of choice, $\SetQuot[\Lim{\List}][\Bisim]$ is the final coalgebra of $\FMSet$.

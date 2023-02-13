@@ -50,9 +50,9 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     ; _^_
     )
 
-open import Cubical.Foundations.Equiv using (secEq ; retEq)
+open import Cubical.Foundations.Equiv using (_≃_ ; secEq ; retEq)
 open import Cubical.Foundations.HLevels
-open import Cubical.Foundations.Isomorphism using (Iso)
+open import Cubical.Foundations.Isomorphism using (Iso ; isoToEquiv)
 open import Cubical.Data.Nat as Nat using (ℕ ; suc ; zero)
 open import Cubical.Data.Unit.Base using (tt*)
 open import Cubical.Data.Vec using (_∷_)
@@ -287,3 +287,6 @@ module _ (fix⁻-preserves-≈ : PreservesRel _≈_ (Relator _≈_) fix⁻) wher
   fixQ⁺-iso .inv = fixQ⁻
   fixQ⁺-iso .rightInv = fixQ⁺fixQ⁻
   fixQ⁺-iso .leftInv = fixQ⁻fixQ⁺
+
+  FMSetFixpointTree/Bisim : (FMSet (Tree /₂ Bisim)) ≃ Tree /₂ Bisim
+  FMSetFixpointTree/Bisim = isoToEquiv fixQ⁺-iso
