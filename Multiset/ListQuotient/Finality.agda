@@ -27,14 +27,13 @@ open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
     ; isReflBisim
     ; isTransBisim
     ; isPropBisim
-    ; TreeSetoid
+    ; BisimRelation
     ; ShBisim ; _≈ˢʰ_ ; shbisim
     ; Approx
     ; Approx-π
     ; Bisim→Approx
     )
 open import Multiset.Util.BoolSequence as Seq using (latch-even)
-open import Multiset.Util.Relation using (ReflectsRel ; PreservesRel ; PreservesRel→SectionReflectsRel)
 open import Multiset.Util.Vec as Vec using ()
 open import Multiset.Util.BundledVec as BVec
   using
@@ -48,7 +47,7 @@ open import Multiset.Util.BundledVec as BVec
     ; isReflRelator
     ; Relator∞-map
     ; Relator-map
-    ; RelatorSetoid
+    ; RelatorRelation
     )
   renaming
     ( [_] to #[_]
@@ -65,6 +64,15 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     )
 open import Multiset.Omniscience using (LLPO)
 open import Multiset.Setoid.Base using (SetoidMorphism ; IsSetoidMorphism)
+open import Multiset.Relation.Base as Relation
+  using
+    ( Relation
+    ; ReflectsRel
+    ; PreservesRel
+    ; PreservesRelation
+    ; PreservesRel→SectionReflectsRel
+    ; Rel[_⇒_]
+    )
 
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Equiv using (secEq ; retEq)
@@ -478,11 +486,8 @@ fix⁺-reflects-≈→LLPO reflects = pres-reflects-≈→LLPO goal where
     zero → tt*
     (suc n) → subst2 (Relator (Approx n)) (sym (pres⁺ s .is-lim n)) (sym (pres⁺ t .is-lim n)) (rel .elements n)
 
-fix⁻-preserves-≈→LLPO : PreservesRel _≈_ (Relator _≈_) fix⁻ → LLPO
+fix⁻-preserves-≈→LLPO : PreservesRelation BisimRelation (RelatorRelation BisimRelation) fix⁻ → LLPO
 fix⁻-preserves-≈→LLPO preserves = fix⁺-reflects-≈→LLPO (PreservesRel→SectionReflectsRel _≈_ (Relator _≈_) fix⁻ fix⁺ (retEq fix) preserves)
-
-fix⁻-setoid-morphism→LLPO : IsSetoidMorphism TreeSetoid (RelatorSetoid TreeSetoid) fix⁻ → LLPO
-fix⁻-setoid-morphism→LLPO = fix⁻-preserves-≈→LLPO
 
 Path→Approx : ∀ n {t u}
   → t ≡ u
@@ -516,14 +521,31 @@ fix⁺-preserves-≈' (suc n) {t} {u} rel =
 fix⁺-preserves-≈ : PreservesRel (Relator _≈_) _≈_ fix⁺
 fix⁺-preserves-≈ r = bisim λ n → fix⁺-preserves-≈' n r
 
-fix⁺-setoid-morphism : SetoidMorphism (RelatorSetoid TreeSetoid) TreeSetoid
-fix⁺-setoid-morphism .SetoidMorphism.morphism = fix⁺
-fix⁺-setoid-morphism .SetoidMorphism.is-setoid-morphism = fix⁺-preserves-≈
+fix⁺-relhom : Rel[ RelatorRelation BisimRelation ⇒ BisimRelation ]
+fix⁺-relhom .Rel[_⇒_].morphism = fix⁺
+fix⁺-relhom .Rel[_⇒_].preserves-relation = fix⁺-preserves-≈
 
-module _ {C : Type} (R : C → C → Type)
-         (γ : C → ΣVec C)
-         (γ-preserves-R : PreservesRel R (Relator R) γ)
-         where
+module _
+  (C : Relation ℓ-zero ℓ-zero)
+  (γ-hom : Rel[ C ⇒ RelatorRelation C ]) where
+  open Relation using (⟨_⟩ ; RelOf)
+
+  R = RelOf C
+
+  open Rel[_⇒_] γ-hom
+    renaming
+      ( morphism to γ
+      ; preserves-relation to γ-preserves-R
+      )
+
+  private
+    _ : ⟨ C ⟩ → ΣVec ⟨ C ⟩
+    _ = γ
+
+  -- module _ {C : Type} (R : C → C → Type)
+  --          (γ : C → ΣVec C)
+  --          (γ-preserves-R : PreservesRel R (Relator R) γ)
+  --          where
 
 -- unfold is a setoid morphism
   unfold-preserves-R' : ∀ n {x y} → R x y → Approx n (step γ n x) (step γ n y)
@@ -541,7 +563,7 @@ module _ {C : Type} (R : C → C → Type)
     in Path→Rel (funExt⁻ (isCoalgebraMorphismUnfold γ) x)
 
 -- uniqueness of unfold
-  unfold-unique' : (f : C → Tree)
+  unfold-unique' : (f : ⟨ C ⟩ → Tree)
     → (∀ x → f x ≈ fix⁺ (map f (γ x)))
     → ∀ x n → Approx n (f x .elements n) (step γ n x)
   unfold-unique' f feq x zero = tt*
@@ -566,7 +588,7 @@ module _ {C : Type} (R : C → C → Type)
         _                                  ≡⟨ cong (λ g → map g (γ x)) (funExt (λ y → f y .is-lim n)) ⟩
         map (cut n ∘ f) (γ x) ∎
 
-  unfold-unique : (f : C → Tree)
+  unfold-unique : (f : ⟨ C ⟩ → Tree)
     → (∀ x → Relator _≈_ (fix⁻ (f x)) (map f (γ x)))
     → ∀ x → f x ≈ unfold γ x
   unfold-unique f feq x =

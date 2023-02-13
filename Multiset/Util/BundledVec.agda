@@ -5,6 +5,7 @@ module Multiset.Util.BundledVec where
 open import Multiset.Prelude
 open import Multiset.Util.Vec as VecExt using (here ; there)
 open import Multiset.Setoid.Base as Setoid using (Setoid)
+open import Multiset.Relation.Base as Relation using (Relation ; RelationStr ; IsRelation)
 
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.HLevels
@@ -472,6 +473,17 @@ module _ {ℓ ℓR} (S : Setoid ℓ ℓR)  where
     (isReflRelator (setoidS .is-reflexive))
     (isSymRelator (setoidS .is-symmetric))
     (isTransRelator (setoidS .is-transitive))
+
+module _ {ℓ ℓR} (R : Relation ℓ ℓR) where
+  open Relation using (⟨_⟩ ; RelOf ; str)
+  open RelationStr
+  open IsRelation
+
+  RelatorRelation : Relation _ _
+  RelatorRelation .fst = ΣVec ⟨ R ⟩
+  RelatorRelation .snd .rel = Relator (RelOf R)
+  RelatorRelation .snd .is-relation .is-set-carrier = isSetΣVec (str R .is-set-carrier)
+  RelatorRelation .snd .is-relation .is-prop-rel _ _ = isPropRelator _
 
 
 module _ {ℓ ℓ'} {A B : Type ℓ} {R : Rel A B ℓ'} where

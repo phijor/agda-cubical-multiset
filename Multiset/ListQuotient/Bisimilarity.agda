@@ -4,6 +4,7 @@ module Multiset.ListQuotient.Bisimilarity where
 
 open import Multiset.Prelude
 open import Multiset.Setoid.Base using (Setoid ; makeSetoid)
+open import Multiset.Relation.Base using (Relation ; RelationStr ; IsRelation)
 open import Multiset.ListQuotient.ListFinality
   using
     ( FunctorΣVec
@@ -146,3 +147,9 @@ module _ where
 
 TreeSetoid : Setoid ℓ-zero ℓ-zero
 TreeSetoid = makeSetoid Bisim isSetTree (isPropBisim _ _) isReflBisim isSymBisim isTransBisim
+
+BisimRelation : Relation ℓ-zero ℓ-zero
+BisimRelation .fst = Tree
+BisimRelation .snd .RelationStr.rel = Bisim
+BisimRelation .snd .RelationStr.is-relation .IsRelation.is-set-carrier = isSetTree
+BisimRelation .snd .RelationStr.is-relation .IsRelation.is-prop-rel = isPropBisim
