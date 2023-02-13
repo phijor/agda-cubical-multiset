@@ -27,6 +27,7 @@ open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
     ; isReflBisim
     ; isTransBisim
     ; isPropBisim
+    ; TreeSetoid
     ; ShBisim ; _≈ˢʰ_ ; shbisim
     ; Approx
     ; Approx-π
@@ -47,6 +48,7 @@ open import Multiset.Util.BundledVec as BVec
     ; isReflRelator
     ; Relator∞-map
     ; Relator-map
+    ; RelatorSetoid
     )
   renaming
     ( [_] to #[_]
@@ -62,6 +64,7 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     ; _^_
     )
 open import Multiset.Omniscience using (LLPO)
+open import Multiset.Setoid.Base using (SetoidMorphism ; IsSetoidMorphism)
 
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Equiv using (secEq ; retEq)
@@ -478,6 +481,9 @@ fix⁺-reflects-≈→LLPO reflects = pres-reflects-≈→LLPO goal where
 fix⁻-preserves-≈→LLPO : PreservesRel _≈_ (Relator _≈_) fix⁻ → LLPO
 fix⁻-preserves-≈→LLPO preserves = fix⁺-reflects-≈→LLPO (PreservesRel→SectionReflectsRel _≈_ (Relator _≈_) fix⁻ fix⁺ (retEq fix) preserves)
 
+fix⁻-setoid-morphism→LLPO : IsSetoidMorphism TreeSetoid (RelatorSetoid TreeSetoid) fix⁻ → LLPO
+fix⁻-setoid-morphism→LLPO = fix⁻-preserves-≈→LLPO
+
 Path→Approx : ∀ n {t u}
   → t ≡ u
   → Approx n t u
@@ -509,6 +515,10 @@ fix⁺-preserves-≈' (suc n) {t} {u} rel =
 
 fix⁺-preserves-≈ : PreservesRel (Relator _≈_) _≈_ fix⁺
 fix⁺-preserves-≈ r = bisim λ n → fix⁺-preserves-≈' n r
+
+fix⁺-setoid-morphism : SetoidMorphism (RelatorSetoid TreeSetoid) TreeSetoid
+fix⁺-setoid-morphism .SetoidMorphism.morphism = fix⁺
+fix⁺-setoid-morphism .SetoidMorphism.is-setoid-morphism = fix⁺-preserves-≈
 
 module _ {C : Type} (R : C → C → Type)
          (γ : C → ΣVec C)

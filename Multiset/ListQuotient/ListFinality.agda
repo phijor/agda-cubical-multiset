@@ -358,6 +358,8 @@ open TerminalChain.Fixpoint isLimitPreservingΣVec
 isSetLimΣVec : isSet (Lim ΣVec)
 isSetLimΣVec = isOfHLevelLimit _ 2 isSetΣVec^
 
+isSetTree = isSetLimΣVec
+
 open Limit
 
 TreePath : ∀ {l₁ l₂ : Lim ΣVec} → (∀ n → l₁ .elements n ≡ l₂ .elements n) → l₁ ≡ l₂

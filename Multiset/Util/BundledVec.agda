@@ -4,6 +4,7 @@ module Multiset.Util.BundledVec where
 
 open import Multiset.Prelude
 open import Multiset.Util.Vec as VecExt using (here ; there)
+open import Multiset.Setoid.Base as Setoid using (Setoid)
 
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.HLevels
@@ -455,6 +456,23 @@ module _ {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (open BinaryRelation)
     → Relator _≡_ (map [_]R as) (map [_]R bs)
     → Relator R as bs
   effectiveRelator = PT.map effectiveRelator∞
+
+module _ {ℓ ℓR} (S : Setoid ℓ ℓR)  where
+  open Setoid.SetoidStr
+  open Setoid.IsSetoid
+  private
+    R = Setoid.RelOf S
+
+    setoidS = Setoid.str S .is-setoid
+
+  RelatorSetoid : Setoid _ _
+  RelatorSetoid = Setoid.makeSetoid (Relator R)
+    (isSetΣVec (setoidS .is-set-carrier))
+    (isPropRelator _)
+    (isReflRelator (setoidS .is-reflexive))
+    (isSymRelator (setoidS .is-symmetric))
+    (isTransRelator (setoidS .is-transitive))
+
 
 module _ {ℓ ℓ'} {A B : Type ℓ} {R : Rel A B ℓ'} where
 
