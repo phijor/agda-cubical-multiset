@@ -24,6 +24,7 @@ module _ {C : Category ℓC ℓC'} (F : Functor C C) where
   IsCoalgebra x = C [ x , F₀ x ]
   
   record Coalgebra : Type (ℓ-max ℓC ℓC') where
+    constructor coalgebra
     field
       {carrier} : ob C
       str : IsCoalgebra carrier
