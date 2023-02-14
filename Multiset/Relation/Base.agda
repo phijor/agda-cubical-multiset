@@ -42,6 +42,12 @@ RelOf S = str S .RelationStr.rel
 
 syntax RelOf S a b = a ≈⟨ S ⟩ b
 
+PathRelation : (A : Type ℓ) → isSet A → Relation ℓ ℓ
+PathRelation A setA .fst = A
+PathRelation A setA .snd .RelationStr.rel = Path A
+PathRelation A setA .snd .RelationStr.is-relation .IsRelation.is-set-carrier = setA
+PathRelation A setA .snd .RelationStr.is-relation .IsRelation.is-prop-rel = setA
+
 module _ {ℓ ℓ≈ ℓ′ ℓ≈′ : Level} (S : Relation ℓ ℓ≈) (R : Relation ℓ′ ℓ≈′) where
   open IsRelation
   open RelationStr
@@ -53,6 +59,7 @@ module _ {ℓ ℓ≈ ℓ′ ℓ≈′ : Level} (S : Relation ℓ ℓ≈) (R : Re
   isPropPreservesRelation = isPropImplicitΠ2 λ _ _ → isPropΠ λ _ → str R .is-prop-rel _ _
 
   record Rel[_⇒_] : Type (ℓ-max (ℓ-max ℓ ℓ′) (ℓ-max ℓ≈ ℓ≈′)) where
+    constructor mkRel⇒
     field
       morphism : ⟨ S ⟩ → ⟨ R ⟩
       preserves-relation : PreservesRelation morphism
