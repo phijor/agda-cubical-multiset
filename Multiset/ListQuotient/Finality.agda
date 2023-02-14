@@ -33,18 +33,12 @@ open import Multiset.Util.BundledVec as BVec
     ; Relator-map
     ; RelatorRelation
     )
-open import Multiset.Limit.Chain
-  using
-    ( lim
-    ; Limit
-    )
+open import Multiset.Limit.Chain using (Limit)
 open import Multiset.Limit.TerminalChain as TerminalChain
   using
     ( Functor
     ; _^_
     )
-open import Multiset.Omniscience using (LLPO)
-open import Multiset.Setoid.Base using (SetoidMorphism ; IsSetoidMorphism)
 open import Multiset.Relation.Base as Relation
   using
     ( Relation
@@ -54,8 +48,6 @@ open import Multiset.Relation.Base as Relation
     ; PreservesRel→SectionReflectsRel
     ; Rel[_⇒_]
     )
-open import Multiset.Coalgebra using (isCoalgebraMorphism)
-open import Multiset.Categories.Coalgebra using (TerminalCoalgebra)
 
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Equiv
@@ -168,47 +160,3 @@ module _
     → ∀ x → f x ≈ unfold γ x
   unfold-unique f feq x =
     bisim (unfold-unique' f (λ y → isTransBisim _ _ _ (Path→Bisim (sym (secEq fix (f y)))) (fix⁺-preserves-≈ (feq y))) x)
-
-module _
-  (coalg : Tree → ΣVec Tree)
-  (unfold-is-coalg-morphism : {C : Type} → (γ : C → ΣVec C) → isCoalgebraMorphism ΣVec γ coalg (unfold γ))
-  (coalg-pres : PreservesRelation BisimRelation (RelatorRelation BisimRelation) coalg)
-  where
-  unfold-coalg : TerminalCoalgebra $ BVec.RelatorFunctor {ℓ = ℓ-zero} {ℓR = ℓ-zero}
-  unfold-coalg = coalg-lift , coalg-lift-eq where
-    open import Multiset.Categories.Coalgebra
-    open Coalgebra
-    open CoalgebraHom
-    open Relation using (⟨_⟩ ; _⋆Rel⇒_ ; RelOf)
-
-    open BVec using (RelatorFunctor)
-    open Rel[_⇒_]
-
-    coalg-lift : Coalgebra RelatorFunctor
-    coalg-lift .carrier = BisimRelation
-    coalg-lift .str .morphism = coalg
-    coalg-lift .str .preserves-relation = coalg-pres
-
-    coalg-lift-eq : isTerminalCoalgebra RelatorFunctor coalg-lift
-    coalg-lift-eq γ-coalg = ana , anaEq where
-      C = ⟨ γ-coalg .carrier ⟩
-      R = RelOf (γ-coalg .carrier)
-
-      open Rel[_⇒_] (γ-coalg .str)
-        renaming
-          ( morphism to γ
-          ; preserves-relation to γ-preserves-R
-          )
-
-      ana : CoalgebraHom _ _ _
-      ana .carrierHom = unfold-hom (γ-coalg .carrier) (γ-coalg .str)
-      ana .strHom = Relation.Rel⇒Path (unfold-is-coalg-morphism γ)
-
-      module _ (f : CoalgebraHom RelatorFunctor γ-coalg coalg-lift) where
-        anaEq' : unfold γ ≡ f .carrierHom .morphism
-        anaEq' = {! !}
-
-        anaEq : ana ≡ f
-        anaEq = CoalgebraHom≡ RelatorFunctor (Relation.Rel⇒Path anaEq')
-
--- TODO: Instanciate the above module to fix⁻ and the fact that unfold is a coalgebra-morphism
