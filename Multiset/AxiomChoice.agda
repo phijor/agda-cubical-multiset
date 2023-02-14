@@ -20,6 +20,17 @@ open BinaryRelation
 
 -- open import Basics
 
+AC : ∀ {ℓ ℓ' ℓR} → Type (ℓ-suc (ℓ-max ℓ (ℓ-max ℓ' ℓR)))
+AC {ℓ} {ℓ'} {ℓR} =
+  ∀ {A : Type ℓ} {B : A → Type ℓ'}
+  → (R : (a : A) → (B a) → Type ℓR)
+  → isSet A
+  → (∀ a → isSet (B a))
+  → (∀ a b → isProp (R a b))
+  → (∀ a → ∥ Σ[ b ∈ B a ] R a b ∥₁)
+  → ∥ Σ[ f ∈ ((a : A) → B a) ] (∀ a → R a (f a)) ∥₁
+
+
 substSymInRel : {A : Type} (B : A → Type)
   → (R : ∀ a → B a → B a → Type)
   → {a a' : A} (p : a ≡ a')
