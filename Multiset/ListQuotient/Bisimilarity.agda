@@ -129,7 +129,10 @@ module _ where
   isTransApprox : ∀ n → isTrans (Approx n)
   isTransApprox zero = isTransTot
   isTransApprox (suc n) = isTransRelator (isTransApprox n)
-  
+
+  isEquivRelApprox : ∀ n → isEquivRel (Approx n)
+  isEquivRelApprox n = equivRel (isReflApprox n) (isSymApprox n) (isTransApprox n)
+
   isReflBisim : isRefl Bisim
   isReflBisim t = bisim {s = t} {t = t} λ { n → (isReflApprox n (t .elements n)) }
 

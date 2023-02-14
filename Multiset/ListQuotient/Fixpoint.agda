@@ -3,7 +3,11 @@
 module Multiset.ListQuotient.Fixpoint where
 
 open import Multiset.Prelude
-open import Multiset.ListQuotient.Finality using (fix⁺-preserves-≈)
+open import Multiset.ListQuotient.Finality
+  using
+    ( fix⁺-preserves-≈
+    ; unfold-unique
+    )
 open import Multiset.ListQuotient.ListFinality
   using
     ( FunctorΣVec
@@ -13,6 +17,8 @@ open import Multiset.ListQuotient.ListFinality
     ; fix ; fix⁺ ; fix⁻
     ; step
     ; unfold
+    ; isSetLimΣVec
+    ; isCoalgebraMorphismUnfold
     )
 open import Multiset.ListQuotient.Bisimilarity as Bisimilarity
   using
@@ -73,6 +79,13 @@ open Functor ⦃...⦄
 
 FMSet : ∀ {ℓ} → Type ℓ → Type ℓ
 FMSet X = ΣVec X /₂ (Relator _≡_)
+
+mapFMSet : {X Y : Type} 
+  → (X → Y) → FMSet X → FMSet Y
+mapFMSet f =
+  SQ.rec SQ.squash/
+         (λ x → SQ.[ map f x ])
+         λ x y r → SQ.eq/ _ _ (Relator-map _≡_ _ (cong f) r)  
 
 -- Unordered trees are a fixpoint of FMSet
 UnorderedTree : Type _
@@ -267,3 +280,118 @@ module _ (fix⁻-preserves-≈ : PreservesRel _≈_ (Relator _≈_) fix⁻) wher
 
   FMSetFixpointTree/Bisim : (FMSet (Tree /₂ Bisim)) ≃ Tree /₂ Bisim
   FMSetFixpointTree/Bisim = isoToEquiv fixQ⁺-iso
+
+  open import Multiset.AxiomChoice
+
+  [_⇒FMSet_] : (A B : Type) → Type
+  [ A ⇒FMSet B ] = [ A ⇒ (ΣVec B) ]/ Relator _≡_
+
+  [_⇒UTree] : (A : Type) → Type
+  [ A ⇒UTree] = [ A ⇒ Tree ]/ Bisim
+  
+  unfold-preserves-coalg-rel' : {X : Type} {γ γ' : X → ΣVec X}
+    → (∀ x → Relator _≡_ (γ x) (γ' x))
+    → ∀ x n → Approx n (step γ n x) (step γ' n x)
+  unfold-preserves-coalg-rel' rel x zero = tt*
+  unfold-preserves-coalg-rel' {γ = γ} {γ'} rel x (suc n) =
+    Relator-map _ _
+      (λ {y} →
+        J (λ b eq → Approx n (step γ n y) (step γ' n b))
+          (unfold-preserves-coalg-rel' rel y n))
+      (rel x)
+  
+  unfold-preserves-coalg-rel : {X : Type} {γ γ' : X → ΣVec X}
+    → (∀ x → Relator _≡_ (γ x) (γ' x))
+    → ∀ x → unfold γ x ≈ unfold γ' x
+  unfold-preserves-coalg-rel rel x = bisim (unfold-preserves-coalg-rel' rel x)
+  
+  unfoldQ' : {X : Type} (γ : [ X ⇒FMSet X ])
+    → X → UnorderedTree
+  unfoldQ' =
+    SQ.rec (isSetΠ (λ _ → SQ.squash/))
+           (λ γ x → SQ.[ unfold γ x ])
+           λ γ γ' rel → funExt (λ x → SQ.eq/ _ _ (unfold-preserves-coalg-rel rel x))
+
+  module _
+         (ac : {A : Type} {B : A → Type} (R : (a : A) → B a → Type)
+             → isSet A → (∀ a → isSet (B a)) → (∀ a b → isProp (R a b))
+             → ((a : A) → ∥ (Σ[ b ∈ B a ] R a b ) ∥₁)
+             → ∥ Σ[ f ∈ ((a : A) → B a) ] ((a : A) → R a (f a)) ∥₁)
+          (X : Type) (setX : isSet X)
+          where
+  
+    open ChoiceForTheorem7 ac
+    open Hyps (Relator {A = X} _≡_) setX
+              (BVec.isSetΣVec setX) (λ _ _ → BVec.isPropRelator _≡_)
+              (isEquivRelRelator (BinaryRelation.equivRel (λ _ → refl) (λ _ _ → sym) λ _ _ _ → _∙_))
+         renaming (θInv to θ1Inv; sectionθ to sectionθ1)
+  
+    open Hyps Bisim setX
+              isSetLimΣVec isPropBisim isEquivRelBisim
+         renaming (θInv to θ2Inv; sectionθ to sectionθ2)
+
+    θ1 : [ X ⇒FMSet X ] → X → FMSet X
+    θ1 = θ _ _
+
+    θ2 : [ X ⇒UTree] → X → UnorderedTree
+    θ2 = θ _ _
+
+    unfoldQ : (γ : X → FMSet X) → X → UnorderedTree
+    unfoldQ γ = unfoldQ' (θ1Inv γ) 
+
+    unfoldQ-coalg-morphism' : (γ : [ X ⇒FMSet X ])
+      → ∀ x → fixQ⁻ (unfoldQ' γ x) ≡ mapFMSet (unfoldQ' γ) (θ1 γ x)
+    unfoldQ-coalg-morphism' =
+      SQ.elimProp (λ _ → isPropΠ (λ _ → SQ.squash/ _ _))
+                 (λ γ x → cong SQ.[_] (cong (map SQ.[_]) (funExt⁻ (isCoalgebraMorphismUnfold γ) x)
+                           ∙ sym (map-comp _ _ _)))
+
+    unfoldQ-coalg-morphism : (γ : X → FMSet X)
+      → ∀ x → fixQ⁻ (unfoldQ γ x) ≡ mapFMSet (unfoldQ γ) (γ x)
+    unfoldQ-coalg-morphism γ x =
+      unfoldQ-coalg-morphism' (θ1Inv γ) x
+      ∙ cong (λ f → mapFMSet (unfoldQ γ) (f x)) (sectionθ1 γ)
+
+    unfoldQ-unique'' : (γ : X → ΣVec X)
+      → (f : [ X ⇒UTree])
+      → (∀ x → fixQ⁻ (θ2 f x) ≡ mapFMSet (θ2 f) SQ.[ γ x ])
+      → ∀ x → θ2 f x ≡ unfoldQ' SQ.[ γ ] x
+    unfoldQ-unique'' γ =
+      SQ.elimProp (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → SQ.squash/ _ _)))
+        (λ f feq x → SQ.eq/ _ _
+          (unfold-unique _≡_ γ (λ {y} → J (λ a eq → Relator _≡_ (γ y) (γ a)) (isReflRelator (λ _ → refl) _)) f
+                          (λ x →
+                            BVec.effectiveRelator
+                              isPropBisim
+                              isEquivRelBisim
+                              (subst (Relator _≡_ (BVec.map SQ.[_] (fix⁻ (f x))))
+                                     (map-comp _ _ _)
+                                     (SQ.effective (λ _ _ → isPropRelator _≡_)
+                                                   (isEquivRelRelator (BinaryRelation.equivRel (λ _ → refl) (λ _ _ → sym) λ _ _ _ → _∙_))
+                                                   _ _
+                                                   (feq x))))
+                          x))
+
+    unfoldQ-unique' : (γ : [ X ⇒FMSet X ])
+      → (f : X → UnorderedTree)
+      → (feq : ∀ x → fixQ⁻ (f x) ≡ mapFMSet f (θ1 γ x))
+      → ∀ x → f x ≡ unfoldQ' γ x
+    unfoldQ-unique' =
+      SQ.elimProp
+        (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → SQ.squash/ _ _))))
+        (λ γ f feq x →
+           (λ i → sym (sectionθ2 f) i x)
+           ∙ unfoldQ-unique'' γ
+                              (θ2Inv f)
+                              (λ y → (λ i → fixQ⁻ (sectionθ2 f i y))
+                                      ∙ feq y
+                                      ∙ cong (λ g → SQ.[ map g (γ y) ]) (sym (sectionθ2 f)))
+                              x)
+
+    unfoldQ-unique : (γ : X → FMSet X)
+      → (f : X → UnorderedTree)
+      → (feq : ∀ x → fixQ⁻ (f x) ≡ mapFMSet f (γ x))
+      → f ≡ unfoldQ γ
+    unfoldQ-unique γ f feq =
+      funExt (unfoldQ-unique' (θ1Inv γ) f (λ y → feq y ∙ λ i → mapFMSet f (sectionθ1 γ (~ i) y)))
+
