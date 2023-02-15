@@ -3,6 +3,7 @@
 module Multiset.AxiomChoice where
 
 import Multiset.Axioms.Choice as AOC
+import Multiset.Axioms.PointwiseChoice as PWC
 
 open import Cubical.Core.Everything
 open import Cubical.Foundations.Everything
@@ -329,38 +330,24 @@ module _ {A : Type} (B : A → Type)
              (λ _ _ _ → isProp→PathP (λ _ → propC _) _ _)
 
 
-module ChoiceForTheorem7
-         (ac : {A : Type} {B : A → Type} (R : (a : A) → B a → Type)
-           → isSet A → (∀ a → isSet (B a)) → (∀ a b → isProp (R a b))
-           → ((a : A) → ∥ (Σ[ b ∈ B a ] R a b ) ∥₁)
-           → ∥ Σ[ f ∈ ((a : A) → B a) ] ((a : A) → R a (f a)) ∥₁)
-         where
-
+module ChoiceForTheorem7 (ac : AC) where
   module Hyps {X Y : Type} (R : Y → Y → Type)
               (setX : isSet X) (setY : isSet Y)
               (propR : isPropValued R) (eqR : isEquivRel R)
               where
+    open module C = PWC.PWC {ℓA = ℓ-zero} {ℓB = ℓ-zero} {ℓR = ℓ-zero}
+      (PWC.AC→PointwiseChoice ac)
+      X Y R
+      setX setY propR eqR
+      using ()
+      renaming
+        ( wrap to θInv
+        ; unwrap-section to sectionθ
+        )
+      public
 
-    [surjective] : (g : X → Y / R) → ∃[ f ∈ (X → Y) ] ((x : X) → [ f x ] ≡ g x)
-    [surjective] g = 
-      ac (λ x y → [ y ] ≡ g x)
-         setX (λ _ → setY) (λ _ _ → squash/ _ _)
-         (elimProp {P = λ z → ∥ (Σ-syntax Y (λ y → [ y ] ≡ z)) ∥₁}
-                   (λ _ → squash₁)
-                   (λ y → ∣ y , refl ∣₁)
-           ∘ g)
-           
-    θInvSec : (f : X → Y / R) → Σ ([ X ⇒ Y ]/ R) (λ g → θ X R g ≡ f)
-    θInvSec f = 
-      ∥rec∥ (SectionIsProp X R propR eqR f)
-            (λ { (g , eq) → [ g ] , funExt eq })
-            ([surjective] f)
-
-    θInv : (X → Y / R) → [ X ⇒ Y ]/ R
-    θInv = fst ∘ θInvSec
-
-    sectionθ : (f : X → Y / R) → θ X R (θInv f) ≡ f
-    sectionθ = snd ∘ θInvSec
+    {-# WARNING_ON_USAGE θInv "DEPRECATED: Use imports from `Multiset.Axioms.PointwiseChoice` instead of `θInv`" #-}
+    {-# WARNING_ON_USAGE sectionθ "DEPRECATED: Use imports from `Multiset.Axioms.PointwiseChoice` instead of `sectionθ`" #-}
 
 
 
