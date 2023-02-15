@@ -442,8 +442,8 @@ $  %\[
 
 \subsection{Definable Quotients and Sorting}\label{sec:Sorting}
 
-In the proof of Theorem~\ref{thm:PresSplitEpi} we employ the fact that the type of finite bags $\FMSet X$, for some specific choice of $X$, is linearly-ordered and $\SetQuot[(\Fin n \to X)][\sim]$ is a definable set-quotient.
-%The proof of Theorem~\ref{thm:PresSplitEpi} relies on the validity of two specific instances of the axiom of countable choice. We show here that these instances hold and therefore Theorem~\ref{thm:PresSplitEpi} is true without the need of postulating countable choice. This is achieved by showing that, whenever a type $X$ is endowed with a linear order $(<)$, then $\SetQuot[\List X][\Perm]$ is a definable set-quotient.
+In the proof of Theorem~\ref{thm:PresFMSetSection} we employ the fact that the type of finite bags $\FMSet X$, for some specific choice of $X$, is linearly-ordered and $\SetQuot[(\Fin n \to X)][\sim]$ is a definable set-quotient.
+%The proof of Theorem~\ref{thm:PresFMSetSection} relies on the validity of two specific instances of the axiom of countable choice. We show here that these instances hold and therefore Theorem~\ref{thm:PresFMSetSection} is true without the need of postulating countable choice. This is achieved by showing that, whenever a type $X$ is endowed with a linear order $(<)$, then $\SetQuot[\List X][\Perm]$ is a definable set-quotient.
 Remember that a relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
 If $X$ has a linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, so that $\Perm \;xs\;(\sort\,xs)$ holds. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
 Since $\SetQuot[\List X][\Perm] \simeq \FMSet X$, we obtain the following result.
@@ -549,11 +549,8 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
   \end{align*}
 \end{proof}
 
-\begin{theorem}[\CodeRef{Multiset.FCM.Limit}{pres-inj⇒complete}]\label{lem:InjPresImpliesComplete}
+\begin{theorem}[\CodeRef{Multiset.FCM.Limit}{pres-inj⇒llpo}]\label{lem:InjPresImpliesComplete}
   If $\pres{\FMSet}$ is injective, then \LLPO{} holds.
-  \todo[inline]{%
-    Merge \texttt{complete-to-llpo}, and reference that.
-  }
 \end{theorem}
 \begin{proof}
   In this proof we use $\M$ instead of $\FMSet$. The statement of the theorem holds since $\M X$ is equivalent to $\FMSet X$. 
@@ -633,9 +630,8 @@ For all $n$, $\FMSet^n 1$ is linearly-ordered.
 Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)$ is the empty relation and $x <^{1 + n} y \DefEq \LexPerm\,(<^n)\;x\;y$. Proposition \ref{prop:lift-linear-order} implies that the order $(<^n)$ is linear for all $n$.
 \end{proof}
 
-\begin{theorem}[\CodeRef{Multiset.FMSet.Limit}{SplitEpimorphism.pres-section}]\label{thm:PresSplitEpi}
+\begin{theorem}[\CodeRef{Multiset.FMSet.Limit}{PresSection.pres-section}]\label{thm:PresFMSetSection}
  The function $\pres{\FMSet}$ has a section.
-  \todo{Get rid of all mentions of \enquote{split-epimorphism}, in the paper and the code.}
 \end{theorem}
 \begin{proof}
   Let $s : \LimSh{\FMSet}$, we build an element $t : \FMSet \,\Lim{\FMSet}$ in the fiber of $\pres{\FMSet}$ over $s$. The size (i.e. the 1st projection) of the bags $\ell_n\,s$ is the same for all $n$, call it $n^*$. We set the size of $t$ to be $n^*$. Given an index $k : \Fin n^*$, we now search for an element $u\,k : \Lim{\FMSet}$ for defining $t \DefEq (n^*,u)$.
@@ -695,9 +691,8 @@ Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by t
   Assuming $\coalg{\List}$ is a setoid-morphism,
   $\FMSet(\SetQuot[\Lim{\List}][\Bisim]) \simeq \SetQuot[\Lim{\List}][\Bisim]$.
 \end{theorem}
-\begin{theorem}\label{thm:final-quotient}
+\begin{theorem}[\CodeRef{Multiset.ListQuotient.Fixpoint}{TerminalfixQ⁻}]\label{thm:final-quotient}
   Assuming axiom of choice, $\SetQuot[\Lim{\List}][\Bisim]$ is the final coalgebra of $\FMSet$.
-  \todo{Where do we prove this?}
 \end{theorem}
 Both proofs, which employs the functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$, are analogous to related ones for the finite powerset functor in \cite{Veltri2021}.
 Why is the axiom of choice needed in \cref{thm:final-quotient}? When building a coalgebra morphism from a given coalgebra $c : X \to \SetQuot[\List X][\Relator\,(=)]$ to $\SetQuot[\List (-)][\Relator\,(=)]$, we iteratively apply $c$ on the input value in $X$. Each time $c$ is applied, we are given an equivalence class in $\SetQuot[\List X][\Relator\,(=)]$, which we need to open via $\Rec{\SetQuot[\List X][\Relator\,(=)]}$ in order to eventually produce an element of $t : \Lim{\List}$ and ultimately return $\SetQuotCon[t]$. There is no information on the
@@ -989,7 +984,7 @@ where the relation $\Op{Act} \,P\,a$ is
 \]
 The type $\Op{F}_{A,B,P}\,X$ is a set whenever the type of shapes $A$ is a set. The functor $\FMSet$ corresponds to the instance where $A \DefEq ℕ$, $B \DefEq \Fin$ and $P\,\sigma \DefEq 1$.
 
-We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:PresSplitEpi} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ does not generally have a section, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:PresSplitEpi} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor. 
+We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:PresFMSetSection} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ does not generally have a section, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:PresFMSetSection} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor.
 The employment of these propositions can be seen as the invocation of two specific instances of the axiom of countable choice, which happen to be hold in the case of $\FMSet$.
 
 Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A,B,P}$ valued in groupoids, akin to the functor $\Bag$. First, the small HIT construction of the groupoid of finite types $\Bij$ can be generalized:

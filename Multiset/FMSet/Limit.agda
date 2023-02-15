@@ -127,7 +127,7 @@ module _ (sz : ℕ) where
       cp : SymmetricActionΣ sz v w
       cp = canonicalS (isSetFMSet^ d) (LexFMSet^ d) (linLexFMSet^ d) sz v w r
 
-module SplitEpimorphism where
+module PresSection where
 
   module ConstSize (sz : ℕ) (xs : (d : Depth) → PVect (FMSet ^ (undepth d)) sz) where
     constSzLim : (d : Depth) → FMSet ^ (suc (undepth d))
@@ -236,6 +236,6 @@ module SplitEpimorphism where
   pres⁻¹ : ShLim FMSet → FMSet (Lim FMSet)
   pres⁻¹ = fst ∘ inhFibers
 
-  -- pres is a split epimorphism, i.e. it admits a section pres⁻¹.
+  -- pres admits a section, pres⁻¹:
   pres-section : section pres pres⁻¹
   pres-section = snd ∘ inhFibers

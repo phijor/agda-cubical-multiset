@@ -212,11 +212,11 @@ open import Multiset.ListQuotient.Fixpoint using (fixQ⁺-iso ; TerminalfixQ⁻)
 Theorem3 = llpo⇒pres-inj
 
 open import Multiset.FMSet.Base using (FMSet)
-open import Multiset.FMSet.Limit using (module SplitEpimorphism)
+open import Multiset.FMSet.Limit using (module PresSection)
 
--- The limit preservation map is a split epimorphism.
-Theorem4 : section (pres FMSet) (SplitEpimorphism.pres⁻¹)
-Theorem4 = SplitEpimorphism.pres-section
+-- The limit preservation map has a section.
+Theorem4 : section (pres FMSet) (PresSection.pres⁻¹)
+Theorem4 = PresSection.pres-section
 
 -- 4.2 As a Quotient of the Final List-Coalgebra
 
