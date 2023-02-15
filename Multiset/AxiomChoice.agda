@@ -2,6 +2,8 @@
 
 module Multiset.AxiomChoice where
 
+import Multiset.Axioms.Choice as AOC
+
 open import Cubical.Core.Everything
 open import Cubical.Foundations.Everything
 open import Cubical.Data.List renaming (map to mapList; [_] to sing)
@@ -21,14 +23,7 @@ open BinaryRelation
 -- open import Basics
 
 AC : ∀ {ℓ ℓ' ℓR} → Type (ℓ-suc (ℓ-max ℓ (ℓ-max ℓ' ℓR)))
-AC {ℓ} {ℓ'} {ℓR} =
-  ∀ {A : Type ℓ} {B : A → Type ℓ'}
-  → (R : (a : A) → (B a) → Type ℓR)
-  → isSet A
-  → (∀ a → isSet (B a))
-  → (∀ a b → isProp (R a b))
-  → (∀ a → ∥ Σ[ b ∈ B a ] R a b ∥₁)
-  → ∥ Σ[ f ∈ ((a : A) → B a) ] (∀ a → R a (f a)) ∥₁
+AC {ℓ} {ℓ'} {ℓR} = AOC.AC ℓ ℓ' ℓR
 
 
 substSymInRel : {A : Type} (B : A → Type)
@@ -96,7 +91,7 @@ SectionIsProp' : ∀ A {B} (R : B → B → Type)
   → (f : A → B / R)
   → (g g' : [ A ⇒ B ]/ R) (eq : θ A R g ≡ f) (eq' : θ A R g' ≡ f)
   → g ≡ g'
-SectionIsProp' A R Rprop Reqr f = elimProp2 (λ _ _ → isPropΠ (λ _ → isPropΠ λ _ → squash/ _ _))
+SectionIsProp' A R Rprop Reqr f = elimProp2 {P = λ z z₁ → θ A R z ≡ f → θ A R z₁ ≡ f → z ≡ z₁} (λ _ _ → isPropΠ (λ _ → isPropΠ λ _ → squash/ _ _))
   λ g g' eq eq' → eq/ _ _ (λ x → effective Rprop Reqr _ _ (λ i → (eq ∙ sym eq') i x))
 
 SectionIsProp : ∀ A {B} (R : B → B → Type)
