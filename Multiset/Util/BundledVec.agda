@@ -384,6 +384,21 @@ module _ {ℓ ℓ' ℓR ℓS} {A B : Type ℓ} {A' B' : Type ℓ'}
     → Relator S (map f as) (map g bs)
   Relator-map = PT.map Relator∞-map
 
+module _ {ℓ ℓ' ℓS}
+  {A : Type ℓ}
+  {B : Type ℓ'}
+  {S : Rel B B ℓS}
+  (f g : A → B)
+  (f≈g : ∀ a → S (f a) (g a))
+  where
+
+  Relator∞-parmap : (as : ΣVec A) → Relator∞ S (map f as) (map g as)
+  Relator∞-parmap [] = rnil∞
+  Relator∞-parmap (# (x ∷ xs)) = rcons∞ (g x) (f≈g x) here (Relator∞-parmap (# xs))
+
+  Relator-parmap : (as : ΣVec A) → Relator S (map f as) (map g as)
+  Relator-parmap as = PT.∣ Relator∞-parmap as ∣₁
+
 module Reasoning {ℓ ℓ'} {A : Type ℓ} (R : Rel A A ℓ') (open BinaryRelation) (refl-R : isRefl R) (trans-R : isTrans R) where
   private
     _≈_ = Relator R
@@ -458,22 +473,6 @@ module _ {ℓ ℓ′} {A : Type ℓ} {R : Rel A A ℓ′} (open BinaryRelation)
     → Relator R as bs
   effectiveRelator = PT.map effectiveRelator∞
 
-module _ {ℓ ℓR} (S : Setoid ℓ ℓR)  where
-  open Setoid.SetoidStr
-  open Setoid.IsSetoid
-  private
-    R = Setoid.RelOf S
-
-    setoidS = Setoid.str S .is-setoid
-
-  RelatorSetoid : Setoid _ _
-  RelatorSetoid = Setoid.makeSetoid (Relator R)
-    (isSetΣVec (setoidS .is-set-carrier))
-    (isPropRelator _)
-    (isReflRelator (setoidS .is-reflexive))
-    (isSymRelator (setoidS .is-symmetric))
-    (isTransRelator (setoidS .is-transitive))
-
 module _ {ℓ ℓR} (R : Relation ℓ ℓR) where
   open Relation using (⟨_⟩ ; RelOf ; str)
   open RelationStr
@@ -485,25 +484,42 @@ module _ {ℓ ℓR} (R : Relation ℓ ℓR) where
   RelatorRelation .snd .is-relation .is-set-carrier = isSetΣVec (str R .is-set-carrier)
   RelatorRelation .snd .is-relation .is-prop-rel _ _ = isPropRelator _
 
-module _ {ℓ ℓR} where
-  open import Multiset.Relation.Category using (RelationEndo)
-  open import Cubical.Categories.Functor
+module _ {ℓ ℓR} (S : Setoid ℓ ℓR)  where
+  open Setoid.SetoidStr
+  open Relation.IsRelation
 
-  open Relation using (Rel[_⇒_])
-  open Rel[_⇒_]
+  private
+    R = Setoid.Setoid→Relation S
+
+  RelatorSetoid : Setoid ℓ (ℓ-max ℓ ℓR)
+  RelatorSetoid = Setoid.Relation→Setoid (RelatorRelation R) (isEquivRelRelator (Setoid.isEquivRel S))
+
+module _ {ℓ ℓR} where
+  open import Multiset.Setoid.Category using (SetoidCategory)
+  open import Cubical.Categories.Functor
+  import Cubical.HITs.SetQuotients as SQ
+
+  open Setoid
 
   private
     ℓ' = ℓ-max ℓ ℓR
 
-  Relator-lift : {R S : Relation ℓ ℓ'} → Rel[ R ⇒ S ] → Rel[ RelatorRelation R ⇒ RelatorRelation S ]
-  Relator-lift rel .morphism = map (rel .morphism)
-  Relator-lift rel .preserves-relation = Relator-map _ _ (rel .preserves-relation)
+  Relator-lift : {R S : Setoid ℓ ℓ'} → SetoidHom R S → SetoidHom (RelatorSetoid R) (RelatorSetoid S)
+  Relator-lift {R} {S} = SQ.rec isSetSetoidHom (SQ.[_] ∘ go) pres where
+    open Relation.Rel[_⇒_]
 
-  RelatorFunctor : RelationEndo ℓ ℓ'
-  RelatorFunctor .Functor.F-ob = RelatorRelation
+    go : PreSetoidHom R S → PreSetoidHom (RelatorSetoid R) (RelatorSetoid S)
+    go (Relation.rel⇒ morphism preserves-relation) = Relation.rel⇒ (map morphism) (Relator-map _ _ preserves-relation)
+
+    pres : (f g : PreSetoidHom R S) → SetoidHomEq _ _ f g → SQ.[ go f ] ≡ SQ.[ go g ]
+    pres f g f≈g = SQ.eq/ _ _ (Relator-parmap (f .morphism) (g .morphism) f≈g)
+
+  RelatorFunctor : Functor (SetoidCategory ℓ ℓ') (SetoidCategory ℓ ℓ')
+  RelatorFunctor .Functor.F-ob = RelatorSetoid
   RelatorFunctor .Functor.F-hom = Relator-lift
-  RelatorFunctor .Functor.F-id = Relation.Rel⇒Path (funExt map-id)
-  RelatorFunctor .Functor.F-seq f g = Relation.Rel⇒Path (funExt (map-comp (g .morphism) (f .morphism)))
+  RelatorFunctor .Functor.F-id = cong SQ.[_] $ Relation.Rel⇒Path (funExt map-id)
+  RelatorFunctor .Functor.F-seq = SQ.elimProp2 (λ f g → isSetSetoidHom _ _) λ f g → cong SQ.[_] $ Relation.Rel⇒Path (funExt (map-comp (g .morphism) (f .morphism)))
+    where open Relation.Rel[_⇒_]
 
 module _ {ℓ ℓ'} {A B : Type ℓ} {R : Rel A B ℓ'} where
 

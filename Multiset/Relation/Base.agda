@@ -40,7 +40,10 @@ Relation ℓ ℓ≈ = TypeWithStr ℓ (RelationStr ℓ≈)
 RelOf : (S : Relation ℓ ℓ≈) → Rel ⟨ S ⟩ ⟨ S ⟩ ℓ≈
 RelOf S = str S .RelationStr.rel
 
-syntax RelOf S a b = a ≈⟨ S ⟩ b
+RelOf-syntax : (S : Relation ℓ ℓ≈) → Rel ⟨ S ⟩ ⟨ S ⟩ ℓ≈
+RelOf-syntax = RelOf
+
+syntax RelOf-syntax S a b = a ≈⟨ S ⟩ b
 
 PathRelation : (A : Type ℓ) → isSet A → Relation ℓ ℓ
 PathRelation A setA .fst = A
@@ -59,7 +62,7 @@ module _ {ℓ ℓ≈ ℓ′ ℓ≈′ : Level} (S : Relation ℓ ℓ≈) (R : Re
   isPropPreservesRelation = isPropImplicitΠ2 λ _ _ → isPropΠ λ _ → str R .is-prop-rel _ _
 
   record Rel[_⇒_] : Type (ℓ-max (ℓ-max ℓ ℓ′) (ℓ-max ℓ≈ ℓ≈′)) where
-    constructor mkRel⇒
+    constructor rel⇒
     field
       morphism : ⟨ S ⟩ → ⟨ R ⟩
       preserves-relation : PreservesRelation morphism

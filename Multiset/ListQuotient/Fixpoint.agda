@@ -370,9 +370,7 @@ module _ (fix⁻-preserves-≈ : PreservesRel _≈_ (Relator _≈_) fix⁻) wher
           )
 
         bisim-f-unfold : Bisim (f x) (unfold γ x)
-        bisim-f-unfold = unfold-unique (PathRelation X setX)
-          (mkRel⇒ γ λ {y} → J (λ a eq → Relator _≡_ (γ y) (γ a)) (isReflRelator (λ _ → refl) _))
-          f by-effectiveness x
+        bisim-f-unfold = unfold-unique γ f by-effectiveness x
 
         goal : θ2 SQ.[ f ] x ≡ unfoldQ' SQ.[ γ ] x
         goal = SQ.eq/ _ _ bisim-f-unfold

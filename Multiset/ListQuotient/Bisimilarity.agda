@@ -3,7 +3,7 @@
 module Multiset.ListQuotient.Bisimilarity where
 
 open import Multiset.Prelude
-open import Multiset.Setoid.Base using (Setoid ; makeSetoid)
+open import Multiset.Setoid.Base as Setoid using (Setoid)
 open import Multiset.Relation.Base using (Relation ; RelationStr ; IsRelation)
 open import Multiset.ListQuotient.ListFinality
   using
@@ -148,11 +148,11 @@ module _ where
   BisimApproxEquiv : ∀ {s t} → Bisim s t ≃ (∀ n → Approx n (cut n s) (cut n t))
   BisimApproxEquiv {s} {t} = propBiimpl→Equiv (isPropBisim _ _) (isPropΠ (isPropRelatorLim^ s t)) elements bisim
 
-TreeSetoid : Setoid ℓ-zero ℓ-zero
-TreeSetoid = makeSetoid Bisim isSetTree (isPropBisim _ _) isReflBisim isSymBisim isTransBisim
-
 BisimRelation : Relation ℓ-zero ℓ-zero
 BisimRelation .fst = Tree
 BisimRelation .snd .RelationStr.rel = Bisim
 BisimRelation .snd .RelationStr.is-relation .IsRelation.is-set-carrier = isSetTree
 BisimRelation .snd .RelationStr.is-relation .IsRelation.is-prop-rel = isPropBisim
+
+TreeSetoid : Setoid ℓ-zero ℓ-zero
+TreeSetoid = Setoid.Relation→Setoid BisimRelation isEquivRelBisim

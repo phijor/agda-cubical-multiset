@@ -5,11 +5,8 @@ module Multiset.Relation.Category where
 open import Multiset.Prelude
 open import Multiset.Relation.Base
 
-open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Categories.Category
 open import Cubical.Categories.Functor
-open import Cubical.Categories.Constructions.FullSubcategory using (FullSubcategory ; FullInclusion)
-open import Cubical.Relation.Binary using (module BinaryRelation)
 
 module _ ℓ ℓR where
   private
@@ -28,15 +25,3 @@ module _ ℓ ℓR where
 
   RelationEndo : Type _
   RelationEndo = Functor RelationCategory RelationCategory
-
-  open BinaryRelation using (isEquivRel)
-  open RelationStr using (rel)
-
-  isSetoid : Relation ℓ ℓR → Type ℓ-hom
-  isSetoid = isEquivRel ∘ rel ∘ str
-
-  SetoidCategory : Category ℓ-ob ℓ-hom
-  SetoidCategory = FullSubcategory RelationCategory isSetoid
-
-  SetoidInclusion : Functor SetoidCategory RelationCategory
-  SetoidInclusion = FullInclusion RelationCategory isSetoid

@@ -9,6 +9,7 @@ open import Multiset.ListQuotient.ListFinality
     ; !^
     ; cut
     ; Tree
+    ; TreePath
     ; fix ; fix⁺ ; fix⁻
     ; step
     ; unfold
@@ -39,6 +40,7 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     ( Functor
     ; _^_
     )
+open import Multiset.Omniscience using (LLPO)
 open import Multiset.Relation.Base as Relation
   using
     ( Relation
@@ -51,6 +53,7 @@ open import Multiset.Relation.Base as Relation
 
 open import Cubical.Foundations.Function using (_∘_)
 open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat as Nat using (ℕ ; suc ; zero)
 open import Cubical.Data.Unit.Base using (tt*)
 open import Cubical.HITs.PropositionalTruncation as PT using (∥_∥₁)
@@ -95,42 +98,9 @@ fix⁺-relhom : Rel[ RelatorRelation BisimRelation ⇒ BisimRelation ]
 fix⁺-relhom .Rel[_⇒_].morphism = fix⁺
 fix⁺-relhom .Rel[_⇒_].preserves-relation = fix⁺-preserves-≈
 
-module _
-  (C : Relation ℓ-zero ℓ-zero)
-  (γ-hom : Rel[ C ⇒ RelatorRelation C ]) where
-  open Relation using (⟨_⟩ ; RelOf)
-
-  open Rel[_⇒_] γ-hom
-    renaming
-      ( morphism to γ
-      ; preserves-relation to γ-preserves-R
-      )
-  open Rel[_⇒_]
-
-  private
-    R = RelOf C
-
-    _ : ⟨ C ⟩ → ΣVec ⟨ C ⟩
-    _ = γ
-
-  -- (unfold γ) is a setoid morphism
-  unfold-hom : Rel[ C ⇒ BisimRelation ]
-  unfold-hom .morphism = unfold γ
-  unfold-hom .preserves-relation r = bisim (λ n → approx n r) where
-    approx : ∀ n {x y} → R x y → Approx n (step γ n x) (step γ n y)
-    approx zero r = tt*
-    approx (suc n) r = Relator-map R _ (approx n) (γ-preserves-R r)
-
-
-  -- unfold γ is a coalgebra-morphism from `γ` to `fix⁻`, up to the relation `Relator _≈_`
-  unfold-coalg-morphism-γ-fix⁻ : ∀ x → Relator _≈_ (fix⁻ (unfold γ x)) (map (unfold γ) (γ x))
-  unfold-coalg-morphism-γ-fix⁻ x =
-    let
-      open BVec.Reasoning Bisim isReflBisim isTransBisim using (Path→Rel)
-    in Path→Rel (funExt⁻ (isCoalgebraMorphismUnfold γ) x)
-
--- uniqueness of unfold
-  unfold-unique' : (f : ⟨ C ⟩ → Tree)
+-- Unfold is unique as a coalgebra, up to bisimilarity:
+module _ {C : Type} (γ : C → ΣVec C) where
+  unfold-unique' : (f : C → Tree)
     → (∀ x → f x ≈ fix⁺ (map f (γ x)))
     → ∀ x n → Approx n (f x .elements n) (step γ n x)
   unfold-unique' f feq x zero = tt*
@@ -142,7 +112,7 @@ module _
     cut (suc n) (fix⁺ (map f (γ x)))  Rel⟨ Path→Rel path ⟩
     map (cut n ∘ f) (γ x)             Rel⟨ goal ⟩
     map (step γ n) (γ x)              Rel∎
-    where
+    where abstract
       goal : Relator (Approx n) (map (cut n ∘ f) (γ x)) (map (step γ n) (γ x))
       goal = Relator-map _≡_ _
         (λ {y} → J (λ z eq → Approx n (cut n (f y)) (step γ n z)) (unfold-unique' f feq y n))
@@ -155,8 +125,71 @@ module _
         _                                  ≡⟨ cong (λ g → map g (γ x)) (funExt (λ y → f y .is-lim n)) ⟩
         map (cut n ∘ f) (γ x) ∎
 
-  unfold-unique : (f : ⟨ C ⟩ → Tree)
+  unfold-unique : (f : C → Tree)
     → (∀ x → Relator _≈_ (fix⁻ (f x)) (map f (γ x)))
     → ∀ x → f x ≈ unfold γ x
   unfold-unique f feq x =
     bisim (unfold-unique' f (λ y → isTransBisim _ _ _ (Path→Bisim (sym (secEq fix (f y)))) (fix⁺-preserves-≈ (feq y))) x)
+
+-- Assuming that fix⁻ is a setoid-morphism, i.e. preserves bisimilarity,
+-- we can conclude that the functor of setoids `RelatorFunctor : (A , R) ↦ (ΣVec A , Relator R)`
+-- has a terminal coalgebra:
+module _
+  (fix⁻-preserves-≈ : PreservesRel _≈_ (Relator _≈_) fix⁻)
+  where
+  open import Multiset.Categories.Coalgebra
+
+  import Cubical.HITs.SetQuotients as SQ
+
+  open import Multiset.Setoid.Base
+  open BVec using (RelatorFunctor ; RelatorSetoid)
+  open Bisimilarity using (TreeSetoid)
+
+  fix-coalg : Coalgebra (RelatorFunctor {ℓ-zero} {ℓ-zero})
+  fix-coalg .Coalgebra.carrier = TreeSetoid
+  fix-coalg .Coalgebra.str = setoidhom (Relation.rel⇒ coalg coalg-pres) where
+    coalg : Tree → ΣVec Tree
+    coalg = fix⁻
+
+    coalg-pres : PreservesRel _≈_ (Relator _≈_) coalg
+    coalg-pres = fix⁻-preserves-≈
+
+  fix-is-terminal : isTerminalCoalgebra RelatorFunctor fix-coalg
+  fix-is-terminal (coalgebra {carrier = S} γ) = SQ.elimProp
+    {P = λ γ → isContr (CoalgebraHom RelatorFunctor (coalgebra γ) fix-coalg)}
+    (λ _ → isPropIsContr) coalg-lift-eq-pre γ where
+    module _ {S : Setoid _ _} (γ-rel@(Relation.rel⇒ γ γ-preserves) : PreSetoidHom S (RelatorSetoid S)) where
+      open CoalgebraHom
+      open Rel[_⇒_]
+
+      anaPre : PreSetoidHom S TreeSetoid
+      anaPre .morphism = unfold γ
+      anaPre .preserves-relation s≈s' = bisim λ { n → approx n s≈s' } where abstract
+        approx : ∀ n {x y} → RelOf S x y → Approx n (step γ n x) (step γ n y)
+        approx zero r = tt*
+        approx (suc n) r = Relator-map (RelOf S) _ (approx n) (γ-preserves r)
+
+      ana : CoalgebraHom RelatorFunctor (coalgebra SQ.[ γ-rel ]) fix-coalg
+      ana .carrierHom = setoidhom anaPre
+      ana .strHom = goal where abstract
+        goal : IsCoalgebraHom RelatorFunctor (coalgebra SQ.[ γ-rel ]) fix-coalg (setoidhom anaPre)
+        goal = cong SQ.[_] (Relation.Rel⇒Path (isCoalgebraMorphismUnfold γ))
+
+      module _ (f : PreSetoidHom S TreeSetoid) (f-hom : IsCoalgebraHom _ (coalgebra SQ.[ γ-rel ]) fix-coalg (setoidhom f)) where
+        f-hom-eff : (x : ⟨ S ⟩) → Relator _≈_ (fix⁻ (f .morphism x)) (BVec.map (f .morphism) (γ x))
+        f-hom-eff x = effective f-hom x
+
+        anaEq' : setoidhom anaPre ≡ setoidhom f
+        anaEq' = SQ.eq/ _ _ λ (s : ⟨ S ⟩) → Bisimilarity.isSymBisim _ _ (unfold-unique γ (f .morphism) f-hom-eff s)
+
+      anaEq : (f : CoalgebraHom RelatorFunctor (coalgebra SQ.[ γ-rel ]) fix-coalg) → ana ≡ f
+      anaEq (coalgebraHom f* f-hom) = SQ.elimProp {P = λ f → (h : IsCoalgebraHom _ (coalgebra SQ.[ γ-rel ]) fix-coalg f) → ana ≡ coalgebraHom f h}
+        (λ f → isPropΠ λ h → isSetCoalgebraHom _ _ (coalgebraHom f h))
+        (λ f f-hom → CoalgebraHom≡ _ (anaEq' f f-hom)) f* f-hom
+
+
+      coalg-lift-eq-pre : isContr (CoalgebraHom RelatorFunctor (coalgebra SQ.[ γ-rel ]) fix-coalg)
+      coalg-lift-eq-pre = ana , anaEq
+
+  finalSetoidCoalgebra : TerminalCoalgebra RelatorFunctor
+  finalSetoidCoalgebra = fix-coalg , fix-is-terminal

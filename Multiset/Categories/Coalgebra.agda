@@ -96,5 +96,8 @@ module _ {C : Category ℓC ℓC'} (F : Functor C C) where
   isTerminalCoalgebra : Coalgebra → Type _
   isTerminalCoalgebra = isTerminal CoalgebrasCategory
 
+  isPropIsTerminalCoalgebra : {ω : Coalgebra} → isProp (isTerminalCoalgebra ω)
+  isPropIsTerminalCoalgebra {ω} = isPropIsTerminal CoalgebrasCategory ω
+
   TerminalCoalgebra : Type _
   TerminalCoalgebra = Terminal CoalgebrasCategory
