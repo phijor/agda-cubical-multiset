@@ -640,8 +640,8 @@ The limit $\Lim{\List}$ is a type of non-wellfounded with \emph{ordered} subtree
 and we denote by $\coalg{\List}$ be its coalgebra structure.
 By choosing a suitable relation $R$, one can hope to obtain a type of
 \emph{unordered} trees $\SetQuot[\Lim{\List}][R]$ that induces a coalgebra structure on $\FMSet$.
-We will chose $R$ to be a notion of \emph{bisimilarity} $\Bisim$,
-obtained iteratively from the relational lifting $\Relator$ applied to finite approximations of trees in $\Lim{\List}$:
+We chose $R$ to be a notion of \emph{bisimilarity} $\Bisim$,
+obtained iteratively from the \emph{predicate lifting}~\cite[\S2]{Hasuo2013} $\Relator$ applied to finite approximations of trees in $\Lim{\List}$:
   \begin{align*}
     &\Approx^n : \List^n 1 → \List^n 1 → \Type \\
     &\Approx^0 x\;y \DefEq 1 \\
@@ -671,7 +671,8 @@ Once again, the same issue as when working with $\FMSet$ arises:
 The proof is similar to that of \cref{lem:InjPresImpliesComplete}.
 Similar to \cref{lem:LLPOImpliesPresInj}, the converse is true also.
 Nevertheless, the inverse of $\coalg{\List}$ is always a setoid-morphism.
-Therefore $\coalg{\List}$ is an equivalence of setoids whenever it is a setoid-morphism.
+Therefore $\coalg{\List}$ is an equivalence of setoids whenever it is a setoid-morphism,
+i.e.\@ \LLPO{} holds.
 Under this assumption alone it is the final coalgebra of an endofunctor in the category of setoids:
 \todo{Give definition of this category}
 
@@ -682,22 +683,39 @@ Under this assumption alone it is the final coalgebra of an endofunctor in the c
   which is final in the category of setoids.
 \end{theorem}
 
-Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by the relation $\Bisim$ does not give the final coalgebra of the finite bag functor $\FMSet$. We can show that the resulting quotient is a fixpoint, and in particular a coalgebra. But the proof of finality requires the full axiom of choice. 
+Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by the relation $\Bisim$ does not obviously give the final coalgebra of $\FMSet$.
+We can show that the resulting quotient is a fixpoint, and in particular a coalgebra (of sets):
 \begin{theorem}[\CodeRef{Multiset.ListQuotient.Fixpoint}{FMSetFixpointTree/Bisim}]\label{thm:fixpoint-quotient}
-  Assuming $\coalg{\List}$ is a setoid-morphism,
-  $\FMSet(\SetQuot[\Lim{\List}][\Bisim]) \simeq \SetQuot[\Lim{\List}][\Bisim]$.
+  If $\coalg{\List}$ is a setoid-morphism,
+  it lifts to an equivalence $\coalg{\FMSet} : \SetQuot[\Lim{\List}][\Bisim] \xrightarrow{≃} \FMSet(\SetQuot[\Lim{\List}][\Bisim])$.
 \end{theorem}
+\begin{proof}
+  For the proof, we employ the equivalent functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$.
+  Let $U \DefEq \SetQuot[\Lim{\List}][\Bisim]$ be a type of unordered trees.
+  The assumption implies that $\coalg{\List}$ lifts to a function $U → \FMSet U$,
+  definable by recursion on the set-quotient.
+  An inverse $\FMSet U → U$ is definable since $\coalg{\List}^{-1}$ is always a setoid-morphism
+  and $\SetQuot[\List X][\Relator R]$ is an \emph{effective quotient} for any setoid $(X, R)$.
+\end{proof}
+
+However, proving that this fixpoint is the final coalgebra seems to require the axiom of choice:
 \begin{theorem}[\CodeRef{Multiset.ListQuotient.Fixpoint}{TerminalfixQ⁻}]\label{thm:final-quotient}
-  Assuming axiom of choice, $\SetQuot[\Lim{\List}][\Bisim]$ is the final coalgebra of $\FMSet$.
+  Assuming axiom of choice, the fixpoint of \cref{thm:final-quotient} carries the structure of the final $\FMSet$-coalgebra.
 \end{theorem}
-Both proofs, which employs the functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$, are analogous to related ones for the finite powerset functor in \cite{Veltri2021}.
-Why is the axiom of choice needed in \cref{thm:final-quotient}? When building a coalgebra morphism from a given coalgebra $c : X \to \SetQuot[\List X][\Relator\,(=)]$ to $\SetQuot[\List (-)][\Relator\,(=)]$, we iteratively apply $c$ on the input value in $X$. Each time $c$ is applied, we are given an equivalence class in $\SetQuot[\List X][\Relator\,(=)]$, which we need to open via $\Rec{\SetQuot[\List X][\Relator\,(=)]}$ in order to eventually produce an element of $t : \Lim{\List}$ and ultimately return $\SetQuotCon[t]$. There is no information on the
-cardinality of $X$, so each application of $c$ may happen on a different
-value of $X$. Therefore we generally have to invoke $\Rec{\SetQuot[\List X][\Relator\,(=)]}$ an arbitrary number of times,
-which can only be achieved via the axiom of choice.
+\begin{proof}
+  We sketch the invocation of choice in the proof, which is analogous to a related one for the finite powerset functor in \cite{Veltri2021}.
+  Abbreviate unordered trees again as $U$ and $R \DefEq \Relator\; (=)$, and use the presentation of $\FMSet$ as in \cref{thm:fixpoint-quotient}.
+  To build a coalgebra morphism $u_c : C → U$ from a given coalgebra $c : C \to \FMSet C$ to $\coalg{\FMSet} : U → \FMSet U$,
+  one can define a function $u' : \SetQuot[(C → \List C)][R^*] → (C → U)$.
+  Here, $R^*$ is the pointwise lifting of $R$,
+  and $u'$ is obtained by recursion from the unique $\List$-coalgebra morphism $C → \Lim{\List}$.
+  The axiom of choice implies that the canonical map $(C → \SetQuot[\List][R]) → \SetQuot[(C → \List C)][R^*]$
+  has a section $\theta$ for \emph{arbitrary} $C$.
+  This is is sufficient to prove that $u_c \DefEq u'(\theta(c))$ is the unique coalgebra morphism from $c$ to $\coalg{\FMSet}$.
+\end{proof}
 
-
-While not delivering the final coalgebra of $\FMSet$ without extra classical assumptions, the quotient $\SetQuot[\Lim{\List}][\Bisim]$ can still be used as a denotational domain for transition systems with a finite set of states: given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, we are able to construct a unique coalgebra morphism from $S$ to $\SetQuot[\Lim{\List}][\Bisim]$.
+While not delivering the final coalgebra of $\FMSet$ without extra classical assumptions, the quotient $\SetQuot[\Lim{\List}][\Bisim]$ can still be used as a denotational domain for transition systems with a finite set of states:
+given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, the existence of the section $\theta$ is implied by a finite-choice argument.
 
 \section{The Finite Bag Functor in Groupoids}\label{sec:finite-bags-groupoids}
 
