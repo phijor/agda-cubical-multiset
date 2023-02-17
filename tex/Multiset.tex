@@ -232,16 +232,16 @@ Given a type $X$, the \emph{free commutative monoid} on $X$
     \begin{center}
       \hspace*{\fill}
         \AxiomC{$\vphantom{X}$}
-        \UnaryInfC{$\Empty : \M{X}$}
+        \UnaryInfC{$\Empty : \FCM{X}$}
         \DisplayProof
       \hfill
         \AxiomC{$x : X$}
-        \UnaryInfC{$\Singl x : \M X$}
+        \UnaryInfC{$\Singl x : \FCM X$}
         \DisplayProof
       \hfill
         \hspace{10pt}
-        \AxiomC{$xs, ys : \M X$}
-        \UnaryInfC{$\Var{xs} \Union \Var{ys} : \M X$}
+        \AxiomC{$xs, ys : \FCM X$}
+        \UnaryInfC{$\Var{xs} \Union \Var{ys} : \FCM X$}
         \DisplayProof
       \hspace*{\fill}
 %    \end{center}
@@ -249,11 +249,11 @@ Given a type $X$, the \emph{free commutative monoid} on $X$
       \\[6pt]
 %    \begin{center}
       \hspace*{\fill}
-        \AxiomC{$\Var{xs} : \M X$}
+        \AxiomC{$\Var{xs} : \FCM X$}
         \UnaryInfC{$\mathsf{unit} : \Empty \Union \Var{xs} = \Var{xs}$}
         \DisplayProof
       \hfill
-        \AxiomC{$\Var{xs}, \Var{ys}, \Var{xs} : \M X$}
+        \AxiomC{$\Var{xs}, \Var{ys}, \Var{xs} : \FCM X$}
         \UnaryInfC{
           $\mathsf{assoc} : \Var{xs}\Union(\Var{ys}\Union\Var{zs}) = (\Var{xs}\Union\Var{ys})\Union\Var{zs}$
         }
@@ -261,7 +261,7 @@ Given a type $X$, the \emph{free commutative monoid} on $X$
       \hspace*{\fill}
       \\[6pt]
       \hspace*{\fill}
-        \AxiomC{$\Var{xs}, \Var{ys} : \M X$}
+        \AxiomC{$\Var{xs}, \Var{ys} : \FCM X$}
         \UnaryInfC{
           $\mathsf{comm} : \Var{xs}\Union\Var{ys} = \Var{ys}\Union\Var{xs}$
         }
@@ -271,31 +271,31 @@ Given a type $X$, the \emph{free commutative monoid} on $X$
 %  \item set-truncation:
 %    \begin{center}
 %      \hspace*{\fill}
-        \AxiomC{$\Var{xs}, \Var{ys} : \M X$}
+        \AxiomC{$\Var{xs}, \Var{ys} : \FCM X$}
         \AxiomC{$p, q : \Var{xs} = \Var{ys}$}
         \BinaryInfC{
-          $\mathsf{squash}_{\M} \,p\;q : p = q$
+          $\mathsf{squash}_{\FCM} \,p\;q : p = q$
         }
         \DisplayProof
       \hspace*{\fill}
     \end{center}
 %\end{itemize}
 
-The constructor $\Singl$ embeds $X$ into $\M X$, while $\Empty$ and $\Union$ are the unit and multiplication of the monoid. The path constructors express unitality of $\Empty$ wrt. $\Union$, associativity and commutativity of $\Union$, and the final higher path constructor forces $\M X$ to be a set.
+The constructor $\Singl$ embeds $X$ into $\FCM X$, while $\Empty$ and $\Union$ are the unit and multiplication of the monoid. The path constructors express unitality of $\Empty$ wrt. $\Union$, associativity and commutativity of $\Union$, and the final higher path constructor forces $\FCM X$ to be a set.
 
-In Cubical Agda, functions out of HITs like $\M X$ can be defined directly by pattern matching. But it is often useful to have elimination principles at hand that give more control on the shape of the proof obligations. For example, the non-dependent elimination principle of $\M X$ states that a function of type $\M X \to A$ is definable, provided that $A$ is a commutative monoid and there exists a function $\eta^* : X \to A$.
+In Cubical Agda, functions out of HITs like $\FCM X$ can be defined directly by pattern matching. But it is often useful to have elimination principles at hand that give more control on the shape of the proof obligations. For example, the non-dependent elimination principle of $\FCM X$ states that a function of type $\FCM X \to A$ is definable, provided that $A$ is a commutative monoid and there exists a function $\eta^* : X \to A$.
 \begin{align*}
-  \Rec{\M X} &: \{A : \Type\} → \IsSet A \\
+  \Rec{\FCM X} &: \{A : \Type\} → \IsSet A \\
     &→ (\varepsilon^* : A) \,(\eta^* : X → A) \, (({+}) : A → A → A) \\
     &→ (∀ a\Where \varepsilon^* + a = a) \\
     &→ (∀ a\, b\, c\Where a + (b + c) = (a + b) + c) \\
     &→ (∀ a\, b\Where a + b = b + a) \\
-    &→ \M X → A
+    &→ \FCM X → A
 \end{align*}
-$\M$ is a functor, with action on maps given by
+$\FCM$ is a functor, with action on maps given by
 \begin{align*}
-  &\Map{\M} : (f : X \to Y) \to \M X \to \M Y \\
-  &\Map{\M}\,f \DefEq \Rec{\M X}\;\mathsf{squash}_{\M}\;\Empty\;(\eta \circ f)\;(\Union)\;\mathsf{unit}\;\mathsf{assoc}\;\mathsf{comm}
+  &\Map{\FCM} : (f : X \to Y) \to \FCM X \to \FCM Y \\
+  &\Map{\FCM}\,f \DefEq \Rec{\FCM X}\;\mathsf{squash}_{\FCM}\;\Empty\;(\eta \circ f)\;(\Union)\;\mathsf{unit}\;\mathsf{assoc}\;\mathsf{comm}
 \end{align*}
 
 \subsection{As a Quotient of Lists}
@@ -331,11 +331,11 @@ Another way of specifying permutations is via a \emph{relation lifting}, often c
 The relation lifting of $R$ is the symmetric closure of the relation $\DRelator R$, i.e. $\Relator R\;xs\;ys \DefEq \DRelator R\;xs\;ys \times \DRelator R\;ys\;xs$.
 Because of the presence of a propositional trunctation in the premise of the 2nd rule, both $\DRelator R$ and $\Relator R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator R$ is an equivalence relation.
 
-When $R$ is path equality on $X$, the type $\Relator \,(=)\;xs\;ys$ expresses the existence of a permutation connecting $xs$ and $ys$. In fact, there is a bi-implication between $\Perm\;xs\;ys$ and $\Relator \,(=)\;xs\;ys$. Therefore, we have two equivalent presentations of lists modulo permutations: $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator \,(=)]$. They are also both equivalent to $\M X$.
+When $R$ is path equality on $X$, the type $\Relator \,(=)\;xs\;ys$ expresses the existence of a permutation connecting $xs$ and $ys$. In fact, there is a bi-implication between $\Perm\;xs\;ys$ and $\Relator \,(=)\;xs\;ys$. Therefore, we have two equivalent presentations of lists modulo permutations: $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator \,(=)]$. They are also both equivalent to $\FCM X$.
 
 \subsection{As an Analytic Functor}
 
-Finally, we introduce the type of finite bags over $X$ as an \emph{analytic functor} (in the formulation of Hasegawa~\cite{Hasegawa2002}), which is provably equivalent to $\M X$, $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator\, (=)]$.
+Finally, we introduce the type of finite bags over $X$ as an \emph{analytic functor} (in the formulation of Hasegawa~\cite{Hasegawa2002}), which is provably equivalent to $\FCM X$, $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator\, (=)]$.
 \begin{align*}
   \FMSet X
     \DefEq
@@ -553,12 +553,12 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
   If $\pres{\FMSet}$ is injective, then \LLPO{} holds.
 \end{theorem}
 \begin{proof}
-  In this proof we use $\M$ instead of $\FMSet$. The statement of the theorem holds since $\M X$ is equivalent to $\FMSet X$. 
-  It is sufficient to show that the injectivity of $\pres{\M}$ implies that the following type is inhabited:
+  In this proof we use $\FCM$ instead of $\FMSet$. The statement of the theorem holds since $\FCM X$ is equivalent to $\FMSet X$.
+  It is sufficient to show that the injectivity of $\pres{\FCM}$ implies that the following type is inhabited:
   \begin{equation}\label{eq:compl}
     \def\arraystretch{1.2}
     \begin{array}{l}
-   \{x, y_1, y_2 : \Lim{\M}\} \;(ys : ℕ \to \Lim{\M}) \\
+   \{x, y_1, y_2 : \Lim{\FCM}\} \;(ys : ℕ \to \Lim{\FCM}) \\
   \hspace{.5cm} \to (\Op{split} : \forall n \Where ys\;n = y_1 +  ys\;n = y_2) \;(\Op{diag} : \forall n \Where \ell_n \;x = \ell_n \;(ys\;n)) \\
   \hspace{.5cm} \to \PropTrunc{x = y_1 + x = y_2}
     \end{array}
@@ -567,50 +567,36 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
   \cite{Mandelkern1988} proves the equivalence of \LLPO{} with completeness of two-element subsets of real numbers.
   We adapt their proof, for details refer to either~\cite[{Theorem~7}]{Veltri2021} or the formalization~(\CodeRef{Multiset.ListQuotient.Finality}{complete→llpo}).
   
-%  Given an element $ : L_{\M}$\todo{We're implicitly working with the HIT-definition here},
-%  denote by $\ell_n : L_{\M} → \M^n 1$ the projection maps out of the limit.
-
   To prove completeness, assume $x, y_1, y_2, ys, \Op{split}$ and $\Op{diag}$ as in (\ref{eq:compl}).
-  %:  \Lim{\M}$, $\Var{ys} : ℕ →  \Lim{\M}$,
-  %$\Op{split} : ∀ n\Where (\Var{ys}\,n = y_1) \mathrel{+} (\Var{ys} \,n = y_2)$
-  %and $\Op{diag} : ∀ n\Where \ell_n \,x = \ell_n (\Var{ys}\,n)$.
-  %The goal is to show $\PropTruncCon[x = y_1 \mathrel{+} x = y_2]$.
   Using $\Op{split}$, define the complement of $\Var{ys}$ as $\overline{\Var{ys}}\;n\DefEq y_2$ if $\Var{ys}\; n = y_1$ and $\overline{\Var{ys}}\;n\DefEq y_1$ if $\Var{ys}\;n = y_2$.
-%%   \[
-%%     \overline{\Var{ys}}\,n\DefEq
-%%       \begin{cases}
-%%         y_2 & \text{if}~\Var{ys}\, n = y_1 \\
-%%         y_1 & \text{if}~\Var{ys}\,n = y_2
-%%       \end{cases}
-%%   \]
   The diagonal of $\overline{\Var{ys}}$ also has the limit-property,
   i.e.
   \begin{equation}\label{step:IsLimYsComplement}
     ∀ n\Where
-    \Bang^n_{\M} (\ell_{1 + n} \,(\overline{\Var{ys}}\, (1+n))) = \ell_n \,(\overline{\Var{ys}}\;n)
+    \Bang^n_{\FCM} (\ell_{1 + n} \,(\overline{\Var{ys}}\, (1+n))) = \ell_n \,(\overline{\Var{ys}}\;n)
   \end{equation}
     %  \Step{step:IsLimYsComplement}$$
   For this, fix $n$ and check the four cases generated by inspecting $\Op{split} n$
   and $\Op{split}{} (1+n)$.
   In one case, (\ref{step:IsLimYsComplement}) reduces to the limit-property of $y_1$,
   in another to that of $y_2$ and in the remaining cases to \cref{lem:DiagLimCaseAnalysis}.
-  Call  $\overline{x} : \Lim{\M}$ the element of the limit such that $\ell_n \,\overline{x} \DefEq \ell_n\,(\overline{ys}\;n)$.
+  Call  $\overline{x} : \Lim{\FCM}$ the element of the limit such that $\ell_n \,\overline{x} \DefEq \ell_n\,(\overline{ys}\;n)$.
 
   Write $\{x, y\} \DefEq \eta\, x \oplus \eta\, y$ for the two-element bag comprising of $x$ and $y$. For all $n$, we know that
   %\begin{align}\Step{step:ppc}
     $\{\Var{ys}\;n, \overline{\Var{ys}}\;n\} = \{y_1, y_2\}$
   %\end{align}
   either by $\Op{refl}$ or $\Op{\oplus comm}$, depending on $\Op{split} n$.
-  Using the latter equality, the definition of $\pres{\M}$ and the assumption $\Op{diag}$, we can form the following sequence of equalities:%\todo{better wording}
+  Using the latter equality, the definition of $\pres{\FCM}$ and the assumption $\Op{diag}$, we can form the following sequence of equalities:%\todo{better wording}
   \begin{align*}
-    \ell_n\,(\pres{\M} \{x, \overline{x}\})
+    \ell_n\,(\pres{\FCM} \{x, \overline{x}\})
       &= \{\ell_n \,x , \ell_n \,\overline{x}\}
       = \{\ell_n \,(\Var{ys}\;n) , \ell_n\,(\overline{\Var{ys}} \;n)\}\\
-      &= \ell_n \, (\pres{\M} \{\Var{ys}\;n , \overline{\Var{ys}}\;n\}) 
-      = \ell_n \, (\pres{\M} \{y_1 , y_2\})
+      &= \ell_n \, (\pres{\FCM} \{\Var{ys}\;n , \overline{\Var{ys}}\;n\})
+      = \ell_n \, (\pres{\FCM} \{y_1 , y_2\})
   \end{align*}
-  which implies $\pres{\M}\{x, \overline{x}\} = \pres{\M}\{y_1, y_2\}$.
-  From the injectivity of $\pres{\M}$ it follows that $\{x, \overline{x}\} = \{y_1, y_2\}$, which also implies that (merely) $x = y_1$ or $x = y_2$.
+  which implies $\pres{\FCM}\{x, \overline{x}\} = \pres{\FCM}\{y_1, y_2\}$.
+  From the injectivity of $\pres{\FCM}$ it follows that $\{x, \overline{x}\} = \{y_1, y_2\}$, which also implies that (merely) $x = y_1$ or $x = y_2$.
 \end{proof}
 
 \begin{theorem}[\CodeRef{Multiset.ListQuotient.ToInjectivity}{llpo⇒pres-inj}]\label{lem:LLPOImpliesPresInj}
