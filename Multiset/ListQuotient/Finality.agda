@@ -191,5 +191,5 @@ module _
       coalg-lift-eq-pre : isContr (CoalgebraHom RelatorFunctor (coalgebra SQ.[ γ-rel ]) fix-coalg)
       coalg-lift-eq-pre = ana , anaEq
 
-  finalSetoidCoalgebra : TerminalCoalgebra RelatorFunctor
-  finalSetoidCoalgebra = fix-coalg , fix-is-terminal
+  finalFMSetoidCoalgebra : TerminalCoalgebra RelatorFunctor
+  finalFMSetoidCoalgebra = fix-coalg , fix-is-terminal
