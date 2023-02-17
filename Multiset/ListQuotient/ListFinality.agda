@@ -76,19 +76,20 @@ instance
   FunctorΣVec .Functor.map-id = BVec.map-id
   FunctorΣVec .Functor.map-comp = BVec.map-comp
 
-module _ where private
+module _ where
   open import Cubical.Data.List as List using (List)
-  instance
-    FunctorList : Functor {ℓ-zero} List
-    FunctorList .Functor.map = List.map
-    FunctorList .Functor.map-id {X = X} = go where
-      go : (xs : List X) → _
-      go List.[] = refl
-      go (x List.∷ xs) = cong (x List.∷_) (go xs)
-    FunctorList .Functor.map-comp {X} {Y} {Z} g f = go where
-      go : (xs : List X) → _
-      go List.[] = refl
-      go (x List.∷ xs) = cong (g (f x) List.∷_) (go xs)
+  private
+    instance
+      FunctorList : Functor {ℓ-zero} List
+      FunctorList .Functor.map = List.map
+      FunctorList .Functor.map-id {X = X} = go where
+        go : (xs : List X) → _
+        go List.[] = refl
+        go (x List.∷ xs) = cong (x List.∷_) (go xs)
+      FunctorList .Functor.map-comp {X} {Y} {Z} g f = go where
+        go : (xs : List X) → _
+        go List.[] = refl
+        go (x List.∷ xs) = cong (g (f x) List.∷_) (go xs)
 
   ΣVec→List : {A : Type} → ΣVec A → List A
   ΣVec→List (# Vec.[]) = List.[]

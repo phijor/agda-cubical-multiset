@@ -69,6 +69,9 @@ module _ {A B : Type} (f : A → B) where
     rec squash/ (λ xs → [ List.map f xs ])
         (λ _ _ → PT.rec (squash/ _ _) (λ p → eq/ _ _ PT.∣ mapP f p ∣₁))
 
+  map/Perm : List A / Perm → List B / Perm
+  map/Perm = SQ.rec squash/ (λ xs → [ List.map f xs ]) λ as bs p → eq/ _ _ (mapP f p)
+
   map/Relator≡ : List A / Relator _≡_ → List B / Relator _≡_
   map/Relator≡ = 
     rec squash/ (λ xs → [ List.map f xs ])
@@ -77,6 +80,10 @@ module _ {A B : Type} (f : A → B) where
   List/∥Perm∥→List/Relator≡-nat : (xs : List A / ∥Perm∥₁)
     → List/∥Perm∥→List/Relator≡ (map/∥Perm∥ xs) ≡ map/Relator≡ (List/∥Perm∥→List/Relator≡ xs)
   List/∥Perm∥→List/Relator≡-nat = SQ.elimProp (λ _ → squash/ _ _) λ _ → refl
+
+  List/Perm→List/Relator≡-nat : (xs : List A / Perm)
+    → List/Perm-List/Relator≡-Iso .fun (map/Perm xs) ≡ map/Relator≡ (List/Perm-List/Relator≡-Iso .fun xs)
+  List/Perm→List/Relator≡-nat = SQ.elimProp (λ _ → squash/ _ _) λ _ → refl
 
   open import Multiset.ListQuotient.FMSetEquiv
   open import Multiset.FMSet.Properties as FMSet

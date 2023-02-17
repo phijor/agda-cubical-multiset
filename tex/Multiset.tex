@@ -336,10 +336,10 @@ Another way of specifying permutations is via a \emph{relation lifting}, often c
   \hspace*{\fill}
 \end{center}
 We then take the relation lifting of $R$ to be the symmetric closure of the relation $\DRelator R$, i.e. $\Relator R\;xs\;ys \DefEq \DRelator R\;xs\;ys \times \DRelator R\;ys\;xs$.
-Because of the presence of a propositional trunctation in the premise of the 2nd rule, both $\DRelator R$ and $\Relator R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator R$ is an equivalence relation.
+Because of the presence of a propositional truncation in the premise of the 2nd rule, both $\DRelator R$ and $\Relator R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator R$ is an equivalence relation.
 
 When $R$ is path equality on $X$, the type $\Relator \,(=)\;xs\;ys$ expresses the existence of a permutation connecting $xs$ and $ys$.
-In fact, there is a bi-implication between $\Perm\;xs\;ys$ and $\Relator \,(=)\;xs\;ys$.
+In fact, there is a $\PropTrunc{\Perm\;xs\;ys}$ and $\Relator \,(=)\;xs\;ys$ are equivalent types.
 
 \subsection{As an Analytic Functor}
 
