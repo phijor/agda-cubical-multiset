@@ -202,9 +202,9 @@ Lemma2 = diag-ysᶜ-islim-alternating
 -- Injectivity of pres implies LLPO.
 Theorem2 = pres-inj⇒llpo
 
-open import Multiset.ListQuotient.ToInjectivity
-  using (llpo⇒pres-inj)
-open import Multiset.ListQuotient.Finality using (pres-reflects-≈→LLPO)
+open import Multiset.ListQuotient.ToInjectivity using (llpo⇒pres-inj)
+open import Multiset.ListQuotient.LLPO using (pres-reflects-≈→LLPO)
+open import Multiset.ListQuotient.Finality
 open import Multiset.ListQuotient.Fixpoint using (fixQ⁺-iso ; TerminalfixQ⁻)
 
 -- Using the equivalent type (List X / Perm), we can show that
