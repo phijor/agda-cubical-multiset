@@ -223,10 +223,12 @@ Other HITs are presented in the next section, where we also take a closer look a
 \section{The Finite Bag Functor in Sets}\label{sec:finite-bags-sets}
 
 The action of the finite bag functor on a type $X$ can be encoded as a higher inductive
-type in various ways, three of which are presented here. 
-The first is as the free commutative monoid, the second as lists modulo permutations,
-%set-quotiented by an \emph{up to permutation}-relation,
-the third as an analytic functor. These are all set-based definitions, in the sense that the type of finite bags is a set. Groupoid-based definitions are discussed in Section~\ref{sec:finite-bags-groupoids}.
+type in various ways, three of which are presented here.
+The first is as the free commutative monoid, the second as lists modulo permutations, the third as an analytic functor.
+These are all set-based definitions, in the sense that the type of finite bags is a set.
+In \cref{sec:fmset-presentation-equivs}, we prove these are equivalent as types and have the same action on maps,
+therefore being equivalent as functors.
+Groupoid-based definitions are discussed in Section~\ref{sec:finite-bags-groupoids}.
 
 \subsection{As the Free Commutative Monoid}
 
@@ -303,7 +305,7 @@ $\FCM$ is a functor, with action on maps given by
   &\Map{\FCM}\,f \DefEq \Rec{\FCM X}\;\mathsf{squash}_{\FCM}\;\Empty\;(\eta \circ f)\;(\Union)\;\mathsf{unit}\;\mathsf{assoc}\;\mathsf{comm}
 \end{align*}
 
-\subsection{As a Quotient of Lists}
+\subsection{As a Quotient of Lists}\label{sec:fmset-list-quot}
 
 Another standard definition of the type of finite bags is as lists modulo permutations. The relation specifying the existence of a permutation between two lists can be given in multiple ways, here we mention two possibilities.
 
@@ -334,13 +336,15 @@ Another way of specifying permutations is via a \emph{relation lifting}, often c
   \hspace*{\fill}
 \end{center}
 The relation lifting of $R$ is the symmetric closure of the relation $\DRelator R$, i.e. $\Relator R\;xs\;ys \DefEq \DRelator R\;xs\;ys \times \DRelator R\;ys\;xs$.
-Because of the presence of a propositional trunctation in the premise of the 2nd rule, both $\DRelator R$ and $\Relator R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator R$ is an equivalence relation.
+Because of the presence of a propositional truncation in the premise of the 2nd rule, both $\DRelator R$ and $\Relator R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator R$ is an equivalence relation.
 
-When $R$ is path equality on $X$, the type $\Relator \,(=)\;xs\;ys$ expresses the existence of a permutation connecting $xs$ and $ys$. In fact, there is a bi-implication between $\Perm\;xs\;ys$ and $\Relator \,(=)\;xs\;ys$. Therefore, we have two equivalent presentations of lists modulo permutations: $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator \,(=)]$. They are also both equivalent to $\FCM X$.
+When $R$ is path equality on $X$, the type $\Relator \,(=)\;xs\;ys$ expresses the existence of a permutation connecting $xs$ and $ys$.
+In fact, there is a bi-implication between $\Perm\;xs\;ys$ and $\Relator \,(=)\;xs\;ys$.
 
 \subsection{As an Analytic Functor}
 
-Finally, we introduce the type of finite bags over $X$ as an \emph{analytic functor} (in the formulation of Hasegawa~\cite{Hasegawa2002}), which is provably equivalent to $\FCM X$, $\SetQuot[\List X][\Perm]$ and $\SetQuot[\List X][\Relator\, (=)]$.
+Finally, we introduce the type of finite bags over $X$ as an \emph{analytic functor} (in the formulation of Hasegawa~\cite{Hasegawa2002}):
+For any type $X$, define
 \begin{align*}
   \FMSet X
     \DefEq
@@ -445,6 +449,33 @@ $  %\[
   That these maps are mutual inverses follows from $\FinElimComp$.
 \end{proof}
 
+\subsection{Equivalence of Presentations}\label{sec:fmset-presentation-equivs}
+
+All encodings of finite multisets used in the preceding section induce equivalent functors:
+\begin{proposition}
+  For any type $X$, there is a sequence of equivalences
+  \[
+    \FCM X
+      \stackrel{\alpha}{≃} \SetQuot[\List X][\Perm]
+      \stackrel{\beta}{≃} \SetQuot[\List X][\Relator\;(=)]
+      \stackrel{\gamma}{≃} \FMSet X,
+  \]
+  natural in $X$: for any $f : X → Y$, $\alpha \circ \Map{\FCM} f = \Map{\SetQuot[\List X][\Relator\;(=)]} {} \circ \alpha$, etc.
+\end{proposition}
+\begin{proof}
+  Equivalence $\alpha$ is obtained by observing that both types form a free commutative monoid on $X$,
+  with addition $(\oplus)$ and $(\Append)$ respectively.
+  For $\beta$, note that $\Perm$ is a set but $\Relator\;(=)$ is a proposition.
+  Yet in general, it is enough to prove there is a bi-implication between the relations to conclude that the set-quotients they define are equivalent,
+  as mentioned in \cref{sec:fmset-list-quot}.
+  Equivalence $\gamma$ is obtained similarly, this time proving that the encodings of permutations (\enquote{intensionally} via the relator and \enquote{extensional} in terms of equivalence of types) are logically equivalent.
+  Naturality is established directly.
+\end{proof}
+In the formalization, we make use of slight variations of the above types where convenient.
+These mostly concern presentation of lists (e.g. bundling lengths via $\List A ≃ \sum_{n : ℕ} \operatorname{Vec} A\; n$),
+and are easily seen to be equivalent.
+
+
 \subsection{Definable Quotients and Sorting}\label{sec:Sorting}
 
 In the proof of Theorem~\ref{thm:PresFMSetSection} we employ the fact that the type of finite bags $\FMSet X$, for some specific choice of $X$, is linearly-ordered and $\SetQuot[(\Fin n \to X)][\sim]$ is a definable set-quotient.
@@ -483,9 +514,6 @@ This can further be extended to a linear order on $\SetQuot[\List X][\Perm]$ as 
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.  
 \end{proposition}
 
-\subsection{TODO: Comparison}
-
-\todo[inline]{Link all equivalent definitions of finite multisets.}
 
 \section{The Final Coalgebra in Sets}\label{sec:final-coalgebra-sets}
 
