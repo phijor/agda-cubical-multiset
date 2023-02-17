@@ -18,9 +18,6 @@ agdaPackages.mkDerivation {
     # Make sure the README builds with --safe
     agda --html --html-dir=$html --safe README.agda
 
-    # Build all modules that are not --safe compatible
-    agda --html --html-dir=$html ./Multiset/Coinductive.agda
-
     runHook postBuild
   '';
 

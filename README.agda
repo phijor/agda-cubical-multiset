@@ -297,9 +297,3 @@ open import Multiset.FMSet.Finality using (isContrAna)
 -- coalgebra of FMSet in sets, i.e. the space of coalgebra
 -- morphisms into it is contractible
 Theorem11 = isContrAna
-
--- 7 Alternatives and Generalizations
-
--- 7.1 Using Coinductive Types
-
--- See `Multiset.Coalgebra.FinCoalg` for the details, again --sized-types is needed.
