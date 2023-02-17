@@ -33,7 +33,7 @@ open import Cubical.HITs.SetTruncation as ST --using (∥_∥₂)
 open import Cubical.HITs.SetQuotients as SQ
 open import Cubical.Data.Sigma.Properties using (Σ-cong-equiv)
 
-open import Multiset.AxiomChoice
+import Multiset.Axioms.Choice as AOC
 
 -- Set truncation is isomorphic to the quotient by the discrete relation
 
@@ -56,6 +56,95 @@ Iso.leftInv PropTrunc≅SetQuot = PT.elim (λ _ → isProp→isSet squash₁ _ _
 
 -- Assuming the axiom of choice, ∥ BagLim ∥₂ is the final coalgebra of FMSet
 
+-- Below, we will assume AC(3,2) and AC(2,1).
+-- Here's the precise consequences of these versions of choice that we'll need:
+module Choice
+  (ac32 : AOC.AC[Gpd,Set] ℓ-zero ℓ-zero)
+  (ac : AOC.AC[Set,Prop] ℓ-zero ℓ-zero)
+  where
+  open import Cubical.HITs.PropositionalTruncation as PT
+
+  ∥θ∥₂ : {A B : Type} → ∥ (A → B) ∥₂ → A → ∥ B ∥₂
+  ∥θ∥₂ = ST.rec (isSetΠ (λ _ → squash₂)) (∣_∣₂ ∘_)
+
+  ∥θ∥₁ : {X : Type} {Y : X → Type} → ∥ ((x : X) → Y x) ∥₁ → (x : X) → ∥ Y x ∥₁
+  ∥θ∥₁ = PT.rec (isPropΠ (λ _ → squash₁)) (∣_∣₁ ∘_)
+
+  module Hyps {X : Type} {Y : Type} (setX : isSet X) (grpdY : isGroupoid Y) where abstract
+
+    ∥surjective∥₂ : (g : X → ∥ Y ∥₂) → ∥ Σ[ f ∈ (X → Y) ] ((x : X) → ∣ f x ∣₂ ≡ g x) ∥₂
+    ∥surjective∥₂ g = AOC.AC[Gpd,Set]→AC[Gpd,Set]-Rel ac32
+        (λ x y → ∣ y ∣₂ ≡ g x)
+        setX (λ _ → grpdY) (λ _ _ → squash₂ _ _)
+        (ST.elim {B = λ z → ∥ Σ[ y ∈ Y ] (∣ y ∣₂ ≡ z) ∥₂}
+                  (λ _ → squash₂)
+                  (λ y → ∣ y , refl ∣₂) ∘ g)
+
+    ∥θ∥₂InvSec :  (g : X → ∥ Y ∥₂) → Σ[ f ∈ ∥ (X → Y) ∥₂ ] ∥θ∥₂ f ≡ g
+    ∥θ∥₂InvSec g =
+      ST.rec (isSetΣ squash₂ (λ _ → isProp→isSet (isSetΠ (λ _ → squash₂) _ _)))
+             (λ { (f , eq) → ∣ f ∣₂ , funExt eq  })
+             (∥surjective∥₂ g)
+
+    ∥θ∥₂Inv :  (X → ∥ Y ∥₂) → ∥ (X → Y) ∥₂
+    ∥θ∥₂Inv g = ∥θ∥₂InvSec g .fst
+
+    ∥θ∥₂Sec :  (g : X → ∥ Y ∥₂) → ∥θ∥₂ (∥θ∥₂Inv g) ≡ g
+    ∥θ∥₂Sec g = ∥θ∥₂InvSec g .snd
+
+    ∥θ∥₂-inj : (f f' : ∥ (X → Y) ∥₂) → ∥θ∥₂ f ≡ ∥θ∥₂ f' → f ≡ f'
+    ∥θ∥₂-inj =
+      ST.elim2 (λ _ _ → isSetΠ λ _ → isProp→isSet (squash₂ _ _))
+               λ f f' eq →
+                 PathIdTrunc₀Iso .Iso.inv
+                   (PT.map funExt
+                          (ac X (λ x → f x ≡ f' x)
+                               setX (λ _ → grpdY _ _)
+                               (λ x → PathIdTrunc₀Iso .Iso.fun (λ i → eq i x))))
+
+    ∥θ∥₂Inv-β : (f : X → Y) → ∥θ∥₂Inv (∣_∣₂ ∘ f) ≡ ∣ f ∣₂
+    ∥θ∥₂Inv-β f = ∥θ∥₂-inj (∥θ∥₂Inv (∣_∣₂ ∘ f)) ∣ f ∣₂ (∥θ∥₂Sec (∣_∣₂ ∘ f))
+
+    recColl₂ : {A : Type} → isSet A
+      → ((X → Y) → A)
+      → (X → ∥ Y ∥₂) → A
+    recColl₂ setA h g = ST.rec setA h (∥θ∥₂Inv g)
+
+    recCollβ₂ : {A : Type} (setA : isSet A)
+      → (g : (X → Y) → A)
+      → (f : X → Y) → recColl₂ setA g (∣_∣₂ ∘ f) ≡ g f
+    recCollβ₂ {A} setA h f = cong (ST.rec setA h) (∥θ∥₂Inv-β f)
+
+    elimCollProp₂' : (B : (X → ∥ Y ∥₂) → Type) → (∀ c → isProp (B c))
+      → ((c : X → Y) → B (∣_∣₂ ∘ c))
+      → (c : ∥ (X → Y) ∥₂) → B (∥θ∥₂ c)
+    elimCollProp₂' B propB h = ST.elim (λ _ → isProp→isSet (propB _)) h
+
+    elimCollProp₂ : (B : (X → ∥ Y ∥₂) → Type) → (∀ c → isProp (B c))
+      → ((c : X → Y) → B (∣_∣₂ ∘ c))
+      → (c : X → ∥ Y ∥₂) → B c
+    elimCollProp₂ B propB h c =
+      subst B (∥θ∥₂Sec c) (elimCollProp₂' B propB h (∥θ∥₂Inv c))
+
+  module Hyps2 {X : Type} (Y : X → Type)
+               (setX : isSet X) (setY : ∀ x → isSet (Y x))
+               where abstract
+
+    ∥θ∥₁Inv : ((x : X) → ∥ Y x ∥₁) → ∥ ((x : X) → Y x) ∥₁
+    ∥θ∥₁Inv = ac X Y setX setY
+
+    elimCollProp₁' :  (B : ((x : X) → ∥ Y x ∥₁) → Type) → (∀ c → isProp (B c))
+      → ((c : (x : X) → Y x) → B (∣_∣₁ ∘ c))
+      → (c : ∥ ((x : X) → Y x) ∥₁) → B (∥θ∥₁ c)
+    elimCollProp₁' B propB h = PT.elim (λ _ → propB _) h
+
+    elimCollProp₁ :  (B : ((x : X) → ∥ Y x ∥₁) → Type) → (∀ c → isProp (B c))
+      → ((c : (x : X) → Y x) → B (∣_∣₁ ∘ c))
+      → (c : (x : X) → ∥ Y x ∥₁) → B c
+    elimCollProp₁ B propB h c =
+      subst B (isPropΠ (λ _ → squash₁) _ _) (elimCollProp₁' B propB h (∥θ∥₁Inv c))
+
+
 module _
 
 -- -- BagLim is the final coalgebra of Bag [Ahrens 2015]
@@ -75,18 +164,12 @@ module _
    (eNat : ∀{Y Z} (f : Y → Z)→ equivFun e ∘ ST.map (Bag.map f) ≡ FMSet.map f ∘ equivFun e)
 
 -- Two forms of axiom of choice
-   (ac32 : {A : Type} {B : A → Type} (R : (a : A) → B a → Type)
-     → isSet A → (∀ a → isGroupoid (B a)) → (∀ a b → isProp (R a b))
-     → ((a : A) → ∥ (Σ[ b ∈ B a ] R a b ) ∥₂)
-     → ∥ Σ[ f ∈ ((a : A) → B a) ] ((a : A) → R a (f a)) ∥₂)
-   (ac : {A : Type} (B : A → Type)
-     → isSet A → (∀ a → isSet (B a))
-     → ((a : A) → ∥ B a ∥₁)
-     → ∥ ((a : A) → B a) ∥₁)
+  (ac32 : AOC.AC[Gpd,Set] ℓ-zero ℓ-zero)
+  (ac : AOC.AC[Set,Prop] ℓ-zero ℓ-zero)
    (X : Type) (setX : isSet X)
    where
 
-  open ChoiceForTheorem11 ac32 ac
+  open Choice ac32 ac
   open Hyps setX (isGroupoidBag (isSet→isGroupoid setX))
   module Hyps' = Hyps {Y = BagLim} setX isGroupoidBagLim
   module Hyps2' {c : X → Bag X} {h : X → BagLim} = Hyps2 (λ x → h x ≡ (Bag.fix⁺ ∘ Bag.map h ∘ c) x) setX (λ x → isGroupoidBagLim _ _)
