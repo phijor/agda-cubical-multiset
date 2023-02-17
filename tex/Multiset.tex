@@ -68,20 +68,20 @@
 \subsection{TODO}
 
 \begin{itemize}
-  \item
-    Change the focus of the paper:
-    stress preservation-properties (as needed by Adamek's construction).
-    Move story of finality to a separate section.
+%  \item
+%    Change the focus of the paper:
+%    stress preservation-properties (as needed by Adamek's construction).
+%    Move story of finality to a separate section.
   \item
     Say that only core claims are formalized
-  \item
-    Idea: hyperlink the formalized theorems from the paper.
+%  \item
+%    Idea: hyperlink the formalized theorems from the paper.
   \item
     Be precise about which presentations of types are used.
   \item
     Tone down our claims about \enquote{necessity}, c.f.\@ response
-  \item
-    Give example of transition systems etc.
+%  \item
+%    Give example of transition systems etc.
   \item
     Talk about differences of intrinsically vs.\@ extrinsically quotiented trees.
 \end{itemize}
@@ -137,7 +137,7 @@ assistant. The code is freely available at \url{https://github.com/phijor/agda-c
 
 We work in homotopy type theory \cite{HoTTBook} and practically our formalization takes place in Cubical Agda \cite{Vezzosi2019}. We recall some basic notions that are employed in our development.
 
-Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$, written also $\forall x \Where B\,x$ when the type $A$ is clear from context. Implicit arguments of dependent functions are enclosed in curly brackets. Basic inductive types include: unit $1$, empty $\bot$, Booleans $\Bool$, naturals $ℕ$, finite prefixes of naturals $\Fin n$, lists $\List A$, dependent pair $\sum (x : A) \Where B \, x$, binary sum $A + B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is $! : A \to 1$. Membership in a list is $x \in xs$ and removal of an occurrence $m : x \in xs$ is $xs \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readability in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
+Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$, written also $\forall x \Where B\,x$ when the type $A$ is clear from context. Implicit arguments of dependent functions are enclosed in curly brackets. Basic inductive types include: unit $1$, empty $\bot$, naturals $ℕ$, finite prefixes of naturals $\Fin n$, lists $\List A$, dependent pair $\sum (x : A) \Where B \, x$, binary sum $A + B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is $! : A \to 1$. Membership in a list is $x \in xs$ and removal of an occurrence $m : x \in xs$ is $xs \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readability in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
 
 Given $x, y : A$, their definitional equality is denoted $x \DefEq y$ while propositional equality is $x = y$.
 Following ``cubical terminology'', the latter is called the \emph{path type} between $x$ and $y$.
@@ -159,7 +159,7 @@ We recall the first instances of the hierarchy of \emph{homotopy levels}, and sa
 \end{itemize}
 When mentioning \enquote{sets} or \enquote{groupoids}, we always refer to the definition above.
 
-A \emph{higher inductive type} (HIT) is like an inductive type, but its constructors can build both its elements and its (higher) paths. HITs are primitively supported in Cubical Agda. We recall the definition of three basic HITs: propositional truncation, set-truncation and the set-quotient. 
+A \emph{higher inductive type} (HIT) is like an inductive type, but its constructors can build both its elements and its (higher) paths. HITs are primitively supported in Cubical Agda. We recall the definition of three basic HITs: propositional truncation, set-truncation and set-quotient. 
 
 The \emph{propositional truncation} $\PropTrunc{A}$ is the proposition associated to the type $A$, i.e. it identifies all the elements and (higher) paths of $A$. It is the HIT with constructors
 \begin{center}
@@ -214,7 +214,7 @@ $R : A \to A \to \Type$ is the HIT with constructors
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-The term $\SetQuotCon[a]$ is the $R$-equivalence class of $a$, while the path constructor $\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}$ states that $R$-related elements have path equal equivalence classes. The higher path constructor $\SetQuotSquash$ forces $\SetQuot[A][R]$ to be a set. A set-quotient $\SetQuot[A][R]$ is called \emph{definable} if the equivalence class constructor has a section, i.e. there is a representative-picking function $\rep: \SetQuot[A][R] \, \to A$ such that $\SetQuotCon[\rep\,x] = x$ for all $x : \SetQuot[A][R]$ \cite{Li2015}.
+The term $\SetQuotCon[a]$ is the $R$-equivalence class of $a$, while the path constructor $\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}$ states that $R$-related elements have path equal equivalence classes. The higher path constructor $\SetQuotSquash$ forces $\SetQuot[A][R]$ to be a set. A set-quotient $\SetQuot[A][R]$ is called \emph{definable} if the equivalence class constructor has a section~\cite{Li2015}, i.e. there is a representative-picking function $\rep: \SetQuot[A][R] \, \to A$ such that $\SetQuotCon[\rep\,x] = x$ for all $x : \SetQuot[A][R]$.
 
 Other HITs are presented in the next section, where we also take a closer look at their elimination principles.
 
@@ -304,8 +304,30 @@ $\FCM$ is a functor, with action on maps given by
   &\Map{\FCM} : (f : X \to Y) \to \FCM X \to \FCM Y \\
   &\Map{\FCM}\,f \DefEq \Rec{\FCM X}\;\mathsf{squash}_{\FCM}\;\Empty\;(\eta \circ f)\;(\Union)\;\mathsf{unit}\;\mathsf{assoc}\;\mathsf{comm}
 \end{align*}
+Transition systems can be encoded as coalgebra for $\FMC$ as follows: 
+\vspace{-.8cm}
+\[
+\begin{array}{c@{\qquad\qquad}c}
+\xymatrix{
+  0 \ar@/^/[rr] \ar@/_/[rr] & & 1 \ar[dl] \ar@(ur,dr) \\
+  & 2 &
+}
+&
+\begin{array}{l}
+  \\ \\
+  c : \Fin 2 \to \FCM (\Fin 2) \\
+  c \; 0 \DefEq \Singl 1 \Union \Singl 1 \\
+  c \; 1 \DefEq \Singl 1 \Union \Singl 2 \\
+  c \; 2 \DefEq \Empty
+\end{array}
+\end{array}
+\]
 
 \subsection{As a Quotient of Lists}\label{sec:fmset-list-quot}
+
+
+\subsection{As a Quotient of Lists}\label{sec:quot-list}
+>>>>>>> 4a8d832 (Proof of naturality of equivalences between different presentations of finite multisets)
 
 Another standard definition of the type of finite bags is as lists modulo permutations. The relation specifying the existence of a permutation between two lists can be given in multiple ways, here we mention two possibilities.
 
@@ -335,8 +357,8 @@ Another way of specifying permutations is via a \emph{relation lifting}, often c
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-The relation lifting of $R$ is the symmetric closure of the relation $\DRelator R$, i.e. $\Relator R\;xs\;ys \DefEq \DRelator R\;xs\;ys \times \DRelator R\;ys\;xs$.
-Because of the presence of a propositional truncation in the premise of the 2nd rule, both $\DRelator R$ and $\Relator R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator R$ is an equivalence relation.
+We then take the relation lifting of $R$ to be the symmetric closure of the relation $\DRelator R$, i.e. $\Relator R\;xs\;ys \DefEq \DRelator R\;xs\;ys \times \DRelator R\;ys\;xs$.
+Because of the presence of a propositional trunctation in the premise of the 2nd rule, both $\DRelator R$ and $\Relator R$ are propositionally-valued. If $R$ is reflexive and transitive, than $\Relator R$ is an equivalence relation.
 
 When $R$ is path equality on $X$, the type $\Relator \,(=)\;xs\;ys$ expresses the existence of a permutation connecting $xs$ and $ys$.
 In fact, there is a bi-implication between $\Perm\;xs\;ys$ and $\Relator \,(=)\;xs\;ys$.
@@ -959,63 +981,11 @@ Similarly to the quotient $\SetQuot[\Lim{\List}][\Bisim]$ of Section~\ref{sec:fi
 %%   Only assuming the (full) axiom of choice this is the case, i.e.\@ yields a final coalgebra.
 %%   }
 
-\section{Alternatives and Generalizations}
+%\section{Alternatives and Generalizations}
 
-We now look at an alternative construction of the final coalgebra using coinductive types and a generalization of our constructions to other analytic functors.
+%We now look at an alternative construction of the final coalgebra using coinductive types and a generalization of our constructions to other analytic functors.
 
-\subsection{Using Coinductive Types}\label{sec:coinductive}
-
-\todo[inline]{Remove this section, adjust mentions of this section.}
-
-Cubical Agda has primitive support for coinductive types. In particular, HITs such as $\M$ can appear in the codomain of coinductive type destructors, which is intuitively justified by the treatment of HITs in Cubical Agda as inductive types with constructors possibly depending on variables from the interval $\Interval$~\cite{Coquand2018,Cavallo2019}.
-The coinductive type associated to $\M$ is the coinductive record type
-\[
-\def\arraystretch{0.8}
-\begin{array}{l}
-\Op{record} \; \cLim{\M} :  \Type \;\Op{where} \\
-\quad  \Op{constructor} \fold \\
-\quad  \Op{coinductive} \\
- \quad \Op{field} \\
- \quad \quad  \unfold : \M \cLim{\M}
-\end{array}
-\]
-The type $\cLim{\M}$ (the initial $\mathsf{c}$ stands for \enquote{coinductive}) has a constructor $\fold : \cLim{\M}\to \M \,\cLim{\M}$ and a destructor 
-$\unfold : \cLim{\M} \to \,\M \cLim{\M}$ which are mutual inverses. In particular, $\unfold \circ \fold$ is judgementally equal to the identity function, while the other equation can be proved by corecursion and path introduction:
-\[
-\def\arraystretch{0.8}
-\begin{array}{l}
-\Op{iso}\cLim{\M} : \forall x \Where \fold (\unfold \,x) = x \\
-\unfold\; (\Op{iso}\cLim{\M}\; x\; i) \DefEq \unfold\; x
-\end{array}
-\]
-The construction of a mediating coalgebra morphism between a
-$\M$-coalgebra $(X , c : X \to \M X)$ and $\cLim{\M}$, whose coalgebra is the
-destructor $\unfold$, is defined by corecursion:
-\begin{equation*}
-\begin{array}{l}
-\Op{final} : (c : X \to \M X) \to X \to \cLim{\M} \\
-\unfold \;(\Op{final} \;c \;x) \DefEq \Map{\M} \;(\Op{final}\; c)\; (c \;x)
-\end{array}
-\end{equation*}
-Agda's strict productivity checker actually rejects this definition, since the recursive call does not appear directly under the application of a constructor. Practically in our formalization we employ \emph{sized types}~\cite{Hughes1996,Danielsson2018} to work around these issues.
-%\end{array}
-%\end{equation*}
-The proof that $\Op{final}$ is a coalgebra morphism is simply given by reflexivity. The proof of uniqueness is also quite straightforward.
-\begin{theorem}\label{thm:coinductive}
-$\cLim{\M}$ is the final coalgebra of $\M$.
-\end{theorem}
-
-%% \begin{itemize}
-%%     \item It is not clear that Agda's coinductive types
-%%         interacts well with HITs.
-%%     \item This might not work with the groupoid-definition:
-%%         Either we use HITs (possibly inconsistent, for the small Bij),
-%%         or the construction ends up being too large.
-%%     \item
-%%         Another approach: Quotient the (entire) final coalgebra of lists.
-%% \end{itemize}
-
-\subsection{Other Analytic Functors}\label{sec:analytic}
+\section{Other Analytic Functors}\label{sec:analytic}
 
 The formulation $\FMSet$ of the finite bag functor exposes this as an analytic functor \cite{Joyal1986,Hasegawa2002}, which differs from a polynomial functor in that the tuple of elements $\Fin\,n \to X$ is quotiented by the relation generated by the action of the symmetric group with $n$ elements on $X$. Other analytic functors arise by choosing a different subgroup of the symmetric group. For example, picking the subgroup of cyclic permutations delivers the functor of cyclic lists, while taking the trivial subgroup allows us to recover the list functor. 
 
@@ -1090,19 +1060,19 @@ generalizations to other analytic functors, which we plan to further explore in 
 
 Our conclusion is in line with the one of Kock~\cite{Kock2012} and Finster et al.~\cite{Finster2021}: the bag functor is better behaved when valued in groupoids instead of sets, especially from the perspective of final semantics. This seems to indicate that the denotational semantics of ``resource-sensitive'' computations %or dynamical systems
 is better performed using groupoids instead of sets (switching from categorical to bicategorical semantics).
-In particular, the syntax of process calculi such as CCS, or term calculi for linear logic,  could be defined directly as a groupoid, i.e. structural congruences could be treated as data instead of property. We plan to properly investigate this connection to programming language semantics in future work.
+In particular, the syntax of process calculi such as CCS, or term calculi for linear logic,  could be defined directly as a groupoid, i.e. structural congruences could be treated as data instead of property. We plan to properly investigate this connection to programming language semantics in future work. For this endeavor, it will also be necessary to study the final coalgebra of combinations of the bag functor with other functors e.g.~formalizing the presence of labels or actions in the transition relation.
 
 Cubical Agda currently allows the definition of coinductive types with HITs appearing in the codomain of destructors. For example, it is possible to define the following coinductive record:
 \begin{equation}\label{eq:coind}
 \def\arraystretch{0.8}
 \begin{array}{l}
-\Op{record} \; \cLim{\M} :  \Type \;\Op{where} \\
+\Op{record} \; \cLim{\FCM} :  \Type \;\Op{where} \\
 \quad  \Op{coinductive} \\
  \quad \Op{field} \\
- \quad \quad  \unfold : \M \cLim{\M}
+ \quad \quad  \unfold : \FCM \cLim{\FCM}
 \end{array}
 \end{equation}
-It is moreover possible to prove that this type is the final coalgebra of the set-based finite bag functor. The proof is similar to the one given for the finite powerset functor \cite[Theorem 2]{Veltri2021}. Definitions such as (\ref{eq:coind}) are an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). We believe that such definitions could be motivated by looking at recent work by Kristensen et al.~\cite{Kristensen2022}, which seems to indicate that the final coalgebra of functors such as $\M$ or $\Op{Pfin}$, which are given as HITs, should be definable as the \emph{strict} $\omega$-limit of the chain in (\ref{eq:chain}) in the cubical set model. Strictness means that the limit-property holds on the nose, not only up-to path equality. 
+It is moreover possible to prove that this type is the final coalgebra of the set-based finite bag functor. The proof is similar to the one given for the finite powerset functor \cite[Theorem 2]{Veltri2021}. Definitions such as (\ref{eq:coind}) are an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). We believe that such definitions could be motivated by looking at recent work by Kristensen et al.~\cite{Kristensen2022}, which seems to indicate that the final coalgebra of functors such as $\FCM$ or $\Op{Pfin}$, which are given as HITs, should be definable as the \emph{strict} $\omega$-limit of the chain in (\ref{eq:chain}) in the cubical set model. Strictness means that the limit-property holds on the nose, not only up-to path equality.
 
 %\nocite{*}
 
