@@ -304,30 +304,8 @@ $\FCM$ is a functor, with action on maps given by
   &\Map{\FCM} : (f : X \to Y) \to \FCM X \to \FCM Y \\
   &\Map{\FCM}\,f \DefEq \Rec{\FCM X}\;\mathsf{squash}_{\FCM}\;\Empty\;(\eta \circ f)\;(\Union)\;\mathsf{unit}\;\mathsf{assoc}\;\mathsf{comm}
 \end{align*}
-Transition systems can be encoded as coalgebra for $\FCM$ as follows:
-\vspace{-.8cm}
-\[
-\begin{array}{c@{\qquad\qquad}c}
-\xymatrix{
-  0 \ar@/^/[rr] \ar@/_/[rr] & & 1 \ar[dl] \ar@(ur,dr) \\
-  & 2 &
-}
-&
-\begin{array}{l}
-  \\ \\
-  c : \Fin 2 \to \FCM (\Fin 2) \\
-  c \; 0 \DefEq \Singl 1 \Union \Singl 1 \\
-  c \; 1 \DefEq \Singl 1 \Union \Singl 2 \\
-  c \; 2 \DefEq \Empty
-\end{array}
-\end{array}
-\]
 
 \subsection{As a Quotient of Lists}\label{sec:fmset-list-quot}
-
-
-\subsection{As a Quotient of Lists}\label{sec:quot-list}
->>>>>>> 4a8d832 (Proof of naturality of equivalences between different presentations of finite multisets)
 
 Another standard definition of the type of finite bags is as lists modulo permutations. The relation specifying the existence of a permutation between two lists can be given in multiple ways, here we mention two possibilities.
 
@@ -433,7 +411,7 @@ The proof of Theorem~\ref{thm:FMSetFixpointOfTrunc} employs the fact that $\FMSe
   %The proof uses the fact that $\Map{\SetTrunc{\Blank}}$ is functorial.
 \end{proof}
 %\begin{definition}
-The equivalence of Lemma \ref{lem:FiniteChoice} allows to define a variant of the elimination principle $\Elim{\SetTrunc{X}}$ taking $\Fin n \to \SetTrunc{X}$ as input instead of $\SetTrunc{X}$ (a sort of ``finite choice'' principle for set-truncation)
+The equivalence of Lemma \ref{lem:FiniteChoice} allows to define a variant of the elimination principle $\Elim{\SetTrunc{X}}$ taking $\Fin n \to \SetTrunc{X}$ as input instead of $\SetTrunc{X}$ (a sort of ``finite choice'' principle for set-truncation):
 %taking The principle of finite choice can be defined in terms of $\Op{box}$:
   \begin{equation}\label{eq:finite-choice}
     \def\arraystretch{1.2}
@@ -445,7 +423,7 @@ The equivalence of Lemma \ref{lem:FiniteChoice} allows to define a variant of th
   \end{equation}
  % It is defined by applying $\mathsf{choice}$ to the term obtained from
  % set-truncation elimination on $\operatorname{box} v$.
-  which furthermore comes with a (propositional) computational rule
+  This comes with a (propositional) computational rule
   %\begin{align*}
   $\FinElimComp : %(v : \Fin n → X) →
   \FinElim \;c\;(\SetTruncCon{} \circ v) = c\;v$.
@@ -474,13 +452,13 @@ $  %\[
 \subsection{Equivalence of Presentations}\label{sec:fmset-presentation-equivs}
 
 All encodings of finite multisets used in the preceding section induce equivalent functors:
-\begin{proposition}
+\begin{proposition}\label{prop:eqpres}
   For any type $X$, there is a sequence of equivalences
   \[
     \FCM X
-      \stackrel{\alpha}{≃} \SetQuot[\List X][\Perm]
-      \stackrel{\beta}{≃} \SetQuot[\List X][\Relator\;(=)]
-      \stackrel{\gamma}{≃} \FMSet X,
+      \; \stackrel{\alpha}{≃} \; \SetQuot[\List X][\Perm]
+      \; \stackrel{\beta}{≃} \; \SetQuot[\List X][\Relator\;(=)]
+      \; \stackrel{\gamma}{≃} \; \FMSet X,
   \]
   natural in $X$: for any $f : X → Y$, $\alpha \circ \Map{\FCM} f = \Map{\SetQuot[\List X][\Relator\;(=)]} {} \circ \alpha$, etc.
 \end{proposition}
@@ -495,21 +473,21 @@ All encodings of finite multisets used in the preceding section induce equivalen
 \end{proof}
 In the formalization, we make use of slight variations of the above types where convenient.
 These mostly concern presentation of lists (e.g. bundling lengths via $\List A ≃ \sum_{n : ℕ} \operatorname{Vec} A\; n$),
-and are easily seen to be equivalent.
+and are easily seen to be naturally equivalent.
 
 
 \subsection{Definable Quotients and Sorting}\label{sec:Sorting}
 
 In the proof of Theorem~\ref{thm:PresFMSetSection} we employ the fact that the type of finite bags $\FMSet X$, for some specific choice of $X$, is linearly-ordered and $\SetQuot[(\Fin n \to X)][\sim]$ is a definable set-quotient.
 %The proof of Theorem~\ref{thm:PresFMSetSection} relies on the validity of two specific instances of the axiom of countable choice. We show here that these instances hold and therefore Theorem~\ref{thm:PresFMSetSection} is true without the need of postulating countable choice. This is achieved by showing that, whenever a type $X$ is endowed with a linear order $(<)$, then $\SetQuot[\List X][\Perm]$ is a definable set-quotient.
-Remember that a relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
+A relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
 If $X$ has a linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, so that $\Perm \;xs\;(\sort\,xs)$ holds. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
 Since $\SetQuot[\List X][\Perm] \simeq \FMSet X$, we obtain the following result.
 \begin{proposition}[{\CodeRef{Multiset.Ordering.FMSetOrder}{SortingFMSet.sortPVect-section}}]\label{prop:ListPermDefQuot}
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable quotient for all $n : ℕ$.
 \end{proposition}
 
-Sorting also allows to explicitly find a canonical permutation between any two related lists. Given $p : \Perm \;xs\;ys$, we can find another permutation $\canonicalPerm \;p : \Perm\;xs\;ys$: there are permutations $\Perm\;xs\;(\sort\,xs)$ and $\Perm\;(\sort\;ys)\;ys$, and moreover the existence of $p$ implies $\sort\,xs = \sort\,ys$. The function $\canonicalPerm$ is constant, since it never inspect the input permutation $p$. 
+Sorting also allows to explicitly find a canonical permutation between any two related lists. Given $p : \Perm \;xs\;ys$, we can find another permutation $\canonicalPerm \;p : \Perm\;xs\;ys$ as follows: there are permutations $\Perm\;xs\;(\sort\,xs)$ and $\Perm\;(\sort\;ys)\;ys$, and moreover the existence of $p$ implies $\sort\,xs = \sort\,ys$. The function $\canonicalPerm$ is constant, since it never inspect the input permutation $p$. 
 \begin{proposition}[{\CodeRef{Multiset.Ordering.FMSetOrder}{SortingFMSet.canonicalS}}]\label{prop:ListPermCanonicalPerm}
 If $X$ is linearly-ordered, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$ , i.e. the propositional truncation in $\SymAct n\; v\; w$ can be removed.
 \end{proposition}
@@ -531,7 +509,7 @@ A linear order $(<)$ on $X$ can be extended to a linear order on $\List X$ via t
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-This can further be extended to a linear order on $\SetQuot[\List X][\Perm]$ as follows: $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
+The lexicographic order can be further extended to a linear order on $\SetQuot[\List X][\Perm]$ by defining $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
 \begin{proposition}[{\CodeRef{Multiset.Ordering.FMSetOrder}{SortingFMSet.linLexFMSet}}]\label{prop:lift-linear-order}
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.  
 \end{proposition}
@@ -548,6 +526,25 @@ $(B,b)$ are
   \Coalg\;F &\DefEq \sum (A : \Type) \Where A \to F A \\
   \CoalgMor\,F\,(A,a)\,(B,b) &\DefEq \sum (f : A \to B) \Where \forall x \Where b \,(f\,x) = \Map{F} f \,(a \,x)
 \end{align*}
+Coalgebras can be used to represent transition systems, e.g.~the coalgebra on the right encodes the small transition system on the left:
+\vspace{-.8cm}
+\[
+\begin{array}{c@{\qquad\qquad\qquad}c}
+\xymatrix{
+  0 \ar@/^/[rr] \ar@/_/[rr] & & 1 \ar[dl] \ar@(ur,dr) \\
+  & 2 &
+}
+&
+\begin{array}{l}
+  \\ \\
+  c : \Fin 2 \to \FCM (\Fin 2) \\
+  c \; 0 \DefEq \Singl 1 \Union \Singl 1 \\
+  c \; 1 \DefEq \Singl 1 \Union \Singl 2 \\
+  c \; 2 \DefEq \Empty
+\end{array}
+\end{array}
+\]
+
 A coalgebra is \emph{final} if there exists a unique coalgebra morphism to any other coalgebra. This can be formalized by saying that there is a coalgebra $C : \Coalg\;F$ such that the type $\CoalgMor\;F\;C\;D$ is contractible for any other coalgebra $D$. These definitions are the same of Ahrens et al.~\cite{Ahrens2015}, which they only consider in the case of $F$ being a polynomial functor.
 
 We analyze two constructions of the final coalgebra for the finite bag functor: as an $\omega$-limit %(Section~\ref{sec:final-limit-set})
@@ -578,6 +575,7 @@ In HoTT, the \emph{(homotopy) limit} of the chain is definable as
 \]
 Write $\Lim{\FMSet} \DefEq \lim_{n} (\FMSet^n 1)$. An element of the limit consists of an element $xs\;n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs\;(1 + n)$ to $\FMSet^n 1$ via $\Bang^n_{\FMSet}$ is equal to $xs\;n$. The $n$-th projection from the limit is called $\ell_n : \Lim{\FMSet} → \FMSet^n 1$. The limit is invariant wrt.\@ shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{\FMSet} \simeq \LimSh{\FMSet}$, where $\LimSh{\FMSet} \DefEq \lim_{n} (\FMSet^{1 + n} 1)$. We use $\ell_n : \LimSh{\FMSet} → \FMSet^{1+n} 1$ also for the $n$-th projection from the shifted limit.
 The limit is a set, since all types in its diagram are sets.
+Notice that the limit of the chain in (\ref{eq:chain}), with $\FMSet$ replaced by any of its naturally equivalent formulations in Proposition~\ref{prop:eqpres}, is equivalent to $\Lim{\FMSet}$. This implies that, when proving properties of this limit, we can use whichever set-based formulation of finite bags we prefer.
 
 In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\pres{\FMSet} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: take $\ell_n\,(\pres{\FMSet} \,s)$ as $\Map{\FMSet}\,\ell_n \,s$. The function $\pres{\FMSet}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\pres{\FMSet}^{-1}$ provides a coalgebra for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
 
@@ -608,7 +606,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
   If $\pres{\FMSet}$ is injective, then \LLPO{} holds.
 \end{theorem}
 \begin{proof}
-  In this proof we use $\FCM$ instead of $\FMSet$. The statement of the theorem holds since $\FCM X$ is equivalent to $\FMSet X$.
+  In this proof we use $\FCM$ instead of $\FMSet$. The statement of the theorem holds since $\FCM X$ is naturally equivalent to $\FMSet X$.
   It is sufficient to show that the injectivity of $\pres{\FCM}$ implies that the following type is inhabited:
   \begin{equation}\label{eq:compl}
     \def\arraystretch{1.2}
@@ -619,7 +617,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
     \end{array}
   \end{equation}
   This is a form of \emph{completeness} of two-element subsets of the $\omega$-limit.
-  \cite{Mandelkern1988} proves the equivalence of \LLPO{} with completeness of two-element subsets of real numbers.
+  Mandelkern \cite{Mandelkern1988} has proved the equivalence of \LLPO{} with completeness of two-element subsets of real numbers.
   We adapt their proof, for details refer to either~\cite[{Theorem~7}]{Veltri2021} or the formalization~(\CodeRef{Multiset.ListQuotient.Finality}{complete→llpo}).
   
   To prove completeness, assume $x, y_1, y_2, ys, \Op{split}$ and $\Op{diag}$ as in (\ref{eq:compl}).
@@ -660,7 +658,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
 %\begin{proof}
 %  \todo[inline]{Prove it.}
 %\end{proof}
-For the proof \cref{lem:LLPOImpliesPresInj}, which employs the functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result \cite[Theorem 9]{Veltri2021}: the injectivity of $\pres{\Op{Pfin}} : \Op{Pfin} \,\Lim{\Op{Pfin}} \to \LimSh{\Op{Pfin}}$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in Theorem 9 of \cite{Veltri2021}.
+For the proof of \cref{lem:LLPOImpliesPresInj}, which employs the functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result \cite[Theorem 9]{Veltri2021}: the injectivity of $\pres{\Op{Pfin}} : \Op{Pfin} \,\Lim{\Op{Pfin}} \to \LimSh{\Op{Pfin}}$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in Theorem 9 of \cite{Veltri2021}.
 
 Nevertheless, we are able to salvage in our constructive setting the fact that $\pres{\FMSet}$ has a section/right-inverse. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but strong limit-preservation is equivalent to \LLPO{}.
 %irst we show that each set $\FMSet^n 1$ can be endowed with a linear order.
@@ -691,17 +689,19 @@ Assuming \LLPO{} we have $\FMSet \Lim{\FMSet} \simeq \Lim{\FMSet}$, and proving 
 \subsection{As a Quotient of the Final $\List$-Coalgebra}\label{sec:final-quotient-set}
 
 It is known that the limit $\Lim{\List} \DefEq \lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}.
-The limit $\Lim{\List}$ is a type of non-wellfounded with \emph{ordered} subtrees,
-and we denote by $\coalg{\List}$ be its coalgebra structure.
+The limit $\Lim{\List}$ is a type of non-wellfounded \emph{ordered} trees,
+and we denote by $\coalg{\List}$ its coalgebra structure.
 By choosing a suitable relation $R$, one can hope to obtain a type of
 \emph{unordered} trees $\SetQuot[\Lim{\List}][R]$ that induces a coalgebra structure on $\FMSet$.
 We chose $R$ to be a notion of \emph{bisimilarity} $\Bisim$,
-obtained iteratively from the \emph{predicate lifting}~\cite[\S2]{Hasuo2013} $\Relator$ applied to finite approximations of trees in $\Lim{\List}$:
-  \begin{align*}
-    &\Approx^n : \List^n 1 → \List^n 1 → \Type \\
-    &\Approx^0 x\;y \DefEq 1 \\
-    &\Approx^{1+n}\;x\;y \DefEq \Relator \,(\Approx^n)\;x\,y.
-  \end{align*}
+obtained iteratively from the \emph{relation lifting} $\Relator$ applied to finite approximations of trees in $\Lim{\List}$~\cite{Hasuo2013}:
+\[
+\begin{array}{l}
+  \Approx^n : \List^n 1 → \List^n 1 → \Type \\
+  \Approx^0 x\;y \DefEq 1 \\
+  \Approx^{1+n}\;x\;y \DefEq \Relator \,(\Approx^n)\;x\,y.
+\end{array}
+\]
 From the fact that $(\forall x,y\Where R \,x\,y \to S \,x\,y)$ implies $\forall xs,ys \Where \Relator  R\;xs\;ys \to \Relator S\;xs\;ys$,
 we obtain, for $s, t : \Lim{\List}$, a chain of propositions
 \begin{equation}\label{eq:chain-rel}
@@ -713,12 +713,12 @@ we obtain, for $s, t : \Lim{\List}$, a chain of propositions
 \end{equation}
 The desired relation $\Bisim\,s\,t$ is the limit of the chain in (\ref{eq:chain-rel}).
 
-Before proceeding to $\SetQuot[\Lim{\List}][\Bisim]$,
-one might wonder if $\coalg{\List}$ lifts to coalgebra of setoids $(\Lim{\List}, \Bisim) → (\List \Lim{\List}, \Relator \Bisim)$.
+Before proceeding to investigate $\SetQuot[\Lim{\List}][\Bisim]$,
+one might wonder if $\coalg{\List}$ lifts to a coalgebra of setoids $(\Lim{\List}, \Bisim) → (\List \Lim{\List}, \Relator \Bisim)$.
 For this, one needs to show that it is a \emph{setoid-morphism},
 i.e.\@ for $s, t : \Lim{\List}$, whenever $\Bisim\;s\;t$
 then $\Relator \Bisim\; (\coalg{\List} s)\; (\coalg{\List} t)$.
-Once again, the same issue as when working with $\FMSet$ arises:
+Once again, the same issue we found when trying to prove the injectivity of $\pres{\FMSet}$ in Section~\ref{sec:final-limit-set} arises:
 
 \begin{theorem}[\CodeRef{Multiset.ListQuotient.LLPO}{fix⁻-preserves-≈→LLPO}]
   If $\coalg{\List}$ is a setoid-morphism, then \LLPO{} holds.
@@ -746,14 +746,14 @@ We can show that the resulting quotient is a fixpoint, and in particular a coalg
 \end{theorem}
 \begin{proof}
   For the proof, we employ the equivalent functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$.
-  Let $U \DefEq \SetQuot[\Lim{\List}][\Bisim]$ be a type of unordered trees.
+  Let $U \DefEq \SetQuot[\Lim{\List}][\Bisim]$ be the type of unordered trees.
   The assumption implies that $\coalg{\List}$ lifts to a function $U → \FMSet U$,
   definable by recursion on the set-quotient.
   An inverse $\FMSet U → U$ is definable since $\coalg{\List}^{-1}$ is always a setoid-morphism
   and $\SetQuot[\List X][\Relator R]$ is an \emph{effective quotient} for any setoid $(X, R)$.
 \end{proof}
 
-However, proving that this fixpoint is the final coalgebra seems to require the axiom of choice:
+However, we were able to prove that this fixpoint is the final coalgebra only under the assumption of the axiom of choice. 
 \begin{theorem}[\CodeRef{Multiset.ListQuotient.Fixpoint}{TerminalfixQ⁻}]\label{thm:final-quotient}
   Assuming axiom of choice, the fixpoint of \cref{thm:final-quotient} carries the structure of the final $\FMSet$-coalgebra.
 \end{theorem}
@@ -769,8 +769,8 @@ However, proving that this fixpoint is the final coalgebra seems to require the 
   This is is sufficient to prove that $u_c \DefEq u'(\theta(c))$ is the unique coalgebra morphism from $c$ to $\coalg{\FMSet}$.
 \end{proof}
 
-While not delivering the final coalgebra of $\FMSet$ without extra classical assumptions, the quotient $\SetQuot[\Lim{\List}][\Bisim]$ can still be used as a denotational domain for transition systems with a finite set of states:
-given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, the existence of the section $\theta$ is implied by a finite-choice argument.
+%While not delivering the final coalgebra of $\FMSet$ without extra classical assumptions, the quotient $\SetQuot[\Lim{\List}][\Bisim]$ can still be used as a denotational domain for transition systems with a finite set of states:
+%given a coalgebra $c : S \to \FMSet S$ where $S$ is (Bishop) finite, the existence of the section $\theta$ is implied by a finite-choice argument.
 
 \section{The Finite Bag Functor in Groupoids}\label{sec:finite-bags-groupoids}
 
