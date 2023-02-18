@@ -145,7 +145,7 @@ module Choice
       subst B (isPropΠ (λ _ → squash₁) _ _) (elimCollProp₁' B propB h (∥θ∥₁Inv c))
 
 
-module _
+module FinalityWithChoice
 
 -- -- BagLim is the final coalgebra of Bag [Ahrens 2015]
   (ana : {X : Type} → (c : X → Bag X) → X → BagLim)

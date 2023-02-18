@@ -460,7 +460,7 @@ All encodings of finite multisets used in the preceding section induce equivalen
       \; \stackrel{\beta}{≃} \; \SetQuot[\List X][\Relator\;(=)]
       \; \stackrel{\gamma}{≃} \; \FMSet X,
   \]
-  natural in $X$: for any $f : X → Y$, $\alpha \circ \Map{\FCM} f = \Map{\SetQuot[\List X][\Relator\;(=)]} {} \circ \alpha$, etc.
+  which are natural in $X$: for any $f : X → Y$, $\alpha \circ \Map{\FCM} f = \Map{\SetQuot[\List X][\Relator\;(=)]} {} \circ \alpha$, and similarly for $\beta$ and $\gamma$.
 \end{proposition}
 \begin{proof}
   Equivalence $\alpha$ is obtained by observing that both types form a free commutative monoid on $X$,
@@ -758,7 +758,7 @@ However, we were able to prove that this fixpoint is the final coalgebra only un
   Assuming axiom of choice, the fixpoint of \cref{thm:final-quotient} carries the structure of the final $\FMSet$-coalgebra.
 \end{theorem}
 \begin{proof}
-  We sketch the invocation of choice in the proof, which is analogous to a related one for the finite powerset functor in \cite{Veltri2021}.
+  We only discuss the particular instance of choice used in the proof, which is analogous to a related one for the finite powerset functor in \cite{Veltri2021}.
   Abbreviate unordered trees again as $U$ and $R \DefEq \Relator\; (=)$, and use the presentation of $\FMSet$ as in \cref{thm:fixpoint-quotient}.
   To build a coalgebra morphism $u_c : C → U$ from a given coalgebra $c : C \to \FMSet C$ to $\coalg{\FMSet} : U → \FMSet U$,
   one can define a function $u' : \SetQuot[(C → \List C)][R^*] → (C → U)$.
@@ -766,7 +766,7 @@ However, we were able to prove that this fixpoint is the final coalgebra only un
   and $u'$ is obtained by recursion from the unique $\List$-coalgebra morphism $C → \Lim{\List}$.
   The axiom of choice implies that the canonical map $(C → \SetQuot[\List][R]) → \SetQuot[(C → \List C)][R^*]$
   has a section $\theta$ for \emph{arbitrary} $C$.
-  This is is sufficient to prove that $u_c \DefEq u'(\theta(c))$ is the unique coalgebra morphism from $c$ to $\coalg{\FMSet}$.
+  This is is sufficient to prove that $u_c \DefEq u'(\theta(c))$ is the unique coalgebra morphism from $(C,c)$ to $(\coalg{\FMSet},\SetQuot[\Lim{\List}][\Bisim])$.
 \end{proof}
 
 %While not delivering the final coalgebra of $\FMSet$ without extra classical assumptions, the quotient $\SetQuot[\Lim{\List}][\Bisim]$ can still be used as a denotational domain for transition systems with a finite set of states:
@@ -802,7 +802,7 @@ First, recall one way of defining finite sets in HoTT \cite{Frumin2018}.
   The underlying type of a $\FinSet$ is accessed via the first projection $\langle - \rangle : \FinSet → \Type$.
 %\end{definition}
 
-$\Op{isFinSet} B$ is a proposition and any type $B$ satisfying the predicate is a set.
+The type $\Op{isFinSet} B$ is a proposition and any type $B$ satisfying the predicate is a set.
 It follows that $\Op{FinSet}$ forms a groupoid.
 Note that $\Op{FinSet}$ is a \emph{large} type, i.e. $\Op{FinSet} : \Type_1$.
 %it lives in the successor universe of the types that it ranges over.
@@ -882,10 +882,6 @@ Following \cite{Finster2021}, we first introduce an equivalent but small definit
       \AxiomC{$\alpha : \Fin m ≃ \Fin n$}
       \BinaryInfC{$\Hom\,\alpha : \Obj m = \Obj n$}
       \DisplayProof
-    \hfill
-      \AxiomC{$n : \N$}
-      \UnaryInfC{$\Hom\, \mathsf{id} = \Refl\,(\Obj n)$}
-      \DisplayProof
     \hspace*{\fill}
     \\[1em]
     \hspace*{\fill}
@@ -940,11 +936,19 @@ Since $\Bag$ is a polynomial functor, its final coalgebra can be computed as the
   The map $\pres{\Bag} : \Bag\,\Lim{\Bag} \to \LimSh{\Bag}$ is an equivalence of groupoids.
 \end{theorem}
 
-\begin{corollary}
-  From \cite{Ahrens2015} it follows that $\Lim{\Bag}$ is the final $\Bag$-coalgebra.
+\begin{corollary}[Theorem 7 of \cite{Ahrens2015}]
+  $\Lim{\Bag}$ is the final $\Bag$-coalgebra.
 \end{corollary}
 
-The combination of \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote}, together with the fact that set-truncation preserve equivalences, implies that $\SetTrunc{\Bag^n 1}$ is equivalent to $\FMSet^n 1$ for all $n$. One might wonder whether the set-truncation of $\Lim{\Bag}$ delivers the final coalgebra of $\FMSet$. We are able to show that $\SetTrunc{\Lim{\Bag}}$ is a fixpoint of $\FMSet$, but the proof of finality requires the additional assumption of the axiom of choice.
+The combination of \cref{thm:FMSetOfFMGpdTrunc} and
+\cref{prop:BagTote}, together with the fact that set-truncation
+preserve equivalences, implies that $\SetTrunc{\Bag^n 1}$ is
+equivalent to $\FMSet^n 1$ for all $n$. One might wonder whether the
+set-truncation of $\Lim{\Bag}$ delivers the final coalgebra of
+$\FMSet$. We are able to show that $\SetTrunc{\Lim{\Bag}}$ is a
+fixpoint of $\FMSet$. But to prove finality, we
+require the additional assumption of the axiom of choice and a
+``higher'' version $\mathsf{AC}_{3,2}$ of the axiom of choice \cite[Exercise 7.8]{HoTTBook}, which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the following type is inhabited: $((x : X) \to \SetTrunc{Y\;x}) \to \SetTrunc{(x : X) \to Y \;x}$.
 \begin{theorem}[\CodeRef{Multiset.FMSet.Fixpoint}{FMSetFixSetTruncTree}]\label{thm:FMSetFixpointOfTrunc}
   %The set-truncation of $\Lim{\Bag}$ is a fixpoint of $\FMSet$, i.e.\@
   There is an equivalence $\FMSet \SetTrunc{\Lim{\Bag}} ≃ \SetTrunc{\Lim{\Bag}}$.
@@ -963,17 +967,20 @@ The combination of \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote}, togethe
   and \eqref{thm:FMSetFixpointOfTrunc:step3} follows from \cref{thm:FMGpdLim}.
   %since $\Lim{\Bag}$ is a limit.
 \end{proof}
-%It seems highely unlikely that the coalgebra underlying the equivalence in \cref{thm:FMSetFixpointOfTrunc} is provably final without the assumption of any choice-like principles. Initial investigations show that, in order to construct a coalgebra morphism typed $X \to \SetTrunc{\Lim{\Bag}}$ from a coalgebra $c : X \to \FMSet X$, we need to assume the following principle: the function $\theta_{X,Y} : \SetTrunc{X \to Y} \to (X \to \SetTrunc{Y})$, which can be easily defined using  $\Rec{\SetTrunc{\Blank}}$, has a section for all types $X$ and $Y$. The proof of uniqueness of the mediating coalgebra morphism seems to additionally require an instance of the axiom of choice. We refrain from showing a proof of finality here, which we leave to future work. We do not know what is the strength of assuming the existence of a section for $\theta_{X,Y}$, nor how it compares to other choice principles. It surely resembles a form of choice: if set-truncation is replaced with propositonal truncation, then the required principle becomes a particular instance of the axiom of choice.
-We employ an alternative formulation of the axiom of choice, provably equivalent to more standard formulations~\cite{Veltri2021}. Given types $X,Y$ and a relation $R$ on $Y$, define the relation $X \to R$ on $X \to Y$ as the pointwise lifting of $R$ to functions. The axiom of choice states that the function $\theta_R : \SetQuot[(X \to Y)][(X \to R)] \to (X \to \SetQuot[Y][R])$, definable via $\Rec{\SetQuot[X \to Y][X \to R]}$, has a section. From the fact that $e : (\SetQuot[X][{=}]) \simeq \SetTrunc{X}$, the axiom of choice gives in particular a function $\psi : (X \to \SetTrunc{Y}) \to \SetTrunc{X \to Y}$ which is a right-inverse of $\theta_{=}$ (up to equivalence $e$).
+Let $\coalg{\FMSet}$ be the coalgebra underlying the equivalence of Theorem \ref{thm:FMSetFixpointOfTrunc}.
+%We employ an alternative formulation of the axiom of choice, provably equivalent to more standard formulations~\cite{Veltri2021}. Given types $X,Y$ and a relation $R$ on $Y$, define the relation $X \to R$ on $X \to Y$ as the pointwise lifting of $R$ to functions. The axiom of choice states that the function $\theta_R : \SetQuot[(X \to Y)][(X \to R)] \to (X \to \SetQuot[Y][R])$, definable via $\Rec{\SetQuot[X \to Y][X \to R]}$, has a section. From the fact that $e : (\SetQuot[X][{=}]) \simeq \SetTrunc{X}$, the axiom of choice gives in particular a function $\psi : (X \to \SetTrunc{Y}) \to \SetTrunc{X \to Y}$ which is a right-inverse of $\theta_{=}$ (up to equivalence $e$).
 \begin{theorem}\label{thm:final-set-truncation}
-  Assuming axiom of choice, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$.
-  \todo{Specify $\operatorname{AC}_{x,y}$, for appropriate $x, y$. C.f. \cite[Ex.~7.8]{HoTTBook}}
+  Assuming axiom of choice and $\mathsf{AC}_{3,2}$, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$.
 \end{theorem}
 \begin{proof}
-Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote} is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\psi$ on $c'$ gives us $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in \cref{thm:FMGpdLim}, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $X$ and $\SetTrunc{\Lim{\Bag}}$.
+Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote} is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\mathsf{AC}_{3,2}$ on $c'$ gives $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in \cref{thm:FMGpdLim}, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $(X,c)$ and $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$. The proof of uniqueness uses an application of the axiom of choice. We refer to the formalization for details.
 \end{proof}
 %We do not yet know what is the strength of assuming the existence of a section for $\theta_X$ and how it compares to well-known choice principles. It resembles a form of choice: if set-truncation is replaced with propositonal truncation, then it becomes a particular instance of the axiom of choice.
-Similarly to the quotient $\SetQuot[\Lim{\List}][\Bisim]$ of Section~\ref{sec:final-quotient-set}, in the absence of the axiom of choice $\SetTrunc{\Lim{\Bag}}$ can still be used to give semantics to transition systems with finite set of states, since a section for $\theta_{R}$ is derivable in case the domain type $X$ is finite. When $R$ is path equality, the section can be defined using the \enquote{finite choice} principle in (\ref{eq:finite-choice}).\todo{This has not been formalized. Say that?}
+In the absence of the axiom of choice and $\mathsf{AC}_{3,2}$, the type $\SetTrunc{\Lim{\Bag}}$ can still be used to give semantics to transition systems with \emph{finite} set of states.
+\begin{proposition}
+For all $n : \N$ and coalgebra $c : \Fin n \to \FMSet (\Fin n)$, there exists a unique coalgebra morphism from $(\Fin n,c)$ to $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$.
+\end{proposition}
+This is true since $\mathsf{AC}_{3,2}$ holds when $X$ is equivalent to $\Fin n$, it follows from the \enquote{finite choice} principle in Lemma \ref{lem:FiniteChoice}. The particular instance of the axiom of choice used in the proof of Theorem \ref{thm:final-set-truncation} also holds when $X ≃ \Fin n$.
 
 %% Note that the above fixpoint is not necessarily the \emph{largest} fixpoint.
 %% \todo[inline,caption={Choice for largest fixpoint}]{%
@@ -1001,8 +1008,8 @@ where the relation $\Op{Act} \,P\,a$ is
 \]
 The type $\Op{F}_{A,B,P}\,X$ is a set whenever the type of shapes $A$ is a set. The functor $\FMSet$ corresponds to the instance where $A \DefEq ℕ$, $B \DefEq \Fin$ and $P\,\sigma \DefEq 1$.
 
-We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:PresFMSetSection} is valid for any $\Op{F}_{A,B,P}$. The answer is no: the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$ does not generally have a section, and it can be shown to be surjective only in the presence of the axiom of countable choice. In fact, the proof of Theorem~\ref{thm:PresFMSetSection} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor.
-The employment of these propositions can be seen as the invocation of two specific instances of the axiom of countable choice, which happen to be hold in the case of $\FMSet$.
+We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$. Nevertheless, one can ask if a result like Theorem~\ref{thm:PresFMSetSection} is valid for any $\Op{F}_{A,B,P}$. We do not know how to generally define a section for the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$. But we know how to prove the surjectivity of $\pres{\Op{F}}$ under the assumption of the axiom of countable choice. The proof of Theorem~\ref{thm:PresFMSetSection} relies on Propositions~\ref{prop:ListPermDefQuot} and \ref{prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor.
+The employment of these propositions can be seen as the invocation of two specific instances of the axiom of countable choice, which happen to hold in the case of $\FMSet$.
 
 Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A,B,P}$ valued in groupoids, akin to the functor $\Bag$. First, the small HIT construction of the groupoid of finite types $\Bij$ can be generalized:
   \begin{center}
@@ -1017,10 +1024,6 @@ Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A
       \AxiomC{\hspace{-.5cm}$\alpha : B a ≃ B a$}
       \AxiomC{\hspace{-.5cm}$p : P\,\alpha$}
       \TrinaryInfC{$\Hom \,\alpha\,p: \Obj a = \Obj a$}
-      \DisplayProof
-    \hfill
-      \AxiomC{$a : A$}
-      \UnaryInfC{$\Hom \,\mathsf{id} \Op{Prefl}= \Refl\,(\Obj a)$}
       \DisplayProof
     \hspace*{\fill}
     \\[1em]
@@ -1037,7 +1040,7 @@ Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A
         \DisplayProof
     \hspace*{\fill}
   \end{center}
-$\Op{Prefl}$ and $\Op{Pcomp}$ are the closures of $P$ wrt.\@ identity and composition of equivalences.
+Above $\Op{Pcomp}$ is the closures of $P$ wrt.\@ composition of equivalences. It is possible to prove that $\Hom$ also preserves identities and inverses.
 When $B$ is valued in sets, one can also define a function $\langle -\rangle : \Op{U}_{A,B,P} \to \Type$ extracting a set, so that $\langle \Obj a \rangle \DefEq B\,a$.
 The polynomial functor $\Op{G}_{A,B,P}$ is %defined as
 \[

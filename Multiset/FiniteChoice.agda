@@ -45,7 +45,7 @@ open import Cubical.HITs.SetTruncation as ST
 private
   variable
     ℓ ℓ' : Level
-    X : Type ℓ
+    X X' : Type ℓ
     n : ℕ
     Y : Fin n → Type ℓ'
 
@@ -224,12 +224,12 @@ module _ {B : (Fin n → ∥ X ∥₂) → Type ℓ'}
     choice v
       ∎
 
-elim2ₙ : {B : (v w : Fin n → ∥ X ∥₂) → Type ℓ'}
+elim2ₙ : {B : (v : Fin n → ∥ X ∥₂) (v : Fin n → ∥ X' ∥₂) → Type ℓ'}
   → (setB : ∀ ∣v∣ ∣w∣ → isSet (B ∣v∣ ∣w∣))
-  → (choice : (v w : Fin n → X) → B ∣ v ∣₂∗ ∣ w ∣₂∗)
-  → (v w : Fin n → ∥ X ∥₂) → B v w
-elim2ₙ {n = n} {X = X} {B = B} setB choice =
-  elimₙ {B = λ v → (w : Fin n → ∥ X ∥₂) → B v w}
+  → (choice : (v : Fin n → X) (w : Fin n → X') → B ∣ v ∣₂∗ ∣ w ∣₂∗)
+  → (v : Fin n → ∥ X ∥₂) (w : Fin n → ∥ X' ∥₂) → B v w
+elim2ₙ {n = n} {X' = X'} {B = B} setB choice =
+  elimₙ {B = λ v → (w : Fin n → ∥ X' ∥₂) → B v w}
     (λ ∣v∣ → isSetΠ (λ ∣w∣ → setB ∣v∣ ∣w∣))
     (λ v → elimₙ
       (λ ∣w∣ → setB ∣ v ∣₂∗ ∣w∣)
@@ -247,3 +247,24 @@ rec2ₙ : {A : Type ℓ'}
   → (choice : (v w : Fin n → X) → A)
   → (v w : Fin n → ∥ X ∥₂) → A
 rec2ₙ setA = elim2ₙ (λ _ _ → setA)
+
+
+open import Cubical.HITs.PropositionalTruncation as PT
+
+module _ {Y : Fin (suc n) → Type ℓ'} where
+  box-cons₁
+    : ∥ Y fzero ∥₁
+    → ∥ ((k : Fin n) → Y (fsuc k)) ∥₁
+    → ∥ ((k : Fin (suc n)) → Y k) ∥₁
+  box-cons₁ = PT.map2 _∷_
+
+module _ where
+  box₁ : ∀ {n} {Y : Fin n → Type ℓ'}
+    → ((k : Fin n) → ∥ Y k ∥₁)
+    → ∥ ((k : Fin n) → Y k) ∥₁
+  box₁ {n = ℕ.zero} v = ∣ ⊥.elim ∣₁
+  box₁ {n = suc n} {Y = Y} v = box-cons₁ (v fzero) (box₁ (v ∘ fsuc))
+
+unbox₁ : ∥ ((k : Fin n) → Y k) ∥₁
+  → (k : Fin n) → ∥ Y k ∥₁
+unbox₁ ∣v∣ k = PT.map (at k) ∣v∣
