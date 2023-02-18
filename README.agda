@@ -291,7 +291,8 @@ open import Multiset.FMSet.Fixpoint using (FMSetFixSetTruncTree)
 Theorem10 : FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂
 Theorem10 = FMSetFixSetTruncTree
 
-open import Multiset.FMSet.Finality using (isContrAna)
+open import Multiset.FMSet.Finality
+open FinalityWithChoice using (isContrAna)
 
 -- Assuming the axiom of choice, ∥ BagLim ∥₂ is the final
 -- coalgebra of FMSet in sets, i.e. the space of coalgebra

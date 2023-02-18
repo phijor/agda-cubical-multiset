@@ -41,7 +41,7 @@ open import Cubical.HITs.PropositionalTruncation as PT
 private
   variable
     ℓ : Level
-    X : Type ℓ
+    X Y : Type ℓ
 
 isGroupoidTote : isGroupoid X → isGroupoid (Tote X)
 isGroupoidTote h = isOfHLevelΣ 3 isGroupoidFinSet λ _ → isOfHLevelΠ 3 (λ _ → h)
@@ -62,6 +62,17 @@ FMSet→∥Tote∥₂ (n , x) = SQ.rec squash₂ f well-defined x where
   well-defined v w = PT.elim
     (λ _ → isSetSetTrunc _ _)
     (λ (σ , v∘σ≡w) → cong ∣_∣₂ (TotePath (ua σ) v∘σ≡w))
+
+map∥Tote∥₂ : (f : X → Y) → ∥ Tote X ∥₂ → ∥ Tote Y ∥₂
+map∥Tote∥₂ f = ST.map (Tote.map f)
+
+FMSet→∥Tote∥₂-nat : (f : X → Y) (xs : FMSet X)
+  → FMSet→∥Tote∥₂ (FMSet.map f xs) ≡ map∥Tote∥₂ f (FMSet→∥Tote∥₂ xs)
+FMSet→∥Tote∥₂-nat f (n , x) =
+  SQ.elimProp {P = λ x → FMSet→∥Tote∥₂ (FMSet.map f (n , x)) ≡ map∥Tote∥₂ f (FMSet→∥Tote∥₂ (n , x))}
+              (λ _ → isSetSetTrunc _ _)
+              (λ _ → refl)
+              x
 
 Tote→FMSet : Tote X → FMSet X
 Tote→FMSet {X = X} ((Y , n , e) , v) = n , (PT.rec→Set SQ.squash/ from-equiv is2Const e) where
