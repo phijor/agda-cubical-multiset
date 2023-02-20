@@ -1,34 +1,6 @@
 {-# OPTIONS --safe #-}
 
-{-
-Prerequisites
--------------
-
-This library has been tested with the following software versions:
- * Agda v2.6.2.2
- * The Cubical library, version 0.4 (23th Nov 2022):
-     https://github.com/agda/cubical/releases/tag/v0.4
-
-Type checking the code
-----------------------
-
-Type check the code by running Agda in Safe Mode:
-
-    $ agda --safe ./README.agda
-
-Alternatively, use the provided Nix flake (see file `flake.nix`) to reproducibly
-type check the library with all dependencies pinned to working versions:
-
-    $ nix build
-
-A development shell that includes all of the dependencies can be spawned via
-
-    $ nix shell
-    (nix-shell) $ which agda
-    /nix/store/dfr3d08mx77isqzkgxnm0vr2rrfpc20x-agdaWithPackages-2.6.2.2/bin/agda
-    (nix-shell) $ agda --safe ./README.agda
-    ...
--}
+-- See README.md for prerequisites and Agda instructions.
 
 module README where
 
@@ -44,10 +16,6 @@ open import Cubical.Data.SumFin using (Fin)
 open import Cubical.HITs.PropositionalTruncation as PT using (∥_∥₁)
 open import Cubical.HITs.SetQuotients as SQ using (_/_)
 open import Cubical.HITs.SetTruncation as ST using (∥_∥₂ ; ∣_∣₂)
-
--- open import Cubical.Foundations.Equiv
--- open import Cubical.Data.FinSet using (FinSet)
--- open import Cubical.HITs.SetTruncation as ST using (∥_∥₂)
 
 -- 3. The Finite Bag Functor in Sets
 -- ---------------------------------
