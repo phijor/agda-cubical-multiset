@@ -28,10 +28,30 @@
               include = [ "doc" "tex" ];
             };
           };
+        archive = pkgs.callPackage ./nix/archive.nix {
+          src = nix-filter.lib.filter {
+            root = ./.;
+            name = "archive-cubical-multiset";
+            include = [
+              "README.md"
+              "README.agda"
+              "LICENSE"
+
+              # The Agda library
+              "Multiset/"
+              "Multiset.agda-lib"
+
+              # Building with Nix
+              "nix"
+              (nix-filter.lib.matchExt "nix")
+              "flake.lock"
+            ];
+          };
+        };
       in
       {
         packages = {
-          inherit multiset paper;
+          inherit multiset paper archive;
           default = multiset;
         };
 
