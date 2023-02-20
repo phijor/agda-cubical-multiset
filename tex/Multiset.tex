@@ -664,7 +664,7 @@ Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)
   and that $t$ is indeed in the fiber of $\pres{\FMSet}$ over $s$.
 \end{proof}
 
-Assuming \LLPO{} we have $\FMSet \Lim{\FMSet} \simeq \Lim{\FMSet}$, and proving that the coalgebra underlining this equivalence is final is straightforward using the universal property of the limit.
+Assuming \LLPO{} we have $\FMSet \Lim{\FMSet} \simeq \Lim{\FMSet}$, and proving that the coalgebra underlining this equivalence is final in the category of sets is straightforward using the universal property of the limit.
 
 \subsection{As a Quotient of the Final $\List$-Coalgebra}\label{sec:final-quotient-set}
 
@@ -734,7 +734,7 @@ We can show that the resulting quotient is a fixpoint, and in particular a coalg
 
 However, we were able to prove that this fixpoint is the final coalgebra only under the assumption of the axiom of choice. 
 \begin{theorem}[\CodeRef{FinalFMSetCoalgebra}]\label{thm:final-quotient}
-  Assuming axiom of choice, the fixpoint of \cref{thm:final-quotient} carries the structure of the final $\FMSet$-coalgebra.
+  Assuming the axiom of choice, the fixpoint of \cref{thm:fixpoint-quotient} is the final $\FMSet$-coalgebra in the category of sets.
 \end{theorem}
 \begin{proof}
   We only discuss the particular instance of choice used in the proof, which is analogous to a related one for the finite powerset functor in \cite{Veltri2021}.
@@ -953,7 +953,7 @@ which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the fo
 Let $\coalg{\FMSet}$ be the coalgebra underlying the equivalence of Theorem \ref{thm:FMSetFixpointOfTrunc}.
 %We employ an alternative formulation of the axiom of choice, provably equivalent to more standard formulations~\cite{Veltri2021}. Given types $X,Y$ and a relation $R$ on $Y$, define the relation $X \to R$ on $X \to Y$ as the pointwise lifting of $R$ to functions. The axiom of choice states that the function $\theta_R : \SetQuot[(X \to Y)][(X \to R)] \to (X \to \SetQuot[Y][R])$, definable via $\Rec{\SetQuot[X \to Y][X \to R]}$, has a section. From the fact that $e : (\SetQuot[X][{=}]) \simeq \SetTrunc{X}$, the axiom of choice gives in particular a function $\psi : (X \to \SetTrunc{Y}) \to \SetTrunc{X \to Y}$ which is a right-inverse of $\theta_{=}$ (up to equivalence $e$).
 \begin{theorem}[\CodeRef{FMSetFinalCoalgebra}]\label{thm:final-set-truncation}
-  Assuming axiom of choice and $\mathsf{AC}_{3,2}$, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$.
+  Assuming axiom of choice and $\mathsf{AC}_{3,2}$, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$ in the category of sets.
 \end{theorem}
 \begin{proof}
 Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote} is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\mathsf{AC}_{3,2}$ on $c'$ gives $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in \cref{cor:BagFinalCoalg}, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $(X,c)$ and $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$. The proof of uniqueness uses an application of the axiom of choice. We refer to the formalization for details.
