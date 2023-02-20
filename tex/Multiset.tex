@@ -1,10 +1,18 @@
-\documentclass[a4paper,USenglish,cleveref]{lipics-v2021}
+\documentclass[final,a4paper,USenglish,cleveref]{lipics-v2021}
 
-\usepackage[debug]{multiset}
+\usepackage{multiset}
 
 \usepackage{bussproofs}
+\usepackage{microtype}
 
 \usepackage{todonotes}
+\hypersetup{%
+  colorlinks,
+  pdfpagemode=UseOutlines,
+  bookmarks,
+  hyperfootnotes,
+  backref,
+}
 
 \bibliographystyle{plainurl}
 
@@ -109,7 +117,7 @@ We conclude by discussing generalizations of our constructions to other analytic
 
 The material presented in the paper (apart from \cref{sec:analytic}) has been formalized in the Cubical Agda proof assistant.
 The code is freely available at \url{https://github.com/phijor/agda-cubical-multiset}.
-For any result in the paper decorated with an \texttt{Identifier},
+For any result in the paper decorated with an \CodeRef{Identifier},
 the repository contains instructions on how to find the corresponding formalization.
 
 \section{Type Theory and Cubical Agda}
