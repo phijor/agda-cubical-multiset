@@ -52,30 +52,6 @@ reshapeSquare {p = p} {q = q} {r} {s} sq =
      sym r ∙ r                               ≡⟨ lCancel r ⟩
      refl                                    ∎)
 
--- Equivalence of chains C and C'
-record ChainEquiv {ℓ} (C C' : Chain ℓ) : Type ℓ where
-  constructor chain-equiv
-  field
-    α : (n : ℕ) → C .Ob n → C' .Ob n
-    α-nat : ∀ n x → C' .π n (α (suc n) x) ≡ α n (C .π n x)
-    α-eq : ∀ n → isEquiv (α n)
-
--- Half-adjoint equivalence of chains C and C'
-record ChainHAEquiv {ℓ} (C C' : Chain ℓ) : Type ℓ where
-  constructor chain-ha
-  field
-    α : (n : ℕ) → C .Ob n → C' .Ob n
-    α-nat : ∀ n x → C' .π n (α (suc n) x) ≡ α n (C .π n x)
-    α-ha : ∀ n → isHAEquiv (α n)
-
-  α-inv : (n : ℕ) → C' .Ob n → C .Ob n
-  α-inv n = α-ha n .g
-
-ChainEquiv→ChainHAEquiv : ∀ {ℓ} {C C' : Chain ℓ}
-  → ChainEquiv C C' → ChainHAEquiv C C'
-ChainEquiv→ChainHAEquiv (chain-equiv α α-nat α-eq) =
-  chain-ha α α-nat (λ n → equiv→HAEquiv (α n , α-eq n) .snd)
-
 open ChainHAEquiv
 
 -- The inverse of a chain equivalence also enjoys the naturality property

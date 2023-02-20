@@ -284,6 +284,12 @@ module _ (F : Type → Type) {{FunctorF : Functor F}} where
   coalg : isLimitPreserving F → Lim F → F (Lim F)
   coalg = TerminalChain.Fixpoint.fix⁻
 
+  open import Multiset.Limit.Chain using (Chain ; ChainEquiv ; Limit)
+  import Multiset.Limit.Isomorphism
+
+  chainEquivToLimitEquiv : ∀ {ℓ} {C C' : Chain ℓ} → ChainEquiv C C' → Limit C ≃ Limit C'
+  chainEquivToLimitEquiv = Multiset.Limit.Isomorphism.mapLimit-pres-equiv
+
 import Multiset.FCM.Limit
 
 -- The Lesser Limit Principle of Omniscience:
