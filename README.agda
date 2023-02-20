@@ -115,13 +115,10 @@ _∼_ = Multiset.FMSet._∼_
 
 -- Finite choice for Fin-indexed types:
 import Multiset.FiniteChoice
-  -- using
-  --   (box ; unbox
-  --   ; elimₙ ; elimₙ-comp
-  --   )
+
 module _ {n : ℕ} (Y : Fin n → Type) where
-  setFinChoice≃ : ((k : Fin n) → ∥ Y k ∥₂) ≃ ∥ ((k : Fin n) → Y k) ∥₂
-  setFinChoice≃ = Multiset.FiniteChoice.setFinChoice≃ Y
+  finChoiceEquiv : ((k : Fin n) → ∥ Y k ∥₂) ≃ ∥ ((k : Fin n) → Y k) ∥₂
+  finChoiceEquiv = Multiset.FiniteChoice.setFinChoice≃ Y
 
   box : ((k : Fin n) → ∥ Y k ∥₂) → ∥ ((k : Fin n) → Y k) ∥₂
   box = Multiset.FiniteChoice.box
@@ -164,7 +161,7 @@ FMSetEquivs X =
   List X / Relator _≡_ ≃⟨ invEquiv Multiset.ListQuotient.FMSetEquiv.FMSet≃List/Relator= ⟩
   FMSet X ■
 
--- All equivalence are natural:
+-- All equivalences above are natural:
 FCM≃List/Perm-natural = Multiset.Equivalences.FCM-PList.PListToM-nat
 List/Perm≃List/Relator-natural = Multiset.Equivalences.PList-RelatorList.List/Perm→List/Relator≡-nat
 FMSet→List/Relator=-natural = Multiset.Equivalences.PList-RelatorList.FMSet→List/Relator=-nat
@@ -214,8 +211,8 @@ module _ {A : Type} (setA : isSet A) (R : A → A → Type) (linR : isLinOrder R
   sort : (n : ℕ) → (Fin n → A) / _∼_ → (Fin n → A)
   sort = S.sortPVect
 
-  sort-section : (n : ℕ) → section SQ.[_] (sort n)
-  sort-section = S.sortPVect-section
+  SymActDefineable : (n : ℕ) → section SQ.[_] (sort n)
+  SymActDefineable = S.sortPVect-section
 
   -- For linearly ordered A, there is a canonical permutation between
   -- any two unordered finite sets of A's:
@@ -294,18 +291,18 @@ open import Multiset.Omniscience using (LLPO)
 
 -- Injectivity of the limit-preservation map of finite multisets implies LLPO.
 -- Note that this is proved for the presentation as a HIT:
-FMSet-pres-inj→LLPO : isInjective (pres FCM) → LLPO
-FMSet-pres-inj→LLPO = Multiset.FCM.Limit.pres-inj⇒llpo
+InjectiveFMSetPresToLLPO : isInjective (pres FCM) → LLPO
+InjectiveFMSetPresToLLPO = Multiset.FCM.Limit.pres-inj⇒llpo
 
 -- The crucial lemma that the above proof depends on:
-FMSet-alternation-lemma = Multiset.FCM.Limit.diag-ysᶜ-islim-alternating
+FMSetAlternationLemma = Multiset.FCM.Limit.diag-ysᶜ-islim-alternating
 
 import Multiset.ListQuotient.ToInjectivity
 
 -- LLPO also implies the injectivity of the limit-preservation map.
 -- This time, we use lists modulo a relational lifting for the proof:
-LLPO→FMSet-pres-inj : LLPO → isInjective (pres (λ X → List X / Relator _≡_))
-LLPO→FMSet-pres-inj = Multiset.ListQuotient.ToInjectivity.llpo⇒pres-inj
+LLPOToInjectiveFMSetPres : LLPO → isInjective (pres (λ X → List X / Relator _≡_))
+LLPOToInjectiveFMSetPres = Multiset.ListQuotient.ToInjectivity.llpo⇒pres-inj
 
 import Multiset.FMSet.Limit
 
@@ -315,11 +312,11 @@ import Multiset.FMSet.Limit
 LexFMSet^ : (n : ℕ) → FMSet ^ n → FMSet ^ n → Type
 LexFMSet^ = Multiset.FMSet.Limit.LexFMSet^
 
-linLexFMSet^ : ∀ n → isLinOrder (LexFMSet^ n)
-linLexFMSet^ = Multiset.FMSet.Limit.linLexFMSet^
+linLexIterFMSet : ∀ n → isLinOrder (LexFMSet^ n)
+linLexIterFMSet = Multiset.FMSet.Limit.linLexFMSet^
 
-FMSet-pres-section : section (pres FMSet) Multiset.FMSet.Limit.PresSection.pres⁻¹
-FMSet-pres-section = Multiset.FMSet.Limit.PresSection.pres-section
+FMSetPresSection : section (pres FMSet) Multiset.FMSet.Limit.PresSection.pres⁻¹
+FMSetPresSection = Multiset.FMSet.Limit.PresSection.pres-section
 
 -- 4.2 As a Quotient of the Final List-Coalgebra
 -- ---------------------------------------------
@@ -360,8 +357,8 @@ open import Cubical.Categories.Instances.Sets using (SET)
 module _ (isSetoidMorCoalgList : (∀ {s} {t} → Bisim s t → Relator' Bisim (coalgList s) (coalgList t))) where
 
   -- 1) The anti-constructive principle LLPO:
-  isSetoidMorCoalgList→LLPO : LLPO
-  isSetoidMorCoalgList→LLPO = Multiset.ListQuotient.LLPO.fix⁻-preserves-≈→LLPO isSetoidMorCoalgList
+  isSetoidMorphismCoalgListToLLPO : LLPO
+  isSetoidMorphismCoalgListToLLPO = Multiset.ListQuotient.LLPO.fix⁻-preserves-≈→LLPO isSetoidMorCoalgList
 
   import Multiset.Setoid.Category
   open import Cubical.Categories.Category using (Category)
@@ -396,8 +393,8 @@ module _ (isSetoidMorCoalgList : (∀ {s} {t} → Bisim s t → Relator' Bisim (
   FMSetFunctor = Multiset.ListQuotient.Fixpoint.FMSetFunctor
 
   -- 4) Assuming the axiom of choice this fixpoint is the largest, i.e. coalgFMSet is the final coalgebra:
-  coalgFMSetFinal : AC _ _ _ → Cat.TerminalCoalgebra FMSetFunctor
-  coalgFMSetFinal = Multiset.ListQuotient.Fixpoint.TerminalfixQ⁻ isSetoidMorCoalgList
+  FinalFMSetCoalgebra : AC _ _ _ → Cat.TerminalCoalgebra FMSetFunctor
+  FinalFMSetCoalgebra = Multiset.ListQuotient.Fixpoint.TerminalfixQ⁻ isSetoidMorCoalgList
 
 
 -- 5 The Finite Bag Functor in Groupoids
@@ -493,5 +490,5 @@ module _
   coalgFinite = Multiset.FMSet.FiniteFinality.FinalityFinite.coalg ana anaEq anaUniq e eNat
 
   -- When not assuming choice, there is still a unique coalgebra morphism from a coalgebra with finite carrier and `coalg'`:
-  uniqueFiniteCoalg : ∀ n (c : Fin n → FMSet (Fin n)) → isContr (Cat.CoalgebraHom FMSetFunctor' (Cat.coalgebra c) coalgFinite)
-  uniqueFiniteCoalg = Multiset.FMSet.FiniteFinality.FinalityFinite.uniqueFiniteCoalg ana anaEq anaUniq e eNat
+  uniqueCoalgMorphismFinCarrier : ∀ n (c : Fin n → FMSet (Fin n)) → isContr (Cat.CoalgebraHom FMSetFunctor' (Cat.coalgebra c) coalgFinite)
+  uniqueCoalgMorphismFinCarrier = Multiset.FMSet.FiniteFinality.FinalityFinite.uniqueFiniteCoalg ana anaEq anaUniq e eNat

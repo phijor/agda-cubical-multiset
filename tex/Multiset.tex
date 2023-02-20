@@ -381,7 +381,7 @@ We write $\SymActSigma n$ for the non-propositionally-truncated variant of $\Sym
 %\subsubsection{Finite Choice for Sets}
 
 The proof of Theorem~\ref{thm:FMSetFixpointOfTrunc} employs the fact that $\FMSet$ is closed under set-truncation.  The latter fact factors through the following lemma, stating that set-truncation distributes over finite families of types.
-\begin{lemma}[{\CodeRef{Multiset.FiniteChoice}{setFinChoice{$≃$}}}]\label{lem:FiniteChoice}
+\begin{lemma}[{\CodeRef{finChoiceEquiv}}]\label{lem:FiniteChoice}
   For any $n : ℕ$ and type family $Y : \Fin n \to \Type$,
   there is an equivalence
   $
@@ -430,8 +430,9 @@ The equivalence of Lemma \ref{lem:FiniteChoice} allows to define a variant of th
   %\end{align*}
 %\end{definition}
 
-\begin{theorem}[{\CodeRef{Multiset.FMSet.Properties.STInvariance}{STInvarianceEquiv}}]\label{thm:FMSetSetTruncInvariant}
-  $\FMSet$ is invariant under set-truncation: $\FMSet \SetTrunc{X} ≃ \FMSet X$.
+\begin{theorem}[{\CodeRef{FMSetTruncInvariance}}]\label{thm:FMSetSetTruncInvariant}
+  $\FMSet$ is invariant under set-truncation:
+  for any type $X$, there is an equivalence $\FMSet \SetTrunc{X} ≃ \FMSet X$.
 \end{theorem}
 \begin{proof}
   The equivalence is obtained from an isomorphism.
@@ -452,7 +453,7 @@ $  %\[
 \subsection{Equivalence of Presentations}\label{sec:fmset-presentation-equivs}
 
 All encodings of finite multisets used in the preceding section induce equivalent functors:
-\begin{proposition}\label{prop:eqpres}
+\begin{proposition}[\CodeRef{FMSetEquivs}]\label{prop:eqpres}
   For any type $X$, there is a sequence of equivalences
   \[
     \FCM X
@@ -483,12 +484,12 @@ In the proof of Theorem~\ref{thm:PresFMSetSection} we employ the fact that the t
 A relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
 If $X$ has a linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, so that $\Perm \;xs\;(\sort\,xs)$ holds. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
 Since $\SetQuot[\List X][\Perm] \simeq \FMSet X$, we obtain the following result.
-\begin{proposition}[{\CodeRef{Multiset.Ordering.FMSetOrder}{SortingFMSet.sortPVect-section}}]\label{prop:ListPermDefQuot}
+\begin{proposition}[{\CodeRef{SymActDefineable}}]\label{prop:ListPermDefQuot}
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable quotient for all $n : ℕ$.
 \end{proposition}
 
 Sorting also allows to explicitly find a canonical permutation between any two related lists. Given $p : \Perm \;xs\;ys$, we can find another permutation $\canonicalPerm \;p : \Perm\;xs\;ys$ as follows: there are permutations $\Perm\;xs\;(\sort\,xs)$ and $\Perm\;(\sort\;ys)\;ys$, and moreover the existence of $p$ implies $\sort\,xs = \sort\,ys$. The function $\canonicalPerm$ is constant, since it never inspect the input permutation $p$. 
-\begin{proposition}[{\CodeRef{Multiset.Ordering.FMSetOrder}{SortingFMSet.canonicalS}}]\label{prop:ListPermCanonicalPerm}
+\begin{proposition}[{\CodeRef{SymActUntruncate}}]\label{prop:ListPermCanonicalPerm}
 If $X$ is linearly-ordered, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$ , i.e. the propositional truncation in $\SymAct n\; v\; w$ can be removed.
 \end{proposition}
 
@@ -510,7 +511,7 @@ A linear order $(<)$ on $X$ can be extended to a linear order on $\List X$ via t
   \hspace*{\fill}
 \end{center}
 The lexicographic order can be further extended to a linear order on $\SetQuot[\List X][\Perm]$ by defining $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
-\begin{proposition}[{\CodeRef{Multiset.Ordering.FMSetOrder}{SortingFMSet.linLexFMSet}}]\label{prop:lift-linear-order}
+\begin{proposition}[{\CodeRef{linLexFMSet}}]\label{prop:lift-linear-order}
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.  
 \end{proposition}
 
@@ -584,7 +585,7 @@ values that yields $\True$ in at most one position, one can decide
 whether all even or all odd positions are $\False$.
 Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is sufficient to find a bi-implication between them. %But first a useful lemma.
 
-\begin{lemma}[\CodeRef{Multiset.FCM.Limit}{diag-ysᶜ-islim-alternating}]\label{lem:DiagLimCaseAnalysis}
+\begin{lemma}[\CodeRef{FMSetAlternationLemma}]\label{lem:DiagLimCaseAnalysis}
   For $x, y_1, y_2 : \Lim{\FMSet}$, $\Var{ys} : ℕ → \Lim{\FMSet}$
   such that $∀ n\Where \ell_n\,x = \ell_n\,(\Var{ys}\,n)$, and $n : ℕ$, if $\Var{ys}\,n = y_1$ and $\Var{ys}\,(1+n) = y_2$, then $\Bang_{\FMSet}^n(\ell_{1+n}\,y_1) = \ell_n\,y_2$.
 \end{lemma}
@@ -602,7 +603,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
   \end{align*}
 \end{proof}
 
-\begin{theorem}[\CodeRef{Multiset.FCM.Limit}{pres-inj⇒llpo}]\label{lem:InjPresImpliesComplete}
+\begin{theorem}[\CodeRef{InjectiveFMSetPresToLLPO}]\label{lem:InjPresImpliesComplete}
   If $\pres{\FMSet}$ is injective, then \LLPO{} holds.
 \end{theorem}
 \begin{proof}
@@ -652,7 +653,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
   From the injectivity of $\pres{\FCM}$ it follows that $\{x, \overline{x}\} = \{y_1, y_2\}$, which also implies that (merely) $x = y_1$ or $x = y_2$.
 \end{proof}
 
-\begin{theorem}[\CodeRef{Multiset.ListQuotient.ToInjectivity}{llpo⇒pres-inj}]\label{lem:LLPOImpliesPresInj}
+\begin{theorem}[\CodeRef{LLPOToInjectiveFMSetPres}]\label{lem:LLPOImpliesPresInj}
   \LLPO{} implies the injectivity of $\pres{\FMSet}$.
 \end{theorem}
 %\begin{proof}
@@ -662,14 +663,14 @@ For the proof of \cref{lem:LLPOImpliesPresInj}, which employs the functor $\SetQ
 
 Nevertheless, we are able to salvage in our constructive setting the fact that $\pres{\FMSet}$ has a section/right-inverse. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but strong limit-preservation is equivalent to \LLPO{}.
 %irst we show that each set $\FMSet^n 1$ can be endowed with a linear order.
-\begin{lemma}[\CodeRef{Multiset.FMSet.Limit}{linLexFMSet\^}]\label{lem:iter-linear}
+\begin{lemma}[\CodeRef{linLexIterFMSet}]\label{lem:iter-linear}
 For all $n$, $\FMSet^n 1$ is linearly-ordered.
 \end{lemma}
 \begin{proof}
 Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)$ is the empty relation and $x <^{1 + n} y \DefEq \LexPerm\,(<^n)\;x\;y$. Proposition \ref{prop:lift-linear-order} implies that the order $(<^n)$ is linear for all $n$.
 \end{proof}
 
-\begin{theorem}[\CodeRef{Multiset.FMSet.Limit}{PresSection.pres-section}]\label{thm:PresFMSetSection}
+\begin{theorem}[\CodeRef{FMSetPresSection}]\label{thm:PresFMSetSection}
  The function $\pres{\FMSet}$ has a section.
 \end{theorem}
 \begin{proof}
@@ -720,7 +721,7 @@ i.e.\@ for $s, t : \Lim{\List}$, whenever $\Bisim\;s\;t$
 then $\Relator \Bisim\; (\coalg{\List} s)\; (\coalg{\List} t)$.
 Once again, the same issue we found when trying to prove the injectivity of $\pres{\FMSet}$ in Section~\ref{sec:final-limit-set} arises:
 
-\begin{theorem}[\CodeRef{Multiset.ListQuotient.LLPO}{fix⁻-preserves-≈→LLPO}]
+\begin{theorem}[\CodeRef{isSetoidMorphismCoalgListToLLPO}]
   If $\coalg{\List}$ is a setoid-morphism, then \LLPO{} holds.
 \end{theorem}
 The proof is similar to that of \cref{lem:InjPresImpliesComplete}.
@@ -731,7 +732,7 @@ i.e.\@ \LLPO{} holds.
 Under this assumption alone it is the final coalgebra of an endofunctor in the category of setoids:
 \todo{Give definition of this category}
 
-\begin{theorem}[\CodeRef{Multiset.ListQuotient.Finality}{finalFMSetoidCoalgebra}]\label{thm:final-setoids}
+\begin{theorem}[\CodeRef{finalFMSetoidCoalgebra}]\label{thm:final-setoids}
   Assuming $\coalg{\List}$ is a setoid-morphism,
   the setoid $(\Lim{\List},\Bisim)$ has a coalgebra structure for the functor
   $(X, R) \mapsto (\List X, \Relator R)$
@@ -740,7 +741,7 @@ Under this assumption alone it is the final coalgebra of an endofunctor in the c
 
 Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by the relation $\Bisim$ does not obviously give the final coalgebra of $\FMSet$.
 We can show that the resulting quotient is a fixpoint, and in particular a coalgebra (of sets):
-\begin{theorem}[\CodeRef{Multiset.ListQuotient.Fixpoint}{FMSetFixpointTree/Bisim}]\label{thm:fixpoint-quotient}
+\begin{theorem}[\CodeRef{FMSetFixpointTree/Bisim}]\label{thm:fixpoint-quotient}
   If $\coalg{\List}$ is a setoid-morphism,
   it lifts to an equivalence $\coalg{\FMSet} : \SetQuot[\Lim{\List}][\Bisim] \xrightarrow{≃} \FMSet(\SetQuot[\Lim{\List}][\Bisim])$.
 \end{theorem}
@@ -754,7 +755,7 @@ We can show that the resulting quotient is a fixpoint, and in particular a coalg
 \end{proof}
 
 However, we were able to prove that this fixpoint is the final coalgebra only under the assumption of the axiom of choice. 
-\begin{theorem}[\CodeRef{Multiset.ListQuotient.Fixpoint}{TerminalfixQ⁻}]\label{thm:final-quotient}
+\begin{theorem}[\CodeRef{FinalFMSetCoalgebra}]\label{thm:final-quotient}
   Assuming axiom of choice, the fixpoint of \cref{thm:final-quotient} carries the structure of the final $\FMSet$-coalgebra.
 \end{theorem}
 \begin{proof}
@@ -818,7 +819,7 @@ From this, we can define a \enquote{tote} (in the sense of a \enquote{large bag}
 %\end{definition}
 Elements of $\Tote X$ are pairs consisting of a finite set $B$ and a function from (the type underlying) $B$ to $X$ which picks the elements in the tote.  Univalence implies that the path type $(B,v) = (C,w)$ in $\Tote X$ is equivalent to the type of dependent pairs consisting of an equivalence $\sigma : \langle B \rangle \simeq \langle C\rangle$ and a path $v = w \circ \sigma$.
 This indicates that $\Tote X$ is not a set, in general it is at least a groupoid.
-\begin{proposition}[\CodeRef{Multiset.Tote.Properties}{isGroupoidTote}]
+\begin{proposition}[\CodeRef{isGroupoidTote}]
   If $X$ is a groupoid, then $\Tote X$ is a groupoid.
 \end{proposition}
 \begin{proof}
@@ -827,7 +828,7 @@ This indicates that $\Tote X$ is not a set, in general it is at least a groupoid
   $\FinSet$ is also a groupoid, so the entire $\Sigma$-type is a groupoid.
 \end{proof}
 $\Tote X$ differs from $\FMSet X$ in that path equality in the former records the permutations between the (finite sets representing) sizes of the bags, while the second only cares about the mere existence of a permutation. Nonetheless, the two definitions become equivalent when we set-truncate the type of totes.
-\begin{theorem}[\CodeRef{Multiset.Tote.Properties}{FMSet{$≃$}{$\|$}Tote{$\|$}{\textsubscript{2}}}]\label{thm:FMSetOfFMGpdTrunc}
+\begin{theorem}[{\CodeRef{FMSetToteTruncEquiv}, \CodeRef{isNatural-FMSetToteTruncEquiv}}]\label{thm:FMSetOfFMGpdTrunc}
   For any type $X$, $\SetTrunc{\Tote X} ≃ \FMSet X$. The equivalence is natural in $X$.
 \end{theorem}
 \begin{proof}
@@ -897,7 +898,7 @@ Following \cite{Finster2021}, we first introduce an equivalent but small definit
     \hspace*{\fill}
   \end{center}
   %Here, $\operatorname{id}$ is the identity-equivalence, $(\circ)$ composition of equivalences,
-  \begin{proposition}[\CodeRef{Multiset.Bij.Properties}{Bij{$≃$}FinSet}]\label{prop:BijFinSet}
+  \begin{proposition}[\CodeRef{BinFinSetEquiv}]\label{prop:BijFinSet}
     There is an equivalence $\Bij \simeq \Op{FinSet}$. In particular, one can extract a type $\langle x \rangle : \Type$ from each $x : \Bij$:
   \end{proposition}
   A small type of finite bags %valued in groupoids
@@ -913,7 +914,7 @@ Following \cite{Finster2021}, we first introduce an equivalent but small definit
 % We abbreviate $\BagCon{v} \DefEq (x, v) : \Bag X$ if $x : \Bij$ can be inferred from context.
 %\end{definition}
 %\paragraph{Comparing $\Op{List}$ and $\Bag$}\todo{Fit this comparison in somewhere}
-  \begin{proposition}[\CodeRef{Multiset.Bag.Properties}{Bag{$≃$}Tote}]\label{prop:BagTote}
+  \begin{proposition}[\CodeRef{BagToteEquiv}]\label{prop:BagTote}
     For any type $X$, the equivalence of Proposition~\ref{prop:BijFinSet} extends to an equivalence $\Bag X \simeq \Tote X$.
   \end{proposition}
  Notice that $\Bag$ is the \emph{polynomial functor} associated to the container with $\Bij$ as shapes and $\langle x \rangle$ as positions at shape $x$. This can be seen as a \enquote{higher, more informative} variant of the list functor, which has $ℕ$ as shapes and $\Fin n$ as positions at shape $n$, a statement substantiated by Theorem \ref{thm:FMSetOfFMGpdTrunc}.
@@ -932,7 +933,7 @@ We conjecture that $\Bag X$ can be proved equivalent to the \emph{free symmetric
 %\subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
 
 Since $\Bag$ is a polynomial functor, its final coalgebra can be computed as the $\omega$-limit $\Lim{\Bag} \DefEq \lim_n (\Bag^n 1)$ \cite{Ahrens2015}. Ahrens et al. construction does not restrict the homotopy level of the polynomial functors, so it works also for $\Bag$ for which the limit $\Lim{\Bag}$ is a groupoid. Notice that a variant $\Tote' : \Type_1 \to \Type_1$ of $\Tote$, which does not raise the universe level, could in principle be replaced for $\Bag$ in the limit, by first lifting the unit type 1 to the universe $\Type_1$. The resulting limit would be a large groupoid in $\Type_1$.
-\begin{theorem}[\CodeRef{Multiset.Bag.Properties}{bagLimitEquiv}]\label{thm:FMGpdLim}
+\begin{theorem}[\CodeRef{isLimitPreservingBag}]\label{thm:FMGpdLim}
   The map $\pres{\Bag} : \Bag\,\Lim{\Bag} \to \LimSh{\Bag}$ is an equivalence of groupoids.
 \end{theorem}
 
@@ -948,10 +949,15 @@ set-truncation of $\Lim{\Bag}$ delivers the final coalgebra of
 $\FMSet$. We are able to show that $\SetTrunc{\Lim{\Bag}}$ is a
 fixpoint of $\FMSet$. But to prove finality, we
 require the additional assumption of the axiom of choice and a
-``higher'' version $\mathsf{AC}_{3,2}$ of the axiom of choice \cite[Exercise 7.8]{HoTTBook}, which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the following type is inhabited: $((x : X) \to \SetTrunc{Y\;x}) \to \SetTrunc{(x : X) \to Y \;x}$.
-\begin{theorem}[\CodeRef{Multiset.FMSet.Fixpoint}{FMSetFixSetTruncTree}]\label{thm:FMSetFixpointOfTrunc}
-  %The set-truncation of $\Lim{\Bag}$ is a fixpoint of $\FMSet$, i.e.\@
-  There is an equivalence $\FMSet \SetTrunc{\Lim{\Bag}} ≃ \SetTrunc{\Lim{\Bag}}$.
+\enquote{higher} version $\mathsf{AC}_{3,2}$ of the axiom of choice \cite[Exercise 7.8]{HoTTBook},%
+\footnote{%
+  We use 0-based indexing of $h$-levels, while \cite{HoTTBook} uses $-2$-based indexing,
+  so our $\mathsf{AC}_{3,2}$ is their $\mathsf{AC}_{1,0}$.
+}
+which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the following type is inhabited: $((x : X) \to \SetTrunc{Y\;x}) \to \SetTrunc{(x : X) \to Y \;x}$.
+\begin{theorem}[\CodeRef{FMSetFixpointTruncBagLim}]\label{thm:FMSetFixpointOfTrunc}
+  The set-truncation of $\Lim{\Bag}$ is a fixpoint of $\FMSet$, i.e.\@
+  there is an equivalence $\FMSet \SetTrunc{\Lim{\Bag}} ≃ \SetTrunc{\Lim{\Bag}}$.
 \end{theorem}
 \begin{proof}
   The equivalence is obtained from the composition
@@ -969,7 +975,7 @@ require the additional assumption of the axiom of choice and a
 \end{proof}
 Let $\coalg{\FMSet}$ be the coalgebra underlying the equivalence of Theorem \ref{thm:FMSetFixpointOfTrunc}.
 %We employ an alternative formulation of the axiom of choice, provably equivalent to more standard formulations~\cite{Veltri2021}. Given types $X,Y$ and a relation $R$ on $Y$, define the relation $X \to R$ on $X \to Y$ as the pointwise lifting of $R$ to functions. The axiom of choice states that the function $\theta_R : \SetQuot[(X \to Y)][(X \to R)] \to (X \to \SetQuot[Y][R])$, definable via $\Rec{\SetQuot[X \to Y][X \to R]}$, has a section. From the fact that $e : (\SetQuot[X][{=}]) \simeq \SetTrunc{X}$, the axiom of choice gives in particular a function $\psi : (X \to \SetTrunc{Y}) \to \SetTrunc{X \to Y}$ which is a right-inverse of $\theta_{=}$ (up to equivalence $e$).
-\begin{theorem}\label{thm:final-set-truncation}
+\begin{theorem}[\CodeRef{FMSetFinalCoalgebra}]\label{thm:final-set-truncation}
   Assuming axiom of choice and $\mathsf{AC}_{3,2}$, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$.
 \end{theorem}
 \begin{proof}
@@ -977,8 +983,8 @@ Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{thm:FMSetOfFMGpdTrunc} a
 \end{proof}
 %We do not yet know what is the strength of assuming the existence of a section for $\theta_X$ and how it compares to well-known choice principles. It resembles a form of choice: if set-truncation is replaced with propositonal truncation, then it becomes a particular instance of the axiom of choice.
 In the absence of the axiom of choice and $\mathsf{AC}_{3,2}$, the type $\SetTrunc{\Lim{\Bag}}$ can still be used to give semantics to transition systems with \emph{finite} set of states.
-\begin{proposition}
-For all $n : \N$ and coalgebra $c : \Fin n \to \FMSet (\Fin n)$, there exists a unique coalgebra morphism from $(\Fin n,c)$ to $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$.
+\begin{proposition}[\CodeRef{uniqueCoalgMorphismFinCarrier}]
+  Given any $n : \N$ and a coalgebra ${c : \Fin n \to \FMSet (\Fin n)}$, there exists a unique coalgebra morphism from $(\Fin n,c)$ to $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$.
 \end{proposition}
 This is true since $\mathsf{AC}_{3,2}$ holds when $X$ is equivalent to $\Fin n$, it follows from the \enquote{finite choice} principle in Lemma \ref{lem:FiniteChoice}. The particular instance of the axiom of choice used in the proof of Theorem \ref{thm:final-set-truncation} also holds when $X ≃ \Fin n$.
 
