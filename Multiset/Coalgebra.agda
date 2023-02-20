@@ -34,6 +34,9 @@ module _ {ℓ} (F : Type ℓ → Type ℓ) {{FunctorF : Functor F}} where
   isTerminal : ∀ {νF} (out : νF → F νF) → Type _
   isTerminal out = ∀ {B} → (β : B → F B) → isContr (CoalgebraMorphism β out)
 
+  FinalCoalgebra : Type (ℓ-suc ℓ)
+  FinalCoalgebra = Σ[ νF ∈ (Type ℓ) ] Σ[ out ∈ (νF → F νF) ] (isTerminal out)
+
   module _ {νF} {out : νF → F νF} (is-terminal : isTerminal out) where
     ana : ∀ {B} → (β : B → F B) → CoalgebraMorphism β out
     ana β = is-terminal β .fst

@@ -58,6 +58,7 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     ( Functor
     ; _^_
     )
+open import Multiset.Categories.Coalgebra
 
 open import Cubical.Foundations.Equiv using (_≃_ ; secEq ; retEq)
 open import Cubical.Foundations.Function using (_∘_)
@@ -73,6 +74,10 @@ open import Cubical.HITs.SetQuotients as SQ
     ( _/_ to _/₂_
     )
 open import Cubical.Relation.Binary.Base using (module BinaryRelation)
+
+import Cubical.Categories.Functor as Cat
+open import Cubical.Categories.Instances.Sets
+
 
 open BVec.ΣVec
 open Limit using (elements ; is-lim)
@@ -233,6 +238,12 @@ fixQ⁺ =
 
     fR : ∀ xs ys → ΣVecRel Bisim xs ys → f xs ≡ f ys
     fR ts us rs = SQ.eq/ _ _ (fix⁺-preserves-≈ (ΣVecRel→Relator _≈_ rs))
+
+FMSetFunctor : Cat.Functor (SET ℓ-zero) (SET ℓ-zero)
+FMSetFunctor .Cat.Functor.F-ob (X , _) = FMSet X , isSetFMSet
+FMSetFunctor .Cat.Functor.F-hom f = mapFMSet f
+FMSetFunctor .Cat.Functor.F-id = funExt (SQ.elimProp (λ x → isSetFMSet _ x) λ xs → cong _/₂_.[_] (BVec.map-id xs))
+FMSetFunctor .Cat.Functor.F-seq f g = funExt (SQ.elimProp (λ _ → isSetFMSet _ _) λ xs → cong _/₂_.[_] (BVec.map-comp g f xs))
 
 module _ (fix⁻-preserves-≈ : PreservesRel _≈_ (Relator _≈_) fix⁻) where
   fixQ⁻ : UnorderedTree → FMSet UnorderedTree
@@ -398,16 +409,6 @@ module _ (fix⁻-preserves-≈ : PreservesRel _≈_ (Relator _≈_) fix⁻) wher
       funExt (unfoldQ-unique' (FMSetC.wrap γ) f (λ y → feq y ∙ λ i → mapFMSet f (FMSetC.unwrap-section γ (~ i) y)))
 
   module _ (ac : AC ℓ-zero ℓ-zero ℓ-zero) where
-    open import Cubical.Categories.Functor as Cat
-    open import Cubical.Categories.Instances.Sets
-    open import Multiset.Categories.Coalgebra
-
-    FMSetFunctor : Cat.Functor (SET ℓ-zero) (SET ℓ-zero)
-    FMSetFunctor .Functor.F-ob (X , _) = FMSet X , isSetFMSet
-    FMSetFunctor .Functor.F-hom f = mapFMSet f
-    FMSetFunctor .Functor.F-id = funExt (SQ.elimProp (λ x → isSetFMSet _ x) λ xs → cong _/₂_.[_] (BVec.map-id xs))
-    FMSetFunctor .Functor.F-seq f g = funExt (SQ.elimProp (λ _ → isSetFMSet _ _) λ xs → cong _/₂_.[_] (BVec.map-comp g f xs))
-
     unfoldCoalgebra : Coalgebra FMSetFunctor
     unfoldCoalgebra .Coalgebra.carrier = (Tree /₂ Bisim) , SQ.squash/
     unfoldCoalgebra .Coalgebra.str = fixQ⁻

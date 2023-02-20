@@ -145,6 +145,15 @@ module Choice
       subst B (isPropΠ (λ _ → squash₁) _ _) (elimCollProp₁' B propB h (∥θ∥₁Inv c))
 
 
+open import Cubical.Categories.Functor
+open import Cubical.Categories.Instances.Sets using (SET)
+
+FMSetFunctor : Functor (SET ℓ-zero) (SET ℓ-zero)
+FMSetFunctor .Functor.F-ob (X , _) = FMSet X , isSetFMSet
+FMSetFunctor .Functor.F-hom = FMSet.map
+FMSetFunctor .Functor.F-id = funExt FMSet.mapId
+FMSetFunctor .Functor.F-seq f g = funExt (sym ∘ mapComp g f)
+
 module FinalityWithChoice
 
 -- -- BagLim is the final coalgebra of Bag [Ahrens 2015]
@@ -166,75 +175,107 @@ module FinalityWithChoice
 -- Two forms of axiom of choice
   (ac32 : AOC.AC[Gpd,Set] ℓ-zero ℓ-zero)
   (ac : AOC.AC[Set,Prop] ℓ-zero ℓ-zero)
-   (X : Type) (setX : isSet X)
    where
 
   open Choice ac32 ac
-  open Hyps setX (isGroupoidBag (isSet→isGroupoid setX))
-  module Hyps' = Hyps {Y = BagLim} setX isGroupoidBagLim
-  module Hyps2' {c : X → Bag X} {h : X → BagLim} = Hyps2 (λ x → h x ≡ (Bag.fix⁺ ∘ Bag.map h ∘ c) x) setX (λ x → isGroupoidBagLim _ _)
 
-  unfold : FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂
-  unfold = compEquiv STInvariance.STInvarianceEquiv (compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv))
+  abstract
+    unfold : FMSet ∥ BagLim ∥₂ ≃ ∥ BagLim ∥₂
+    unfold = compEquiv STInvariance.STInvarianceEquiv (compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv))
 
-  unfoldEq : compEquiv (invEquiv (STInvariance.STInvarianceEquiv)) unfold ≡ compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv)
-  unfoldEq =
-    compEquiv-assoc _ _ _
-    ∙ cong (λ x → compEquiv x (compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv))) (invEquiv-is-linv _)
-    ∙ compEquivIdEquiv _
+    unfoldEq : compEquiv (invEquiv (STInvariance.STInvarianceEquiv)) unfold ≡ compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv)
+    unfoldEq =
+      compEquiv-assoc
+        (invEquiv (STInvariance.fromSetTrunc , isoToIsEquiv STInvarianceIso))
+        (STInvariance.fromSetTrunc , isoToIsEquiv STInvarianceIso)
+        ((λ x → setTruncEquiv bagLimitEquiv .size (invEquiv e .size x)) , compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv) .snd)
+      ∙ cong (λ x → compEquiv x (compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv))) (invEquiv-is-linv _)
+      ∙ compEquivIdEquiv ((λ z → ST.rec squash₂ (λ x → ∣ bagLimitEquiv .size x ∣₂) (snd e .equiv-proof (idfun (FMSet _) z) .size .size)) , compEquiv (invEquiv e) (setTruncEquiv bagLimitEquiv) .snd)
   
-  ana₂' : (c : X → Bag X) → X → ∥ BagLim ∥₂
-  ana₂' c = ∣_∣₂ ∘ ana c
+  module _ {X : Type} (setX : isSet X) where
+    open Hyps setX (isGroupoidBag (isSet→isGroupoid setX))
+    module Hyps' = Hyps {Y = BagLim} setX isGroupoidBagLim
+    module Hyps2' {c : X → Bag X} {h : X → BagLim} = Hyps2 (λ x → h x ≡ (Bag.fix⁺ ∘ Bag.map h ∘ c) x) setX (λ x → isGroupoidBagLim _ _)
 
-  ana₂ : (c : X → FMSet X) → X → ∥ BagLim ∥₂
-  ana₂ c = recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (invEq e ∘ c)
+    ana₂' : (c : X → Bag X) → X → ∥ BagLim ∥₂
+    ana₂' c = ∣_∣₂ ∘ ana c
 
-  ana₂Eq : (c : X → FMSet X) 
-    → ana₂ c ≡ equivFun unfold ∘ FMSet.map (ana₂ c) ∘ c
-  ana₂Eq c =
-    elimCollProp₂ (λ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ≡ equivFun unfold ∘ FMSet.map (recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c) ∘ equivFun e ∘ c)
-                 (λ c → isSetΠ (λ _ → isSetSetTrunc) _ _)
-                 (λ c → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c
-                        ∙ cong (∣_∣₂ ∘_) (anaEq c)
-                        ∙ cong (λ x → ST.map Bag.fix⁺ ∘ x ∘ ST.map (Bag.map (ana c)) ∘ ∣_∣₂ ∘ c) (sym (funExt (retEq e)))
-                        ∙ cong (λ x → ST.map Bag.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (eNat (ana c))
-                        ∙ cong (λ x → x ∘ FMSet.map (ana c) ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (cong equivFun unfoldEq))
-                        ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (funExt (mapComp ∣_∣₂ (ana c))) 
-                        ∙ cong (λ x → equivFun unfold ∘ FMSet.map x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c)))
-                 (invEq e ∘ c)
-    ∙ cong (λ x → equivFun unfold ∘ FMSet.map (ana₂ c) ∘ x ∘ c) (funExt (secEq e))
+    ana₂ : (c : X → FMSet X) → X → ∥ BagLim ∥₂
+    ana₂ c = recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (invEq e ∘ c)
+
+    ana₂Eq : (c : X → FMSet X)
+      → ana₂ c ≡ equivFun unfold ∘ FMSet.map (ana₂ c) ∘ c
+    ana₂Eq c =
+      elimCollProp₂ (λ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ≡ equivFun unfold ∘ FMSet.map (recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c) ∘ equivFun e ∘ c)
+                  (λ c → isSetΠ (λ _ → isSetSetTrunc) _ _)
+                  (λ c → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c
+                          ∙ cong (∣_∣₂ ∘_) (anaEq c)
+                          ∙ cong (λ x → ST.map Bag.fix⁺ ∘ x ∘ ST.map (Bag.map (ana c)) ∘ ∣_∣₂ ∘ c) (sym (funExt (retEq e)))
+                          ∙ cong (λ x → ST.map Bag.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (eNat (ana c))
+                          ∙ cong (λ x → x ∘ FMSet.map (ana c) ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (cong equivFun unfoldEq))
+                          ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (funExt (mapComp ∣_∣₂ (ana c))) 
+                          ∙ cong (λ x → equivFun unfold ∘ FMSet.map x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c)))
+                  (invEq e ∘ c)
+      ∙ cong (λ x → equivFun unfold ∘ FMSet.map (ana₂ c) ∘ x ∘ c) (funExt (secEq e))
 
 
-  ana₂Uniq : (c : X → FMSet X)
-    → (h : X → ∥ BagLim ∥₂)
-    → h ≡ equivFun unfold ∘ FMSet.map h ∘ c
-    → ana₂ c ≡ h
-  ana₂Uniq c h eq =
-    elimCollProp₂ (λ c → (h : X → ∥ BagLim ∥₂) → h ≡ equivFun unfold ∘ FMSet.map h ∘ equivFun e ∘ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ≡ h)
-                 (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _)))
-                 (λ c → Hyps'.elimCollProp₂ 
-                                      (λ h → h ≡ equivFun unfold ∘ FMSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ h)
-                                      (λ _ → isPropΠ (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _))
-                                      λ h eq → let eq' = eq
-                                                         ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (funExt (FMSet.mapComp ∣_∣₂ h)))
-                                                         ∙ cong (λ x → x ∘ FMSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c) (cong equivFun unfoldEq)
-                                                         ∙ cong (λ x → ST.map Bag.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (sym (eNat h))
-                                                         ∙ cong (λ x → ST.map Bag.fix⁺ ∘ x ∘ ST.map (Bag.map h) ∘ ∣_∣₂ ∘ c) (funExt (retEq e)) in
-                                                Hyps2'.elimCollProp₁ 
-                                                              (λ _ → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ ∣_∣₂ ∘ h)
-                                                              (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _)
-                                                              (λ eq'' → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ∙ cong (∣_∣₂ ∘_) (anaUniq c h (funExt eq'')))
-                                                              (λ x → Iso.fun PathIdTrunc₀Iso (funExt⁻ eq' x)))
-                 _
-                 h
-                 (eq ∙ cong (λ x → equivFun unfold ∘ FMSet.map h ∘ x ∘ c) (sym (funExt (secEq e))))
+    ana₂Uniq : (c : X → FMSet X)
+      → (h : X → ∥ BagLim ∥₂)
+      → h ≡ equivFun unfold ∘ FMSet.map h ∘ c
+      → ana₂ c ≡ h
+    ana₂Uniq c h eq =
+      elimCollProp₂ (λ c → (h : X → ∥ BagLim ∥₂) → h ≡ equivFun unfold ∘ FMSet.map h ∘ equivFun e ∘ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ≡ h)
+                  (λ _ → isPropΠ (λ _ → isPropΠ (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _)))
+                  (λ c → Hyps'.elimCollProp₂ 
+                                        (λ h → h ≡ equivFun unfold ∘ FMSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ h)
+                                        (λ _ → isPropΠ (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _))
+                                        λ h eq → let eq' = eq
+                                                          ∙ cong (λ x → equivFun unfold ∘ x ∘ equivFun e ∘ ∣_∣₂ ∘ c) (sym (funExt (FMSet.mapComp ∣_∣₂ h)))
+                                                          ∙ cong (λ x → x ∘ FMSet.map h ∘ equivFun e ∘ ∣_∣₂ ∘ c) (cong equivFun unfoldEq)
+                                                          ∙ cong (λ x → ST.map Bag.fix⁺ ∘ invEq e ∘ x ∘ ∣_∣₂ ∘ c) (sym (eNat h))
+                                                          ∙ cong (λ x → ST.map Bag.fix⁺ ∘ x ∘ ST.map (Bag.map h) ∘ ∣_∣₂ ∘ c) (funExt (retEq e)) in
+                                                  Hyps2'.elimCollProp₁
+                                                                (λ _ → recColl₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' (∣_∣₂ ∘ c) ≡ ∣_∣₂ ∘ h)
+                                                                (λ _ → isSetΠ (λ _ → isSetSetTrunc) _ _)
+                                                                (λ eq'' → recCollβ₂ (isSetΠ (λ _ → isSetSetTrunc)) ana₂' c ∙ cong (∣_∣₂ ∘_) (anaUniq c h (funExt eq'')))
+                                                                (λ x → Iso.fun PathIdTrunc₀Iso (funExt⁻ eq' x)))
+                  _
+                  h
+                  (eq ∙ cong (λ x → equivFun unfold ∘ FMSet.map h ∘ x ∘ c) (sym (funExt (secEq e))))
 
-  
-  isContrAna : (c : X → FMSet X)
-    → isContr (Σ[ h ∈ (X → ∥ BagLim ∥₂) ] h ≡ equivFun unfold ∘ FMSet.map h ∘ c)
-  isContrAna c =
-    ( (ana₂ c , ana₂Eq c) -- existence
-    , λ { (h , is-ana)
-        → Σ≡Prop (λ c → isOfHLevelPath' 1 (isSetΠ λ _ → isSetSetTrunc) c _) (ana₂Uniq c h is-ana) -- uniqueness
-      }
-    )
+    
+    isContrAna : (c : X → FMSet X)
+      → isContr (Σ[ h ∈ (X → ∥ BagLim ∥₂) ] h ≡ equivFun unfold ∘ FMSet.map h ∘ c)
+    isContrAna c =
+      ( (ana₂ c , ana₂Eq c) -- existence
+      , λ { (h , is-ana)
+          → Σ≡Prop (λ c → isOfHLevelPath' 1 (isSetΠ λ _ → isSetSetTrunc) c _) (ana₂Uniq c h is-ana) -- uniqueness
+        }
+      )
+
+  open import Multiset.Categories.Coalgebra
+
+  coalg : Coalgebra FMSetFunctor
+  coalg .Coalgebra.carrier = ∥ BagLim ∥₂ , isSetSetTrunc
+  coalg .Coalgebra.str = invEq unfold
+
+  FMSetFinalCoalgebra : TerminalCoalgebra FMSetFunctor
+  FMSetFinalCoalgebra .fst = coalg
+  FMSetFinalCoalgebra .snd β'@(coalgebra {carrier = (B , setB)} β) = ana₃ , CoalgebraHom≡ _ ∘ ana₃Eq where
+    -- Please forgive me the subscript.
+    ana₃ : CoalgebraHom FMSetFunctor β' coalg
+    ana₃ .CoalgebraHom.carrierHom = ana₂ setB β
+    ana₃ .CoalgebraHom.strHom = funExt λ x →
+      invEq unfold (ana₂ setB β x)                                   ≡⟨ cong (invEq unfold) (funExt⁻ (ana₂Eq setB β) x) ⟩
+      invEq unfold (equivFun unfold (FMSet.map (ana₂ setB β) (β x))) ≡⟨ retEq unfold _ ⟩∎
+      FMSet.map (ana₂ setB β) (β x) ∎
+
+    module _ ((coalgebraHom f f-hom) : CoalgebraHom _ β' coalg) where
+      isCoalg→isCorec : f ≡ equivFun unfold ∘ FMSet.map f ∘ β
+      isCoalg→isCorec = funExt λ x →
+        f x                                   ≡⟨ sym (secEq unfold (f x)) ⟩
+        equivFun unfold (invEq unfold (f x))  ≡⟨ cong (equivFun unfold) (funExt⁻ f-hom x) ⟩∎
+        equivFun unfold (FMSet.map f (β x))   ∎
+
+      ana₃Eq : ana₂ setB β ≡ f
+      ana₃Eq = ana₂Uniq setB β f isCoalg→isCorec
