@@ -486,7 +486,7 @@ In the proof of Theorem~\ref{thm:PresFMSetSection} we employ the fact that the t
 A relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
 If $X$ has a linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, so that $\Perm \;xs\;(\sort\,xs)$ holds. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
 Since $\SetQuot[\List X][\Perm] \simeq \FMSet X$, we obtain the following result.
-\begin{proposition}[{\CodeRef{SymActDefineable}}]\label{prop:ListPermDefQuot}
+\begin{proposition}[{\CodeRef{SymActDefinable}}]\label{prop:ListPermDefQuot}
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable quotient for all $n : ℕ$.
 \end{proposition}
 
@@ -621,7 +621,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
   \end{equation}
   This is a form of \emph{completeness} of two-element subsets of the $\omega$-limit.
   Mandelkern \cite{Mandelkern1988} has proved the equivalence of \LLPO{} with completeness of two-element subsets of real numbers.
-  We adapt their proof, for details refer to either~\cite[{Theorem~7}]{Veltri2021} or the formalization~(\CodeRef{Multiset.ListQuotient.Finality}{complete→llpo}).
+  We adapt their proof, for details refer to either~\cite[{Theorem~7}]{Veltri2021} or the formalization~(\CodeRef{CompleteToLLPO}).
   
   To prove completeness, assume $x, y_1, y_2, ys, \Op{split}$ and $\Op{diag}$ as in (\ref{eq:compl}).
   Using $\Op{split}$, define the complement of $\Var{ys}$ as $\overline{\Var{ys}}\;n\DefEq y_2$ if $\Var{ys}\; n = y_1$ and $\overline{\Var{ys}}\;n\DefEq y_1$ if $\Var{ys}\;n = y_2$.
@@ -764,7 +764,7 @@ However, we were able to prove that this fixpoint is the final coalgebra only un
   We only discuss the particular instance of choice used in the proof, which is analogous to a related one for the finite powerset functor in \cite{Veltri2021}.
   Abbreviate unordered trees again as $U$ and $R \DefEq \Relator\; (=)$, and use the presentation of $\FMSet$ as in \cref{thm:fixpoint-quotient}.
   To build a coalgebra morphism $u_c : C → U$ from a given coalgebra $c : C \to \FMSet C$ to $\coalg{\FMSet} : U → \FMSet U$,
-  one can define a function $u' : \SetQuot[(C → \List C)][R^*] → (C → U)$.
+  one defines a function $u' : \SetQuot[(C → \List C)][R^*] → (C → U)$.
   Here, $R^*$ is the pointwise lifting of $R$,
   and $u'$ is obtained by recursion from the unique $\List$-coalgebra morphism $C → \Lim{\List}$.
   The axiom of choice implies that the canonical map $(C → \SetQuot[\List][R]) → \SetQuot[(C → \List C)][R^*]$
@@ -787,7 +787,7 @@ making them invariant under permutation for free.
 We define two equivalent type families $\Tote,\Bag : \Type → \Type$ of finite bags valued in groupoids,
 and substantiate the previous claims by showing that the set-truncation of the former is equivalent to $\FMSet$ (\cref{thm:FMSetOfFMGpdTrunc}),
 and constructing the final coalgebra of the latter in a straightforward way %(\cref{ssec:FMGpdLim},
-(\cref{thm:FMGpdLim}).
+(\cref{thm:BagPresLim,cor:BagFinalCoalg}).
 
 First, recall one way of defining finite sets in HoTT \cite{Frumin2018}.
 %\begin{definition}
@@ -935,11 +935,11 @@ We conjecture that $\Bag X$ can be proved equivalent to the \emph{free symmetric
 %\subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
 
 Since $\Bag$ is a polynomial functor, its final coalgebra can be computed as the $\omega$-limit $\Lim{\Bag} \DefEq \lim_n (\Bag^n 1)$ \cite{Ahrens2015}. Ahrens et al. construction does not restrict the homotopy level of the polynomial functors, so it works also for $\Bag$ for which the limit $\Lim{\Bag}$ is a groupoid. Notice that a variant $\Tote' : \Type_1 \to \Type_1$ of $\Tote$, which does not raise the universe level, could in principle be replaced for $\Bag$ in the limit, by first lifting the unit type 1 to the universe $\Type_1$. The resulting limit would be a large groupoid in $\Type_1$.
-\begin{theorem}[\CodeRef{isLimitPreservingBag}]\label{thm:FMGpdLim}
+\begin{theorem}[\CodeRef{isLimitPreservingBag}]\label{thm:BagPresLim}
   The map $\pres{\Bag} : \Bag\,\Lim{\Bag} \to \LimSh{\Bag}$ is an equivalence of groupoids.
 \end{theorem}
 
-\begin{corollary}[Theorem 7 of \cite{Ahrens2015}]
+\begin{corollary}[Theorem 7 of \cite{Ahrens2015}]\label{cor:BagFinalCoalg}
   $\Lim{\Bag}$ is the final $\Bag$-coalgebra.
 \end{corollary}
 
@@ -972,7 +972,7 @@ which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the fo
   where \eqref{thm:FMSetFixpointOfTrunc:step1} is invariance of $\FMSet$ under set-truncation
   (\cref{thm:FMSetSetTruncInvariant}),
   \eqref{thm:FMSetFixpointOfTrunc:step2} follows from Theorems~\ref{thm:FMSetOfFMGpdTrunc} and \ref{prop:BagTote},
-  and \eqref{thm:FMSetFixpointOfTrunc:step3} follows from \cref{thm:FMGpdLim}.
+  and \eqref{thm:FMSetFixpointOfTrunc:step3} follows from \cref{thm:BagPresLim}.
   %since $\Lim{\Bag}$ is a limit.
 \end{proof}
 Let $\coalg{\FMSet}$ be the coalgebra underlying the equivalence of Theorem \ref{thm:FMSetFixpointOfTrunc}.
@@ -981,7 +981,7 @@ Let $\coalg{\FMSet}$ be the coalgebra underlying the equivalence of Theorem \ref
   Assuming axiom of choice and $\mathsf{AC}_{3,2}$, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$.
 \end{theorem}
 \begin{proof}
-Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote} is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\mathsf{AC}_{3,2}$ on $c'$ gives $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in \cref{thm:FMGpdLim}, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $(X,c)$ and $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$. The proof of uniqueness uses an application of the axiom of choice. We refer to the formalization for details.
+Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote} is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\mathsf{AC}_{3,2}$ on $c'$ gives $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in \cref{cor:BagFinalCoalg}, there exists a unique coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique coalgebra morphism between $(X,c)$ and $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$. The proof of uniqueness uses an application of the axiom of choice. We refer to the formalization for details.
 \end{proof}
 %We do not yet know what is the strength of assuming the existence of a section for $\theta_X$ and how it compares to well-known choice principles. It resembles a form of choice: if set-truncation is replaced with propositonal truncation, then it becomes a particular instance of the axiom of choice.
 In the absence of the axiom of choice and $\mathsf{AC}_{3,2}$, the type $\SetTrunc{\Lim{\Bag}}$ can still be used to give semantics to transition systems with \emph{finite} set of states.
@@ -1054,7 +1054,7 @@ The polynomial functor $\Op{G}_{A,B,P}$ is %defined as
 \[
 \Op{G}_{A,B,P} X \DefEq \sum (x : \Op{U}_{A,B,P}) \Where \langle x \rangle \to X
 \]
-The latter can be related to $\Op{F}_{A,B,P}$ similarly to how $\Bag$ and $\FMSet$ are related via Theorems~\ref{thm:FMSetOfFMGpdTrunc} and \ref{prop:BagTote}: $\SetTrunc{\Op{G}_{A,B,P} X} \simeq \Op{F}_{A,B,P} X$. Since $\Op{G}_{A,B,P}$ is a polynomial functor, its final coalgebra can be constructed as an $\omega$-limit, as in Theorem \ref{thm:FMGpdLim}.
+The latter can be related to $\Op{F}_{A,B,P}$ similarly to how $\Bag$ and $\FMSet$ are related via Theorems~\ref{thm:FMSetOfFMGpdTrunc} and \ref{prop:BagTote}: $\SetTrunc{\Op{G}_{A,B,P} X} \simeq \Op{F}_{A,B,P} X$. Since $\Op{G}_{A,B,P}$ is a polynomial functor, its final coalgebra can be constructed as an $\omega$-limit, as in \cref{thm:BagPresLim,cor:BagFinalCoalg}.
 %% \begin{itemize}
 %%     \item Hint at a definition of analytic functors using
 %%         the above definitions (pick a subgroupoid of Bij etc.)

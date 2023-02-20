@@ -211,8 +211,8 @@ module _ {A : Type} (setA : isSet A) (R : A → A → Type) (linR : isLinOrder R
   sort : (n : ℕ) → (Fin n → A) / _∼_ → (Fin n → A)
   sort = S.sortPVect
 
-  SymActDefineable : (n : ℕ) → section SQ.[_] (sort n)
-  SymActDefineable = S.sortPVect-section
+  SymActDefinable : (n : ℕ) → section SQ.[_] (sort n)
+  SymActDefinable = S.sortPVect-section
 
   -- For linearly ordered A, there is a canonical permutation between
   -- any two unordered finite sets of A's:
@@ -296,6 +296,12 @@ InjectiveFMSetPresToLLPO = Multiset.FCM.Limit.pres-inj⇒llpo
 
 -- The crucial lemma that the above proof depends on:
 FMSetAlternationLemma = Multiset.FCM.Limit.diag-ysᶜ-islim-alternating
+
+-- The detailed proof that completeness of two-element multisets implies LLPO:
+CompleteToLLPO : Multiset.FCM.Limit.Complete → LLPO
+CompleteToLLPO = Multiset.FCM.Limit.complete⇒llpo
+-- NB: The proof of `isSetoidMorphismCoalgListToLLPO` is conceptually the same,
+-- but might be slightly more readable than the above proof.
 
 import Multiset.ListQuotient.ToInjectivity
 
