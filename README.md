@@ -27,8 +27,10 @@ types.
 
 ## Formalization in Agda
 
-See [README.agda](README.agda) for a summary of the library that lives under
-`Multiset/`.
+Claims in the paper have been formalized in a library that lives under `Multiset/`.
+The file [`README.agda`](https://phijor.github.io/agda-cubical-multiset/README.html) contains a summary of the library.
+Whenever a claim in the paper is decorated with an identifier `Foo`,
+the corresposing formalization can be found at `Foo` in `README.agda`.
 
 # License
 
