@@ -16,7 +16,7 @@ agdaPackages.mkDerivation {
     runHook preBuild
 
     # Make sure the README builds with --safe
-    agda --html --html-dir=$html --safe README.agda
+    agda --html --html-dir=$html --highlight-occurrences --safe README.agda
 
     runHook postBuild
   '';
