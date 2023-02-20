@@ -34,9 +34,9 @@
   </ccs2012>
 \end{CCSXML}
 
-\ccsdesc[500]{Theory of computation~Type theory\todo{Use proper classification.}}
+\ccsdesc[500]{Theory of computation~Type theory}
 
-\acknowledgements{%
+\funding{%
   This work was supported by the Estonian Research Council grant PSG749.
 }
 
@@ -64,29 +64,6 @@
 
 \setcounter{tocdepth}{1}
 % \tableofcontents
-
-\subsection{TODO}
-
-\begin{itemize}
-%  \item
-%    Change the focus of the paper:
-%    stress preservation-properties (as needed by Adamek's construction).
-%    Move story of finality to a separate section.
-  \item
-    Say that only core claims are formalized
-%  \item
-%    Idea: hyperlink the formalized theorems from the paper.
-  \item
-    Be precise about which presentations of types are used.
-  \item
-    Tone down our claims about \enquote{necessity}, c.f.\@ response
-%  \item
-%    Give example of transition systems etc.
-  \item
-    Talk about differences of intrinsically vs.\@ extrinsically quotiented trees.
-\end{itemize}
-
-\listoftodos
 
 \section{Introduction}
 
@@ -132,8 +109,8 @@ We conclude by discussing generalizations of our constructions to other analytic
 
 The material presented in the paper (apart from Section~\ref{sec:analytic}) has been formalized in the Cubical Agda proof assistant.
 The code is freely available at \url{https://github.com/phijor/agda-cubical-multiset}.
-For any claim in this paper decorated with an \texttt{Identifier},
-the repository contains instructions where to find the corresponding formalization.
+For any result in the paper decorated with an \texttt{Identifier},
+the repository contains instructions on how to find the corresponding formalization.
 
 \section{Type Theory and Cubical Agda}
 
@@ -663,7 +640,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so it is suffi
 %\end{proof}
 For the proof of \cref{lem:LLPOImpliesPresInj}, which employs the functor $\SetQuot[\List (-)][\Relator\,(=)]$ instead of $\FMSet$, we refer the reader to our Agda formalization.  The proof is similar to the one of a related result \cite[Theorem 9]{Veltri2021}: the injectivity of $\pres{\Op{Pfin}} : \Op{Pfin} \,\Lim{\Op{Pfin}} \to \LimSh{\Op{Pfin}}$, where $\Op{Pfin}$ is the finite powerset functor, is derivable from \LLPO{} and the axiom of countable choice. It turns out that countable choice is not needed, neither in \cref{lem:LLPOImpliesPresInj} nor in Theorem 9 of \cite{Veltri2021}.
 
-Nevertheless, we are able to salvage in our constructive setting the fact that $\pres{\FMSet}$ has a section/right-inverse. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but strong limit-preservation is equivalent to \LLPO{}.
+Nevertheless, we are able to salvage the fact that $\pres{\FMSet}$ has a section/right-inverse which targets the shifted limit. This means that $\FMSet$ weakly preserves the $\omega$-limit $\Lim{\FMSet}$, but strong limit-preservation is equivalent to \LLPO{}.
 %irst we show that each set $\FMSet^n 1$ can be endowed with a linear order.
 \begin{lemma}[\CodeRef{linLexIterFMSet}]\label{lem:iter-linear}
 For all $n$, $\FMSet^n 1$ is linearly-ordered.
@@ -732,7 +709,6 @@ Nevertheless, the inverse of $\coalg{\List}$ is always a setoid-morphism.
 Therefore $\coalg{\List}$ is an equivalence of setoids whenever it is a setoid-morphism,
 i.e.\@ \LLPO{} holds.
 Under this assumption alone it is the final coalgebra of an endofunctor in the category of setoids:
-\todo{Give definition of this category}
 
 \begin{theorem}[\CodeRef{finalFMSetoidCoalgebra}]\label{thm:final-setoids}
   Assuming $\coalg{\List}$ is a setoid-morphism,
@@ -835,7 +811,6 @@ $\Tote X$ differs from $\FMSet X$ in that path equality in the former records th
 \end{theorem}
 \begin{proof}
   The proof proceeds by constructing an isomorphism $\FMSet X \cong \SetTrunc{\Tote X}$.
-  %The forward direction is unproblematic, while the inverse function has to be carefully defined with the homotopy levels of the involved types in mind.
 
   A function $\ToTote : \FMSet X → \SetTrunc{\Tote X}$ is defined by
   %invoking $\Rec{\FMSet}$, so it is enough to
@@ -866,7 +841,6 @@ $\Tote X$ differs from $\FMSet X$ in that path equality in the former records th
   Proving $\ToFMSet \circ \ToTote = \Op{id}$ is straightforward.
   Proving $\ToTote \circ \ToFMSet = \Op{id}$ reduces to showing that $v \circ \alpha \sim v$ for any $v : B → X$ and $\alpha : \Fin n ≃ B$, which is also direct.
 \end{proof}
-
 $\Tote X$ is a large type, but an equivalent small variant can be defined with the help of HITs.
 %it is unsuitable for iteration, as the assignment $(\lambda n\Where \Tote^n \mathsf{1})$
 %of $n$-fold applications of the family is not well-typed.
@@ -886,7 +860,7 @@ Following \cite{Finster2021}, we first introduce an equivalent but small definit
       \BinaryInfC{$\Hom\,\alpha : \Obj m = \Obj n$}
       \DisplayProof
     \hspace*{\fill}
-    \\[1em]
+    \\[.2em]
     \hspace*{\fill}
       \AxiomC{$m, n, o : \N$}
       \AxiomC{$\alpha : \Fin m ≃ \Fin n$}
@@ -901,8 +875,9 @@ Following \cite{Finster2021}, we first introduce an equivalent but small definit
   \end{center}
   %Here, $\operatorname{id}$ is the identity-equivalence, $(\circ)$ composition of equivalences,
   \begin{proposition}[\CodeRef{BinFinSetEquiv}]\label{prop:BijFinSet}
-    There is an equivalence $\Bij \simeq \Op{FinSet}$. In particular, one can extract a type $\langle x \rangle : \Type$ from each $x : \Bij$:
+    There is an equivalence $\Bij \simeq \Op{FinSet}$. In particular, one can extract a type $\langle x \rangle : \Type$ from each $x : \Bij$.
   \end{proposition}
+  
   A small type of finite bags %valued in groupoids
   is defined by replacing $\Op{FinSet}$ with $\Bij$.
 %\begin{definition}\label{def:Bag}
@@ -963,16 +938,16 @@ which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the fo
 \end{theorem}
 \begin{proof}
   The equivalence is obtained from the composition
-  \begin{align}
+  \[
     \FMSet \SetTrunc{\Lim{\Bag}}
-      &≃ \FMSet \Lim{\Bag}          \Step{thm:FMSetFixpointOfTrunc:step1} \\
-      &≃ \SetTrunc{\Bag \Lim{\Bag}} \Step{thm:FMSetFixpointOfTrunc:step2} \\
-      &≃ \SetTrunc{\Lim{\Bag}}      \Step{thm:FMSetFixpointOfTrunc:step3}
-  \end{align}
-  where \eqref{thm:FMSetFixpointOfTrunc:step1} is invariance of $\FMSet$ under set-truncation
+    \stackrel{\alpha}{≃} \FMSet \Lim{\Bag}          
+    \stackrel{\beta}{≃} \SetTrunc{\Bag \Lim{\Bag}} 
+    \stackrel{\gamma}{≃} \SetTrunc{\Lim{\Bag}}
+  \]
+  where $\alpha$ is invariance of $\FMSet$ under set-truncation
   (\cref{thm:FMSetSetTruncInvariant}),
-  \eqref{thm:FMSetFixpointOfTrunc:step2} follows from Theorems~\ref{thm:FMSetOfFMGpdTrunc} and \ref{prop:BagTote},
-  and \eqref{thm:FMSetFixpointOfTrunc:step3} follows from \cref{thm:BagPresLim}.
+  $\beta$ follows from Theorems~\ref{thm:FMSetOfFMGpdTrunc} and \ref{prop:BagTote},
+  and $\gamma$ follows from \cref{thm:BagPresLim}.
   %since $\Lim{\Bag}$ is a limit.
 \end{proof}
 Let $\coalg{\FMSet}$ be the coalgebra underlying the equivalence of Theorem \ref{thm:FMSetFixpointOfTrunc}.
@@ -1004,7 +979,7 @@ This is true since $\mathsf{AC}_{3,2}$ holds when $X$ is equivalent to $\Fin n$,
 
 The formulation $\FMSet$ of the finite bag functor exposes this as an analytic functor \cite{Joyal1986,Hasegawa2002}, which differs from a polynomial functor in that the tuple of elements $\Fin\,n \to X$ is quotiented by the relation generated by the action of the symmetric group with $n$ elements on $X$. Other analytic functors arise by choosing a different subgroup of the symmetric group. For example, picking the subgroup of cyclic permutations delivers the functor of cyclic lists, while taking the trivial subgroup allows us to recover the list functor. 
 
-More generally, in type theory analytic functors can be seen as instances of the functors associated to the \emph{quotient containers} of Abbott et al.~\cite{Abbott2004}. A quotient container is a triple consisting of a type $A$, a type family $B : A \to \Type$ and a propositionally-valued type family $P : \forall \{a\} \Where B \,a \simeq B \,a \to \Type$ closed under identity, inverses and composition of equivalences. The associated functor is:
+In type theory analytic functors can be seen as instances of the functors associated to the \emph{quotient containers} of Abbott et al.~\cite{Abbott2004}. A quotient container is a triple consisting of a type $A$, a family $B : A \to \Type$ and a propositionally-valued family $P : \forall \{a\} \Where B \,a \simeq B \,a \to \Type$ closed under identity, inverses and composition of equivalences. The associated functor is:
 \[
 \Op{F}_{A,B,P}\,X \DefEq \sum (a : A) \Where \SetQuot[(B\,a \to X)][\Op{Act} \,P\,a]
 \]
@@ -1065,22 +1040,21 @@ The latter can be related to $\Op{F}_{A,B,P}$ similarly to how $\Bag$ and $\FMSe
 
 \section{Conclusions}
 
-We looked at various definitions of the finite bag functor, valued in sets and in groupoids, and constructions of their final coalgebras. When working with set-based definitions, the set-theoretic constructions as $\omega$-limit of the chain in (\ref{eq:chain}) and as quotient of the final $\List$-coalgebra are not directly replicable in HoTT, since they imply the validity of classical principles like \LLPO{}. We are at least able to salvage the weak preservation of the $\omega$-limit of the chain in (\ref{eq:chain}). The situation is brighter when working with the groupoid-based definition. The latter is a polynomial functor, and as such has the final coalgebra given by the $\omega$-limit of the chain in (\ref{eq:chain}). We also briefly looked at
-%an application of Cubical Agda's coinductive types for building the final coalgebra and
-generalizations to other analytic functors, which we plan to further explore in the future.
+We looked at various definitions of the finite bag functor, valued in sets and in groupoids, and constructions of their final coalgebras. When working with set-based definitions, the set-theoretic constructions as $\omega$-limit of the terminal chain in (\ref{eq:chain}) and as quotient of the final $\List$-coalgebra are not directly replicable in HoTT, since they imply the validity of classical principles like \LLPO{}. We are at least able to salvage the weak preservation of the $\omega$-limit. The situation is brighter when working with the groupoid-based definition. The latter is a polynomial functor, thus has the final coalgebra given by the $\omega$-limit of the terminal chain.
+%We also looked at coalgebra and generalizations to other analytic functors, which we plan to further explore in the future.
 
 Our conclusion is in line with the one of Kock~\cite{Kock2012} and Finster et al.~\cite{Finster2021}: the bag functor is better behaved when valued in groupoids instead of sets, especially from the perspective of final semantics. This seems to indicate that the denotational semantics of ``resource-sensitive'' computations %or dynamical systems
 is better performed using groupoids instead of sets (switching from categorical to bicategorical semantics).
 In particular, the syntax of process calculi such as CCS, or term calculi for linear logic,  could be defined directly as a groupoid, i.e. structural congruences could be treated as data instead of property. We plan to properly investigate this connection to programming language semantics in future work. For this endeavor, it will also be necessary to study the final coalgebra of combinations of the bag functor with other functors e.g.~formalizing the presence of labels or actions in the transition relation.
 
-Cubical Agda currently allows the definition of coinductive types with HITs appearing in the codomain of destructors. For example, it is possible to define the following coinductive record:
+Cubical Agda allows the definition of coinductive types with HITs appearing in the codomain of destructors. For example, it is possible to define the following coinductive record:
+%  \vspace{-0.5cm}
 \begin{equation}\label{eq:coind}
 \def\arraystretch{0.8}
 \begin{array}{l}
 \Op{record} \; \cLim{\FCM} :  \Type \;\Op{where} \\
 \quad  \Op{coinductive} \\
- \quad \Op{field} \\
- \quad \quad  \unfold : \FCM \cLim{\FCM}
+ \quad \Op{field} \; \unfold : \FCM \cLim{\FCM}
 \end{array}
 \end{equation}
 It is moreover possible to prove that this type is the final coalgebra of the set-based finite bag functor. The proof is similar to the one given for the finite powerset functor \cite[Theorem 2]{Veltri2021}. Definitions such as (\ref{eq:coind}) are an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). We believe that such definitions could be motivated by looking at recent work by Kristensen et al.~\cite{Kristensen2022}, which seems to indicate that the final coalgebra of functors such as $\FCM$ or $\Op{Pfin}$, which are given as HITs, should be definable as the \emph{strict} $\omega$-limit of the chain in (\ref{eq:chain}) in the cubical set model. Strictness means that the limit-property holds on the nose, not only up-to path equality.
