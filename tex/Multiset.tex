@@ -1003,7 +1003,7 @@ The type $\Op{F}_{A,B,P}\,X$ is a set whenever the type of shapes $A$ is a set. 
 
 We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$.
 Nevertheless, one can ask if a result like \cref{thm:PresFMSetSection} is valid for any $\Op{F}_{A,B,P}$. We do not know how to generally define a section for the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$.
-But we know how to prove the surjectivity of $\pres{\Op{F}}$ under the assumption of the axiom of countable choice.
+But we believe the surjectivity of $\pres{\Op{F}}$ to be provable under the assumption of the axiom of countable choice.
 The proof of \cref{thm:PresFMSetSection} relies on \cref{prop:ListPermDefQuot,prop:ListPermCanonicalPerm}, which are very specific properties of the finite bag functor.
 The employment of these propositions can be seen as the invocation of two specific instances of the axiom of countable choice, which happen to hold in the case of $\FMSet$.
 
@@ -1036,13 +1036,13 @@ Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A
         \DisplayProof
     \hspace*{\fill}
   \end{center}
-Above $\Op{Pcomp}$ is the closures of $P$ wrt.\@ composition of equivalences. It is possible to prove that $\Hom$ also preserves identities and inverses.
-When $B$ is valued in sets, one can also define a function $\langle -\rangle : \Op{U}_{A,B,P} \to \Type$ extracting a set, so that $\langle \Obj a \rangle \DefEq B\,a$.
-The polynomial functor $\Op{G}_{A,B,P}$ is %defined as
+Above $\Op{Pcomp}$ is the closure of $P$ wrt.\@ composition of equivalences. It is possible to prove that $\Hom$ also preserves identities and inverses.
+When $B$ is valued in sets, there is a function $\langle -\rangle : \Op{U}_{A,B,P} \to \Type$ extracting a set, so that $\langle \Obj a \rangle \DefEq B\,a$.
+The functor $\Op{G}_{A,B,P}$ is %defined as
 \[
 \Op{G}_{A,B,P} X \DefEq \sum (x : \Op{U}_{A,B,P}) \Where \langle x \rangle \to X
 \]
-The latter can be related to $\Op{F}_{A,B,P}$ similarly to how $\Bag$ and $\FMSet$ are related via \cref{thm:FMSetOfFMGpdTrunc,prop:BagTote}: $\SetTrunc{\Op{G}_{A,B,P} X} \simeq \Op{F}_{A,B,P} X$. Since $\Op{G}_{A,B,P}$ is a polynomial functor, its final coalgebra can be constructed as an $\omega$-limit, as in \cref{thm:BagPresLim,cor:BagFinalCoalg}.
+Since $\Op{G}_{A,B,P}$ is a polynomial functor, its final coalgebra can be constructed as an $\omega$-limit, as in \cref{thm:BagPresLim,cor:BagFinalCoalg}. We conjecture that the latter can be related to $\Op{F}_{A,B,P}$ similarly to how $\Bag$ and $\FMSet$ are related via \cref{thm:FMSetOfFMGpdTrunc,prop:BagTote}: $\SetTrunc{\Op{G}_{A,B,P} X} \simeq \Op{F}_{A,B,P} X$. 
 %% \begin{itemize}
 %%     \item Hint at a definition of analytic functors using
 %%         the above definitions (pick a subgroupoid of Bij etc.)
