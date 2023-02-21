@@ -12,9 +12,6 @@ open import Multiset.Bij
 open import Multiset.Bag.Base as Bag
   using
     ( Bag
-    ; Vect
-    ; BagIsoΣ
-    ; ⟨Bij→FinSet⟩≃Idx
     ; isGroupoidBag
     )
 open import Multiset.Bag.Properties as Bag

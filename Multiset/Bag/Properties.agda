@@ -3,19 +3,14 @@
 module Multiset.Bag.Properties where
 
 open import Multiset.Prelude
-open import Multiset.Util using (!_)
-open import Multiset.Bag.Base
+open import Multiset.Bag.Base as Bag
   using
-    ( Bag ; BagIsoΣ
-    ; ⟅_⟆ ; ⟅⟆-syntax
+    ( Bag
     ; map ; mapId ; map∘map
-    ; Idx
     ; Vect
-    ; BagPathExt ; BagPathP
-    ; Idx→-⟨Bij→FinSet⟩→-Iso
     ; isGroupoidBag
     )
-open import Multiset.Tote using (Tote)
+open import Multiset.Tote as Tote using (Tote)
 open import Multiset.Bij as Bij
 open import Multiset.Limit.Chain as Chain using (Limit ; lim ; Chain)
 open import Multiset.Limit.TerminalChain as TerminalChain hiding (cut ; pres)
@@ -33,6 +28,7 @@ open import Cubical.Foundations.HLevels
   using (isContr→isOfHLevel ; isOfHLevelRespectEquiv)
 open import Cubical.Foundations.Path
 open import Cubical.Foundations.Transport
+open import Cubical.Foundations.Structure using (⟨_⟩)
 open import Cubical.Foundations.Function using (_∘_)
 
 open import Cubical.Functions.FunExtEquiv using (funExtDep ; funExtDep⁻)
@@ -52,7 +48,6 @@ private
   variable
     ℓ : Level
 
-open Bag using (card ; members)
 open Limit using (elements ; is-lim)
 
 instance
@@ -61,19 +56,23 @@ instance
   BagFunctor .Functor.map-id = mapId
   BagFunctor .Functor.map-comp g f xs = sym (map∘map f g xs)
 
+open Iso
+
 BagUnit≃Bij : ∀ {ℓ} → Bag (Unit* {ℓ = ℓ}) ≃ Bij
-BagUnit≃Bij = isoToEquiv BagIsoΣ ∙ₑ Σ.Σ-contractSnd {B = λ (x : Bij) → Idx x → Unit*} (λ _ → isContrΠUnit) where
-  isContrΠUnit : {X : Type} → isContr (X → Unit*)
-  isContrΠUnit {X} = (λ _ → tt*) , λ f → refl
+BagUnit≃Bij = isoToEquiv goal
+  where
+    goal : Iso (Bag Unit*) Bij
+    goal .fun = fst
+    goal .inv card = card , λ _ → tt*
+    goal .rightInv _ = refl
+    goal .leftInv _ = refl
 
 private
   !^ : ∀ n → Bag ^ (suc n) → Bag ^ n
   !^ n = Bag map-!^ n
 
-open Iso
-
 zipUnzipIso : Iso (ShLim Bag) (Bag (Lim Bag))
-zipUnzipIso =
+zipUnzipIso = 
   ShLim Bag       Iso⟨ toTraceFirstIso ⟩
   TraceFirst      Iso⟨ toVectLimitBag ⟩
   Σ Bij VectLimit Iso⟨ toBagOfTrees ⟩
@@ -103,26 +102,26 @@ zipUnzipIso =
     go : Iso _ _
     fun go (lim elements isChainLimit) = trace , vects , vects-coh where
       step' : ℕ → Bij
-      step' n = elements n .card
+      step' n = elements n .fst
 
       connect' : ∀ n → step' n ≡ step' (suc n)
-      connect' n = cong card (sym (isChainLimit n))
+      connect' n = cong fst (sym (isChainLimit n))
 
       trace : Trace Bij
       trace = step' , connect'
 
       vects : (n : ℕ) → Vect (Bag ^ n) (step' n)
-      vects n = elements n .members
+      vects n = elements n .snd
 
       vects-coh : ∀ n → PathP (λ i → Vect (Bag ^ n) (connect' n i)) (vects n) (λ idx → !^ n (vects (suc n) idx))
-      vects-coh n = cong members (sym (isChainLimit n))
+      vects-coh n = cong snd (sym (isChainLimit n))
     inv go (trace , vects , vects-coh) = lim elements' isChainLimit' where
       elements' : (n : ℕ) → Bag (Bag ^ n)
-      elements' n = ⟅ vects n idx ∣ idx ∈ trace .step n ⟆
+      elements' n = trace .step n , vects n
 
       isChainLimit' : ∀ n → map (!^ n) (elements' (suc n)) ≡ elements' n
-      isChainLimit' n = BagPathP (sym (trace .connect n)) (symP (vects-coh n))
-    rightInv go (trace , vects , vects-coh) = ΣPathP (refl , ΣPathP (refl {x = vects} , refl {x = vects-coh}))
+      isChainLimit' n = λ i → (trace .connect n (~ i)) , (vects-coh n (~ i))
+    rightInv go (trace , vects , vects-coh) = λ i → trace , (vects , vects-coh)
     leftInv go _ = refl
 
   vectChain : Bij → Chain ℓ-zero
@@ -134,9 +133,9 @@ zipUnzipIso =
 
   toVectLimit : (card : Bij) → Iso (TraceFirst-snd (constTrace card)) (VectLimit card)
   toVectLimit card = go where
-    go : Iso _ _
-    go .fun (vects , vects-coh) = lim vects (sym ∘ vects-coh)
-    go .inv (lim elements isChainLimit) = elements , sym ∘ isChainLimit
+    go : Iso (TraceFirst-snd (constTrace card)) (VectLimit card)
+    go .fun (vects , vects-coh) = lim vects λ n i → vects-coh n (~ i)
+    go .inv (lim elements isChainLimit) = elements , (λ n i → isChainLimit n (~ i))
     go .rightInv _ = refl
     go .leftInv _ = refl
 
@@ -149,16 +148,11 @@ zipUnzipIso =
   toBagOfTrees : Iso (Σ Bij VectLimit) (Bag (Lim Bag))
   toBagOfTrees = go where
     -- This is essentially the UP of limits of chains.
-    go : Iso _ _
-    go .fun (card , lim vects vects-coh) = ⟅ lim (λ n → vects n idx) (λ n → funExt⁻ (vects-coh n) idx) ∣ idx ∈ card ⟆
-    go .inv bagOfTrees =
-      ( bagOfTrees .card
-      , lim
-        (λ n idx → bagOfTrees .members idx .elements n)
-        (λ n → funExt λ idx → bagOfTrees .members idx .is-lim n)
-      )
-    go .rightInv _ = refl
-    go .leftInv _ = refl
+    go : Iso (Σ Bij VectLimit) (Bag (Lim Bag))
+    go .fun (card , lim vects vects-coh) = (card , λ idx → lim (λ n → vects n idx) (λ n → funExt⁻ (vects-coh n) idx))
+    go .inv (card , trees) = card , (lim (λ n idx → trees idx .elements n) λ n → funExt λ idx → trees idx .is-lim n)
+    go .rightInv _ = refl 
+    go .leftInv _ = refl 
 
 zipUnzipIsoInv≡pres : zipUnzipIso .inv ≡ TerminalChain.pres Bag
 zipUnzipIsoInv≡pres = funExt λ xs → ShLimPathPExt Bag (λ n → refl) (is-lim-coh xs) where
@@ -188,15 +182,8 @@ BagLim = Lim Bag
 
 isGroupoidBag^ : ∀ n → isGroupoid (Bag ^ n)
 isGroupoidBag^ 0 = isContr→isOfHLevel 3 isContrUnit*
-isGroupoidBag^ 1 = isOfHLevelRespectEquiv 3 (invEquiv BagUnit≃Bij) isGroupoidBij
+isGroupoidBag^ 1 = isOfHLevelRespectEquiv 3 (invEquiv BagUnit≃Bij) isGroupoidBij 
 isGroupoidBag^ (suc (suc n)) = isGroupoidBag (isGroupoidBag^ (suc n))
 
 isGroupoidBagLim : isGroupoid BagLim
 isGroupoidBagLim = isOfHLevelLim Bag 3 isGroupoidBag^
-
-module _ {ℓ} {X : Type ℓ} where
-  Bag-Tote-Iso : Iso (Bag X) (Tote X)
-  Bag-Tote-Iso = BagIsoΣ ∙≅ Σ.Σ-cong-iso Bij-FinSet-Iso (Idx→-⟨Bij→FinSet⟩→-Iso X)
-
-  Bag≃Tote : Bag X ≃ Tote X
-  Bag≃Tote = isoToEquiv Bag-Tote-Iso

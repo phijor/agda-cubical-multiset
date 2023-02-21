@@ -9,122 +9,100 @@ open import Cubical.Foundations.Structure
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function using (_∘_)
 
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Isomorphism
+
 open import Cubical.Functions.FunExtEquiv using (funExtDep)
 
+open import Cubical.Data.FinSet using (FinSet)
 open import Cubical.Data.Sigma as Σ
 open import Cubical.Data.Nat as ℕ
   using (ℕ)
 
-open import Cubical.Reflection.RecordEquiv
-
-open import Cubical.Data.SumFin as Fin
-  using (Fin ; fzero ; fsuc)
-
-private
-  variable
-    ℓ : Level
-    X Y : Type ℓ
-
+-- ⚠ WARNING: Load-bearing abstract block ⚠
+--
+-- Agda should under no circumstances be given the chance to
+-- reduce the definition below.  For variables (x : Bij), the
+-- term below *will* make Agda v2.6.2.2 loop forever.  Or at
+-- least the last time it went on for more than 2h on a laptop.
+--
+-- The results at the end of this module, especially naturality
+-- (isNaturalBagToteIso), can see through this abstract block.
+-- They are defined carefully to not exhibit the loopy behaviour.
+--
+-- In a perfect world, unfolding would be controlled at use-site
+-- (*ahem*, [1]), and these results could live in a module that
+-- is not `Bag.Base`.
+--
+-- [1]: https://github.com/agda/agda/pull/6354
 abstract
-  open import Cubical.Foundations.Equiv
-  open import Cubical.Foundations.Isomorphism
-
   Idx : Bij → Type ℓ-zero
   Idx = λ x → ⟨ Bij→FinSet x ⟩
 
-  Idx≡⟨Bij→FinSet⟩ : ∀ x → Idx x ≡ ⟨ Bij→FinSet x ⟩
-  Idx≡⟨Bij→FinSet⟩ x = refl
+  IdxEquiv : (x : Bij) → (Idx x) ≃ ⟨ Bij→FinSet x ⟩
+  IdxEquiv x = idEquiv ⟨ Bij→FinSet x ⟩
 
-  Idx≃⟨Bij→FinSet⟩ : ∀ x → (Idx x) ≃ ⟨ Bij→FinSet x ⟩
-  Idx≃⟨Bij→FinSet⟩ x = idEquiv _
-
-  Idx→-⟨Bij→FinSet⟩→-Iso : (X : Type ℓ) → (x : Bij) → Iso (Idx x → X) (⟨ Bij→FinSet x ⟩ → X)
-  Idx→-⟨Bij→FinSet⟩→-Iso X x = idIso
-
-  ⟨Bij→FinSet⟩≃Idx : ∀ x → ⟨ Bij→FinSet x ⟩ ≃ (Idx x)
-  ⟨Bij→FinSet⟩≃Idx x = idEquiv _
-
-  unIdx : {n : ℕ} → Idx (obj n) → Fin n
-  unIdx idx = idx
-
-Vect : Type ℓ → Bij → Type ℓ
+Vect : ∀ {ℓ} → Type ℓ → Bij → Type ℓ
 Vect X k = Idx k → X
 
-isOfHLevelVect : ∀ {k} (n : ℕ) → isOfHLevel n X → isOfHLevel n (Vect X k)
-isOfHLevelVect n hLevel = isOfHLevelΠ n (λ idx → hLevel)
+module _ {ℓ} {X : Type ℓ} where
+  VectIso : (x : Bij) → Iso (Vect X x) (⟨ equivFun Bij≃FinSet x ⟩ → X)
+  VectIso x = equiv→Iso (IdxEquiv x) (idEquiv X)
 
-record Bag (X : Type ℓ) : Type ℓ where
-  constructor ⟅_⟆
-  field
-    {card} : Bij
-    members : Vect X card
+  isOfHLevelVect : ∀ {k} (n : ℕ) → isOfHLevel n X → isOfHLevel n (Vect X k)
+  isOfHLevelVect n hLevel = isOfHLevelΠ n (λ idx → hLevel)
 
-⟅⟆-syntax : {X : Type ℓ} (k : Bij) → (Idx k → X) → Bag X
-⟅⟆-syntax k members = ⟅ members ⟆
+Bag : ∀ {ℓ} → Type ℓ → Type ℓ
+Bag X = Σ[ k ∈ Bij ] Vect X k
 
-⟅⟆-implicit-syntax : {X : Type ℓ} {k : Bij} → (Idx k → X) → Bag X
-⟅⟆-implicit-syntax members = ⟅ members ⟆
+module _ {ℓ} {X : Type ℓ} where
+  BagPathP : ∀ {m n : Bij}
+    → (p : m ≡ n)
+    → {v : Vect X m}
+    → {w : Vect X n}
+    → (q : PathP (λ i → Vect X (p i)) v w)
+    → Path (Bag X) (m , v) (n , w)
+  BagPathP p q i = p i , q i
 
-⟅⟆-obj-syntax : {X : Type ℓ} (n : ℕ) (members : Fin n → X) → Bag X
-⟅⟆-obj-syntax n members = ⟅ (λ (idx : Idx (obj n)) → members (unIdx idx)) ⟆
+  BagPathPExt : ∀ {m n : Bij}
+    → (p : m ≡ n)
+    → {v : Vect X m}
+    → {w : Vect X n}
+    → ({idx₀ : Idx m} {idx₁ : Idx n} (q : PathP (λ i → Idx (p i)) idx₀ idx₁) → v idx₀ ≡ w idx₁)
+    → Path (Bag X) (m , v) (n , w)
+  BagPathPExt p q = BagPathP p (funExtDep q)
 
-syntax ⟅⟆-syntax k (λ idx → x) = ⟅ x ∣ idx ∈ k ⟆
-syntax ⟅⟆-implicit-syntax (λ idx → x) = ⟅ idx ↦ x ⟆
-syntax ⟅⟆-obj-syntax n (λ k → x) = ⟅ x ∣ k ≤ n ⟆
+  isGroupoidBag : isGroupoid X → isGroupoid (Bag X)
+  isGroupoidBag gpdX = isGroupoidΣ isGroupoidBij (λ k → isOfHLevelVect {k = k} 3 gpdX)
 
-unquoteDecl BagIsoΣ = declareRecordIsoΣ BagIsoΣ (quote Bag)
-
-BagPathP : ∀ {m n : Bij}
-  → (p : m ≡ n)
-  → {v : Vect X m}
-  → {w : Vect X n}
-  → (q : PathP (λ i → Vect X (p i)) v w)
-  → ⟅ v ⟆ ≡ ⟅ w ⟆
-BagPathP _ q i = ⟅ q i ⟆
-
-BagPathPExt : ∀ {m n : Bij}
-  → (p : m ≡ n)
-  → {v : Vect X m}
-  → {w : Vect X n}
-  → ({idx₀ : Idx m} {idx₁ : Idx n} (q : PathP (λ i → Idx (p i)) idx₀ idx₁) → v idx₀ ≡ w idx₁)
-  → ⟅ v ⟆ ≡ ⟅ w ⟆
-BagPathPExt p q = BagPathP p (funExtDep q)
-
-
-BagPath : ∀ {m : Bij} {v w : Vect X m}
-  → v ≡ w
-  → ⟅ v ⟆ ≡ ⟅ w ⟆
-BagPath = cong ⟅_⟆
-
-BagPathExt : ∀ {m : Bij} {v w : Vect X m}
-  → (∀ (k : Idx m) → v k ≡ w k)
-  → ⟅ v ⟆ ≡ ⟅ w ⟆
-BagPathExt ext = BagPath (funExt ext)
-
-isGroupoidBag : isGroupoid X → isGroupoid (Bag X)
-isGroupoidBag gpdX = isOfHLevelRetractFromIso 3 BagIsoΣ (isGroupoidΣ isGroupoidBij λ _ → isOfHLevelVect 3 gpdX)
+private
+  variable
+    ℓX ℓY ℓZ : Level
+    X : Type ℓX
+    Y : Type ℓY
+    Z : Type ℓZ
 
 map : (f : X → Y) → (Bag X → Bag Y)
-map f ⟅ members ⟆ = ⟅ f ∘ members ⟆
+map f (k , members) = (k , f ∘ members)
 
 mapId : (xs : Bag X) → map (λ x → x) xs ≡ xs
 mapId xs = refl
 
-map∘map : ∀ {Z : Type ℓ} → (f : X → Y) (g : Y → Z)
+map∘map : (f : X → Y) (g : Y → Z)
   → (xs : Bag X)
   → map g (map f xs) ≡ map (g ∘ f) xs
 map∘map f g xs = refl
 
+open Iso
+open import Multiset.Tote.Base as Tote using (Tote)
 
-module Example where
-  open import Cubical.Foundations.Equiv
-  open import Cubical.Foundations.Isomorphism
+abstract
+  Bag-Tote-Iso : Iso (Bag X) (Tote X)
+  Bag-Tote-Iso = Σ-cong-iso (equivToIso Bij≃FinSet) VectIso
 
-  -- Bag comprehension:
-  ex : Bag ℕ
-  ex = ⟅ 42 ∣ idx ≤ 3 ⟆
+Bag≃Tote : Bag X ≃ Tote X
+Bag≃Tote = isoToEquiv Bag-Tote-Iso
 
-  -- Sometimes, the cardinality of a bag
-  -- can be inferred from context:
-  exImplicitPath : ex ≡ ⟅ idx ↦ 42 ⟆
-  exImplicitPath = BagPathExt (λ idx → refl)
+isNaturalBagToteEquiv : (f : X → Y) → equivFun Bag≃Tote ∘ map f ≡ Tote.map f ∘ equivFun Bag≃Tote
+abstract
+  isNaturalBagToteEquiv f = refl

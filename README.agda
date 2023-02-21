@@ -419,13 +419,10 @@ Bag = Multiset.Bag.Bag
 BagToteEquiv : ∀ {X : Type} → Bag X ≃ Tote X
 BagToteEquiv = Multiset.Bag.Bag≃Tote
 
--- [NOTE 1]: The equivalence is easily seen to be natural,
--- but Agda gets stuck when proving this, since it
--- seems to try and expand the definition of `Multiset.Bij.Bij→FinSet`:
-
-abstract
-  _ : Bij → FinSet ℓ-zero
-  _ = Multiset.Bij.Bij→FinSet
+-- The equivalence is natural:
+isNaturalBagToteEquiv : {X Y : Type} → (f : X → Y)
+  → equivFun BagToteEquiv ∘ Multiset.Bag.map f ≡ Multiset.Tote.map f ∘ equivFun BagToteEquiv
+isNaturalBagToteEquiv = Multiset.Bag.isNaturalBagToteEquiv
 
 -- 6 The Final Coalgebra in Groupoids
 -- ----------------------------------
