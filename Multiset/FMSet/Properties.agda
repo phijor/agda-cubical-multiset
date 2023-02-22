@@ -496,4 +496,4 @@ module STInvariance {ℓ} {X : Type ℓ} where
   STInvarianceEquiv : FMSet ∥ X ∥₂ ≃ FMSet X
   STInvarianceEquiv = isoToEquiv STInvarianceIso
 
-open STInvariance using (STInvarianceIso) public
+open STInvariance using (STInvarianceIso ; STInvarianceEquiv) public

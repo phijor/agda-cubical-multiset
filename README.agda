@@ -451,11 +451,13 @@ module _
     → (h : X → Lim Bag)
     → h ≡ Multiset.Bag.fix⁺ ∘ (Multiset.Bag.map h) ∘ c
     → ana c ≡ h)
-  -- The equivalence ∥ Bag Y ∥₂ ≃ FMSet Y is natural.
-  -- See [NOTE 1] above why this is necessary:
-  (e : {Y : Type} → ∥ Bag Y ∥₂ ≃ FMSet Y)
-  (eNat : ∀{Y Z} (f : Y → Z) → equivFun e ∘ ST.map (Multiset.Bag.map f) ≡ Multiset.FMSet.map f ∘ equivFun e)
   where
+  abstract
+    e : {X : Type} → ∥ Bag X ∥₂ ≃ FMSet X
+    e = Multiset.FMSet.Fixpoint.TruncBagFMSetEquiv
+
+    eNat : ∀ {X Y : Type} (f : X → Y) → equivFun e ∘ ST.map (Multiset.Bag.map f) ≡ Multiset.FMSet.map f ∘ equivFun e
+    eNat = Multiset.FMSet.Fixpoint.isNaturalTruncBagFMSetEquiv
   
   -- Assuming two instance of choice, one for groupoids and one for sets, FMSet admits a final coalgebra in the category of hSets:
   FMSetFinalCoalgebra : (ac32 : AOC.AC[Gpd,Set] ℓ-zero ℓ-zero) → (ac : AOC.AC[Set,Prop] ℓ-zero ℓ-zero) → Cat.TerminalCoalgebra FMSetFunctor'

@@ -138,13 +138,28 @@ FMSet-∥Tote∥₂-Iso .inv = ∥Tote∥₂→FMSet
 FMSet-∥Tote∥₂-Iso .rightInv = ∥Tote∥₂→FMSet→∥Tote∥₂
 FMSet-∥Tote∥₂-Iso .leftInv = FMSet→∥Tote∥₂→FMSet
 
-isNatural-FMSet-∥Tote∥₂-Iso : ∀ {X Y : Type ℓ} (f : X → Y)
+isNatural-FMSet-∥Tote∥₂-Iso : ∀ {ℓ ℓ'} {X : Type ℓ} {Y : Type ℓ'} (f : X → Y)
   → FMSet→∥Tote∥₂ ∘ FMSet.map f ≡ ST.map (Tote.map f) ∘ FMSet→∥Tote∥₂
 isNatural-FMSet-∥Tote∥₂-Iso f = funExt (FMSet.elimProp (λ (xs : FMSet _) → isSetSetTrunc _ _) λ {sz} xs → refl)
 
-FMSet≃∥Tote∥₂ : FMSet X ≃ ∥ Tote X ∥₂
+FMSet≃∥Tote∥₂ : {X : Type ℓ} → FMSet X ≃ ∥ Tote X ∥₂
 FMSet≃∥Tote∥₂ = isoToEquiv FMSet-∥Tote∥₂-Iso
 
-isNatural-FMSet≃∥Tote∥₂ : ∀ {X Y : Type ℓ} (f : X → Y)
+isNatural-FMSet≃∥Tote∥₂ : ∀ {ℓ ℓ'} {X : Type ℓ} {Y : Type ℓ'} (f : X → Y)
   → (equivFun FMSet≃∥Tote∥₂) ∘ FMSet.map f ≡ ST.map (Tote.map f) ∘ (equivFun FMSet≃∥Tote∥₂)
 isNatural-FMSet≃∥Tote∥₂ = isNatural-FMSet-∥Tote∥₂-Iso
+
+isNatural-∥Tote∥₂≃FMSet : ∀ {ℓ ℓ'} {X : Type ℓ} {Y : Type ℓ'} (f : X → Y)
+  → (invEq FMSet≃∥Tote∥₂) ∘ ST.map (Tote.map f) ≡ FMSet.map f ∘ (invEq FMSet≃∥Tote∥₂)
+isNatural-∥Tote∥₂≃FMSet {ℓ = ℓ} {ℓ'} {X} {Y} f =
+  let
+    α⁺ : ∀ {ℓ} (X : Type ℓ) → FMSet X → ∥ Tote X ∥₂
+    α⁺ _ = equivFun (FMSet≃∥Tote∥₂)
+
+    α⁻ : ∀ {ℓ} (X : Type ℓ) → ∥ Tote X ∥₂ → FMSet X
+    α⁻ _ = invEq (FMSet≃∥Tote∥₂)
+  in
+  α⁻ Y ∘ ST.map (Tote.map f)                    ≡⟨ cong ((α⁻ Y ∘ ST.map (Tote.map f)) ∘_) (sym (funExt (secEq FMSet≃∥Tote∥₂))) ⟩
+  α⁻ Y ∘ ST.map (Tote.map f) ∘ (α⁺ X) ∘ (α⁻ X)  ≡⟨ cong (λ · → α⁻ Y ∘ · ∘ α⁻ X) (sym (isNatural-FMSet≃∥Tote∥₂ {X = X} {Y = Y} f)) ⟩
+  α⁻ Y ∘ α⁺ Y ∘ FMSet.map f  ∘ (α⁻ X)           ≡⟨ cong (_∘ (FMSet.map f ∘ α⁻ X)) (funExt (retEq FMSet≃∥Tote∥₂)) ⟩
+                FMSet.map f  ∘ (α⁻ X) ∎

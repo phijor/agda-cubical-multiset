@@ -44,7 +44,7 @@ rec∘map : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
   → ST.rec setZ g (ST.map f x) ≡ ST.rec setZ (g ∘ f) x
 rec∘map setZ f g = ST.elim (λ _ → isSetSetPathImplicit setZ) λ _ → refl
 
-map∘map : ∀ {ℓy ℓz} {Y : Type ℓy} {Z : Type ℓz}
+map∘map : ∀ {ℓx ℓy ℓz} {X : Type ℓx} {Y : Type ℓy} {Z : Type ℓz}
   → (f : X → Y)
   → (g : Y → Z)
   → (x : ∥ X ∥₂)

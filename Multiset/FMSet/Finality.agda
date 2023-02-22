@@ -151,6 +151,7 @@ FMSetFunctor .Functor.F-hom = FMSet.map
 FMSetFunctor .Functor.F-id = funExt FMSet.mapId
 FMSetFunctor .Functor.F-seq f g = funExt (sym ∘ mapComp g f)
 
+
 module FinalityWithChoice
 
 -- -- BagLim is the final coalgebra of Bag [Ahrens 2015]
