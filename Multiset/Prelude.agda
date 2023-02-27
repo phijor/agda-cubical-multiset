@@ -5,14 +5,7 @@ module Multiset.Prelude where
 open import Cubical.Foundations.Prelude
   public
 
-_$_ : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'}
-  → (f : A → B)
-  → (a : A)
-  → B
-f $ a = f a
-{-# INLINE _$_ #-}
-
-infixr -1 _$_
+open import Cubical.Foundations.Function using (_$_) public
 
 module PathReasoning where
   private

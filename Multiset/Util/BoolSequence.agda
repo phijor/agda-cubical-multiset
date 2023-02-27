@@ -311,7 +311,7 @@ module Old where
     ... | true = refl
     ptwise as (suc (suc n)) with head as
     ... | false =
-      (if false and as 1 then t else _) ≡⟨ if-false (and-falseˡ (as 1)) ⟩
+      (if false and as 1 then t else _) ≡⟨ if-false {t = t} (and-falseˡ (as 1)) ⟩
       latch-even' (as ∘ suc ∘ suc) f t n ≡⟨ ptwise (as ∘ suc ∘ suc) n ⟩
       latch-even (as ∘ suc ∘ suc) f t n ∎
     ... | true = refl

@@ -28,6 +28,7 @@ open isEquivRel
 
 open import Cubical.Functions.Embedding
 open import Cubical.Relation.Nullary
+open import Multiset.Prelude
 open import Multiset.ListQuotient.Base
 open import Multiset.FMSet.Base
 open import Multiset.Ordering.Order
@@ -469,7 +470,7 @@ List→Vec→List : ∀{ℓ}{X : Type ℓ}{n : ℕ} (xs : Vec X n)
   → subst (Vec X) (lengthVec→List xs) (List→Vec (Vec→List xs)) ≡ xs
 List→Vec→List [] = substRefl {B = Vec _} []
 List→Vec→List (x ∷ xs) =
-  sym (substVec (lengthVec→List xs))
+  sym (substVec {xs = List→Vec (Vec→List xs)} (lengthVec→List xs))
   ∙ cong′ (x ∷_) (List→Vec→List xs)
 
 ∈→∈V : ∀{ℓ}{X : Type ℓ} {x : X} {xs : List X}
@@ -533,9 +534,11 @@ remove→removeV : ∀{ℓ}{X : Type ℓ} {x y : X} {xs : List X}
   → y ∷ List→Vec (remove xs m)
       ≡ subst (Vec X) (length-remove m) (removeV (List→Vec (y ∷ xs)) (there (∈→∈V m)))
 remove→removeV (here eq) = sym (substRefl {B = Vec _} _)
-remove→removeV {y = y} (there m) =
-  cong′ (y ∷_) (remove→removeV m)
-  ∙ substVec _
+remove→removeV {y = y} {xs = x ∷ xs} (there m) =
+  let xs' = removeV (x ∷ List→Vec xs) (there (∈→∈V m)) in
+  (y ∷ x ∷ List→Vec (remove xs m))          ≡⟨ cong′ (y ∷_) (remove→removeV m) ⟩
+  (y ∷ subst (Vec _) (length-remove m) xs') ≡⟨ substVec {xs = xs'} (length-remove m) ⟩∎
+  subst (Vec _) (cong suc (length-remove m)) (y ∷ xs') ∎
 
 remove→removeV' : ∀{ℓ}{X : Type ℓ} {x y : X} {xs : List X}
   → (m : x ∈ (y ∷ xs))
