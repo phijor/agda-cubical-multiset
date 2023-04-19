@@ -84,7 +84,7 @@ _∼_ = Multiset.FMSet._∼_
 -- Finite choice for Fin-indexed types:
 import Multiset.FiniteChoice
 
-module _ {n : ℕ} (Y : Fin n → Type) where
+module FiniteChoice {n : ℕ} (Y : Fin n → Type) where
   finChoiceEquiv : ((k : Fin n) → ∥ Y k ∥₂) ≃ ∥ ((k : Fin n) → Y k) ∥₂
   finChoiceEquiv = Multiset.FiniteChoice.setFinChoice≃ Y
 
@@ -171,7 +171,7 @@ import Multiset.Ordering.Order
 isLinOrder : {A : Type} (R : A → A → Type) → Type
 isLinOrder = Multiset.Ordering.Order.isLinOrder
 
-module _ {A : Type} (setA : isSet A) (R : A → A → Type) (linR : isLinOrder R) where
+module LexFMSet {A : Type} (setA : isSet A) (R : A → A → Type) (linR : isLinOrder R) where
   import Multiset.Ordering.FMSetOrder
   module S = Multiset.Ordering.FMSetOrder.SortingFMSet setA R linR
 
@@ -227,7 +227,7 @@ open import Multiset.Limit.TerminalChain as TerminalChain
     ; isLimitPreserving
     )
 
-module _ (F : Type → Type) {{FunctorF : Functor F}} where
+module IterLimit (F : Type → Type) {{FunctorF : Functor F}} where
 
   -- The limit and the shifted limit of a chain are equivalent
   shift : Lim F ≃ ShLim F
@@ -257,6 +257,8 @@ module _ (F : Type → Type) {{FunctorF : Functor F}} where
 
   chainEquivToLimitEquiv : ∀ {ℓ} {C C' : Chain ℓ} → ChainEquiv C C' → Limit C ≃ Limit C'
   chainEquivToLimitEquiv = Multiset.Limit.Isomorphism.mapLimit-pres-equiv
+
+open IterLimit using (pres)
 
 import Multiset.FCM.Limit
 
@@ -337,7 +339,7 @@ import Multiset.Categories.Coalgebra as Cat
 open import Cubical.Categories.Instances.Sets using (SET)
 
 -- Under the assuming that `coalgList` is a morphism of setoids, we can deduce the following:
-module _ (isSetoidMorCoalgList : (∀ {s} {t} → Bisim s t → Relator' Bisim (coalgList s) (coalgList t))) where
+module Setoid (isSetoidMorCoalgList : (∀ {s} {t} → Bisim s t → Relator' Bisim (coalgList s) (coalgList t))) where
 
   -- 1) The anti-constructive principle LLPO:
   isSetoidMorphismCoalgListToLLPO : LLPO

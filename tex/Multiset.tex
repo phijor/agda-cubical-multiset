@@ -14,7 +14,12 @@
   backref,
 }
 \hyperbaseurl{https://phijor.github.io/agda-cubical-multiset/}
-\newcommand*{\CodeRef}[1]{\href{README.html\##1}{\color{cyan}{\texttt{#1}}}}
+
+\NewDocumentCommand{\CodeRef}{ o m }{%
+  \IfNoValueTF {#1}
+    {\href{README.html\##2}{\color{cyan}{\texttt{#2}}}}%
+    {\href{README.html\##1.#2}{\color{cyan}{\texttt{#2}}}}%
+}
 
 \bibliographystyle{plainurl}
 
@@ -370,7 +375,7 @@ We write $\SymActSigma n$ for the non-propositionally-truncated variant of $\Sym
 %\subsubsection{Finite Choice for Sets}
 
 The proof of \cref{thm:FMSetFixpointOfTrunc} employs the fact that $\FMSet$ is invariant under set-truncation.  The latter fact factors through the following lemma, stating that set-truncation distributes over finite families of types.
-\begin{lemma}[{\CodeRef{finChoiceEquiv}}]\label{lem:FiniteChoice}
+\begin{lemma}[{\CodeRef[FiniteChoice]{finChoiceEquiv}}]\label{lem:FiniteChoice}
   For any $n : ℕ$ and type family $Y : \Fin n \to \Type$,
   there is an equivalence
   $
@@ -473,12 +478,12 @@ In the proof of \cref{thm:PresFMSetSection} we employ the fact that the type of 
 A relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
 If $X$ has a linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, which allows the construction of a permutation typed $\Perm \;xs\;(\sort\,xs)$. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
 Since $\SetQuot[\List X][\Perm] \simeq \FMSet X$, we obtain the following result.
-\begin{proposition}[{\CodeRef{SymActDefinable}}]\label{prop:ListPermDefQuot}
+\begin{proposition}[{\CodeRef[LexFMSet]{SymActDefinable}}]\label{prop:ListPermDefQuot}
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable quotient for all $n : ℕ$.
 \end{proposition}
 
 Sorting also allows to explicitly find a canonical permutation between any two related lists. Given $p : \Perm \;xs\;ys$, we can find another permutation $\canonicalPerm \;p : \Perm\;xs\;ys$ as follows: there are permutations $\Perm\;xs\;(\sort\,xs)$ and $\Perm\;(\sort\;ys)\;ys$, and moreover the existence of $p$ implies $\sort\,xs = \sort\,ys$. The function $\canonicalPerm$ is constant, since it never inspects the input permutation $p$.
-\begin{proposition}[{\CodeRef{SymActUntruncate}}]\label{prop:ListPermCanonicalPerm}
+\begin{proposition}[{\CodeRef[LexFMSet]{SymActUntruncate}}]\label{prop:ListPermCanonicalPerm}
 If $X$ is linearly-ordered, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$ , i.e. the propositional truncation in $\SymAct n\; v\; w$ can be removed.
 \end{proposition}
 
@@ -500,7 +505,7 @@ A linear order $(<)$ on $X$ can be extended to a linear order on $\List X$ via t
   \hspace*{\fill}
 \end{center}
 The lexicographic order can be further extended to a linear order on $\SetQuot[\List X][\Perm]$ by defining $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
-\begin{proposition}[{\CodeRef{linLexFMSet}}]\label{prop:lift-linear-order}
+\begin{proposition}[{\CodeRef[LexFMSet]{linLexFMSet}}]\label{prop:lift-linear-order}
 If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.  
 \end{proposition}
 
@@ -566,7 +571,7 @@ In HoTT, the \emph{(homotopy) limit} of the chain is definable as
 Write $\Lim{\FMSet} \DefEq \lim_{n} (\FMSet^n 1)$. An element of the limit consists of an element $xs\;n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs\;(1 + n)$ to $\FMSet^n 1$ via $\Bang^n_{\FMSet}$ is equal to $xs\;n$. The $n$-th projection from the limit is called $\ell_n : \Lim{\FMSet} → \FMSet^n 1$. The limit is invariant wrt.\@ shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{\FMSet} \simeq \LimSh{\FMSet}$, where $\LimSh{\FMSet} \DefEq \lim_{n} (\FMSet^{1 + n} 1)$. We use $\ell_n : \LimSh{\FMSet} → \FMSet^{1+n} 1$ also for the $n$-th projection from the shifted limit.
 The limit is a set, since all types in its diagram are sets.
 Notice that the limit of the chain in \eqref{eq:chain}, with $\FMSet$ replaced by any of its naturally equivalent formulations in \cref{prop:eqpres}, is equivalent to $\Lim{\FMSet}$. This implies that, when proving properties of this limit, we can use whichever set-based formulation of finite bags we prefer.
-This holds since naturally equivalent chains have equivalent limits, see \CodeRef{chainEquivToLimitEquiv} in the formalization for details.
+This holds since naturally equivalent chains have equivalent limits, see \CodeRef[IterLimit]{chainEquivToLimitEquiv} in the formalization for details.
 
 In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\pres{\FMSet} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: take $\ell_n\,(\pres{\FMSet} \,s)$ as $\Map{\FMSet}\,\ell_n \,s$. The function $\pres{\FMSet}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\pres{\FMSet}^{-1}$ provides a coalgebra structure for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
 
@@ -711,7 +716,7 @@ i.e.\@ for $s, t : \Lim{\List}$, if $\Bisim\;s\;t$
 then $\Relator \Bisim\; (\coalg{\List} s)\; (\coalg{\List} t)$.
 Once again, the same issue we found when trying to prove the injectivity of $\pres{\FMSet}$ in \cref{sec:final-limit-set} arises:
 
-\begin{theorem}[\CodeRef{isSetoidMorphismCoalgListToLLPO}]
+\begin{theorem}[{\CodeRef[Setoid]{isSetoidMorphismCoalgListToLLPO}}]
   If $\coalg{\List}$ is a setoid-morphism, then \LLPO{} holds.
 \end{theorem}
 The proof is similar to that of \cref{lem:InjPresImpliesComplete}.
@@ -721,7 +726,7 @@ Therefore $\coalg{\List}$ is an equivalence of setoids whenever it is a setoid-m
 i.e.\@ \LLPO{} holds.
 Under this assumption alone it is the final coalgebra of an endofunctor in the category of setoids:
 
-\begin{theorem}[\CodeRef{finalFMSetoidCoalgebra}]\label{thm:final-setoids}
+\begin{theorem}[{\CodeRef[Setoid]{finalFMSetoidCoalgebra}}]\label{thm:final-setoids}
   Assuming $\coalg{\List}$ is a setoid-morphism,
   the setoid $(\Lim{\List},\Bisim)$ has a coalgebra structure for the functor
   $(X, R) \mapsto (\List X, \Relator R)$,
@@ -730,7 +735,7 @@ Under this assumption alone it is the final coalgebra of an endofunctor in the c
 
 Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by the relation $\Bisim$ does not obviously give the final coalgebra of $\FMSet$.
 We can show that the resulting quotient is a fixpoint, and in particular a coalgebra (of sets):
-\begin{theorem}[\CodeRef{FMSetFixpointTree/Bisim}]\label{thm:fixpoint-quotient}
+\begin{theorem}[{\CodeRef[Setoid]{FMSetFixpointTree/Bisim}}]\label{thm:fixpoint-quotient}
   If $\coalg{\List}$ is a setoid-morphism,
   it lifts to an equivalence $\coalg{\FMSet} : \SetQuot[\Lim{\List}][\Bisim] \xrightarrow{≃} \FMSet(\SetQuot[\Lim{\List}][\Bisim])$.
 \end{theorem}
@@ -743,7 +748,7 @@ We can show that the resulting quotient is a fixpoint, and in particular a coalg
 \end{proof}
 
 However, we were able to prove that this fixpoint is the final coalgebra only under the assumption of the axiom of choice. 
-\begin{theorem}[\CodeRef{FinalFMSetCoalgebra}]\label{thm:final-quotient}
+\begin{theorem}[{\CodeRef[Setoid]{FinalFMSetCoalgebra}}]\label{thm:final-quotient}
   Assuming the axiom of choice, the fixpoint of \cref{thm:fixpoint-quotient} is the final $\FMSet$-coalgebra in the category of sets.
 \end{theorem}
 \begin{proof}
