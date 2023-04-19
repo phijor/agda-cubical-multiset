@@ -105,23 +105,18 @@ module _ {ℓ} (F : Type ℓ → Type ℓ) {{ FunctorF : Functor F }} where
   diag : (ℕ → Lim) → (n : ℕ) → F^ n
   diag ys n = cut n (ys n)
 
-  diag-islim-alternating : {n : ℕ}
-    → (l r : Lim)
-    → (x : Lim)
+  diag-islim-alternating :
+      (x : Lim)
     → (ys : ℕ → Lim)
-    → (approx : ∀ n → cut n x ≡ diag ys n)
-    → (ysₙ≡l : ys n ≡ l)
-    → (ysₙ₊₁≡r : ys (suc n) ≡ r)
-    → !^ n (cut (suc n) l) ≡ cut n r
-  diag-islim-alternating {n = n} l r x ys approx ysₙ≡l ysₙ₊₁≡r =
-    !^ n (cut (suc n) l)   ≡⟨ l .is-lim n ⟩
-    cut n l                ≡⟨ cong (cut n) (sym ysₙ≡l) ⟩
-    diag ys n              ≡⟨ sym (approx n) ⟩
-    cut n x                ≡⟨ sym (x .is-lim n) ⟩
-    !^ n (cut (suc n) x)   ≡⟨ cong (!^ n) (approx (suc n)) ⟩
-    !^ n (diag ys (suc n)) ≡⟨ cong (!^ n ∘ cut (suc n)) ysₙ₊₁≡r ⟩
-    !^ n (cut (suc n) r)   ≡⟨ r .is-lim n ⟩
-    cut n r ∎
+    → (∀ n → cut n x ≡ diag ys n)
+    → ∀ n → !^ n (cut (suc n) (ys n)) ≡ cut n (ys (suc n))
+  diag-islim-alternating x ys q n =
+    !^ n (cut (suc n) (ys n)) ≡⟨ ys n .is-lim n ⟩
+    diag ys n                 ≡⟨ sym (q n) ⟩
+    cut n x                   ≡⟨ sym (x .is-lim n) ⟩
+    !^ n (cut (suc n) x)      ≡⟨ cong (!^ n) (q (suc n)) ⟩
+    !^ n (diag ys (suc n))    ≡⟨ ys (suc n) .is-lim n ⟩
+    cut n (ys (suc n)) ∎
 
 isLimitPreserving : ∀ {ℓ} (F : Type ℓ → Type ℓ) → {{ Functor F }} → Type ℓ
 isLimitPreserving F = isEquiv (pres F)

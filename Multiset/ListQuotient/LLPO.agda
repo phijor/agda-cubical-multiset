@@ -147,8 +147,16 @@ pres-reflects-≈→Complete reflects {x = x} {y₁} {y₂} ys split approx = go
     approx-xᶜ-islim : ∀ n → !^ n (approx-xᶜ (suc n)) ≡ approx-xᶜ n
     approx-xᶜ-islim n with (e (suc n)) | (e n)
     ... | inl ysₙ₊₁≡y₁ | inl ysₙ≡y₁ = y₂ .is-lim n
-    ... | inl ysₙ₊₁≡y₁ | inr ysₙ≡y₂ = TerminalChain.diag-islim-alternating _ y₂ y₁ x ys approx ysₙ≡y₂ ysₙ₊₁≡y₁
-    ... | inr ysₙ₊₁≡y₂ | inl ysₙ≡y₁ = TerminalChain.diag-islim-alternating _ y₁ y₂ x ys approx ysₙ≡y₁ ysₙ₊₁≡y₂
+    ... | inl ysₙ₊₁≡y₁ | inr ysₙ≡y₂ =
+      !^ n (cut (suc n) y₂)     ≡⟨ cong (!^ n ∘ cut (suc n)) (sym ysₙ≡y₂) ⟩
+      !^ n (cut (suc n) (ys n)) ≡⟨ TerminalChain.diag-islim-alternating _ x ys approx n ⟩
+      cut n (ys (suc n))        ≡⟨ cong (cut n) ysₙ₊₁≡y₁ ⟩∎
+      cut n y₁ ∎
+    ... | inr ysₙ₊₁≡y₂ | inl ysₙ≡y₁ =
+      !^ n (cut (suc n) y₁)     ≡⟨ cong (!^ n ∘ cut (suc n)) (sym ysₙ≡y₁) ⟩
+      !^ n (cut (suc n) (ys n)) ≡⟨ TerminalChain.diag-islim-alternating _ x ys approx n ⟩
+      cut n (ys (suc n))        ≡⟨ cong (cut n) ysₙ₊₁≡y₂ ⟩∎
+      cut n y₂ ∎
     ... | inr ysₙ₊₁≡y₂ | inr ysₙ≡y₂ = y₁ .is-lim n
 
     xᶜ : Tree

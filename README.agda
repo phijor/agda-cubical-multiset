@@ -269,7 +269,10 @@ InjectiveFMSetPresToLLPO : isInjective (pres FCM) → LLPO
 InjectiveFMSetPresToLLPO = Multiset.FCM.Limit.pres-inj⇒llpo
 
 -- The crucial lemma that the above proof depends on:
-FMSetAlternationLemma = Multiset.FCM.Limit.diag-ysᶜ-islim-alternating
+LimitAlternationLemma = TerminalChain.diag-islim-alternating
+
+-- The lemma instanciated to `FCM`, as necessary (kept here in order not to break old links):
+FMSetAlternationLemma = TerminalChain.diag-islim-alternating (FCM {ℓ = ℓ-zero})
 
 -- The detailed proof that completeness of two-element multisets implies LLPO:
 CompleteToLLPO : Multiset.FCM.Limit.Complete → LLPO

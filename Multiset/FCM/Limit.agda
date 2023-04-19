@@ -94,23 +94,6 @@ isPropComplete : isProp Complete
 isPropComplete =
   isPropImplicitΠ2 λ _ _ → isPropImplicitΠ λ _ → isPropΠ3 λ _ _ _ → PT.isPropPropTrunc
 
-diag-ysᶜ-islim-alternating : ∀ {n} {a b : Lim M}
-  → (x : Lim M)
-  → (ys : ℕ → Lim M)
-  → (∀ n → cut n x ≡ diag ys n)
-  → (ys n ≡ a)
-  → (ys (suc n) ≡ b)
-  → !^ n (cut (suc n) a) ≡ cut n b
-diag-ysᶜ-islim-alternating {n = n} {a} {b} x ys q ysₙ≡a ysₙ₊₁≡b =
-  !^ n (cut (suc n) a)   ≡⟨ a .is-lim n ⟩
-  cut n a                ≡⟨ cong (cut n) (sym ysₙ≡a) ⟩
-  diag ys n              ≡⟨ sym (q n) ⟩
-  cut n x                ≡⟨ sym (x .is-lim n) ⟩
-  !^ n (cut (suc n) x)   ≡⟨ cong (!^ n) (q (suc n)) ⟩
-  !^ n (diag ys (suc n)) ≡⟨ cong (!^ n ∘ cut (suc n)) ysₙ₊₁≡b ⟩
-  !^ n (cut (suc n) b)   ≡⟨ b .is-lim n ⟩
-  cut n b ∎
-
 pres-inj⇒complete : isInjective pres → Complete
 pres-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
 
@@ -125,8 +108,16 @@ pres-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
   diag-ysᶜ-islim : ∀ n → !^ n (diag ysᶜ (suc n)) ≡ diag ysᶜ n
   diag-ysᶜ-islim n with (p (suc n)) | (p n)
   ... | inl ysₙ₊₁≡y₁ | inl ysₙ≡y₁ = y₂ .is-lim n
-  ... | inl ysₙ₊₁≡y₁ | inr ysₙ≡y₂ = diag-ysᶜ-islim-alternating x ys q ysₙ≡y₂ ysₙ₊₁≡y₁
-  ... | inr ysₙ₊₁≡y₂ | inl ysₙ≡y₁ = diag-ysᶜ-islim-alternating x ys q ysₙ≡y₁ ysₙ₊₁≡y₂
+  ... | inl ysₙ₊₁≡y₁ | inr ysₙ≡y₂ =
+    !^ n (cut (suc n) y₂)     ≡⟨ cong (!^ n ∘ cut (suc n)) (sym ysₙ≡y₂) ⟩
+    !^ n (cut (suc n) (ys n)) ≡⟨ TerminalChain.diag-islim-alternating M x ys q n ⟩
+    cut n (ys (suc n))        ≡⟨ cong (cut n) ysₙ₊₁≡y₁ ⟩∎
+    cut n y₁ ∎
+  ... | inr ysₙ₊₁≡y₂ | inl ysₙ≡y₁ =
+    !^ n (cut (suc n) y₁)     ≡⟨ cong (!^ n ∘ cut (suc n)) (sym ysₙ≡y₁) ⟩
+    !^ n (cut (suc n) (ys n)) ≡⟨ TerminalChain.diag-islim-alternating M x ys q n ⟩
+    cut n (ys (suc n))        ≡⟨ cong (cut n) ysₙ₊₁≡y₂ ⟩∎
+    cut n y₂ ∎
   ... | inr ysₙ₊₁≡y₂ | inr ysₙ≡y₂ = y₁ .is-lim n
 
   xᶜ : Lim M
