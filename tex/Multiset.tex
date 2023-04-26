@@ -77,7 +77,7 @@
   \keywords{finite bags, final coalgebra, homotopy type theory, Cubical Agda}
 \end{abstract}
 
-\setcounter{tocdepth}{1}
+\setcounter{tocdepth}{2}
 % \tableofcontents
 
 \section{Introduction}
@@ -560,7 +560,7 @@ and as a set-quotient of the final coalgebra of the $\List$ functor. %(\cref{sec
 %%   \item mention that $\Op{pres}$ is given by the UP
 %% \end{itemize}
 
-\subsection{As an \ensuremath{\omega}-Limit}\label{sec:final-limit-set}
+\subsection{As an \texorpdfstring{\ensuremath{\omega}}{ω}-Limit}\label{sec:final-limit-set}
 
 Consider the chain in \eqref{eq:chain}, with $F$ replaced by $\FMSet$. We formally define $\FMSet^n 1$ by recursion on $n$: $\FMSet^0 1 \DefEq 1$ and $\FMSet^{1 + n} 1 \DefEq \FMSet (\FMSet^n 1)$. Similarly we can define the iteration $\Map{\FMSet}^n\,\Bang$, which we denote $\Bang^n_{\FMSet}$.
 In HoTT, the \emph{(homotopy) limit} of the chain is definable as
@@ -682,7 +682,7 @@ Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)
 
 Assuming \LLPO{} we have $\FMSet \Lim{\FMSet} \simeq \Lim{\FMSet}$, and proving that the coalgebra underlining this equivalence is final in the category of sets is straightforward using the universal property of the limit.
 
-\subsection{As a Quotient of the Final $\List$-Coalgebra}\label{sec:final-quotient-set}
+\subsection{As a Quotient of the Final \texorpdfstring{$\List$}{List}-Coalgebra}\label{sec:final-quotient-set}
 
 It is known that the limit $\Lim{\List} \DefEq \lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}.
 The limit $\Lim{\List}$ is a type of non-wellfounded \emph{ordered} trees,
