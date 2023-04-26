@@ -146,8 +146,11 @@ But unlike function types, this application can compute even when $p$ is unknown
 Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. We write $\Refl\,x$ for the constant path (i.e. proof of reflexivity) in $x = x$ and $(\bullet)$ for sequential composition of paths.
 
 A function $f : A \to B$ is an \emph{equivalence} if it has contractible fibers, i.e. if the preimage of any element in $B$ under $f$ is a singleton type. Any function underlying a type isomorphism defines an equivalence. Writing $A \simeq B$ for the type of equivalences between $A$ and $B$, Voevodsky's \emph{univalence principle} states that the canonical function of type $A = B \to A \simeq B$ is an equivalence. This is a theorem in Cubical Agda. In particular, there is a function $\Op{ua} : A \simeq B \to A = B$ turning equivalences into path equalities. Univalence implies \emph{function extensionality}: pointwise equal functions are equal.
-
-We recall the first instances of the hierarchy of \emph{homotopy levels}, and say that a type $A$ is:
+We recall the first instances of the hierarchy of \emph{homotopy levels},\footnote{%
+  To stay close to the formalization,
+  we follow Voevodsky's~\cite{Voevodsky2015} $0$-based numbering of \emph{h}-levels.
+}
+and say that a type $A$ is:
 \begin{itemize}
   \item[] ($n = 1$) a \emph{proposition}, if
     $\IsProp A \DefEq (a\, b : A) \to a = b$ is inhabited,
@@ -156,7 +159,7 @@ We recall the first instances of the hierarchy of \emph{homotopy levels}, and sa
   \item[] ($n = 3$) a \emph{groupoid}, if
     $\IsGpd A \DefEq (a\, b : A) \to \IsSet \ (a = b)$ is inhabited.
 \end{itemize}
-When mentioning \enquote{sets} or \enquote{groupoids}, we always refer to the definition above.
+When mentioning \enquote{sets} or \enquote{groupoids}, we always refer to the definitions above.
 
 A \emph{higher inductive type} (HIT) is like an inductive type, but its constructors can build both its elements and its (higher) paths. HITs are primitively supported in Cubical Agda. We recall the definition of three basic HITs: propositional truncation, set-truncation and set-quotient. 
 
