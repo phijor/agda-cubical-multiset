@@ -92,9 +92,9 @@ The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and 
 Specific constructions of final coalgebras for a selection of functors, performed \emph{internally} in HoTT, already exist in the literature. Ahrens el al.~\cite{Ahrens2015} presented a construction of \emph{M-types}, i.e. final coalgebras of polynomial functors. They show that, for a polynomial functor $F$, the traditional set-theoretic construction of its M-type as the $\omega$-limit of the chain
 \begin{equation}\label{eq:chain}
     1 \xleftarrow{!} {F 1}
-      \xleftarrow{\Map{F} !} {F^2 1}
-      \xleftarrow{\Map{F}^2 !} {F^3 1}
-      \xleftarrow{\Map{F}^3 !}
+      \xleftarrow{F(!)} {F^2 1}
+      \xleftarrow{F^2(!)} {F^3 1}
+      \xleftarrow{F^3(!)}
       \cdots
 \end{equation}
 (with $1$ being the unit type and $!$ the unique map into $1$) can be ported without major complications to the setting of HoTT. Veltri \cite{Veltri2021} examined various constructions of the final coalgebra of the finite powerset functor, which is known to not be definable as an $\omega$-limit \cite{Adamek1995}. Worrell proposed a set-theoretic construction as a $(\omega+\omega)$-limit \cite{Worrell2005}, but Veltri showed that this cannot be ported to the constructive setting of HoTT: Worrell's construction defines the final coalgebra of the finite powerset functor if and only if the \emph{lesser limited principle of omniscience} (\LLPO{}) holds, which is a constructive taboo \cite{Bridges1987}.
