@@ -132,7 +132,11 @@ the repository contains instructions on how to find the corresponding formalizat
 
 We work in homotopy type theory \cite{HoTTBook} and practically our formalization takes place in Cubical Agda \cite{Vezzosi2019}. We recall some basic notions that are employed in our development.
 
-Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$, written also $\forall x \Where B\,x$ when the type $A$ is clear from context. Implicit arguments of dependent functions are enclosed in curly brackets. Basic inductive types include: unit $1$, empty $\bot$, naturals $ℕ$, finite prefixes of naturals $\Fin n$, lists $\List A$, dependent pair $\sum (x : A) \Where B \, x$, binary sum $A + B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is $! : A \to 1$. Membership in a list is $x \in xs$ and removal of an occurrence $m : x \in xs$ is $xs \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types). The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$. Most of our constructions are universe-polymorphic, but for the sake of readability in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
+Given a type $A$ and a type family $B$ on $A$, the associated dependent function type is $(x : A) \to B \, x$, written also $\forall x \Where B\,x$ when the type $A$ is clear from context. Implicit arguments of dependent functions are enclosed in curly brackets. Basic inductive types include: unit $1$, empty $\bot$, naturals $ℕ$, finite prefixes of naturals $\Fin n$, lists $\List A$, dependent pair $\sum (x : A) \Where B \, x$, binary sum $A + B$. We use standard names for their constructors. The unique function from a type $A$ into the unit type is $! : A \to 1$.
+Proof-relevant occurrence in a list is $x \in \Var{xs}$ and removal of an occurrence $m : x \in \Var{xs}$ is $\Var{xs} \setminus m$. Given an inductive type $T$, we write $\Elim{T}$ and $\Rec{T}$ for its dependent and non-dependent elimination  principles, respectively (we employ the same notation also for higher inductive types).
+The action on maps of a functor $F : \Type \to \Type$ is $\Map{F}$;
+to avoid ambiguities, we write $\Map{F} f$ over the conventional $F(f)$.
+Most of our constructions are universe-polymorphic, but for the sake of readability in the paper we use only the two lowest universe of types, $\Type$ and $\Type_1$.
 
 Given $x, y : A$, their definitional equality is denoted $x \DefEq y$ while propositional equality is $x = y$.
 Following ``cubical terminology'', the latter is called the \emph{path type} between $x$ and $y$.
@@ -146,11 +150,11 @@ A function $f : A \to B$ is an \emph{equivalence} if it has contractible fibers,
 We recall the first instances of the hierarchy of \emph{homotopy levels}, and say that a type $A$ is:
 \begin{itemize}
   \item[] ($n = 1$) a \emph{proposition}, if
-    $\IsProp A \DefEq (a , b : A)\Where a = b$ is inhabited,
+    $\IsProp A \DefEq (a\, b : A) \to a = b$ is inhabited,
   \item[] ($n = 2$) a \emph{set}, if
-    $\IsSet A \DefEq (a, b : A)\Where \IsProp \ (a = b)$ is inhabited,
+    $\IsSet A \DefEq (a\, b : A) \to \IsProp \ (a = b)$ is inhabited,
   \item[] ($n = 3$) a \emph{groupoid}, if
-    $\IsGpd A \DefEq (a, b : A)\Where \IsSet \ (a = b)$ is inhabited.
+    $\IsGpd A \DefEq (a\, b : A) \to \IsSet \ (a = b)$ is inhabited.
 \end{itemize}
 When mentioning \enquote{sets} or \enquote{groupoids}, we always refer to the definition above.
 
