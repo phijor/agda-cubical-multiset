@@ -226,7 +226,7 @@ Other HITs are presented in the next section, where we also take a closer look a
 
 The action of the finite bag functor on a type $X$ can be encoded as a higher inductive
 type in various ways, three of which are presented here.
-The first is as the free commutative monoid, the second as lists modulo permutations, the third as an analytic functor.
+The first is the algebraic presentation of the free commutative monoid, the second as lists modulo permutations, the third as an analytic functor.
 These are all set-based definitions, in the sense that the type of finite bags is a set.
 In \cref{sec:fmset-presentation-equivs} we prove these are naturally equivalent as types,
 therefore being equivalent as functors.
@@ -346,7 +346,7 @@ In fact, $\PropTrunc{\Perm\;xs\;ys}$ and $\Relator \,(=)\;xs\;ys$ are equivalent
 \subsection{As an Analytic Functor}
 
 We additionally introduce the type of finite bags over $X$ as an \emph{analytic functor} (in the formulation of Hasegawa~\cite{Hasegawa2002}).
-For any type $X$, define
+For any type $X$, we define a type of \emph{finite multisets}
 \begin{align*}
   \FMSet X
     \DefEq
@@ -359,7 +359,7 @@ where $\SymAct \Var{n}$ is the propositionally-valued relation
     ∃ (\sigma : \Fin n ≃ \Fin n) \Where
       v = w \circ \sigma
 \end{align*}
-In other words, an element of $\FMSet X$ is a pair of a natural number $n$ (the size of the bag) and an equivalence class of functions $v : \Fin n \to X$ picking an element in $X$ for each index $k < n$. The relation $\SymAct n$ is the action of the symmetric group $\Fin n \simeq \Fin n$ on $n$-tuples of elements of $X$.
+In other words, an element of $\FMSet X$ is a pair of a natural number $n$ (the size of the set) and an equivalence class of functions $v : \Fin n \to X$ picking an element in $X$ for each index $k < n$. The relation $\SymAct n$ is the action of the symmetric group $\Fin n \simeq \Fin n$ on $n$-tuples of elements of $X$.
 We write $\SymActSigma n$ for the non-propositionally-truncated variant of $\SymAct n$. We write $v \sim w$ instead of $\SymAct n \;v \;w$ when $n$ is clear from context, and analogously $\SetQuot[(\Fin n \to X)][\sim]$ in place of $\SetQuot[(\Fin \Var{n} \to X)][\SymAct \Var{n}]$.
 
 
