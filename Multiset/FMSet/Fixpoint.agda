@@ -4,6 +4,7 @@ module Multiset.FMSet.Fixpoint where
 
 open import Multiset.Prelude
 open import Multiset.Functor
+open import Multiset.Limit.TerminalChain using (_^_)
 open import Multiset.Util.SetTruncation as STExt using (setTruncEquiv)
 open import Multiset.Tote as Tote using (Tote ; FMSet≃∥Tote∥₂ ; ∥Tote∥₂→FMSet)
 open import Multiset.FMSet as FMSet
@@ -16,10 +17,22 @@ open import Multiset.Bag.Properties as Bag
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Function using (_∘_)
+open import Cubical.Foundations.Transport using (substEquiv)
+open import Cubical.Foundations.Univalence using (ua)
+open import Cubical.Data.Nat.Base using (zero ; suc)
+open import Cubical.Data.Unit.Properties using (isSetUnit*)
 open import Cubical.HITs.SetTruncation as ST using (∥_∥₂)
 
 TruncBagFMSetEquiv : ∀ {ℓ} {X : Type ℓ} → ∥ Bag X ∥₂ ≃ FMSet X
 TruncBagFMSetEquiv = setTruncEquiv Bag≃Tote ∙ₑ invEquiv (FMSet≃∥Tote∥₂)
+
+IterTruncBagFMSetEquiv : ∀ n → ∥ Bag ^ n ∥₂ ≃ FMSet ^ n
+IterTruncBagFMSetEquiv zero = ST.setTruncIdempotent≃ isSetUnit*
+IterTruncBagFMSetEquiv (suc n) =
+  ∥ Bag (Bag ^ n) ∥₂  ≃⟨ TruncBagFMSetEquiv {X = Bag ^ n} ⟩
+  FMSet (Bag ^ n)     ≃⟨ invEquiv STInvarianceEquiv ⟩
+  FMSet ∥ Bag ^ n ∥₂  ≃⟨ substEquiv FMSet (ua (IterTruncBagFMSetEquiv n)) ⟩
+  FMSet (FMSet ^ n)   ■
 
 abstract
   isNaturalTruncBagFMSetEquiv : ∀ {X Y : Type}

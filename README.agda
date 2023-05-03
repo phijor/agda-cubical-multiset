@@ -438,6 +438,14 @@ isLimitPreservingBag = Multiset.Bag.isLimitPreservingBag
 
 import Multiset.FMSet.Fixpoint
 
+-- `FMSetToteTruncEquiv` from above also applies to `Bag`:
+TruncBagFMSetEquiv : {X : Type} → ∥ Bag X ∥₂ ≃ FMSet X
+TruncBagFMSetEquiv = Multiset.FMSet.Fixpoint.TruncBagFMSetEquiv
+
+-- This applies also to the iterated types:
+IterTruncBagFMSetEquiv : ∀ n → ∥ Bag ^ n ∥₂ ≃ FMSet ^ n
+IterTruncBagFMSetEquiv = Multiset.FMSet.Fixpoint.IterTruncBagFMSetEquiv
+
 -- Truncating the type of Bag-limits yields a fixpoint for FMSet:
 FMSetFixpointTruncBagLim : FMSet ∥ Lim Bag ∥₂ ≃ ∥ Lim Bag ∥₂
 FMSetFixpointTruncBagLim = Multiset.FMSet.Fixpoint.FMSetFixSetTruncTree
