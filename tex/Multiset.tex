@@ -715,6 +715,9 @@ Assuming \LLPO{} we have $\FMSet \Lim{\FMSet} \simeq \Lim{\FMSet}$, and proving 
 
 \subsection{As a Quotient of the Final \texorpdfstring{$\List$}{List}-Coalgebra}\label{sec:final-quotient-set}
 
+Instead of considering a type of unordered trees quotiented at each step of the construction,
+we investigate whether it is possible to define final
+$\FMSet$-coalgebra by quotienting type of ordered trees by some suitable relation.
 It is known that the limit $\Lim{\List} \DefEq \lim_n (\List^n 1)$ is the final coalgebra of the list functor in HoTT~\cite{Ahrens2015}.
 The limit $\Lim{\List}$ is a type of non-wellfounded \emph{ordered} trees,
 and we denote by $\coalg{\List}$ its coalgebra structure.
@@ -740,8 +743,9 @@ we obtain, for $s, t : \Lim{\List}$, a chain of propositions
 \end{equation}
 The desired relation $\Bisim\,s\,t$ is the limit of the chain in \eqref{eq:chain-rel}.
 
-Before proceeding to investigate $\SetQuot[\Lim{\List}][\Bisim]$,
-one might wonder if $\coalg{\List}$ lifts to a coalgebra of setoids $(\Lim{\List}, \Bisim) → (\List \Lim{\List}, \Relator \Bisim)$.
+To find a coalgebra structure on $\SetQuot[\Lim{\List}][\Bisim]$,
+we investigate whether $\coalg{\List}$ lifts to a coalgebra of setoids $(\Lim{\List}, \Bisim) → (\List \Lim{\List}, \Relator \Bisim)$ and if so,
+whether this induces a (final) coalgebra on the quotient.
 For this, one needs to show that it is a \emph{setoid-morphism},
 i.e.\@ for $s, t : \Lim{\List}$, if $\Bisim\;s\;t$
 then $\Relator \Bisim\; (\coalg{\List} s)\; (\coalg{\List} t)$.
@@ -764,8 +768,7 @@ Under this assumption alone it is the final coalgebra of an endofunctor in the c
   which is final in the category of setoids.
 \end{theorem}
 
-Similarly to the case of the finite powerset, set-quotienting $\Lim{\List}$ by the relation $\Bisim$ does not obviously give the final coalgebra of $\FMSet$.
-We can show that the resulting quotient is a fixpoint, and in particular a coalgebra (of sets):
+Promisingly, we can show that the resulting quotient is a fixpoint for $\FMSet$, and in particular a coalgebra (of sets):
 \begin{theorem}[{\CodeRef[Setoid]{FMSetFixpointTree/Bisim}}]\label{thm:fixpoint-quotient}
   If $\coalg{\List}$ is a setoid-morphism,
   it lifts to an equivalence $\coalg{\FMSet} : \SetQuot[\Lim{\List}][\Bisim] \xrightarrow{≃} \FMSet(\SetQuot[\Lim{\List}][\Bisim])$.
@@ -778,12 +781,12 @@ We can show that the resulting quotient is a fixpoint, and in particular a coalg
   and $\SetQuot[\List X][\Relator R]$ is an \emph{effective quotient} for any setoid $(X, R)$.
 \end{proof}
 
-However, we were able to prove that this fixpoint is the final coalgebra only under the assumption of the axiom of choice. 
+However, like in case of the finite powerset, this fixpoint is not obviously the final $\FMSet$-coalgebra.
+We were able to prove this assuming the axiom of choice:
 \begin{theorem}[{\CodeRef[Setoid]{FinalFMSetCoalgebra}}]\label{thm:final-quotient}
   Assuming the axiom of choice, the fixpoint of \cref{thm:fixpoint-quotient} is the final $\FMSet$-coalgebra in the category of sets.
 \end{theorem}
 \begin{proof}
-  %We only discuss the particular instance of choice used in the proof, which is analogous to a related one for the finite powerset functor in \cite{Veltri2021}.
   Define abbreviations $U \DefEq \SetQuot[\Lim{\List}][\Bisim]$ and $R \DefEq \Relator\; (=)$, and use the presentation of $\FMSet$ used in the proof of \cref{thm:fixpoint-quotient}.
   To build a coalgebra morphism $u_c : C → U$ from a given coalgebra $c : C \to \FMSet C$ to $\coalg{\FMSet} : U → \FMSet U$,
   one defines a function $u' : \SetQuot[(C → \List C)][R^*] → (C → U)$.
