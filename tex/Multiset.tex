@@ -890,10 +890,12 @@ $\Tote X$ differs from $\FMSet X$ in that path equality in the former records th
   Proving $\ToFMSet \circ \ToTote = \Op{id}$ is straightforward.
   Proving $\ToTote \circ \ToFMSet = \Op{id}$ reduces to showing that $v \circ \alpha \sim v$ for any $v : B → X$ and $\alpha : \Fin n ≃ B$, which is also direct.
 \end{proof}
-$\Tote X$ is a large type, but an equivalent small variant can be defined with the help of HITs.
-%it is unsuitable for iteration, as the assignment $(\lambda n\Where \Tote^n \mathsf{1})$
-%of $n$-fold applications of the family is not well-typed.
-%typeable in a universe of bounded size.
+
+Before studying $\Lim{\Tote}$, notice that iteration $\Tote^n 1$ is not well-typed as $\Tote$ targets a large universe.
+We could in principle define $\Tote' : \Type_1 \to \Type_1$ which does not raise the universe level by first lifting the unit type 1 to the universe $\Type_1$.
+The resulting limit would be a large groupoid in $\Lim{\Tote'} : \Type_1$.
+Instead, we define an equivalent small variant of $\Tote$ with the help of HITs.
+
 Following \cite{Finster2021}, we first introduce an equivalent but small definition $\Bij$ of the type of finite sets $\Op{FinSet}$. This is equivalent to the \emph{groupoid-quotient} \cite{Sojakova2016,VeltriW21} of the (categorical) groupoid with objects given by natural numbers and morphisms between $n$ and $m$ given by equivalences in $\Fin m ≃ \Fin n$.
 It is possible to prove that $\Hom$ also preserves identities and inverses.    \begin{center}
 %    \small
@@ -940,12 +942,15 @@ It is possible to prove that $\Hom$ also preserves identities and inverses.    \
 % We abbreviate $\BagCon{v} \DefEq (x, v) : \Bag X$ if $x : \Bij$ can be inferred from context.
 %\end{definition}
 %\paragraph{Comparing $\Op{List}$ and $\Bag$}\todo{Fit this comparison in somewhere}
-  \begin{proposition}[\CodeRef{BagToteEquiv}]\label{prop:BagTote}
-    For any type $X$, the equivalence of \cref{prop:BijFinSet} extends to an equivalence $\Bag X \simeq \Tote X$ natural in $X$.
-  \end{proposition}
- Notice that $\Bag$ is the \emph{polynomial functor} associated to the container with $\Bij$ as shapes and $\langle x \rangle$ as positions at shape $x$. This can be seen as a \enquote{higher, more informative} variant of the list functor, which has $ℕ$ as shapes and $\Fin n$ as positions at shape $n$, a statement substantiated by \cref{thm:FMSetOfFMGpdTrunc}.
+\begin{proposition}[\CodeRef{BagToteEquiv}]\label{prop:BagTote}
+  For any type $X$, the equivalence of \cref{prop:BijFinSet} extends to an equivalence $\Bag X \simeq \Tote X$ natural in $X$.
+\end{proposition}
+Combining the above with \cref{thm:FMSetOfFMGpdTrunc} yields the follows convenient characterization:
+\begin{corollary}[\CodeRef{TruncBagFMSetEquiv}]\label{cor:TruncBagEquiv}
+  For any $X$, $\SetTrunc{\Bag X} ≃ \FMSet X$ naturally in $X$.
+\end{corollary}
 
-We conjecture that $\Bag X$ can be proved equivalent to the \emph{free symmetric monoidal groupoid} on $X$ defined as a HIT by Piceghello \cite{Piceghello2021}, which would serve as an alternative proof of MacLane's coherence for symmetric monoidal categories.
+% This can be seen as a \enquote{higher, more informative} variant of the list functor, which has $ℕ$ as shapes and $\Fin n$ as positions at shape $n$, a statement substantiated by \cref{thm:FMSetOfFMGpdTrunc}.
 
 % , in a way analogous to $\Op{List}$:
 %Given a type $A$ and a family $B$ over it, they both match ${\sum (a : A)\Where B(a) → X}$:
@@ -955,23 +960,23 @@ We conjecture that $\Bag X$ can be proved equivalent to the \emph{free symmetric
 
 \section{The Final Coalgebra in Groupoids}\label{sec:final-coalgebra-groupoids}
 
+When defined this way, it is immediate that $\Bag$ is the polynomial functor associated to the \emph{container}
+$(\Bij, \langle\Blank\rangle)$ in the sense of~\cite[Definition~2]{Ahrens2015}.
+Crucially, \cite[Theorem~7]{Ahrens2015} proves that for such functors, the $\omega$-limit is the carrier of the final coalgebra;
+independently of the homotopy level of the container it is associated to.
+Therefore $\Lim{\Bag}$ carries the structure of a final $\Bag$-coalgebra, even though $\Bij$ is not a set:
 
-%\subsection{Final Coalgebras as an $\omega$-Limit in Groupoids}\label{ssec:FMGpdLim}
-
-Since $\Bag$ is a polynomial functor, its final coalgebra can be computed as the $\omega$-limit $\Lim{\Bag} \DefEq \lim_n (\Bag^n 1)$ \cite{Ahrens2015}. Ahrens et al. construction does not restrict the homotopy level of the polynomial functors, so it works also for $\Bag$ whose limit $\Lim{\Bag}$ is a groupoid. Notice that a variant $\Tote' : \Type_1 \to \Type_1$ of $\Tote$, which does not raise the universe level, could in principle be replaced for $\Bag$ in the limit, by first lifting the unit type 1 to the universe $\Type_1$. The resulting limit would be a large groupoid in $\Type_1$.
 \begin{theorem}[\CodeRef{isLimitPreservingBag}]\label{thm:BagPresLim}
   The map $\pres{\Bag} : \Bag\,\Lim{\Bag} \to \LimSh{\Bag}$ is an equivalence of groupoids.
 \end{theorem}
 
-\begin{corollary}[Theorem 7 of \cite{Ahrens2015}]\label{cor:BagFinalCoalg}
-  $\Lim{\Bag}$ is the final $\Bag$-coalgebra.
+\begin{corollary}[{\cite[Theorem~7]{Ahrens2015}}]\label{cor:BagFinalCoalg}
+  $\pres{\Bag}^{-1} \circ \Op{shift} : \Lim{\Bag} \to \Bag\,\Lim{\Bag}$ is the final $\Bag$-coalgebra.
 \end{corollary}
 
-The combination of \cref{thm:FMSetOfFMGpdTrunc} and
-\cref{prop:BagTote}, together with the fact that set-truncation
-preserve equivalences, implies that $\SetTrunc{\Bag^n 1}$ is
-equivalent to $\FMSet^n 1$ for all $n$. One might wonder whether the
-set-truncation of $\Lim{\Bag}$ delivers the final coalgebra of
+Iterated application of \cref{cor:TruncBagEquiv,thm:FMSetSetTruncInvariant} shows that $\SetTrunc{\Bag^n 1}$ is equivalent to $\FMSet^n 1$ for all $n$ (\CodeRef{IterTruncBagFMSetEquiv}).
+One might wonder whether similarly
+the set-truncation of $\Lim{\Bag}$ delivers the final coalgebra of
 $\FMSet$. We are able to show that $\SetTrunc{\Lim{\Bag}}$ is a
 fixpoint of $\FMSet$. But to prove finality, we
 require the additional assumption of the axiom of choice and a
@@ -995,7 +1000,7 @@ which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the fo
   \]
   where $\alpha$ is invariance of $\FMSet$ under set-truncation
   (\cref{thm:FMSetSetTruncInvariant}),
-  $\beta$ follows from \cref{thm:FMSetOfFMGpdTrunc,prop:BagTote},
+  $\beta$ follows from \cref{cor:TruncBagEquiv},
   and $\gamma$ follows from \cref{thm:BagPresLim}.
   %since $\Lim{\Bag}$ is a limit.
 \end{proof}
@@ -1005,7 +1010,7 @@ Let $\coalg{\FMSet}$ be the coalgebra underlying the equivalence of \cref{thm:FM
   Assuming axiom of choice and $\mathsf{AC}_{3,2}$, $\SetTrunc{\Lim{\Bag}}$ is the final coalgebra of $\FMSet$ in the category of sets.
 \end{theorem}
 \begin{proof}
-Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{thm:FMSetOfFMGpdTrunc} and \cref{prop:BagTote} is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\mathsf{AC}_{3,2}$ on $c'$ gives $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in \cref{cor:BagFinalCoalg}, there exists a unique $\Bag$-coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique $\FMSet$-coalgebra morphism between $(X,c)$ and $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$. The proof of uniqueness uses an application of the axiom of choice. We refer to the formalization for details.
+Let $c : X \to \FMSet X$ be a coalgebra, which by \cref{cor:TruncBagEquiv} is equivalent to having a function $c' : X \to \SetTrunc{\Bag X}$. Applying $\mathsf{AC}_{3,2}$ on $c'$ gives $c'' : \SetTrunc{X \to \Bag X}$. Invoking $\Rec{\SetTrunc{X \to \Bag X}}$ on $c''$, we receive $g : X \to \Bag X$. From the finality of $\Lim{\Bag}$ in \cref{cor:BagFinalCoalg}, there exists a unique $\Bag$-coalgebra morphism $f^* : X \to \Lim{\Bag}$ and we define $f\,x \DefEq \SetTruncCon[f^*\,x]$. The function $f$ is the desired unique $\FMSet$-coalgebra morphism between $(X,c)$ and $(\SetTrunc{\Lim{\Bag}},\coalg{\FMSet})$. The proof of uniqueness uses an application of the axiom of choice. We refer to the formalization for details.
 \end{proof}
 %We do not yet know what is the strength of assuming the existence of a section for $\theta_X$ and how it compares to well-known choice principles. It resembles a form of choice: if set-truncation is replaced with propositonal truncation, then it becomes a particular instance of the axiom of choice.
 In the absence of the axiom of choice and $\mathsf{AC}_{3,2}$, the type $\SetTrunc{\Lim{\Bag}}$ can still be used to give semantics to transition systems with \emph{finite} set of states.
@@ -1040,6 +1045,8 @@ where the relation $\Op{Act} \,P\,a$ is
       (v = w \circ \sigma)
 \]
 The type $\Op{F}_{A,B,P}\,X$ is a set whenever the type of shapes $A$ is a set. The functor $\FMSet$ corresponds to the instance where $A \DefEq ℕ$, $B \DefEq \Fin$ and $P\,\sigma \DefEq 1$.
+Similar to how $\FMSet X$ is the free commutative monoid on $X$,
+we conjecture that $\Bag X$ can be proved equivalent to the \emph{free symmetric monoidal groupoid} on $X$ defined as a HIT by Piceghello \cite{Piceghello2021}, which would serve as an alternative proof of MacLane's coherence for symmetric monoidal categories.
 
 We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$.
 Nevertheless, one can ask if a result like \cref{thm:PresFMSetSection} is valid for any $\Op{F}_{A,B,P}$. We do not know how to generally define a section for the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$.
@@ -1082,7 +1089,7 @@ The functor $\Op{G}_{A,B,P}$ is %defined as
 \[
 \Op{G}_{A,B,P} X \DefEq \sum (x : \Op{U}_{A,B,P}) \Where \langle x \rangle \to X
 \]
-Since $\Op{G}_{A,B,P}$ is a polynomial functor, its final coalgebra can be constructed as an $\omega$-limit, as in \cref{thm:BagPresLim,cor:BagFinalCoalg}. We conjecture that the latter can be related to $\Op{F}_{A,B,P}$ similarly to how $\Bag$ and $\FMSet$ are related via \cref{thm:FMSetOfFMGpdTrunc,prop:BagTote}: $\SetTrunc{\Op{G}_{A,B,P} X} \simeq \Op{F}_{A,B,P} X$. 
+Since $\Op{G}_{A,B,P}$ is a polynomial functor, its final coalgebra can be constructed as an $\omega$-limit, as in \cref{thm:BagPresLim,cor:BagFinalCoalg}. We conjecture that the latter can be related to $\Op{F}_{A,B,P}$ similarly to how $\Bag$ and $\FMSet$ are related via \cref{cor:TruncBagEquiv}: $\SetTrunc{\Op{G}_{A,B,P} X} \simeq \Op{F}_{A,B,P} X$.
 %% \begin{itemize}
 %%     \item Hint at a definition of analytic functors using
 %%         the above definitions (pick a subgroupoid of Bij etc.)
