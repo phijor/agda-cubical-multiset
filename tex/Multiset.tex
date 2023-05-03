@@ -4,6 +4,7 @@
 
 \usepackage{bussproofs}
 \usepackage{microtype}
+\usepackage{tikz-cd}
 
 \usepackage{todonotes}
 \hypersetup{%
@@ -570,16 +571,38 @@ and as a set-quotient of the final coalgebra of the $\List$ functor. %(\cref{sec
 
 \subsection{As an \texorpdfstring{\ensuremath{\omega}}{ω}-Limit}\label{sec:final-limit-set}
 
-Consider the chain in \eqref{eq:chain}, with $F$ replaced by $\FMSet$. We formally define $\FMSet^n 1$ by recursion on $n$: $\FMSet^0 1 \DefEq 1$ and $\FMSet^{1 + n} 1 \DefEq \FMSet (\FMSet^n 1)$. Similarly we can define the iteration $\Map{\FMSet}^n\,\Bang$, which we denote $\Bang^n_{\FMSet}$.
+Consider the chain in \eqref{eq:chain}, for some $F : \Type \to \Type$.
+We formally define $F^n 1$ by recursion on $n$: $F^0 1 \DefEq 1$ and $F^{1 + n} 1 \DefEq F (F^n 1)$.
+Similarly we can define the iteration $\Map{F}^n\,\Bang$, which we denote $\Bang^n_{F}$.
 In HoTT, the \emph{(homotopy) limit} of the chain is definable as
 \[
-\lim_{n} (\FMSet^n 1) \DefEq \sum (xs : \forall n \Where \FMSet^n 1) \Where \forall n \Where
-  \Bang^n_{\FMSet}\,(xs\;(1 + n)) = xs\;n
+  \lim_{n} (F^n 1) \DefEq \sum (\Var{x} : (n : ℕ) \to F^n 1) \Where \forall n \Where
+  \Bang^n_{F}\,(\Var{x}\,{(1 + n)}) = \Var{x}\, n
 \]
-Write $\Lim{\FMSet} \DefEq \lim_{n} (\FMSet^n 1)$. An element of the limit consists of an element $xs\;n : \FMSet^n 1$, for all $n : ℕ$, and a proof that restricting $xs\;(1 + n)$ to $\FMSet^n 1$ via $\Bang^n_{\FMSet}$ is equal to $xs\;n$. The $n$-th projection from the limit is called $\ell_n : \Lim{\FMSet} → \FMSet^n 1$. The limit is invariant wrt.\@ shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{\FMSet} \simeq \LimSh{\FMSet}$, where $\LimSh{\FMSet} \DefEq \lim_{n} (\FMSet^{1 + n} 1)$. We use $\ell_n : \LimSh{\FMSet} → \FMSet^{1+n} 1$ also for the $n$-th projection from the shifted limit.
-The limit is a set, since all types in its diagram are sets.
-Notice that the limit of the chain in \eqref{eq:chain}, with $\FMSet$ replaced by any of its naturally equivalent formulations in \cref{prop:eqpres}, is equivalent to $\Lim{\FMSet}$. This implies that, when proving properties of this limit, we can use whichever set-based formulation of finite bags we prefer.
-This holds since naturally equivalent chains have equivalent limits, see \CodeRef[IterLimit]{chainEquivToLimitEquiv} in the formalization for details.
+Write $\Lim{F} \DefEq \lim_{n} (F^n 1)$.
+An element of the limit consists of an element $\Var{x}\, n : F^n 1$, for all $n : ℕ$, and a proof that restricting $\Var{x}\,{(1 + n)}$ to $F^n 1$ via $\Bang^n_{F}$ is equal to $\Var{x}\,n$.
+Writing $\ell_n : \Lim{F} → F^n 1$ for the $n$-th projection from the limit, we obtain the usual diagram:
+\begin{equation}\label{fig:limit-diagram}
+  \begin{tikzcd}[row sep=large]
+    {} & {} & \Lim{F}
+      \ar[dll, shorten >=1mm, "\ell_0"{description}]
+      \ar[dl, "\ell_1"{description}]
+      \ar[d, "\ell_2"{description}]
+      \ar[dr, "\ell_3"{description}]
+      \ar[drr, phantom, "\ldots" description] \\
+    1 & F{1} \ar[l, "!^0_F"]
+      & F^2{1} \ar[l, "!^1_F"]
+      & F^3{1} \ar[l, "!^2_F"]
+      & \ldots \ar[l]
+  \end{tikzcd}
+\end{equation}
+
+The limit is invariant wrt.\@ shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{F} \simeq \LimSh{F}$, where $\LimSh{F} \DefEq \lim_{n} (F^{1 + n} 1)$. We use $\ell_n : \LimSh{F} → F^{1+n} 1$ also for the $n$-th projection from the shifted limit.
+If $F$ is set-valued, the limit $\Lim{F}$ is also a set.
+Notice that for naturally equivalent and set-valued $F$ and $G$, we have $\Lim{F} \simeq \Lim{G}$,
+since naturally equivalent chains have equivalent limits;
+see \CodeRef[IterLimit]{chainEquivToLimitEquiv} in the formalization for details.
+This implies that, when proving properties of this limit for finite bags, an use any of the equivalent presentations in \cref{prop:eqpres} as convenient.
 
 In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\pres{\FMSet} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: take $\ell_n\,(\pres{\FMSet} \,s)$ as $\Map{\FMSet}\,\ell_n \,s$. The function $\pres{\FMSet}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\pres{\FMSet}^{-1}$ provides a coalgebra structure for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
 
