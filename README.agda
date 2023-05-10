@@ -187,7 +187,15 @@ module LexFMSet {A : Type} (setA : isSet A) (R : A → A → Type) (linR : isLin
   SymActUntruncate : (n : ℕ) (v w : Fin n → A) → SymAct n v w → SymAct∞ n v w
   SymActUntruncate = S.canonicalS
 
-  -- This defines a linear order on finite multisets:
+  -- The result above is powered by a (weakly constant) function computing
+  -- a canonical permutation from an arbitrary permutation of lists:
+  canonPerm : (xs ys : List A) → Perm xs ys → Perm xs ys
+  canonPerm = Multiset.Ordering.Order.Sorting.canonPerm setA R linR
+
+  -- In particular, we can evaluate this function for concrete linear orders:
+  module BraidExample = Multiset.Ordering.Order.Example
+
+  -- The above extends to a linear order on finite multisets:
   LexFMSet : FMSet A → FMSet A → Type
   LexFMSet = S.LexFMSet
 

@@ -7,6 +7,7 @@ open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Everything
 open import Cubical.Data.List as List hiding ([_])
+open import Cubical.Data.Nat using (zero ; suc ; _+_ ; +-zero ; +-suc)
 open import Cubical.Data.Sigma
 open import Cubical.HITs.SetQuotients as SQ
 open import Cubical.Relation.Binary
@@ -100,6 +101,7 @@ invP : {A : Type} {xs ys : List A}
 invP stop = stop
 invP (perm ps) = transP (invP ps) (perm stop)
 
+infix 40 _⁻ᵖ
 _⁻ᵖ = invP
 
 substP : {A : Type} {xs ys : List A} → xs ≡ ys → Perm xs ys
@@ -274,6 +276,16 @@ module Sorting {A : Type} (setA : isSet A)
               (x ∷ y ∷ xs)
               (totR x y)
 
+  lengthInsert : (x : A) (xs : List A) → length (insert x xs) ≡ suc (length xs)
+  lengthInsert x [] = refl
+  lengthInsert x (y ∷ xs) =
+    elimTotR R
+             (λ z → length (casesTotR R (x ∷ y ∷ xs) (y ∷ insert x xs) (x ∷ y ∷ xs) z)
+                      ≡ suc (suc (length xs)))
+             (λ _ → refl)
+             (λ _ → cong suc (lengthInsert x xs))
+             (λ _ → refl)
+             (totR x y)
 
   insert-insert : ∀ x y xs
     → insert y (insert x xs) ≡ insert x (insert y xs)
@@ -343,55 +355,164 @@ module Sorting {A : Type} (setA : isSet A)
              (λ _ → stop)
              (totR x y)
 
-  sort : List A → List A → List A
-  sort [] acc = acc
-  sort (x ∷ xs) acc = sort xs (insert x acc)
+  sort-acc : List A → List A → List A
+  sort-acc [] acc = acc
+  sort-acc (x ∷ xs) acc = sort-acc xs (insert x acc)
 
-  sort-eq/' : ∀ xs {ys acc x y}
-    → sort (xs ++ x ∷ y ∷ ys) acc ≡ sort (xs ++ y ∷ x ∷ ys) acc
-  sort-eq/' [] {ys} {acc} = cong (sort ys) (insert-insert _ _ acc)
-  sort-eq/' (x ∷ xs) = sort-eq/' xs
+  sort : List A → List A
+  sort xs = sort-acc xs []
+
+  lengthSortAcc : (xs acc : List A) → length (sort-acc xs acc) ≡ length xs + length acc
+  lengthSortAcc [] acc = refl
+  lengthSortAcc (x ∷ xs) acc =
+    length (sort-acc (x ∷ xs) acc)    ≡⟨ lengthSortAcc xs (insert x acc) ⟩
+    length xs + length (insert x acc) ≡⟨ cong′ (length xs +_) (lengthInsert x acc) ⟩
+    (length xs + suc (length acc))    ≡⟨ +-suc _ _ ⟩
+    suc (length xs + length acc)      ∎
+
+  lengthSort : (xs : List A) → length (sort xs) ≡ length xs
+  lengthSort xs =
+    length (sort-acc xs []) ≡⟨ lengthSortAcc xs [] ⟩
+    length xs + 0           ≡⟨ +-zero (length xs) ⟩
+    length xs ∎
 
 
-  sort-eq/ : ∀ {xs ys acc}
-    → Perm xs ys → sort xs acc ≡ sort ys acc
-  sort-eq/ stop = refl
-  sort-eq/ (perm {xs = xs} ps) = sort-eq/' xs ∙ sort-eq/ ps
+  sort-eq/-acc : ∀ {xs ys acc}
+    → Perm xs ys → sort-acc xs acc ≡ sort-acc ys acc
+  sort-eq/-acc stop = refl
+  sort-eq/-acc (perm {xs = xs} ps) = perm-eq/ xs ∙ sort-eq/-acc ps where
+    perm-eq/ : ∀ xs {ys acc x y}
+      → sort-acc (xs ++ x ∷ y ∷ ys) acc ≡ sort-acc (xs ++ y ∷ x ∷ ys) acc
+    perm-eq/ [] {ys} {acc} = cong (sort-acc ys) (insert-insert _ _ acc)
+    perm-eq/ (x ∷ xs) = perm-eq/ xs
+
+  sort-eq/ : ∀ {xs ys}
+    → Perm xs ys → sort xs ≡ sort ys
+  sort-eq/ p = sort-eq/-acc {acc = []} p
 
   sortMset : Mset A → List A
-  sortMset =
-    SQ.rec (isOfHLevelList 0 setA)
-      (λ xs → sort xs [])
-      (λ _ _ → sort-eq/)
+  sortMset = SQ.rec (isOfHLevelList 0 setA) sort well-defined where
+    well-defined : ∀ xs ys → Perm xs ys → sort xs ≡ sort ys
+    well-defined _ _ = sort-eq/
 
-  sortP : (xs acc : List A) → Perm (acc ++ xs) (sort xs acc)
-  sortP [] acc = substP (++-unit-r acc)
-  sortP (x ∷ xs) acc =
-    transP (invP (moveHeadP x acc))
-            (transP (appendP {zs = xs} (insertP x acc))
-                     (sortP xs (insert x acc)))
+  sortP : (xs : List A) → Perm xs (sort xs)
+  sortP xs = sortP-acc xs [] where
+    sortP-acc : (xs acc : List A) → Perm (acc ++ xs) (sort-acc xs acc)
+    sortP-acc [] acc = substP (++-unit-r acc)
+    sortP-acc (x ∷ xs) acc =
+      (moveHeadP x acc) ⁻ᵖ
+        ∙ₚ ((appendP {zs = xs} (insertP x acc))
+        ∙ₚ (sortP-acc xs (insert x acc)))
 
   sortMset-section : ∀ xs → [ sortMset xs ] ≡ xs
   sortMset-section =
     SQ.elimProp (λ _ → squash/ _ _)
-      (λ xs → eq/ _ _ (invP (sortP xs [])))
+      (λ xs → eq/ _ _ (invP (sortP xs)))
 
--- Knowing a permutation between xs and ys, we build another one by
--- first sorting xs and then un-sorting ys. This is a constant function.
+  -- Knowing a permutation between xs and ys, we build another one by
+  -- first sorting xs and then un-sorting ys. This is a constant function.
+  canonPerm : (xs ys : List A) → Perm xs ys → Perm xs ys
+  canonPerm xs ys σ = (sortP xs) ∙ₚ substP (sort-eq/ σ) ∙ₚ (sortP ys ⁻ᵖ)
 
-  canonicalP : (xs ys : List A) → Perm xs ys → Perm xs ys
-  canonicalP xs ys σ =
-    transP (sortP xs [])
-            (transP (substP (sort-eq/ σ))
-                    (invP (sortP ys [])))
 
-  canonicalP-const : (xs ys : List A) (σ Φ : Perm xs ys)
-    → canonicalP xs ys σ ≡ canonicalP xs ys Φ
-  canonicalP-const xs ys σ Φ =
-    cong (transP (sortP xs []))
-         (cong (λ z → transP z (invP (sortP ys [])))
-               (cong substP (isOfHLevelList 0 setA _ _ _ _)))
+  canonPerm-const : (xs ys : List A) (σ τ : Perm xs ys)
+    → canonPerm xs ys σ ≡ canonPerm xs ys τ
+  canonPerm-const xs ys σ τ =
+    canonPerm xs ys σ                                   ≡⟨⟩
+    (sortP xs) ∙ₚ substP (sort-eq/ σ) ∙ₚ (sortP ys ⁻ᵖ)  ≡⟨ cong (λ p → (sortP xs) ∙ₚ substP p ∙ₚ (sortP ys ⁻ᵖ)) lem ⟩
+    (sortP xs) ∙ₚ substP (sort-eq/ τ) ∙ₚ (sortP ys ⁻ᵖ)  ≡⟨⟩
+    canonPerm xs ys τ ∎ where
+      -- Since A is a set, equality of lists is a proposition.
+      isPropSorted≡ : isProp (sort xs ≡ sort ys)
+      isPropSorted≡ = isOfHLevelList 0 setA (sort xs) (sort ys)
 
+      lem : sort-eq/ σ ≡ sort-eq/ τ
+      lem = isPropSorted≡ (sort-eq/ σ) (sort-eq/ τ)
+
+
+module Example where
+  -- =======================================================================
+  --
+  --  Example: Computing the canonical permutation on lists of units.
+  --
+  --  For any `p : Perm [ tt , tt ] [ tt , tt ]`, we show that `canonPerm p`
+  --  computes to a double braid-like permutation
+  --
+  --        [ tt , tt ]
+  --           \  /
+  --            '/
+  --            /.
+  --           /  \
+  --        [ tt , tt ]
+  --           \  /
+  --            '/
+  --            /.
+  --           /  \
+  --        [ tt , tt ]
+  --
+  --  This suggests that `Perm [ tt , tt ] [ tt , tt ]` is equivalent to the
+  --  braid group on two strands (B₂), which is in turn equivalent to ℤ.
+  open import Cubical.Data.Unit
+
+  -- The unit type comes with a trivial linear order — the empty relation:
+  _<_ : Unit → Unit → Type
+  _<_ tt tt = ⊥
+
+  isLinOrderUnit : isLinOrder {A = Unit} _<_
+  isLinOrderUnit .isLinOrder.asymR ()
+  isLinOrderUnit .isLinOrder.transR ()
+  isLinOrderUnit .isLinOrder.propR ()
+  isLinOrderUnit .isLinOrder.totR tt tt = inr (inr refl)
+
+  -- Abbreviation for the unique two-element list of units:
+  𝟚 : List Unit
+  𝟚 = tt ∷ tt ∷ []
+
+  -- The permutations on 𝟚 are less permutations, more braidings.
+  -- In analogy to the braid group on two strands, call them B₂:
+  B₂ : Type
+  B₂ = Perm 𝟚 𝟚
+
+  -- We have terms for braiding once...
+  --
+  --          [ tt , tt ]
+  --             \  /
+  --              '/
+  --              /.
+  --             /  \
+  --          [ tt , tt ]
+  --
+  braid : B₂
+  braid = perm {x = tt} {y = tt} {xs = []} {ys = []} stop
+
+  -- ...and twice:
+  braid² : B₂
+  braid² = perm {xs = []} braid
+  -- Notice that since B₂ is generated freely, braid² ≢ stop.
+
+  module S = Sorting isSetUnit _<_ isLinOrderUnit
+
+  canonPerm𝟚 : B₂ → B₂
+  canonPerm𝟚 = S.canonPerm _ _
+
+  -- After getting rid of some substitutions over `refl`, we see
+  -- that `canonPerm𝟚` computes to `braid²` on `braid`...
+  canonPerm𝟚-braid : canonPerm𝟚 braid ≡ braid²
+  canonPerm𝟚-braid =
+    canonPerm𝟚 braid ≡⟨⟩
+    perm (p ∙ₚ (p ∙ₚ ((p ⁻ᵖ) ∙ₚ braid))) ≡⟨ cong (λ p → perm {xs = []} (p ∙ₚ (p ∙ₚ ((p ⁻ᵖ) ∙ₚ braid)))) p≡stop ⟩
+    perm (stop ∙ₚ (stop ∙ₚ ((stop ⁻ᵖ) ∙ₚ braid))) ≡⟨⟩
+    braid² ∎
+    where
+      p : B₂
+      p = subst (Perm 𝟚) refl stop
+
+      p≡stop : p ≡ stop
+      p≡stop = substRefl {B = Perm 𝟚} {x = 𝟚} stop
+
+  -- ... and of course on any other value:
+  canonPerm𝟚-const-braid² : (p : B₂) → canonPerm𝟚 p ≡ braid²
+  canonPerm𝟚-const-braid² p = S.canonPerm-const _ _ p braid ∙ canonPerm𝟚-braid
 
 -- ====================================================================
 

@@ -37,44 +37,21 @@ module SortingFMSet {A : Type} (setA : isSet A)
   open isLinOrder linR
   open Sorting setA R linR
 
-  lengthInsert : (x : A) (xs : List A)
-    → length (insert x xs) ≡ suc (length xs)
-  lengthInsert x [] = refl
-  lengthInsert x (y ∷ xs) =
-    elimTotR R
-             (λ z → length (casesTotR R (x ∷ y ∷ xs) (y ∷ insert x xs) (x ∷ y ∷ xs) z)
-                      ≡ suc (suc (length xs)))
-             (λ _ → refl)
-             (λ _ → cong suc (lengthInsert x xs))
-             (λ _ → refl)
-             (totR x y)
+  open Iso
 
-  abstract
-    lengthSort : (xs acc : List A)
-      → length (sort xs acc) ≡ length xs + length acc
-    lengthSort [] acc = refl
-    lengthSort (x ∷ xs) acc =
-      length (sort (x ∷ xs) acc)        ≡⟨ lengthSort xs (insert x acc) ⟩
-      length xs + length (insert x acc) ≡⟨ cong′ (length xs +_) (lengthInsert x acc) ⟩
-      (length xs + suc (length acc))    ≡⟨ +-suc _ _ ⟩
-      suc (length xs + length acc)      ∎
+  lengthSortPVect : (n : ℕ) (x : PVect A n)
+    → length (sortMset (List/Perm-List/Relator≡-Iso .inv (FMSet→List/Relator= (n , x)))) ≡ n
+  lengthSortPVect n =
+    SQ.elimProp (λ _ → isSetℕ _ _) lemma where
 
-    open Iso
+      toVec : ∀ {n} → (SumFin n → A) → Vec A n
+      toVec v = FinVec→Vec (v ∘ Fin→SumFin)
 
-    lengthSortPVect : (n : ℕ) (x : PVect A n)
-      → length (sortMset (List/Perm-List/Relator≡-Iso .inv (FMSet→List/Relator= (n , x)))) ≡ n
-    lengthSortPVect n =
-      SQ.elimProp (λ _ → isSetℕ _ _) lemma where abstract
-
-        toVec : ∀ {n} → (SumFin n → A) → Vec A n
-        toVec v = FinVec→Vec (v ∘ Fin→SumFin)
-
-        lemma : (v : SumFin n → A) → length (sortMset  (List/Perm-List/Relator≡-Iso .inv (FMSet→List/Relator= (n , [ v ])))) ≡ n
-        lemma v =
-          length (sortMset (List/Perm-List/Relator≡-Iso .inv (FMSet→List/Relator= (n , [ v ])))) ≡⟨ lengthSort (Vec→List (toVec v)) [] ⟩
-          length (Vec→List (toVec v)) + 0 ≡⟨ +-zero _ ⟩
-          length (Vec→List (toVec v))     ≡⟨ lengthVec→List (toVec v) ⟩
-          n ∎
+      lemma : (v : SumFin n → A) → length (sortMset  (List/Perm-List/Relator≡-Iso .inv (FMSet→List/Relator= (n , [ v ])))) ≡ n
+      lemma v =
+        length (sortMset (List/Perm-List/Relator≡-Iso .inv (FMSet→List/Relator= (n , [ v ])))) ≡⟨ lengthSort (Vec→List (toVec v)) ⟩
+        length (Vec→List (toVec v))     ≡⟨ lengthVec→List (toVec v) ⟩
+        n ∎
 
   sortFMSet : FMSet A → Σ ℕ λ n → SumFin n → A
   sortFMSet (n , x) =
@@ -99,20 +76,19 @@ module SortingFMSet {A : Type} (setA : isSet A)
   sortPVect n x = subst (λ m → SumFin m → A) (lengthSortPVect n x) (sortFMSet (n , x) .snd)
 
   -- Proposition 1
-  abstract
-    sortPVect-section : ∀ n → section [_] (sortPVect n)
-    sortPVect-section n x =
-      lem (lengthSortPVect n x) (sortFMSet (n , x) .snd)
-      ∙ (subst (PVect A) (lengthSortPVect n x) [ sortFMSet (n , x) .snd ]
-          ≡⟨ (λ i → subst (PVect A) (isSetℕ _ _ (lengthSortPVect n x) (cong size (sortFMSet-section (n , x))) i) [ sortFMSet (n , x) .snd ]) ⟩
-          subst (PVect A) (cong size (sortFMSet-section (n , x))) [ sortFMSet (n , x) .snd ] ∎)
-      ∙ fromPathP (cong snd (sortFMSet-section (n , x)))
-      where
-        lem : ∀{n m} (eq : n ≡ m) v
-          → Path (PVect A m) [ subst (λ n → SumFin n → A) eq v ] (subst (PVect A) eq [ v ])
-        lem = J (λ m eq → ∀ v → [ subst (λ n → SumFin n → A) eq v ] ≡ subst (PVect A) eq [ v ])
-                λ v → cong′ [_] (substRefl {B = (λ n → SumFin n → A)} v)
-                      ∙ sym (substRefl {B = PVect A} [ v ])
+  sortPVect-section : ∀ n → section [_] (sortPVect n)
+  sortPVect-section n x =
+    lem (lengthSortPVect n x) (sortFMSet (n , x) .snd)
+    ∙ (subst (PVect A) (lengthSortPVect n x) [ sortFMSet (n , x) .snd ]
+        ≡⟨ (λ i → subst (PVect A) (isSetℕ _ _ (lengthSortPVect n x) (cong size (sortFMSet-section (n , x))) i) [ sortFMSet (n , x) .snd ]) ⟩
+        subst (PVect A) (cong size (sortFMSet-section (n , x))) [ sortFMSet (n , x) .snd ] ∎)
+    ∙ fromPathP (cong snd (sortFMSet-section (n , x)))
+    where
+      lem : ∀{n m} (eq : n ≡ m) v
+        → Path (PVect A m) [ subst (λ n → SumFin n → A) eq v ] (subst (PVect A) eq [ v ])
+      lem = J (λ m eq → ∀ v → [ subst (λ n → SumFin n → A) eq v ] ≡ subst (PVect A) eq [ v ])
+              λ v → cong′ [_] (substRefl {B = (λ n → SumFin n → A)} v)
+                    ∙ sym (substRefl {B = PVect A} [ v ])
 
   TriplesPath : ∀{n m} {v w : SumFin n → A} {v' w' : SumFin m → A}
     → (eq : n ≡ m)
@@ -208,8 +184,8 @@ module SortingFMSet {A : Type} (setA : isSet A)
     → SymmetricActionΣ n v w
   canonicalS n v w r =
     rec→Set (isSetSymmetricActionΣ setA)
-             (λ p → sa (canonicalP xs ys p))
-             (λ p q i → canonicalS' n v w (lengthRelatorΣ (Perm→RelatorΣ= (canonicalP-const xs ys p q i))) (sa' (canonicalP-const xs ys p q i)))
+             (λ p → sa (canonPerm xs ys p))
+             (λ p q i → canonicalS' n v w (lengthRelatorΣ (Perm→RelatorΣ= (canonPerm-const xs ys p q i))) (sa' (canonPerm-const xs ys p q i)))
              (Relator=→∥Perm∥₁ (SymAct→Relator= _ (w ∘ Fin→SumFin) (SymmetricAction→SymAct v w r)))
     where
       xs = Vec→List (FinVec→Vec (v ∘ Fin→SumFin))
