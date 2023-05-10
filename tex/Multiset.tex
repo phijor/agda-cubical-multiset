@@ -223,7 +223,7 @@ $R : A \to A \to \Type$ is the HIT with constructors
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-The term $\SetQuotCon[a]$ is the $R$-equivalence class of $a$, while the path constructor $\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}$ states that $R$-related elements have path equal equivalence classes. The higher path constructor $\SetQuotSquash$ forces $\SetQuot[A][R]$ to be a set. A set-quotient $\SetQuot[A][R]$ is called \emph{definable} if the equivalence class constructor has a section~\cite{Li2015}, i.e. there is a representative-picking function $\rep: \SetQuot[A][R] \, \to A$ such that $\SetQuotCon[\rep\,x] = x$ for all $x : \SetQuot[A][R]$.
+The term $\SetQuotCon[a]$ is the $R$-equivalence class of $a$, while the path constructor $\operatorname{\mathsf{eq/}}_{\!\mathsf{2}}$ states that $R$-related elements have path equal equivalence classes. The higher path constructor $\SetQuotSquash$ forces $\SetQuot[A][R]$ to be a set.
 
 Other HITs are presented in the next section, where we also take a closer look at their elimination principles.
 
@@ -504,6 +504,10 @@ and are easily seen to be naturally equivalent.
 
 
 \subsection{Definable Quotients and Sorting}\label{sec:Sorting}
+
+In the absence of the axiom of choice, it is not generally possible to define a section of the equivalence class constructor $\SetQuotCon[\Blank] : A \to \SetQuot[A][R]$.
+A set-quotient $\SetQuot[A][R]$ for which such a section exists is called \emph{definable}~\cite{Li2015}.
+Spelled out, there is a representative-picking function $\rep: \SetQuot[A][R] \, \to A$ such that $\SetQuotCon[\rep\,x] = x$ for all $x : \SetQuot[A][R]$.
 
 In the proof of \cref{thm:PresFMSetSection} we employ the fact that the type of finite bags $\FMSet X$, for some specific choice of $X$, is linearly-ordered and $\SetQuot[(\Fin n \to X)][\sim]$ is a definable set-quotient.
 %The proof of \cref{thm:PresFMSetSection} relies on the validity of two specific instances of the axiom of countable choice. We show here that these instances hold and therefore \cref{thm:PresFMSetSection} is true without the need of postulating countable choice. This is achieved by showing that, whenever a type $X$ is endowed with a linear order $(<)$, then $\SetQuot[\List X][\Perm]$ is a definable set-quotient.
