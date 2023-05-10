@@ -897,7 +897,11 @@ This indicates that $\Tote X$ is not a set, in general it is at least a groupoid
   for any $B : \FinSet$.
   The type $\FinSet$ is also a groupoid, so the entire $\Sigma$-type is a groupoid.
 \end{proof}
-$\Tote X$ differs from $\FMSet X$ in that path equality in the former records the permutations between the (finite sets representing) sizes of the bags, while the second only cares about the mere existence of a permutation. Nonetheless, the two definitions become equivalent when we set-truncate the type of totes.
+
+Similar to how $\FMSet X$ is the free commutative monoid on $X$,
+$\Tote X$ can be proved equivalent to the \emph{free symmetric monoidal groupoid} on $X$~\cite[Corollary~5.103]{Piceghello2021},
+which serves as an alternative proof of MacLane's coherence for symmetric monoidal categories.
+It differs from $\FMSet X$ in that path equality in the former records the permutations between the (finite sets representing) sizes of the bags, while the second only cares about the mere existence of a permutation. Nonetheless, the two definitions become equivalent when we set-truncate the type of totes.
 \begin{theorem}[{\CodeRef{FMSetToteTruncEquiv}, \CodeRef{isNatural-FMSetToteTruncEquiv}}]\label{thm:FMSetOfFMGpdTrunc}
   For any type $X$, $\SetTrunc{\Tote X} ≃ \FMSet X$. The equivalence is natural in $X$.
 \end{theorem}
@@ -1089,8 +1093,6 @@ where the relation $\Op{Act} \,P\,a$ is
       (v = w \circ \sigma)
 \]
 The type $\Op{F}_{A,B,P}\,X$ is a set whenever the type of shapes $A$ is a set. The functor $\FMSet$ corresponds to the instance where $A \DefEq ℕ$, $B \DefEq \Fin$ and $P\,\sigma \DefEq 1$.
-Similar to how $\FMSet X$ is the free commutative monoid on $X$,
-we conjecture that $\Bag X$ can be proved equivalent to the \emph{free symmetric monoidal groupoid} on $X$ defined as a HIT by Piceghello \cite{Piceghello2021}, which would serve as an alternative proof of MacLane's coherence for symmetric monoidal categories.
 
 We know that the construction of the final coalgebra as an $\omega$-limit in the category of sets for a general analytic functor $\Op{F}_{A,B,P}$ is constructively problematic, since it is already problematic for $\FMSet$.
 Nevertheless, one can ask if a result like \cref{thm:PresFMSetSection} is valid for any $\Op{F}_{A,B,P}$. We do not know how to generally define a section for the function $\pres{\Op{F}} : \Op{F}_{A,B,P} (\lim_{n} (\Op{F}_{A,B,P}^n 1)) \to \lim_{n} (\Op{F}_{A,B,P}^{1 + n} 1)$.
