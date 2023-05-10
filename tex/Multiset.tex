@@ -109,7 +109,7 @@ Specific constructions of final coalgebras for a selection of functors, performe
 
 We extend this line of work by studying the final coalgebra of the \emph{finite bag functor}. This is an intermediate situation between finitary polynomial functors, such as the one delivering lists, and general finitary functors, such as the one delivering finite subsets. It also serves as a representative starting point for a constructive analysis of Joyal's \emph{analytic functors} \cite{Joyal1986} and their final semantics. In type theory, analytic functors arise from \emph{quotient containers} \cite{Abbott2004} and encompass many datatypes with symmetries, such as finite bags, unordered pairs and cyclic lists \cite{Yorgey2010,Yorgey2014}.
 
-Following the recent work of Choudhury and Fiore \cite{Choudhury2021}, we define and compare various implementations of the type of finite bags in HoTT. Choudhury and Fiore give two equivalent presentations of finite bags as HITs: as free commutative monoids and as lists modulo swapping of adjacent entries. We add an equivalent presentation of finite bags as an analytic functor $\FMSet$: an element of $\FMSet X$ is a pair of a natural number $n$ (its size) and an equivalence class of functions typed $\Fin n \to X$ picking an element of $X$ for each $k < n$. Two functions $v ,w :\Fin n \to X$ belong to the same equivalence class if there merely exists an equivalence $\sigma : \Fin n \to \Fin n$ such that $v = w \circ \sigma$. The type $\FMSet X$ is always a set (in the sense of HoTT, i.e. a type with at most one identification between any two terms), since it employs set-quotienting. Similarly, the HITs of Choudhury and Fiore are sets. Following \cite{Kock2012}, finite bags can alternatively be defined as a polynomial functor $\Bag$ returning a groupoid (in the sense of HoTT, i.e. a type whose equality types are sets) instead of a set. In this case, an element of $\Bag X$ is a pair consisting of a (Bishop-)finite type $Y$ and a function from $Y$ to $X$. The set-based and the groupoid-based definitions of bags are appropriately related by the set-truncation construction: $\SetTrunc{\Bag X} \simeq \FMSet X$.
+Following the recent work of Choudhury and Fiore \cite{Choudhury2023}, we define and compare various implementations of the type of finite bags in HoTT. Choudhury and Fiore give two equivalent presentations of finite bags as HITs: as free commutative monoids and as lists modulo swapping of adjacent entries. We add an equivalent presentation of finite bags as an analytic functor $\FMSet$: an element of $\FMSet X$ is a pair of a natural number $n$ (its size) and an equivalence class of functions typed $\Fin n \to X$ picking an element of $X$ for each $k < n$. Two functions $v ,w :\Fin n \to X$ belong to the same equivalence class if there merely exists an equivalence $\sigma : \Fin n \to \Fin n$ such that $v = w \circ \sigma$. The type $\FMSet X$ is always a set (in the sense of HoTT, i.e. a type with at most one identification between any two terms), since it employs set-quotienting. Similarly, the HITs of Choudhury and Fiore are sets. Following \cite{Kock2012}, finite bags can alternatively be defined as a polynomial functor $\Bag$ returning a groupoid (in the sense of HoTT, i.e. a type whose equality types are sets) instead of a set. In this case, an element of $\Bag X$ is a pair consisting of a (Bishop-)finite type $Y$ and a function from $Y$ to $X$. The set-based and the groupoid-based definitions of bags are appropriately related by the set-truncation construction: $\SetTrunc{\Bag X} \simeq \FMSet X$.
 
 We investigate 3 constructions of the final coalgebra of the finite bag functor:
 \begin{enumerate}
@@ -242,7 +242,7 @@ Groupoid-based definitions are discussed in \cref{sec:finite-bags-groupoids}.
 \subsection{As the Free Commutative Monoid}
 
 Given a type $X$, the \emph{free commutative monoid} on $X$
-\cite{Choudhury2021} is the HIT induced by the following rules:
+\cite{Choudhury2023} is the HIT induced by the following rules:
 %\begin{itemize}
 %  \item Point constructors:
     \begin{center}
@@ -370,7 +370,7 @@ In fact, $\PropTrunc{\Perm\;xs\;ys}$ and $\Relator \,(=)\;xs\;ys$ are equivalent
 \subsection{As an Analytic Functor}
 
 We additionally introduce the type of finite bags over $X$ as an \emph{analytic functor} (in the formulation of Hasegawa~\cite{Hasegawa2002}).
-For any type $X$, we define a type of \emph{finite multisets}~\cite{Li2015,Choudhury2021}
+For any type $X$, we define a type of \emph{finite multisets}~\cite{Li2015,Choudhury2023}
 \begin{align*}
   \FMSet X
     \DefEq
