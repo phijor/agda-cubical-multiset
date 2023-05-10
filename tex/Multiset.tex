@@ -370,7 +370,7 @@ In fact, $\PropTrunc{\Perm\;xs\;ys}$ and $\Relator \,(=)\;xs\;ys$ are equivalent
 \subsection{As an Analytic Functor}
 
 We additionally introduce the type of finite bags over $X$ as an \emph{analytic functor} (in the formulation of Hasegawa~\cite{Hasegawa2002}).
-For any type $X$, we define a type of \emph{finite multisets}
+For any type $X$, we define a type of \emph{finite multisets}~\cite{Li2015,Choudhury2021}
 \begin{align*}
   \FMSet X
     \DefEq
@@ -753,6 +753,7 @@ Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)
   and that $t$ is indeed in the fiber of $\pres{\FMSet}$ over $s$.
 \end{proof}
 
+By \emph{Lambek's theorem}, every final coalgebra is necessarily an equivalence.
 Assuming \LLPO{} we have $\FMSet \Lim{\FMSet} \simeq \Lim{\FMSet}$, and proving that the coalgebra underlying this equivalence is final in the category of sets is straightforward using the universal property of the limit.
 
 \subsection{As a Quotient of the Final \texorpdfstring{$\List$}{List}-Coalgebra}\label{sec:final-quotient-set}
@@ -1015,6 +1016,7 @@ Therefore $\Lim{\Bag}$ carries the structure of a final $\Bag$-coalgebra, even t
 \begin{corollary}[{\cite[Theorem~7]{Ahrens2015}}]\label{cor:BagFinalCoalg}
   $\pres{\Bag}^{-1} \circ \Op{shift} : \Lim{\Bag} \to \Bag\,\Lim{\Bag}$ is the final $\Bag$-coalgebra.
 \end{corollary}
+We refer to the formalization of~\cite{Ahrens2015} for a proof of \cref{cor:BagFinalCoalg}.
 
 Iterated application of \cref{cor:TruncBagEquiv,thm:FMSetSetTruncInvariant} shows that $\SetTrunc{\Bag^n 1}$ is equivalent to $\FMSet^n 1$ for all $n$ (\CodeRef{IterTruncBagFMSetEquiv}).
 One might wonder whether similarly
@@ -1147,7 +1149,9 @@ We looked at various definitions of the finite bag functor, valued in sets and i
 
 Our conclusion is in line with the one of Kock~\cite{Kock2012} and Finster et al.~\cite{Finster2021}: the bag functor is better behaved when valued in groupoids instead of sets, especially from the perspective of final semantics. This seems to indicate that the denotational semantics of ``resource-sensitive'' computations %or dynamical systems
 is better performed using groupoids instead of sets (switching from categorical to bicategorical semantics).
-In particular, the syntax of process calculi such as CCS, or term calculi for linear logic,  could be defined directly as a groupoid, i.e. structural congruences could be treated as data instead of property. We plan to properly investigate this connection to programming language semantics in future work. For this endeavor, it will also be necessary to study the final coalgebra of combinations of the bag functor with other functors e.g.~formalizing the presence of labels or actions in the transition relation.
+In particular, the syntax of process calculi such as CCS, or term calculi for linear logic,  could be defined directly as a groupoid, i.e. structural congruences could be treated as data instead of property. We plan to properly investigate this connection to programming language semantics in future work,
+along the lines of~\cite{Choudhury2022}.
+For this endeavor, it will also be necessary to study the final coalgebra of combinations of the bag functor with other functors e.g.~formalizing the presence of labels or actions in the transition relation.
 
 Cubical Agda allows the definition of coinductive types with HITs appearing in the codomain of destructors. For example, it is possible to define the following coinductive record:
 %  \vspace{-0.5cm}
