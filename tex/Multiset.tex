@@ -649,7 +649,7 @@ If $F$ is set-valued, the limit $\Lim{F}$ is also a set.
 Notice that for naturally equivalent and set-valued $F$ and $G$, we have $\Lim{F} \simeq \Lim{G}$,
 since naturally equivalent chains have equivalent limits;
 see \CodeRef[IterLimit]{chainEquivToLimitEquiv} in the formalization for details.
-This implies that, when proving properties of this limit for finite bags, an use any of the equivalent presentations in \cref{prop:eqpres} as convenient.
+This implies that, when proving properties of this limit for finite bags, we can use any of the equivalent presentations in \cref{prop:eqpres} as convenient.
 
 In classical set theory, $\Lim{\FMSet}$ can be proved to be the final coalgebra of $\FMSet$. The proof proceeds by first constructing a function $\pres{\FMSet} : \FMSet \,\Lim{\FMSet} \to \LimSh{\FMSet}$ via the universal property of the limit: take $\ell_n\,(\pres{\FMSet} \,s)$ as $\Map{\FMSet}\,\ell_n \,s$. The function $\pres{\FMSet}$ is then proved to be an equivalence, showing that $\FMSet$ preserves the $\omega$-limit. The composition of $\shift$ with the inverse $\pres{\FMSet}^{-1}$ provides a coalgebra structure for $\Lim{\FMSet}$. This can be proved to be final, again using the universal property of the limit.
 
