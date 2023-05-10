@@ -485,18 +485,33 @@ and are easily seen to be naturally equivalent.
 In the proof of \cref{thm:PresFMSetSection} we employ the fact that the type of finite bags $\FMSet X$, for some specific choice of $X$, is linearly-ordered and $\SetQuot[(\Fin n \to X)][\sim]$ is a definable set-quotient.
 %The proof of \cref{thm:PresFMSetSection} relies on the validity of two specific instances of the axiom of countable choice. We show here that these instances hold and therefore \cref{thm:PresFMSetSection} is true without the need of postulating countable choice. This is achieved by showing that, whenever a type $X$ is endowed with a linear order $(<)$, then $\SetQuot[\List X][\Perm]$ is a definable set-quotient.
 A relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
-If $X$ has a linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, which allows the construction of a permutation typed $\Perm \;xs\;(\sort\,xs)$. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
+If $X$ is a set with linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, which allows the construction of a permutation typed $\Perm \;xs\;(\sort\,xs)$. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
 Since $\SetQuot[\List X][\Perm] \simeq \FMSet X$, we obtain the following result.
 \begin{proposition}[{\CodeRef[LexFMSet]{SymActDefinable}}]\label{prop:ListPermDefQuot}
-If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable quotient for all $n : ℕ$.
+If $X$ is a linearly-ordered set, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable quotient for all $n : ℕ$.
 \end{proposition}
 
-Sorting also allows to explicitly find a canonical permutation between any two related lists. Given $p : \Perm \;xs\;ys$, we can find another permutation $\canonicalPerm \;p : \Perm\;xs\;ys$ as follows: there are permutations $\Perm\;xs\;(\sort\,xs)$ and $\Perm\;(\sort\;ys)\;ys$, and moreover the existence of $p$ implies $\sort\,xs = \sort\,ys$. The function $\canonicalPerm$ is constant, since it never inspects the input permutation $p$.
+In the presence of a linear order $(<)$ on $X$, we can extract from any proof that two lists are (merely) related by a permutation
+an actual permutation witnessing this:
 \begin{proposition}[{\CodeRef[LexFMSet]{SymActUntruncate}}]\label{prop:ListPermCanonicalPerm}
-If $X$ is linearly-ordered, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$ , i.e. the propositional truncation in $\SymAct n\; v\; w$ can be removed.
+If $X$ is a linearly-ordered set, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$ , i.e. the propositional truncation in $\SymAct n\; v\; w$ can be removed.
 \end{proposition}
+\begin{proof}
+  Since $\FMSet X \simeq \SetQuot[\List X][\Perm]$, it is enough to define for all $\Var{xs}\,\Var{ys} : \List X$ a function
+  $\PropTrunc{\Perm\,\Var{xs}\,\Var{ys}} \to \Perm\,\Var{xs}\,\Var{ys}$.
+  To escape the truncation, we first implement a function
+  $\canonicalPerm : \Perm\,\Var{xs}\,\Var{ys} \to \Perm\,\Var{xs}\,\Var{ys}$
+  returning a \enquote{canonical} way of permuting $\Var{xs}$ into $\Var{ys}$.
+  Given $\sigma : \Perm\,\Var{xs}\,\Var{ys}$,
+  sorting yields a path $p_{\sigma} : \sort\,\Var{xs} = \sort\,\Var{ys}$.
+  Composing (along $p_{\sigma}$) the permutations obtained from sorting $\Var{xs}$ and (un-)sorting $\Var{ys}$
+  gives the desired term $\canonicalPerm\,\sigma$.
+  Since $X$ is a set, $p_{\sigma}$ lands in a proposition.
+  Thus, $\canonicalPerm$ is \emph{weakly constant} and lifts to a function from the truncation~\cite[{Corollary~2}]{Capriotti2015}.
+\end{proof}
+To illustrate the computational behavior of \CodeRef[LexFMSet]{canonPerm}, see \CodeRef[LexFMSet]{BraidExample}.
 
-A linear order $(<)$ on $X$ can be extended to a linear order on $\List X$ via the \emph{lexicographic order}:
+The order $(<)$ can be extended to a linear order on $\List X$ via the \emph{lexicographic order}
 \begin{center}
   \hspace*{\fill}
     \AxiomC{$\vphantom{X}$}
@@ -513,9 +528,9 @@ A linear order $(<)$ on $X$ can be extended to a linear order on $\List X$ via t
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-The lexicographic order can be further extended to a linear order on $\SetQuot[\List X][\Perm]$ by defining $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
+and further to $\SetQuot[\List X][\Perm]$ by defining $\LexPerm\,(<)\;x\;y \DefEq \Lex\,(<)\;(\sortPerm \,x)\;(\sortPerm \,y)$.
 \begin{proposition}[{\CodeRef[LexFMSet]{linLexFMSet}}]\label{prop:lift-linear-order}
-If $X$ is linearly-ordered, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.  
+If $X$ is a linearly-ordered set, then $\SetQuot[(\Fin n \to X)][\sim]$ is linearly-ordered for all $n : ℕ$.
 \end{proposition}
 
 
