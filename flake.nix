@@ -48,10 +48,36 @@
             ];
           };
         };
+        submission = pkgs.callPackage ./nix/submission.nix {
+          src = nix-filter.lib.filter {
+            root = ./.;
+            name = "submission-cubical-multiset";
+            include = [
+              # TeX main file
+              "tex/Multiset.tex"
+
+              # Bibliography (one is a symlink)
+              "doc/Multiset.bib"
+              "tex/Multiset.bib"
+
+              # TeX style and document class
+              "tex/multiset.sty"
+              "tex/lipics-v2021.cls"
+
+              # Supplementary graphics
+              "tex/cc-by.pdf"
+              "tex/orcid.pdf"
+              "tex/lipics-logo-bw.pdf"
+
+              # latexmk configuration
+              "tex/latexmkrc"
+            ];
+          };
+        };
       in
       {
         packages = {
-          inherit multiset paper archive;
+          inherit multiset paper archive submission;
           default = multiset;
         };
 
