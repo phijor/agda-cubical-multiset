@@ -103,14 +103,14 @@
 
 \section{Introduction}
 
-\emph{Coalgebras} are functions of the form $c : S \to F S$, where $S$ is a set of states and $F$ is a functor specifying a certain class of collections of states \cite{Rutten2000,Jacobs2016}. For example, $F S$ could be lists over $S$, bags (a.k.a. multisubsets) or subsets of $S$ (possibly with some cardinality restrictions), wellfounded trees with leaves or nodes in $S$, or probability distributions over $S$. The coalgebra $c$ describes the dynamics of a transition system or an automaton: to each state $s : S$, the function $c$ associates the collection of states $c \,s : F S$ that are reachable from $s$ in one step. The choice of collection functor $F$ is dictated by the specific flavor of non-determinism that is specified by the transition relation. Does the order or multiplicity of reachable states matter? Is the choice of a new state probabilistic? Does the transition relation additionally depend on a set of labels, weights or actions?
+\emph{Coalgebras} are functions of the form $c : S \to F S$, where $S$ is a set of states and $F$ is a functor specifying a certain class of collections of states \cite{Rutten2000,Jacobs2016}. For example, $F S$ could be lists over $S$, bags (\ie multisubsets) or subsets of $S$ (possibly with some cardinality restrictions), wellfounded trees with leaves or nodes in $S$, or probability distributions over $S$. The coalgebra $c$ describes the dynamics of a transition system or an automaton: to each state $s : S$, the function $c$ associates the collection of states $c \,s : F S$ that are reachable from $s$ in one step. The choice of collection functor $F$ is dictated by the specific flavor of non-determinism that is specified by the transition relation. Does the order or multiplicity of reachable states matter? Is the choice of a new state probabilistic? Does the transition relation additionally depend on a set of labels, weights or actions?
 
 The denotational semantics of a transition system $c : S \to F S$ is typically given in terms of the \emph{final coalgebra} $\Lim{F}$ of the functor $F$, which  consists of non-wellfounded trees with branching specified by $F$. When $F$ is the list functor, each tree has a finite and ordered collection of subtrees. If $F$ is the finite bag functor, the order of subtrees does not matter, and if $F$ is the finite powerset functor, multiplicity of subtrees does not matter either. %Picking $F$ as the finite probability distribution functor, the trees correspond to
 The interpretation of a state $s : S$ in $\Lim{F}$ is the possibly-infinite tree obtained by ``running'' the coalgebra $c$ with $s$ as initial state. As such, it gives a complete description of the evolution of the system $c$ starting from state $s$.
 
 The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and in particular the formal description of final coalgebras \cite{Barr1993,Adamek1995,Worrell2005}, with the associated notion of bisimilarity and behavioural equivalence of states, is traditionally developed in a set-theoretic framework with reasoning based on classical logic. In this work, we propose to study the theory of coalgebras in a framework based on constructive logic, more specifically in homotopy type theory (HoTT) \cite{HoTTBook}. The use of a constructive metatheory is beneficial for the development of \emph{formal denotational semantics} of dynamical systems and programming languages, often centered on the notions of final coalgebra and bisimilarity \cite{Turi1997}, in proof assistants based on variants of Martin-L{\"o}f type theory, such as Agda, Coq, Idris and Lean. The specific choice of HoTT is motivated by its expressiveness and innovative features, higher inductive types (HITs) and the univalence principle, which are crucial ingredients for faithfully representing a variety of collection functors $F$ and reasoning up to equivalent presentations of $F$.
 
-Specific constructions of final coalgebras for a selection of functors, performed \emph{internally} in HoTT, already exist in the literature. Ahrens el al.~\cite{Ahrens2015} presented a construction of \emph{M-types}, i.e. final coalgebras of polynomial functors. They show that, for a polynomial functor $F$, the traditional set-theoretic construction of its M-type as the $\omega$-limit of the chain
+Specific constructions of final coalgebras for a selection of functors, performed \emph{internally} in HoTT, already exist in the literature. Ahrens \etal~\cite{Ahrens2015} presented a construction of \emph{M-types}, \ie final coalgebras of polynomial functors. They show that, for a polynomial functor $F$, the traditional set-theoretic construction of its M-type as the $\omega$-limit of the chain
 \begin{equation}\label{eq:chain}
     1 \xleftarrow{!} {F 1}
       \xleftarrow{F(!)} {F^2 1}
@@ -123,16 +123,16 @@ Specific constructions of final coalgebras for a selection of functors, performe
 
 We extend this line of work by studying the final coalgebra of the \emph{finite bag functor}. This is an intermediate situation between finitary polynomial functors, such as the one delivering lists, and general finitary functors, such as the one delivering finite subsets. It also serves as a representative starting point for a constructive analysis of Joyal's \emph{analytic functors} \cite{Joyal1986} and their final semantics. In type theory, analytic functors arise from \emph{quotient containers} \cite{Abbott2004} and encompass many datatypes with symmetries, such as finite bags, unordered pairs and cyclic lists \cite{Yorgey2010,Yorgey2014}.
 
-Following the recent work of Choudhury and Fiore \cite{Choudhury2023}, we define and compare various implementations of the type of finite bags in HoTT. Choudhury and Fiore give two equivalent presentations of finite bags as HITs: as free commutative monoids and as lists modulo swapping of adjacent entries. We add an equivalent presentation of finite bags as an analytic functor $\FMSet$: an element of $\FMSet X$ is a pair of a natural number $n$ (its size) and an equivalence class of functions typed $\Fin n \to X$ picking an element of $X$ for each $k < n$. Two functions $v ,w :\Fin n \to X$ belong to the same equivalence class if there merely exists an equivalence $\sigma : \Fin n \to \Fin n$ such that $v = w \circ \sigma$. The type $\FMSet X$ is always a set (in the sense of HoTT, i.e. a type with at most one identification between any two terms), since it employs set-quotienting. Similarly, the HITs of Choudhury and Fiore are sets. Following \cite{Kock2012}, finite bags can alternatively be defined as a polynomial functor $\Bag$ returning a groupoid (in the sense of HoTT, i.e. a type whose equality types are sets) instead of a set. In this case, an element of $\Bag X$ is a pair consisting of a (Bishop-)finite type $Y$ and a function from $Y$ to $X$. The set-based and the groupoid-based definitions of bags are appropriately related by the set-truncation construction: $\SetTrunc{\Bag X} \simeq \FMSet X$.
+Following the recent work of Choudhury and Fiore \cite{Choudhury2023}, we define and compare various implementations of the type of finite bags in HoTT. Choudhury and Fiore give two equivalent presentations of finite bags as HITs: as free commutative monoids and as lists modulo swapping of adjacent entries. We add an equivalent presentation of finite bags as an analytic functor $\FMSet$: an element of $\FMSet X$ is a pair of a natural number $n$ (its size) and an equivalence class of functions typed $\Fin n \to X$ picking an element of $X$ for each $k < n$. Two functions $v ,w :\Fin n \to X$ belong to the same equivalence class if there merely exists an equivalence $\sigma : \Fin n \to \Fin n$ such that $v = w \circ \sigma$. The type $\FMSet X$ is always a set (in the sense of HoTT, \ie a type with at most one identification between any two terms), since it employs set-quotienting. Similarly, the HITs of Choudhury and Fiore are sets. Following \cite{Kock2012}, finite bags can alternatively be defined as a polynomial functor $\Bag$ returning a groupoid (in the sense of HoTT, \ie a type whose equality types are sets) instead of a set. In this case, an element of $\Bag X$ is a pair consisting of a (Bishop-)finite type $Y$ and a function from $Y$ to $X$. The set-based and the groupoid-based definitions of bags are appropriately related by the set-truncation construction: $\SetTrunc{\Bag X} \simeq \FMSet X$.
 
 We investigate 3 constructions of the final coalgebra of the finite bag functor:
 \begin{enumerate}
   \item Working with the set-based functor $\FMSet$, we try to replicate the classical set-theoretic construction as an $\omega$-limit of \eqref{eq:chain} in our constructive setting. We show that this cannot be directly performed in HoTT without introducing some form of classical logic, an issue already spotted in the case of the finite powerset functor \cite{Veltri2021}. Formally, we show that $\FMSet$ weakly preserves the $\omega$-limit of \eqref{eq:chain},
 but strong preservation of this limit implies \LLPO{}.
 \item The list functor admits a final coalgebra $\Lim{\List}$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $\Bisim$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the finite bag functor.
-  This construction is also inherently classical: attempting to define a $\FMSet$-coalgebra structure on $\Lim{\List} \mathbin{/_{\!2}} \Bisim$, i.e. a function of type $\Lim{\List} \mathbin{/_{\!2}} \Bisim \to \FMSet (\Lim{\List} \mathbin{/_{\!2}} \Bisim)$, by directly lifting the $\List$-coalgebra structure of $\Lim{\List}$, implies \LLPO{}. We point out that this issue already appears in the category of \emph{setoids} \cite{Barthe2003}, before effectively forming the set-quotient $\Lim{\List} \mathbin{/_{\!2}} \Bisim$.
+  This construction is also inherently classical: attempting to define a $\FMSet$-coalgebra structure on $\Lim{\List} \mathbin{/_{\!2}} \Bisim$, \ie a function of type $\Lim{\List} \mathbin{/_{\!2}} \Bisim \to \FMSet (\Lim{\List} \mathbin{/_{\!2}} \Bisim)$, by directly lifting the $\List$-coalgebra structure of $\Lim{\List}$, implies \LLPO{}. We point out that this issue already appears in the category of \emph{setoids} \cite{Barthe2003}, before effectively forming the set-quotient $\Lim{\List} \mathbin{/_{\!2}} \Bisim$.
   We were able to prove that $\Lim{\List} \mathbin{/_{\!2}} \Bisim$ is the final $\FMSet$-coalgebra only under the assumption of the axiom of choice.
-\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of \eqref{eq:chain}, a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We show that it is a fixpoint of $\FMSet$, but we were able to prove that it is the final coalgebra only under the assumption of two variants of the axiom of choice.
+\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of \eqref{eq:chain}, a result arising directly from the work of Ahrens \etal~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We show that it is a fixpoint of $\FMSet$, but we were able to prove that it is the final coalgebra only under the assumption of two variants of the axiom of choice.
 \end{enumerate}
 We do not yet know whether the uses of choice in the last two constructions are also necessary. Nevertheless, the set-truncation $\SetTrunc{\Lim{\Bag}}$ can be practically employed as denotational domain for transition systems with a \emph{(Bishop-)finite} set of states: given a coalgebra $c : S \to \FMSet S$ where $S$ is finite, there exists a unique coalgebra morphism from $S$ to $\SetTrunc{\Lim{\Bag}}$, and no additional choice principle needs to be assumed in this case.
 
@@ -159,9 +159,9 @@ Following ``cubical terminology'', the latter is called the \emph{path type} bet
 In Cubical Agda, the path type $x = y$ behaves similarly to a function type $\Interval \to A$, where $\Interval$ is a primitive interval type with endpoints $i_0$ and $i_1$.
 An element $p : x = y$ is eliminated by application to an interval name $r : \Interval$, returning $p \, r : A$.
 But unlike function types, this application can compute even when $p$ is unknown by using the endpoints $x$ and $y$: $p \,i_0$ reduces to $x$ and $p \,i_1$ reduces to $y$.
-Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. We write $\Refl\,x$ for the constant path (i.e. proof of reflexivity) in $x = x$ and $(\bullet)$ for sequential composition of paths.
+Path introduction is lambda abstraction $(\lambda i : \Interval.\,t) : x = y$, but it causes the extra requirement to match the endpoints: $t[i_0 / i]$ is judgementally equal to $x$ and $t[i_1 / i]$ is judgementally equal to  $y$. We write $\Refl\,x$ for the constant path (\ie proof of reflexivity) in $x = x$ and $(\bullet)$ for sequential composition of paths.
 
-A function $f : A \to B$ is an \emph{equivalence} if it has contractible fibers, i.e. if the preimage of any element in $B$ under $f$ is a singleton type. Any function underlying a type isomorphism defines an equivalence. Writing $A \simeq B$ for the type of equivalences between $A$ and $B$, Voevodsky's \emph{univalence principle} states that the canonical function of type $A = B \to A \simeq B$ is an equivalence. This is a theorem in Cubical Agda. In particular, there is a function $\Op{ua} : A \simeq B \to A = B$ turning equivalences into path equalities. Univalence implies \emph{function extensionality}: pointwise equal functions are equal.
+A function $f : A \to B$ is an \emph{equivalence} if it has contractible fibers, \ie if the preimage of any element in $B$ under $f$ is a singleton type. Any function underlying a type isomorphism defines an equivalence. Writing $A \simeq B$ for the type of equivalences between $A$ and $B$, Voevodsky's \emph{univalence principle} states that the canonical function of type $A = B \to A \simeq B$ is an equivalence. This is a theorem in Cubical Agda. In particular, there is a function $\Op{ua} : A \simeq B \to A = B$ turning equivalences into path equalities. Univalence implies \emph{function extensionality}: pointwise equal functions are equal.
 We recall the first instances of the hierarchy of \emph{homotopy levels},\footnote{%
   To stay close to the formalization,
   we follow Voevodsky's~\cite{Voevodsky2015} $0$-based numbering of \emph{h}-levels.
@@ -179,7 +179,7 @@ When mentioning \enquote{sets} or \enquote{groupoids}, we always refer to the de
 
 A \emph{higher inductive type} (HIT) is like an inductive type, but its constructors can build both its elements and its (higher) paths. HITs are primitively supported in Cubical Agda. We recall the definition of three basic HITs: propositional truncation, set-truncation and set-quotient.
 
-The \emph{propositional truncation} $\PropTrunc{A}$ is the proposition associated to the type $A$, i.e. it identifies all the elements and (higher) paths of $A$. It is the HIT with constructors
+The \emph{propositional truncation} $\PropTrunc{A}$ is the proposition associated to the type $A$, \ie it identifies all the elements and (higher) paths of $A$. It is the HIT with constructors
 \begin{center}
   \hspace*{\fill}
     \AxiomC{$a : A$}
@@ -195,7 +195,7 @@ The \emph{propositional truncation} $\PropTrunc{A}$ is the proposition associate
 \end{center}
 We define the \emph{existential quantifier} $\exists (x : A) \Where B\, x \DefEq \PropTrunc{\sum (x : A) \Where B\,x}$, which records the mere existence of an element $x$ satisfying $B$.
 
-The \emph{set-truncation} $\SetTrunc{A}$ is the set associated to the type $A$, i.e. it identifies all (higher) paths of $A$. It is the HIT with constructors
+The \emph{set-truncation} $\SetTrunc{A}$ is the set associated to the type $A$, \ie it identifies all (higher) paths of $A$. It is the HIT with constructors
 \begin{center}
   \hspace*{\fill}
     \AxiomC{$a : A$}
@@ -296,7 +296,7 @@ Given a type $X$, the \emph{free commutative monoid} on $X$
   \hspace*{\fill}
 \end{center}
 
-The constructor $\Singl$ embeds $X$ into $\FCM X$, while $\Empty$ and $\Union$ are the unit and multiplication of the monoid. The path constructors express unitality of $\Empty$ wrt.\@ $\Union$, associativity and commutativity of $\Union$, and the final higher path constructor forces $\FCM X$ to be a set.
+The constructor $\Singl$ embeds $X$ into $\FCM X$, while $\Empty$ and $\Union$ are the unit and multiplication of the monoid. The path constructors express unitality of $\Empty$ with respect to $\Union$, associativity and commutativity of $\Union$, and the final higher path constructor forces $\FCM X$ to be a set.
 
 In Cubical Agda, functions out of HITs like $\FCM X$ can be defined directly by pattern matching. But it is often useful to have elimination principles at hand that give more control on the shape of the proof obligations. For example, the non-dependent elimination principle of $\FCM X$ states that a function of type $\FCM X \to A$ is definable, provided that $A$ is a commutative monoid and there exists a function $\eta^* : X \to A$.
 \begin{align*}
@@ -360,7 +360,7 @@ The \emph{directed relation lifting} of $R$ is the relation generated by rules
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-and we take the relation lifting of $R$ to be the \emph{symmetrization} of the relation $\DRelator R$, i.e. $\Relator R\;\Var{xs}\;\Var{ys} \DefEq \DRelator R\;\Var{xs}\;\Var{ys} \times \DRelator R\;\Var{ys}\;\Var{xs}$.
+and we take the relation lifting of $R$ to be the \emph{symmetrization} of the relation $\DRelator R$, \ie $\Relator R\;\Var{xs}\;\Var{ys} \DefEq \DRelator R\;\Var{xs}\;\Var{ys} \times \DRelator R\;\Var{ys}\;\Var{xs}$.
 Because of the presence of a propositional truncation in the premise of the 2nd rule, both $\DRelator R$ and $\Relator R$ are propositionally-valued. If $R$ is reflexive and transitive, then $\Relator R$ is an equivalence relation.
 
 When $R$ is path equality on $X$, the type $\Relator \,(=)\;\Var{xs}\;\Var{ys}$ expresses the mere existence of a permutation connecting $\Var{xs}$ and $\Var{ys}$.
@@ -458,7 +458,7 @@ All encodings of finite multisets used in the preceding section induce equivalen
   Naturality is established directly.
 \end{proof}
 In the formalization, we make use of slight variations of the above types where convenient.
-These mostly concern presentation of lists (e.g. bundling lengths via $\List A ≃ \sum_{n : ℕ} \operatorname{Vec} A\; n$),
+These mostly concern presentation of lists (\eg bundling lengths via $\List A ≃ \sum_{n : ℕ} \operatorname{Vec} A\; n$),
 and are easily seen to be naturally equivalent.
 
 
@@ -470,7 +470,7 @@ Spelled out, there is a representative-picking function $\rep: \SetQuot[A][R] \,
 
 In the proof of \cref{thm:PresFMSetSection} we employ the fact that the type of finite bags $\FMSet X$, for some specific choice of $X$, is linearly-ordered and $\SetQuot[(\Fin n \to X)][\sim]$ is a definable set-quotient.
 A relation $(<)$ is a \emph{linear order} when it is asymmetric, transitive, propositionally-valued and total, in the sense that the trichotomy $(x < y) + (x = y) + (y < x)$ holds for all $x,y:X$.
-If $X$ is a set with linear order $(<)$, then lists over $X$ can be sorted wrt. $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, which allows the construction of a permutation typed $\Perm \;\Var{xs}\;(\sort\,\Var{xs})$. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
+If $X$ is a set with linear order $(<)$, then lists over $X$ can be sorted with respect to $(<)$ via a function $\sort : \List X \to \List X$ essentially implementing the insertion-sort algorithm, which allows the construction of a permutation typed $\Perm \;\Var{xs}\;(\sort\,\Var{xs})$. Sorting is independent of the positions of each entry in the input list, therefore via $\Rec{\SetQuot[\List X][\Perm]}$ we obtain a function $\sortPerm : \SetQuot[\List X][\Perm] \to \List X$. It is not hard to show that $\sortPerm$ is a section of the equivalence class constructor, so $\SetQuot[\List X][\Perm]$ is a definable quotient.
 Since $\SetQuot[\List X][\Perm] \simeq \FMSet X$, we obtain the following result.
 \begin{proposition}[{\CodeRef[LexFMSet]{SymActDefinable}}]\label{prop:ListPermDefQuot}
 If $X$ is a linearly-ordered set, then $\SetQuot[(\Fin n \to X)][\sim]$ is a definable quotient for all $n : ℕ$.
@@ -479,7 +479,7 @@ If $X$ is a linearly-ordered set, then $\SetQuot[(\Fin n \to X)][\sim]$ is a def
 In the presence of a linear order $(<)$ on $X$, we can extract from any proof that two lists are (merely) related by a permutation
 an actual permutation witnessing this:
 \begin{proposition}[{\CodeRef[LexFMSet]{SymActUntruncate}}]\label{prop:ListPermCanonicalPerm}
-If $X$ is a linearly-ordered set, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$ , i.e. the propositional truncation in $\SymAct n\; v\; w$ can be removed.
+If $X$ is a linearly-ordered set, then for all $n : ℕ$ and $v,w : \Fin n \to X$ there exists a function typed $\SymAct n\; v\; w \to \SymActSigma n \;v \; w$, \ie the propositional truncation in $\SymAct n\; v\; w$ can be removed.
 \end{proposition}
 \begin{proof}
   Since $\FMSet X \simeq \SetQuot[\List X][\Perm]$, it is enough to define for all $\Var{xs}\,\Var{ys} : \List X$ a function
@@ -530,7 +530,7 @@ $(B,b)$ are
   \Coalg\;F &\DefEq \sum (A : \Type) \Where A \to F A \\
   \CoalgMor\,F\,(A,a)\,(B,b) &\DefEq \sum (f : A \to B) \Where b \circ f = (\Map{F} f) \circ a
 \end{align*}
-Coalgebras can be used to represent transition systems, e.g.~the coalgebra on the right encodes the small transition system on the left:
+Coalgebras can be used to represent transition systems. For example, the coalgebra on the right encodes the small transition system on the left:
 \vspace{-.8cm}
 \[
 \begin{array}{c@{\qquad\qquad\qquad}c}
@@ -549,7 +549,7 @@ Coalgebras can be used to represent transition systems, e.g.~the coalgebra on th
 \end{array}
 \]
 
-A coalgebra is \emph{final} if there exists a unique coalgebra morphism from any other coalgebra. This can be formalized by saying that there is a coalgebra $C : \Coalg\;F$ such that the type $\CoalgMor\;F\;D\;C$ is contractible for any other coalgebra $D$. These definitions are the same of Ahrens et al.~\cite{Ahrens2015}, which they only consider in the case of $F$ being a polynomial functor.
+A coalgebra is \emph{final} if there exists a unique coalgebra morphism from any other coalgebra. This can be formalized by saying that there is a coalgebra $C : \Coalg\;F$ such that the type $\CoalgMor\;F\;D\;C$ is contractible for any other coalgebra $D$. These definitions are the same of Ahrens \etal~\cite{Ahrens2015}, which they only consider in the case of $F$ being a polynomial functor.
 
 We analyze two constructions of the final coalgebra for the finite bag functor: as an $\omega$-limit
 and as a set-quotient of the final coalgebra of the $\List$ functor.
@@ -582,7 +582,7 @@ Writing $\ell_n : \Lim{F} → F^n 1$ for the $n$-th projection from the limit, w
   \end{tikzcd}
 \end{equation}
 
-The limit is invariant wrt.\@ shifting the chain by one position, i.e. there is an equivalence $\shift : \Lim{F} \simeq \LimSh{F}$, where $\LimSh{F} \DefEq \lim_{n} (F^{1 + n} 1)$. We use $\ell_n : \LimSh{F} → F^{1+n} 1$ also for the $n$-th projection from the shifted limit.
+The limit is invariant with respect to shifting the chain by one position, \ie there is an equivalence $\shift : \Lim{F} \simeq \LimSh{F}$, where $\LimSh{F} \DefEq \lim_{n} (F^{1 + n} 1)$. We use $\ell_n : \LimSh{F} → F^{1+n} 1$ also for the $n$-th projection from the shifted limit.
 If $F$ is set-valued, the limit $\Lim{F}$ is also a set.
 Notice that for naturally equivalent and set-valued $F$ and $G$, we have $\Lim{F} \simeq \Lim{G}$,
 since naturally equivalent chains have equivalent limits;
@@ -617,7 +617,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so to establis
   To prove completeness, assume $x, y_1, y_2, \Var{ys}, \Op{split}$ and $\Op{diag}$ as in \eqref{eq:compl}.
   Using $\Op{split}$, define the complement of $\Var{ys}$ as $\overline{\Var{ys}}\;n\DefEq y_2$ if $\Var{ys}\; n = y_1$ and $\overline{\Var{ys}}\;n\DefEq y_1$ if $\Var{ys}\;n = y_2$.
   The diagonal of $\overline{\Var{ys}}$ also has the limit-property,
-  i.e.
+  \ie
   \begin{equation}\label{step:IsLimYsComplement}
     ∀ n\Where
     \Bang^n_{\FCM} (\ell_{1 + n} \,(\overline{\Var{ys}}\, (1+n))) = \ell_n \,(\overline{\Var{ys}}\;n)
@@ -678,7 +678,7 @@ Define $(<^n) : \FMSet^n 1 \to \FMSet^n 1 \to \Type$ by induction on $n$: $(<^0)
  The function $\pres{\FMSet}$ has a section.
 \end{theorem}
 \begin{proof}
-  Let $s : \LimSh{\FMSet}$, we build an element $t : \FMSet \,\Lim{\FMSet}$ in the fiber of $\pres{\FMSet}$ over $s$. The size (i.e. the 1st projection) of the bags $\ell_n\,s$ is the same for all $n$, call it $n^*$. We set the size of $t$ to be $n^*$. Given an index $k : \Fin n^*$, we now search for an element $u\,k : \Lim{\FMSet}$ for defining $t \DefEq (n^*,u)$.
+  Let $s : \LimSh{\FMSet}$, we build an element $t : \FMSet \,\Lim{\FMSet}$ in the fiber of $\pres{\FMSet}$ over $s$. The size (\ie the 1st projection) of the bags $\ell_n\,s$ is the same for all $n$, call it $n^*$. We set the size of $t$ to be $n^*$. Given an index $k : \Fin n^*$, we now search for an element $u\,k : \Lim{\FMSet}$ for defining $t \DefEq (n^*,u)$.
 
   For each $d : ℕ$, we know that $\ell_{d + 1}\,s$ is path equal to a pair of the form $(n^*,v_d)$. In order to construct $u$ we need access to a representative of the equivalence class $v_d : \SetQuot[(\Fin n^* \to \FMSet^d 1)][\sim]$ for each $d$. We know that this can be done using \cref{lem:iter-linear,prop:ListPermDefQuot}. Let $w_d : \Fin n^* \to \FMSet^d 1$ be the canonical representative of $v_d$.
   The limit-property of $s$ can be translated to the mere existence of a permutation $\sigma_d : \Fin n^* \simeq \Fin n^*$
@@ -726,7 +726,7 @@ To find a coalgebra structure on $\SetQuot[\Lim{\List}][\Bisim]$,
 we investigate whether $\coalg{\List}$ lifts to a coalgebra of setoids $(\Lim{\List}, \Bisim) → (\List \Lim{\List}, \Relator \Bisim)$ and if so,
 whether this induces a (final) coalgebra on the quotient.
 For this, one needs to show that it is a \emph{setoid-morphism},
-i.e.\@ for $s, t : \Lim{\List}$, if $\Bisim\;s\;t$
+\ie for $s, t : \Lim{\List}$, if $\Bisim\;s\;t$
 then $\Relator \Bisim\; (\coalg{\List} s)\; (\coalg{\List} t)$.
 Once again, the same issue we found when trying to prove the injectivity of $\pres{\FMSet}$ in \cref{sec:final-limit-set} arises:
 
@@ -737,7 +737,7 @@ The proof is similar to that of \cref{lem:InjPresImpliesComplete}.
 Similar to \cref{lem:LLPOImpliesPresInj}, the converse is true also.
 Nevertheless, the inverse of $\coalg{\List}$ is always a setoid-morphism.
 Therefore $\coalg{\List}$ is an equivalence of setoids whenever it is a setoid-morphism,
-i.e.\@ \LLPO{} holds.
+\ie \LLPO{} holds.
 Under this assumption alone it is the final coalgebra of an endofunctor in the category of setoids:
 
 \begin{theorem}[{\CodeRef[Setoid]{finalFMSetoidCoalgebra}}]\label{thm:final-setoids}
@@ -778,7 +778,7 @@ We were able to prove this assuming the axiom of choice:
 
 \section{The Finite Bag Functor in Groupoids}\label{sec:finite-bags-groupoids}
 
-The results of \cref{sec:final-coalgebra-sets} are evidence that the set-based definitions of finite bags from \cref{sec:finite-bags-sets} are not fit for a fully constructive construction of the final coalgebra. In this section we study a groupoid-based definition and, following the ideas of Kock~\cite{Kock2012} and Finster et al.~\cite{Finster2021},  argue that the correct perspective on finite bags in HoTT is to define them as groupoids instead of sets, particularly for the goal of final semantics.
+The results of \cref{sec:final-coalgebra-sets} are evidence that the set-based definitions of finite bags from \cref{sec:finite-bags-sets} are not fit for a fully constructive construction of the final coalgebra. In this section we study a groupoid-based definition and, following the ideas of Kock~\cite{Kock2012} and Finster \etal~\cite{Finster2021},  argue that the correct perspective on finite bags in HoTT is to define them as groupoids instead of sets, particularly for the goal of final semantics.
 The rationale is that identifications of bags are permutations, and these should inherently be treated as \emph{data}.
 Instead of viewing bags as quotients of lists, thereby \enquote{forgetting} about the permutations,
 we define a type of lists with \enquote{more identifications}.
@@ -806,7 +806,7 @@ The underlying type of a $\FinSet$ is accessed via the first projection $\langle
 
 The type $\Op{isFinSet} B$ is a proposition and any type $B$ satisfying the predicate is a set.
 It follows that $\Op{FinSet}$ forms a groupoid.
-Note that $\Op{FinSet}$ is a \emph{large} type, i.e. $\Op{FinSet} : \Type_1$.
+Note that $\Op{FinSet}$ is a \emph{large} type, \ie $\Op{FinSet} : \Type_1$.
 From this, we can define a \enquote{tote} (in the sense of a \enquote{large bag}) $\Tote : \Type → \Type_1$ as
 \begin{align*}
   \Tote X
@@ -939,7 +939,7 @@ require the additional assumption of the axiom of choice and a
 }
 which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the following type is inhabited: $((x : X) \to \SetTrunc{Y\;x}) \to \SetTrunc{(x : X) \to Y \;x}$.
 \begin{theorem}[\CodeRef{FMSetFixpointTruncBagLim}]\label{thm:FMSetFixpointOfTrunc}
-  The set-truncation of $\Lim{\Bag}$ is a fixpoint of $\FMSet$, i.e.\@
+  The set-truncation of $\Lim{\Bag}$ is a fixpoint of $\FMSet$, \ie
   there is an equivalence $\FMSet \SetTrunc{\Lim{\Bag}} ≃ \SetTrunc{\Lim{\Bag}}$.
 \end{theorem}
 \begin{proof}
@@ -973,7 +973,7 @@ This is true since $\mathsf{AC}_{3,2}$ holds when $X$ is equivalent to $\Fin n$,
 The formulation $\FMSet$ of the finite bag functor exposes this as an analytic functor \cite{Joyal1986,Hasegawa2002}, which differs from a polynomial functor in that the type of tuples $\Fin\,n \to X$ is quotiented by the relation induced by the action of the symmetric group on $\Fin n$.
 Other analytic functors arise by choosing a different subgroup of the symmetric group. For example, picking the subgroup of cyclic permutations delivers the functor of cyclic lists, while taking the trivial subgroup allows us to recover the list functor.
 
-In type theory analytic functors can be seen as instances of the functors associated to the \emph{quotient containers} of Abbott et al.~\cite{Abbott2004}. A quotient container is a triple consisting of a type $A$, a family $B : A \to \Type$ and a propositionally-valued family $P : \forall \{a\} \Where B \,a \simeq B \,a \to \Type$ closed under identity, inverses and composition of equivalences. The associated functor is:
+In type theory analytic functors can be seen as instances of the functors associated to the \emph{quotient containers} of Abbott \etal~\cite{Abbott2004}. A quotient container is a triple consisting of a type $A$, a family $B : A \to \Type$ and a propositionally-valued family $P : \forall \{a\} \Where B \,a \simeq B \,a \to \Type$ closed under identity, inverses and composition of equivalences. The associated functor is:
 \[
 \Op{F}_{A,B,P}\,X \DefEq \sum (a : A) \Where \SetQuot[(B\,a \to X)][\Op{Act} \,P\,a]
 \]
@@ -1020,7 +1020,7 @@ Each quotient container $(A,B,P)$ also specifies a polynomial functor $\Op{G}_{A
         \DisplayProof
     \hspace*{\fill}
   \end{center}
-Above $\Op{Pcomp}$ is the closure of $P$ wrt.\@ composition of equivalences. It is possible to prove that $\Hom$ also preserves identities and inverses.
+Above $\Op{Pcomp}$ is the closure of $P$ with respect to composition of equivalences. It is possible to prove that $\Hom$ also preserves identities and inverses.
 When $B$ is valued in sets, there is a function $\langle -\rangle : \Op{U}_{A,B,P} \to \Type$ extracting a set, so that $\langle \Obj a \rangle \DefEq B\,a$.
 The functor $\Op{G}_{A,B,P}$ is
 \[
@@ -1034,11 +1034,11 @@ Notice that $\Fin$ is an injective type family, which the proof of $\Bij \simeq 
 
 We looked at various definitions of the finite bag functor, valued in sets and in groupoids, and constructions of their final coalgebras. When working with set-based definitions, the set-theoretic constructions as $\omega$-limit of the terminal chain in \eqref{eq:chain} and as quotient of the final $\List$-coalgebra are not directly replicable in HoTT, since they imply the validity of classical principles like \LLPO{}. We are at least able to salvage the weak preservation of the $\omega$-limit. The situation is brighter when working with the groupoid-based definition. The latter is a polynomial functor, thus has the final coalgebra given by the $\omega$-limit of the terminal chain.
 
-Our conclusion is in line with the one of Kock~\cite{Kock2012} and Finster et al.~\cite{Finster2021}: the bag functor is better behaved when valued in groupoids instead of sets, especially from the perspective of final semantics. This seems to indicate that the denotational semantics of ``resource-sensitive'' computations
+Our conclusion is in line with the one of Kock~\cite{Kock2012} and Finster \etal~\cite{Finster2021}: the bag functor is better behaved when valued in groupoids instead of sets, especially from the perspective of final semantics. This seems to indicate that the denotational semantics of ``resource-sensitive'' computations
 is better performed using groupoids instead of sets (switching from categorical to bicategorical semantics).
-In particular, the syntax of process calculi such as CCS, or term calculi for linear logic,  could be defined directly as a groupoid, i.e. structural congruences could be treated as data instead of property. We plan to properly investigate this connection to programming language semantics in future work,
+In particular, the syntax of process calculi such as CCS, or term calculi for linear logic,  could be defined directly as a groupoid, \ie structural congruences could be treated as data instead of property. We plan to properly investigate this connection to programming language semantics in future work,
 along the lines of~\cite{Choudhury2022}.
-For this endeavor, it will also be necessary to study the final coalgebra of combinations of the bag functor with other functors e.g.~formalizing the presence of labels or actions in the transition relation.
+For this endeavor, it will also be necessary to study the final coalgebra of combinations of the bag functor with other functors  eg formalizing the presence of labels or actions in the transition relation.
 
 Cubical Agda allows the definition of coinductive types with HITs appearing in the codomain of destructors. For example, it is possible to define the following coinductive record:
 \begin{lstlisting}[language={Agda}]
@@ -1047,7 +1047,7 @@ record cLim-FCM : Type where
   field
     unfold : FCM cLim-FCM
 \end{lstlisting}
-It is moreover possible to prove that this type is the final coalgebra of the set-based finite bag functor. The proof is similar to the one given for the finite powerset functor \cite[Theorem 2]{Veltri2021}. Definitions such as \lstinline{cLim-FCM} are an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). We believe that such definitions could be motivated by looking at recent work by Kristensen et al.~\cite{Kristensen2022}, which seems to indicate that the final coalgebra of functors with action on objects given as a HIT, such as $\FCM$, should be definable as the \emph{strict} $\omega$-limit of the chain in \eqref{eq:chain} in the cubical set model. Strictness means that the limit-property holds on the nose, not only up-to path equality.
+It is moreover possible to prove that this type is the final coalgebra of the set-based finite bag functor. The proof is similar to the one given for the finite powerset functor \cite[Theorem 2]{Veltri2021}. Definitions such as \lstinline{cLim-FCM} are an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). We believe that such definitions could be motivated by looking at recent work by Kristensen \etal~\cite{Kristensen2022}, which seems to indicate that the final coalgebra of functors with action on objects given as a HIT, such as $\FCM$, should be definable as the \emph{strict} $\omega$-limit of the chain in \eqref{eq:chain} in the cubical set model. Strictness means that the limit-property holds on the nose, not only up-to path equality.
 
 \bibliography{Multiset}
 \end{document}
