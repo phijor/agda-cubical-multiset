@@ -111,7 +111,7 @@
 The denotational semantics of a transition system $c : S \to F S$ is typically given in terms of the \emph{final coalgebra} $\Lim{F}$ of the functor $F$, which  consists of non-wellfounded trees with branching specified by $F$. When $F$ is the list functor, each tree has a finite and ordered collection of subtrees. If $F$ is the finite bag functor, the order of subtrees does not matter, and if $F$ is the finite powerset functor, multiplicity of subtrees does not matter either. %Picking $F$ as the finite probability distribution functor, the trees correspond to
 The interpretation of a state $s : S$ in $\Lim{F}$ is the possibly-infinite tree obtained by ``running'' the coalgebra $c$ with $s$ as initial state. As such, it gives a complete description of the evolution of the system $c$ starting from state $s$.
 
-The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and in particular the formal description of final coalgebras \cite{Barr1993,Adamek1995,Worrell2005}, with the associated notion of bisimilarity and behavioural equivalence of states, is traditionally developed in a set-theoretic framework with reasoning based on classical logic. In this work, we propose to study the theory of coalgebras in a framework based on constructive logic, more specifically in homotopy type theory (HoTT) \cite{HoTTBook}. The use of a constructive metatheory is beneficial for the development of \emph{formal denotational semantics} of dynamical systems and programming languages, often centered on the notions of final coalgebra and bisimilarity \cite{Turi1997}, in proof assistants based on variants of Martin-L{\"o}f type theory, such as Agda, Coq, Idris and Lean. The specific choice of HoTT is motivated by its expressiveness and innovative features, higher inductive types (HITs) and the univalence principle, which are crucial ingredients for faithfully representing a variety of collection functors $F$ and reasoning up to equivalent presentations of $F$. 
+The theory of dynamical systems as coalgebras \cite{Rutten2000,Jacobs2016}, and in particular the formal description of final coalgebras \cite{Barr1993,Adamek1995,Worrell2005}, with the associated notion of bisimilarity and behavioural equivalence of states, is traditionally developed in a set-theoretic framework with reasoning based on classical logic. In this work, we propose to study the theory of coalgebras in a framework based on constructive logic, more specifically in homotopy type theory (HoTT) \cite{HoTTBook}. The use of a constructive metatheory is beneficial for the development of \emph{formal denotational semantics} of dynamical systems and programming languages, often centered on the notions of final coalgebra and bisimilarity \cite{Turi1997}, in proof assistants based on variants of Martin-L{\"o}f type theory, such as Agda, Coq, Idris and Lean. The specific choice of HoTT is motivated by its expressiveness and innovative features, higher inductive types (HITs) and the univalence principle, which are crucial ingredients for faithfully representing a variety of collection functors $F$ and reasoning up to equivalent presentations of $F$.
 
 Specific constructions of final coalgebras for a selection of functors, performed \emph{internally} in HoTT, already exist in the literature. Ahrens el al.~\cite{Ahrens2015} presented a construction of \emph{M-types}, i.e. final coalgebras of polynomial functors. They show that, for a polynomial functor $F$, the traditional set-theoretic construction of its M-type as the $\omega$-limit of the chain
 \begin{equation}\label{eq:chain}
@@ -135,12 +135,12 @@ We investigate 3 constructions of the final coalgebra of the finite bag functor:
 but strong preservation of this limit implies \LLPO{}.
 \item The list functor admits a final coalgebra $\Lim{\List}$ in HoTT \cite{Ahrens2015} and classically an appropriate quotient of the latter, by a relation $\Bisim$ identifying non-wellfounded trees which differ in the order of their subtrees, delivers the final coalgebra of the finite bag functor.
   This construction is also inherently classical: attempting to define a $\FMSet$-coalgebra structure on $\Lim{\List} \mathbin{/_{\!2}} \Bisim$, i.e. a function of type $\Lim{\List} \mathbin{/_{\!2}} \Bisim \to \FMSet (\Lim{\List} \mathbin{/_{\!2}} \Bisim)$, by directly lifting the $\List$-coalgebra structure of $\Lim{\List}$, implies \LLPO{}. We point out that this issue already appears in the category of \emph{setoids} \cite{Barthe2003}, before effectively forming the set-quotient $\Lim{\List} \mathbin{/_{\!2}} \Bisim$.
-  We were able to prove that $\Lim{\List} \mathbin{/_{\!2}} \Bisim$ is the final $\FMSet$-coalgebra only under the assumption of the axiom of choice. 
+  We were able to prove that $\Lim{\List} \mathbin{/_{\!2}} \Bisim$ is the final $\FMSet$-coalgebra only under the assumption of the axiom of choice.
 %We proved that the latter quotient is the final $\FMASet$-coalgebra under the assumption of the axiom of choice. 
 %  This construction can be smoothly replicated as a \emph{strict} $\omega$-limit in the category of \emph{setoids} \cite{Barthe2003}. Problems arise when trying to port the latter from setoids to sets, effectively forming the set-quotient $\Lim{\List} \mathbin{/_{\!2}} R$: we prove that the resulting type is a fixpoint for $\FMSet$, in the sense that $\FMSet (\Lim{\List} \mathbin{/_{\!2}} R) \simeq \Lim{\List} \mathbin{/_{\!2}} R$, but showing that this is the final coalgebra requires the assumption of the full axiom of choice. 
-\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of \eqref{eq:chain}, a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We show that it is a fixpoint of $\FMSet$, but we were able to prove that it is the final coalgebra only under the assumption of two variants of the axiom of choice. 
+\item The groupoid-based polynomial functor $\Bag$ admits a final coalgebra $\Lim{\Bag}$ as the $\omega$-limit of \eqref{eq:chain}, a result arising directly from the work of Ahrens et al.~\cite{Ahrens2015}. $\Lim{\Bag}$ is a groupoid, not a set. One might wonder if the set-truncation $\SetTrunc{\Lim{\Bag}}$ is a good candidate for the final $\FMSet$-coalgebra. We show that it is a fixpoint of $\FMSet$, but we were able to prove that it is the final coalgebra only under the assumption of two variants of the axiom of choice.
 \end{enumerate}
-We do not yet know whether the uses of choice in the last two constructions are also necessary. Nevertheless, the set-truncation $\SetTrunc{\Lim{\Bag}}$ can be practically employed as denotational domain for transition systems with a \emph{(Bishop-)finite} set of states: given a coalgebra $c : S \to \FMSet S$ where $S$ is finite, there exists a unique coalgebra morphism from $S$ to $\SetTrunc{\Lim{\Bag}}$, and no additional choice principle needs to be assumed in this case. 
+We do not yet know whether the uses of choice in the last two constructions are also necessary. Nevertheless, the set-truncation $\SetTrunc{\Lim{\Bag}}$ can be practically employed as denotational domain for transition systems with a \emph{(Bishop-)finite} set of states: given a coalgebra $c : S \to \FMSet S$ where $S$ is finite, there exists a unique coalgebra morphism from $S$ to $\SetTrunc{\Lim{\Bag}}$, and no additional choice principle needs to be assumed in this case.
 
 We conclude by discussing generalizations of our constructions to other analytic functors.
 %and looking at an alternative construction of the final $\FMSet$-coalgebra using Cubical Agda's primitive coinductive types \cite{Vezzosi2019}.
@@ -185,7 +185,7 @@ and say that a type $A$ is:
 \end{itemize}
 When mentioning \enquote{sets} or \enquote{groupoids}, we always refer to the definitions above.
 
-A \emph{higher inductive type} (HIT) is like an inductive type, but its constructors can build both its elements and its (higher) paths. HITs are primitively supported in Cubical Agda. We recall the definition of three basic HITs: propositional truncation, set-truncation and set-quotient. 
+A \emph{higher inductive type} (HIT) is like an inductive type, but its constructors can build both its elements and its (higher) paths. HITs are primitively supported in Cubical Agda. We recall the definition of three basic HITs: propositional truncation, set-truncation and set-quotient.
 
 The \emph{propositional truncation} $\PropTrunc{A}$ is the proposition associated to the type $A$, i.e. it identifies all the elements and (higher) paths of $A$. It is the HIT with constructors
 \begin{center}
@@ -201,7 +201,7 @@ The \emph{propositional truncation} $\PropTrunc{A}$ is the proposition associate
     \DisplayProof
   \hspace*{\fill}
 \end{center}
-We define the \emph{existential quantifier} $\exists (x : A) \Where B\, x \DefEq \PropTrunc{\sum (x : A) \Where B\,x}$, which records the mere existence of an element $x$ satisfying $B$.    
+We define the \emph{existential quantifier} $\exists (x : A) \Where B\, x \DefEq \PropTrunc{\sum (x : A) \Where B\,x}$, which records the mere existence of an element $x$ satisfying $B$.
 
 The \emph{set-truncation} $\SetTrunc{A}$ is the set associated to the type $A$, i.e. it identifies all (higher) paths of $A$. It is the HIT with constructors
 \begin{center}
@@ -394,7 +394,7 @@ For any type $X$, we define a type of \emph{finite multisets}~\cite{Li2015,Choud
     \sum (\Var{n} : ℕ) \Where
       \SetQuot[(\Fin \Var{n} \to X)][\SymAct \Var{n}]
 \end{align*}
-where $\SymAct \Var{n}$ is the propositionally-valued relation 
+where $\SymAct \Var{n}$ is the propositionally-valued relation
 \begin{align*}
   \SymAct n \;v \;w &\mathrel{=_{\mathsf{df}}}
     ∃ (\sigma : \Fin n ≃ \Fin n) \Where
@@ -584,7 +584,7 @@ We now turn to constructing the final coalgebra of the finite bag functor, given
 
 Given a functor $F : \Type \to \Type$, the types of \emph{coalgebras}
 and \emph{coalgebra morphisms} between two coalgebras $(A,a)$ and
-$(B,b)$ are 
+$(B,b)$ are
 \begin{align*}
   \Coalg\;F &\DefEq \sum (A : \Type) \Where A \to F A \\
   \CoalgMor\,F\,(A,a)\,(B,b) &\DefEq \sum (f : A \to B) \Where b \circ f = (\Map{F} f) \circ a
@@ -687,7 +687,7 @@ Both injectivity of $\pres{\FMSet}$ and \LLPO{} are propositions, so to establis
   This is a form of \emph{completeness} of two-element subsets of the $\omega$-limit: every converging sequence $\Var{ys}$ consisting of elements from the subset $\{y_1,y_2\}$ has its limit $x$ also belonging to the subset $\{y_1,y_2\}$.
   Mandelkern \cite{Mandelkern1988} has proved the equivalence of \LLPO{} with completeness of two-element subsets of real numbers.
   We adapt their proof, for details refer to either~\cite[{Theorem~7}]{Veltri2021} or the formalization~(\CodeRef{CompleteToLLPO}).
-  
+
   To prove completeness, assume $x, y_1, y_2, \Var{ys}, \Op{split}$ and $\Op{diag}$ as in \eqref{eq:compl}.
   Using $\Op{split}$, define the complement of $\Var{ys}$ as $\overline{\Var{ys}}\;n\DefEq y_2$ if $\Var{ys}\; n = y_1$ and $\overline{\Var{ys}}\;n\DefEq y_1$ if $\Var{ys}\;n = y_2$.
   The diagonal of $\overline{\Var{ys}}$ also has the limit-property,
@@ -947,7 +947,7 @@ It differs from $\FMSet X$ in that path equality in the former records the permu
 %  $g' : \SetQuot[(\Fin\Var{n} → X)][\mathord{\sim}]$,
 %  but one cannot do so because $e$ is propositionally truncated.
 %  Using induction directly on $e$ cannot work, since $g'$ lives in a set.
-  We can however employ a different recursion principle of propositional truncation \cite[{Corollary~2}]{Capriotti2015}, which allows to define a function into a set provided that it is \emph{(weakly) constant} (in the sense of \cite{Kraus2017}). Define  
+  We can however employ a different recursion principle of propositional truncation \cite[{Corollary~2}]{Capriotti2015}, which allows to define a function into a set provided that it is \emph{(weakly) constant} (in the sense of \cite{Kraus2017}). Define
 %  \begin{align*}
     $g' : (B ≃ \Fin\Var{n}) → \SetQuot[(\Fin\Var{n} → X)][\mathord{\sim}]$ as $g'\, \alpha \DefEq \SetQuotCon[v \circ \alpha]$, which can be proved to be constant and therefore well-defined. We can then take $g\, ((B, \Var{n}, e), v) \DefEq (\Var{n} , g'\,e)$.
   %\end{align*}
@@ -992,7 +992,7 @@ It is possible to prove that $\Hom$ also preserves identities and inverses.    \
 \begin{proposition}[\CodeRef{BinFinSetEquiv}]\label{prop:BijFinSet}
     There is an equivalence $\Bij \simeq \Op{FinSet}$. In particular, one can extract a type $\langle x \rangle : \Type$ from each $x : \Bij$.
   \end{proposition}
-  
+
   A small type of finite bags %valued in groupoids
   is defined by replacing $\Op{FinSet}$ with $\Bij$.
 %\begin{definition}\label{def:Bag}
@@ -1059,8 +1059,8 @@ which states that for set $X$ and groupoid-valued type family $Y$ on $X$, the fo
   The equivalence is obtained from the composition
   \[
     \FMSet \SetTrunc{\Lim{\Bag}}
-    \stackrel{\alpha}{≃} \FMSet \Lim{\Bag}          
-    \stackrel{\beta}{≃} \SetTrunc{\Bag \Lim{\Bag}} 
+    \stackrel{\alpha}{≃} \FMSet \Lim{\Bag}
+    \stackrel{\beta}{≃} \SetTrunc{\Bag \Lim{\Bag}}
     \stackrel{\gamma}{≃} \SetTrunc{\Lim{\Bag}}
   \]
   where $\alpha$ is invariance of $\FMSet$ under set-truncation
@@ -1105,7 +1105,7 @@ In type theory analytic functors can be seen as instances of the functors associ
 \]
 where the relation $\Op{Act} \,P\,a$ is
 \[
-\Op{Act} \,P\,a\;v\;w \DefEq 
+\Op{Act} \,P\,a\;v\;w \DefEq
     ∃ (\sigma : B\,a ≃ B\,a) \Where P\,\sigma \times
       (v = w \circ \sigma)
 \]
