@@ -33,6 +33,8 @@
 
 \RequirePackage[all]{xy}
 
+\RequirePackage{listings}
+
 \RequirePackage{csquotes}
 \PassOptionsToPackage{capitalize}{cleveref}
 % \RequirePackage[capitalize]{cleveref} % Load last because... duh, LaTeX.
@@ -174,3 +176,9 @@
 \newcommand*{\unfold}{\ensuremath{\mathsf{unfold}}}
 \newcommand*{\fold}{\ensuremath{\mathsf{fold}}}
 \newcommand*{\Bisim}{\ensuremath{\mathsf{Bisim}}}
+
+\lstdefinelanguage{Agda}{%
+  otherkeywords={:},%
+  morekeywords={record,where,field,coinductive},%
+  sensitive,%
+}[keywords]

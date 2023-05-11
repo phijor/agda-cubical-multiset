@@ -1042,18 +1042,13 @@ along the lines of~\cite{Choudhury2022}.
 For this endeavor, it will also be necessary to study the final coalgebra of combinations of the bag functor with other functors e.g.~formalizing the presence of labels or actions in the transition relation.
 
 Cubical Agda allows the definition of coinductive types with HITs appearing in the codomain of destructors. For example, it is possible to define the following coinductive record:
-%  \vspace{-0.5cm}
-\begin{equation}\label{eq:coind}
-\def\arraystretch{0.8}
-\begin{array}{l}
-\Op{record} \; \cLim{\FCM} :  \Type \;\Op{where} \\
-\quad  \Op{coinductive} \\
- \quad \Op{field} \; \unfold : \FCM \cLim{\FCM}
-\end{array}
-\end{equation}
-It is moreover possible to prove that this type is the final coalgebra of the set-based finite bag functor. The proof is similar to the one given for the finite powerset functor \cite[Theorem 2]{Veltri2021}. Definitions such as \eqref{eq:coind} are an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). We believe that such definitions could be motivated by looking at recent work by Kristensen et al.~\cite{Kristensen2022}, which seems to indicate that the final coalgebra of functors with action on objects given as a HIT, such as $\FCM$, should be definable as the \emph{strict} $\omega$-limit of the chain in \eqref{eq:chain} in the cubical set model. Strictness means that the limit-property holds on the nose, not only up-to path equality.
-
-%\nocite{*}
+\begin{lstlisting}[language={Agda}]
+record cLim-FCM : Type where
+  coinductive
+  field
+    unfold : FCM cLim-FCM
+\end{lstlisting}
+It is moreover possible to prove that this type is the final coalgebra of the set-based finite bag functor. The proof is similar to the one given for the finite powerset functor \cite[Theorem 2]{Veltri2021}. Definitions such as \lstinline{cLim-FCM} are an experimental feature of Cubical Agda, since the interaction of coinductive types and HITs has not yet been investigated (only for some M-types~\cite{Vezzosi2019}, which are definable internally in HoTT anyway). We believe that such definitions could be motivated by looking at recent work by Kristensen et al.~\cite{Kristensen2022}, which seems to indicate that the final coalgebra of functors with action on objects given as a HIT, such as $\FCM$, should be definable as the \emph{strict} $\omega$-limit of the chain in \eqref{eq:chain} in the cubical set model. Strictness means that the limit-property holds on the nose, not only up-to path equality.
 
 \bibliography{Multiset}
 \end{document}
