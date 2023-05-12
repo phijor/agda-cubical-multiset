@@ -3,6 +3,7 @@
 ![Type Checking](https://github.com/phijor/agda-cubical-multiset/actions/workflows/typecheck.yaml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![Software Heritage Archive](https://archive.softwareheritage.org/badge/origin/https://github.com/phijor/agda-cubical-multiset/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/phijor/agda-cubical-multiset)
 
 
 ## Abstract
