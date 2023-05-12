@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v18
+      - uses: cachix/install-nix-action@v20
         with:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
@@ -23,7 +23,7 @@ jobs:
           name: phijor
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Getting nix version
-        run: nix --version
+        run: nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version'
       - name: Type checking the library
         run: nix build --print-build-logs '.#multiset'
       - name: Render Agda code to HTML
