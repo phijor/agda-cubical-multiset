@@ -18,7 +18,7 @@ We first compare various equivalent definitions of finite bags employing higher 
 We then analyze a few well-known, classical set-theoretic constructions of final coalgebras in our constructive setting.
 We show that, in the case of set-based definitions of finite bags,
 some constructions are intrinsically classical, in the sense that they are equivalent to some weak form of excluded middle.
-Nevertheless, the final coalgebra can be safely constructed in HoTT employing the groupoid-based definition of finite bags.
+Nevertheless, a type satisfying the universal property of the final coalgebra can be constructed in HoTT employing the groupoid-based definition of finite bags.
 We conclude by discussing generalizations of our constructions to the wider class of analytic functors.
 
 ## Formalization in Agda
