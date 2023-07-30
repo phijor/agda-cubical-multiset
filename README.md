@@ -1,8 +1,9 @@
-# Final Coalgebras of Analytic Functors in Homotopy Type Theory
+# Constructive Final Semantics of Finite Bags
 
 ![Type Checking](https://github.com/phijor/agda-cubical-multiset/actions/workflows/typecheck.yaml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![DOI: 10.4230/LIPIcs.ITP.2023.20](https://img.shields.io/badge/DOI-10.4230%2FLIPIcs.ITP.2023.20-085DA6.svg?logo=DOI)](https://doi.org/10.4230/LIPIcs.ITP.2023.20)
 [![Software Heritage Archive](https://archive.softwareheritage.org/badge/origin/https://github.com/phijor/agda-cubical-multiset/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/phijor/agda-cubical-multiset)
 
 
@@ -21,6 +22,9 @@ We show that, in the case of set-based definitions of finite bags,
 some constructions are intrinsically classical, in the sense that they are equivalent to some weak form of excluded middle.
 Nevertheless, a type satisfying the universal property of the final coalgebra can be constructed in HoTT employing the groupoid-based definition of finite bags.
 We conclude by discussing generalizations of our constructions to the wider class of analytic functors.
+
+The full paper is avaiable at [10.4230/LIPIcs.ITP.2023.20](https://doi.org/10.4230/LIPIcs.ITP.2023.20)
+as part of [LIPIcs, Volume 268, ITP 2023](https://www.dagstuhl.de/dagpub/978-3-95977-284-6).
 
 ## Formalization in Agda
 
