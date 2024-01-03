@@ -36,8 +36,8 @@ the corresposing formalization can be found at `Foo` in `README.agda`.
 ## Prerequisites
 
 This library has been tested with the following software versions:
- * Agda v2.6.4
- * The Cubical library, [v0.6](https://github.com/agda/cubical/tree/v0.6) (Oct 24th 2023)
+ * Agda v2.6.4.3
+ * The Cubical library, [v0.7](https://github.com/agda/cubical/tree/v0.7) (Feb 12th 2024)
 
 ## Type checking the code
 
