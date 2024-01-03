@@ -6,14 +6,6 @@ open import Multiset.Prelude
 open import Multiset.Util using (!_)
 open import Multiset.FCM.Base as M
 
--- open import Multiset.Util.Logic using
---   ( _xor_
---   ; xorl
---   ; xorr
---   ; isPropXor
---   )
-
-open import Cubical.Foundations.Id using (ap)
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism

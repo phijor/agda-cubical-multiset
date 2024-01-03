@@ -366,7 +366,7 @@ module Sorting {A : Type} (setA : isSet A)
   lengthSortAcc [] acc = refl
   lengthSortAcc (x ∷ xs) acc =
     length (sort-acc (x ∷ xs) acc)    ≡⟨ lengthSortAcc xs (insert x acc) ⟩
-    length xs + length (insert x acc) ≡⟨ cong′ (length xs +_) (lengthInsert x acc) ⟩
+    length xs + length (insert x acc) ≡⟨ congS (length xs +_) (lengthInsert x acc) ⟩
     (length xs + suc (length acc))    ≡⟨ +-suc _ _ ⟩
     suc (length xs + length acc)      ∎
 

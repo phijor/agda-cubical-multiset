@@ -87,7 +87,7 @@ module SortingFMSet {A : Type} (setA : isSet A)
       lem : ∀{n m} (eq : n ≡ m) v
         → Path (PVect A m) [ subst (λ n → SumFin n → A) eq v ] (subst (PVect A) eq [ v ])
       lem = J (λ m eq → ∀ v → [ subst (λ n → SumFin n → A) eq v ] ≡ subst (PVect A) eq [ v ])
-              λ v → cong′ [_] (substRefl {B = (λ n → SumFin n → A)} v)
+              λ v → congS [_] (substRefl {B = (λ n → SumFin n → A)} v)
                     ∙ sym (substRefl {B = PVect A} [ v ])
 
   TriplesPath : ∀{n m} {v w : SumFin n → A} {v' w' : SumFin m → A}
@@ -112,7 +112,7 @@ module SortingFMSet {A : Type} (setA : isSet A)
       J (λ m eq → subst (λ n → SumFin n → X) eq (v ∘ SumFin→Fin)
                         ≡ subst (λ n → Fin n → X) eq v ∘ SumFin→Fin)
         (substRefl {B = λ n → SumFin n → X} (v ∘ SumFin→Fin)
-        ∙ sym (cong′ (λ x → x ∘ SumFin→Fin) (substRefl {B = λ n → Fin n → X} v)))
+        ∙ sym (congS (λ x → x ∘ SumFin→Fin) (substRefl {B = λ n → Fin n → X} v)))
 
     substVec→FinVec : ∀ {ℓ} {X : Type ℓ} {n m} (xs : Vec X n) (eq : n ≡ m)
       → subst (λ n → Fin n → X) eq (Vec→FinVec xs)
@@ -121,7 +121,7 @@ module SortingFMSet {A : Type} (setA : isSet A)
       J (λ m eq → subst (λ n → Fin n → X) eq (Vec→FinVec xs)
                         ≡ Vec→FinVec (subst (Vec X) eq xs))
         (substRefl {B = λ n → Fin n → X} (Vec→FinVec xs)
-        ∙ sym (cong′ Vec→FinVec (substRefl {B = Vec X} xs)))
+        ∙ sym (congS Vec→FinVec (substRefl {B = Vec X} xs)))
 
 
   canonicalS' : ∀ n (v w : SumFin n → A)
@@ -216,11 +216,11 @@ module SortingFMSet {A : Type} (setA : isSet A)
               (xs
                  ≡⟨ sym (List/Relator=→FMSet→List/Relator= (xs .fst) (xs .snd)) ⟩
                List/Relator=→FMSet (FMSet→List/Relator= xs)
-                 ≡⟨ cong′ List/Relator=→FMSet (sym (equivToIso List/Perm≃List/Relator≡ .Iso.rightInv (FMSet→List/Relator= xs))) ⟩
+                 ≡⟨ congS List/Relator=→FMSet (sym (equivToIso List/Perm≃List/Relator≡ .Iso.rightInv (FMSet→List/Relator= xs))) ⟩
                List/Relator=→FMSet (equivFun List/Perm≃List/Relator≡ (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= xs)))
                  ≡⟨ (λ i → List/Relator=→FMSet (equivFun List/Perm≃List/Relator≡ (eq i))) ⟩
                List/Relator=→FMSet (equivFun List/Perm≃List/Relator≡ (invEq List/Perm≃List/Relator≡ (FMSet→List/Relator= ys)))
-                 ≡⟨ cong′ List/Relator=→FMSet (equivToIso List/Perm≃List/Relator≡ .Iso.rightInv (FMSet→List/Relator= ys)) ⟩
+                 ≡⟨ congS List/Relator=→FMSet (equivToIso List/Perm≃List/Relator≡ .Iso.rightInv (FMSet→List/Relator= ys)) ⟩
                List/Relator=→FMSet (FMSet→List/Relator= ys)
                  ≡⟨ List/Relator=→FMSet→List/Relator= (ys .fst) (ys .snd) ⟩
                ys
