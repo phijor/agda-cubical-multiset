@@ -2,9 +2,9 @@
 
 module Multiset.ListQuotient.Base where
 
-open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Function
+open import Cubical.Foundations.HLevels
 open import Cubical.Data.List hiding ([_]) renaming (map to mapList)
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty

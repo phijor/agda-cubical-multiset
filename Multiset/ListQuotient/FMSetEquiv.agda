@@ -2,9 +2,14 @@
 
 module Multiset.ListQuotient.FMSetEquiv where
 
-open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Function
+open import Cubical.Foundations.GroupoidLaws
+open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Isomorphism
+open import Cubical.Foundations.Transport
+open import Cubical.Foundations.Univalence
 open import Cubical.Data.List as List hiding ([_]) renaming (map to mapList)
 open import Cubical.Data.Vec
 open import Cubical.Data.Sigma
@@ -112,7 +117,7 @@ skip-lower-wrt zero zero neq = Empty.rec (neq refl)
 skip-lower-wrt (suc k) zero neq = refl
 skip-lower-wrt zero (suc j) neq = refl
 skip-lower-wrt {zero} one one neq = Empty.rec (neq refl)
-skip-lower-wrt {suc n} (suc k) (suc j) neq = cong′ suc (skip-lower-wrt k j (neq ∘ cong suc))
+skip-lower-wrt {suc n} (suc k) (suc j) neq = congS suc (skip-lower-wrt k j (neq ∘ cong suc))
 
 lower-wrt-skip : {n : ℕ} (k : Fin (suc (suc n))) (j : Fin (suc n))
   → lower-wrt k (skip k j) ≡ j
@@ -139,7 +144,7 @@ isPropRelatorF : ∀ {ℓ}{X Y : Type ℓ} (R : X → Y → Type ℓ)
   → isProp (RelatorF R n v w)
 isPropRelatorF R nil nil = refl
 isPropRelatorF R (cons p) (cons q) =
-  cong′ cons (isPropPropTrunc p q)
+  congS cons (isPropPropTrunc p q)
 
 SymAct : ∀{ℓ}{X : Type ℓ} (n : ℕ) (v w : Fin n → X) → Type ℓ
 SymAct {X = X} n v w = ∃[ σ ∈ (Fin n ≃ Fin n) ] v ≡ w ∘ equivFun σ
@@ -151,7 +156,7 @@ symSymAct : ∀{ℓ}{X : Type ℓ} {n : ℕ} {v w : Fin n → X}
   → SymAct n v w → SymAct n w v
 symSymAct {w = w} = ∥map∥ (λ { (σ , eq) → invEquiv σ ,
   funExt (λ k →
-    cong′ w (sym (Iso.rightInv (equivToIso σ) k))
+    congS w (sym (Iso.rightInv (equivToIso σ) k))
     ∙ λ i → eq (~ i) (invEq σ k)) })
 
 Fin→SumFin : ∀{n} → Fin n → SumFin n
@@ -166,7 +171,7 @@ SumFin→Fin→SumFin : ∀{n} (k : SumFin n)
   → Fin→SumFin (SumFin→Fin k) ≡ k
 SumFin→Fin→SumFin {suc n} fzero = refl
 SumFin→Fin→SumFin {suc n} (fsuc k) =
-  cong′ fsuc (SumFin→Fin→SumFin k)
+  congS fsuc (SumFin→Fin→SumFin k)
 
 Fin→SumFin→Fin : ∀{n} (k : Fin n)
   → SumFin→Fin (Fin→SumFin k) ≡ k
@@ -185,7 +190,7 @@ SymmetricAction→SymAct : {X : Type} {n : ℕ}
   → SymAct n (v ∘ Fin→SumFin) (w ∘ Fin→SumFin)
 SymmetricAction→SymAct v w =
   ∥map∥ (λ { (σ , eq) → compEquiv (invEquiv SumFin≃Fin) (compEquiv σ SumFin≃Fin) ,
-    funExt (λ k → ua→⁻ eq (Fin→SumFin k) ∙ cong′ w (sym (SumFin→Fin→SumFin _)))})
+    funExt (λ k → ua→⁻ eq (Fin→SumFin k) ∙ congS w (sym (SumFin→Fin→SumFin _)))})
 
 
 SymmetricActionΣ : ∀{ℓ}{X : Type ℓ} (n : ℕ) → Rel (SumFin n → X) (SumFin n → X) _
@@ -217,7 +222,7 @@ SymmetricActionΣ→SymActΣ : {X : Type} {n : ℕ}
   → SymActΣ n (v ∘ Fin→SumFin) (w ∘ Fin→SumFin)
 SymmetricActionΣ→SymActΣ v w (σ , eq) =
   compEquiv (invEquiv SumFin≃Fin) (compEquiv σ SumFin≃Fin) ,
-    funExt (λ k → ua→⁻ eq (Fin→SumFin k) ∙ cong′ w (sym (SumFin→Fin→SumFin _)))
+    funExt (λ k → ua→⁻ eq (Fin→SumFin k) ∙ congS w (sym (SumFin→Fin→SumFin _)))
 
 SymAct→SymmetricAction : {X : Type} {n : ℕ}
   → (v w : Fin n → X)
@@ -225,7 +230,7 @@ SymAct→SymmetricAction : {X : Type} {n : ℕ}
   → SymmetricAction n (v ∘ SumFin→Fin) (w ∘ SumFin→Fin)
 SymAct→SymmetricAction v w =
   ∥map∥ λ { (σ , eq) → compEquiv SumFin≃Fin (compEquiv σ (invEquiv SumFin≃Fin)) ,
-    ua→ (λ k → (λ i → eq i (SumFin→Fin k)) ∙ cong′ w (sym (Fin→SumFin→Fin _))) }
+    ua→ (λ k → (λ i → eq i (SumFin→Fin k)) ∙ congS w (sym (Fin→SumFin→Fin _))) }
 
 SymActΣ→SymmetricActionΣ : {X : Type} {n : ℕ}
   → (v w : Fin n → X)
@@ -233,7 +238,7 @@ SymActΣ→SymmetricActionΣ : {X : Type} {n : ℕ}
   → SymmetricActionΣ n (v ∘ SumFin→Fin) (w ∘ SumFin→Fin)
 SymActΣ→SymmetricActionΣ v w (σ , eq) =
   compEquiv SumFin≃Fin (compEquiv σ (invEquiv SumFin≃Fin)) ,
-  ua→ (λ k → (λ i → eq i (SumFin→Fin k)) ∙ cong′ w (sym (Fin→SumFin→Fin _)))
+  ua→ (λ k → (λ i → eq i (SumFin→Fin k)) ∙ congS w (sym (Fin→SumFin→Fin _)))
 
 extend-with : {n : ℕ} → (Fin n → Fin n) → Fin (suc n)
   → Fin (suc n) → Fin (suc n)
@@ -256,7 +261,7 @@ extend-with-iso1 σ k zero with discreteFin k k
 extend-with-iso1 σ k (suc j) with discreteFin k (skip k (Iso.fun σ j))
 ... | yes eq = Empty.rec (skipSkips k (Iso.fun σ j) (sym eq))
 extend-with-iso1 {suc n} σ k (suc j) | no eq =
-  cong′ suc (cong′ (Iso.inv σ) (lower-wrt-skip k _)
+  congS suc (congS (Iso.inv σ) (lower-wrt-skip k _)
             ∙ Iso.leftInv σ j)
 
 extend-with-iso2 : {n : ℕ} (σ : Iso (Fin n) (Fin n))
@@ -266,7 +271,7 @@ extend-with-iso2 σ k j with discreteFin k j
 ... | yes eq = eq
 extend-with-iso2 {zero} σ zero zero | no neq = refl
 extend-with-iso2 {suc n} σ k j | no neq =
-  cong′ (skip k) (Iso.rightInv σ (lower-wrt k j))
+  congS (skip k) (Iso.rightInv σ (lower-wrt k j))
   ∙ skip-lower-wrt k j (neq ∘ sym)
 
 extend-with≃ : {n : ℕ} (σ : Fin n ≃ Fin n) (k : Fin (suc n))
@@ -302,7 +307,7 @@ SymAct→RelatorF=' : {X : Type} {n : ℕ} (v w : Fin n → X)
   → RelatorF _≡_ n v w
 SymAct→RelatorF=' {n = zero} v w σ eq = nil
 SymAct→RelatorF=' {n = one} v w σeqv eq =
-  cons ∣ zero , (λ i → eq i zero) ∙ cong′ w (sym (isContrFin1 .snd _)) , nil ∣₁
+  cons ∣ zero , (λ i → eq i zero) ∙ congS w (sym (isContrFin1 .snd _)) , nil ∣₁
 SymAct→RelatorF=' {n = suc (suc n)} v w σeqv eq =
   cons ∣ σ zero , (λ i → eq i zero) ,
         SymAct→RelatorF=' _ _ σ'≃ (funExt eq') ∣₁
@@ -327,15 +332,15 @@ SymAct→RelatorF=' {n = suc (suc n)} v w σeqv eq =
 
     σ'iso1 : ∀ j → σ'inv (σ' j) ≡ j
     σ'iso1 j =
-      cong′ (λ x → predFin (σinv x)) (skip-lower-wrt (σ zero) (σ (suc j))
+      congS (λ x → predFin (σinv x)) (skip-lower-wrt (σ zero) (σ (suc j))
         λ p → znotsF (sym (isEquiv→isEmbedding (snd σeqv) (suc j) zero .equiv-proof p .fst .fst)))
-      ∙ cong′ predFin (Iso.leftInv (equivToIso σeqv) (suc j))
+      ∙ congS predFin (Iso.leftInv (equivToIso σeqv) (suc j))
 
     σ'iso2 : ∀ j → σ' (σ'inv j) ≡ j
     σ'iso2 j =
-      cong′ (λ x → lower-wrt (σ zero) (σ x)) (suc-predFin (σinv (skip (σ zero) j))
+      congS (λ x → lower-wrt (σ zero) (σ x)) (suc-predFin (σinv (skip (σ zero) j))
           λ eq → skipSkips (σ zero) j (isEquiv→isEmbedding (snd (invEquiv σeqv)) _ _ .equiv-proof (eq ∙ sym (Iso.leftInv (equivToIso σeqv) _)) .fst .fst))
-      ∙ cong′ (lower-wrt (σ zero)) (Iso.rightInv (equivToIso σeqv) (skip (σ zero) j))
+      ∙ congS (lower-wrt (σ zero)) (Iso.rightInv (equivToIso σeqv) (skip (σ zero) j))
       ∙ lower-wrt-skip (σ zero) j
 
     σ'≃ : Fin (suc n) ≃ Fin (suc n)
@@ -391,7 +396,7 @@ FinVec-remove : ∀{ℓ}{X : Type ℓ} {n : ℕ}
   → FinVec→Vec (w ∘ skip k) ≡ removeV (FinVec→Vec w) (∈FinVec w k)
 FinVec-remove w zero = refl
 FinVec-remove {n = suc n} w (suc k) =
-  cong′ (w zero ∷_) (FinVec-remove (w ∘ suc) k)
+  congS (w zero ∷_) (FinVec-remove (w ∘ suc) k)
 
 Vec-remove : ∀{ℓ}{X : Type ℓ} {n y} {ys : Vec X (suc n)}
   → ∀ (m : y ∈V ys) j
@@ -449,7 +454,7 @@ List→Vec (x ∷ xs) = x ∷ List→Vec xs
 Vec→List→Vec : ∀{ℓ}{X : Type ℓ} (xs : List X)
   → Vec→List (List→Vec xs) ≡ xs
 Vec→List→Vec [] = refl
-Vec→List→Vec (x ∷ xs) = cong′ (x ∷_) (Vec→List→Vec xs)
+Vec→List→Vec (x ∷ xs) = congS (x ∷_) (Vec→List→Vec xs)
 
 lengthVec→List : ∀{ℓ}{X : Type ℓ} {n} (xs : Vec X n)
   → List.length (Vec→List xs) ≡ n
@@ -462,15 +467,15 @@ substVec : ∀{ℓ}{A : Type ℓ} {n m : ℕ}
   → Path (Vec A (suc m)) (y ∷ subst (Vec A) eq xs) (subst (Vec A) (cong suc eq) (y ∷ xs))
 substVec {A = A}{y = y}{xs} =
   J (λ x eq → Path (Vec A (suc x)) (y ∷ subst (Vec A) eq xs) (subst (Vec A) (cong suc eq) (y ∷ xs)))
-    (cong′ (y ∷_) (substRefl {B = Vec A} xs)
+    (congS (y ∷_) (substRefl {B = Vec A} xs)
      ∙ sym (substRefl {B = Vec A} _))
 
 List→Vec→List : ∀{ℓ}{X : Type ℓ}{n : ℕ} (xs : Vec X n)
   → subst (Vec X) (lengthVec→List xs) (List→Vec (Vec→List xs)) ≡ xs
 List→Vec→List [] = substRefl {B = Vec _} []
 List→Vec→List (x ∷ xs) =
-  sym (substVec (lengthVec→List xs))
-  ∙ cong′ (x ∷_) (List→Vec→List xs)
+  sym (substVec {xs = (List→Vec (Vec→List xs))} (lengthVec→List xs))
+  ∙ congS (x ∷_) (List→Vec→List xs)
 
 ∈→∈V : ∀{ℓ}{X : Type ℓ} {x : X} {xs : List X}
   → x ∈ xs → x ∈V List→Vec xs
@@ -488,7 +493,7 @@ removeV→remove : ∀{ℓ}{X : Type ℓ} {n : ℕ} {x : X} {xs : Vec X (suc n)}
   → Vec→List (removeV xs m) ≡ remove (Vec→List xs) (∈V→∈ m)
 removeV→remove (here x) = refl
 removeV→remove (there {y = y} {xs = x ∷ xs} m) =
-  cong′ (y ∷_) (removeV→remove m)
+  congS (y ∷_) (removeV→remove m)
 
 RelatorV→DRelator : ∀{ℓ}{X : Type ℓ} (R : X → X → Type ℓ)
   → {n : ℕ} (xs ys : Vec X n)
@@ -534,8 +539,8 @@ remove→removeV : ∀{ℓ}{X : Type ℓ} {x y : X} {xs : List X}
       ≡ subst (Vec X) (length-remove m) (removeV (List→Vec (y ∷ xs)) (there (∈→∈V m)))
 remove→removeV (here eq) = sym (substRefl {B = Vec _} _)
 remove→removeV {y = y} (there m) =
-  cong′ (y ∷_) (remove→removeV m)
-  ∙ substVec _
+  congS (y ∷_) (remove→removeV m)
+  ∙ substVec {xs = (removeV (List→Vec (_ ∷ _)) (there (∈→∈V m)))} (length-remove m)
 
 remove→removeV' : ∀{ℓ}{X : Type ℓ} {x y : X} {xs : List X}
   → (m : x ∈ (y ∷ xs))
@@ -718,7 +723,7 @@ substPVect {X = X} xs =
   J (λ m eq → subst (PVect X) eq [ Vec→FinVec xs ∘ SumFin→Fin ]
                    ≡ [ Vec→FinVec (subst (Vec X) eq xs) ∘ SumFin→Fin ])
     (substRefl {B = PVect X} [ Vec→FinVec xs ∘ SumFin→Fin ]
-     ∙ sym (cong′ (λ x → [ Vec→FinVec x ∘ SumFin→Fin ]) (substRefl {B = Vec X} xs)))
+     ∙ sym (congS (λ x → [ Vec→FinVec x ∘ SumFin→Fin ]) (substRefl {B = Vec X} xs)))
 
 List/Relator=→FMSet : {X : Type} → List X / Relator _≡_ → FMSet X
 List/Relator=→FMSet {X} =
@@ -739,7 +744,7 @@ FMSet→List/Relator=→FMSet : {X : Type} (x : List X / Relator _≡_)
   → FMSet→List/Relator= (List/Relator=→FMSet x) ≡ x
 FMSet→List/Relator=→FMSet =
   elimPropQ (λ _ → squash/ _ _)
-            λ xs → cong′ [_] ((λ i → Vec→List (FinVec→Vec (λ k → Vec→FinVec (List→Vec xs) (Fin→SumFin→Fin k i))))
+            λ xs → congS [_] ((λ i → Vec→List (FinVec→Vec (λ k → Vec→FinVec (List→Vec xs) (Fin→SumFin→Fin k i))))
                               ∙ (λ i → Vec→List (Vec→FinVec→Vec (List→Vec xs) i))
                               ∙ Vec→List→Vec xs)
 
@@ -753,11 +758,11 @@ List/Relator=→FMSet→List/Relator= {X} n =
                             (subst (PVect X) (lengthVec→List (FinVec→Vec (v ∘ Fin→SumFin))) [ Vec→FinVec (List→Vec (Vec→List (FinVec→Vec (v ∘ Fin→SumFin)))) ∘ SumFin→Fin ]
                                ≡⟨ substPVect (List→Vec (Vec→List (FinVec→Vec (v ∘ Fin→SumFin)))) _ ⟩
                              [ Vec→FinVec (subst (Vec X) (lengthVec→List (FinVec→Vec (v ∘ Fin→SumFin))) (List→Vec (Vec→List (FinVec→Vec (v ∘ Fin→SumFin))))) ∘ SumFin→Fin ]
-                               ≡⟨ cong′ [_] (λ i → Vec→FinVec (List→Vec→List (FinVec→Vec (v ∘ Fin→SumFin)) i) ∘ SumFin→Fin) ⟩
+                               ≡⟨ congS [_] (λ i → Vec→FinVec (List→Vec→List (FinVec→Vec (v ∘ Fin→SumFin)) i) ∘ SumFin→Fin) ⟩
                              [ Vec→FinVec (FinVec→Vec (v ∘ Fin→SumFin)) ∘ SumFin→Fin ]
-                               ≡⟨ cong′ [_] (λ i → FinVec→Vec→FinVec (v ∘ Fin→SumFin) i ∘ SumFin→Fin) ⟩
+                               ≡⟨ congS [_] (λ i → FinVec→Vec→FinVec (v ∘ Fin→SumFin) i ∘ SumFin→Fin) ⟩
                              [ v ∘ Fin→SumFin ∘ SumFin→Fin ]
-                               ≡⟨ cong′ [_] (λ i k → v (SumFin→Fin→SumFin k i)) ⟩
+                               ≡⟨ congS [_] (λ i k → v (SumFin→Fin→SumFin k i)) ⟩
                              [ v ]
                                ∎)))
 

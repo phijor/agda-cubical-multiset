@@ -2,7 +2,7 @@
 
 module Multiset.FMSet.FiniteFinality where
 
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Prelude
 open import Multiset.Prelude
 open import Multiset.Util.SetTruncation using (setTruncEquiv)
 open import Multiset.Tote as Tote
@@ -19,6 +19,8 @@ open import Multiset.Bag.Properties as Bag
 
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Equiv.Properties using (preCompEquiv)
+open import Cubical.Foundations.Function
+open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Structure
 open import Cubical.Data.Nat

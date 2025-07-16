@@ -1,4 +1,4 @@
 name: multiset
 depend: cubical
 include: .
-flags: --cubical --postfix-projections -vprofile:7 -vprofile.definitions:10
+flags: --cubical --guardedness --postfix-projections -vprofile:7 -vprofile.definitions:10 -WnoUnsupportedIndexedMatch

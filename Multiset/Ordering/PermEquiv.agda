@@ -2,7 +2,9 @@
 
 module Multiset.Ordering.PermEquiv where
 
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Univalence
 open import Cubical.Functions.FunExtEquiv
 open import Cubical.Data.List as List
 open import Cubical.Data.Sigma

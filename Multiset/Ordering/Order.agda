@@ -3,9 +3,9 @@
 module Multiset.Ordering.Order where
 
 
-open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Function
+open import Cubical.Foundations.HLevels
 open import Cubical.Data.List as List hiding ([_])
 open import Cubical.Data.Nat using (zero ; suc ; _+_ ; +-zero ; +-suc)
 open import Cubical.Data.Sigma
@@ -366,7 +366,7 @@ module Sorting {A : Type} (setA : isSet A)
   lengthSortAcc [] acc = refl
   lengthSortAcc (x ∷ xs) acc =
     length (sort-acc (x ∷ xs) acc)    ≡⟨ lengthSortAcc xs (insert x acc) ⟩
-    length xs + length (insert x acc) ≡⟨ cong′ (length xs +_) (lengthInsert x acc) ⟩
+    length xs + length (insert x acc) ≡⟨ cong (length xs +_) (lengthInsert x acc) ⟩
     (length xs + suc (length acc))    ≡⟨ +-suc _ _ ⟩
     suc (length xs + length acc)      ∎
 

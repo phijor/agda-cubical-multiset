@@ -4,7 +4,6 @@ module Multiset.FCM.Base where
 
 open import Multiset.Prelude
 
-open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
   using (_∘_)

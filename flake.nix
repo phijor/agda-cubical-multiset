@@ -5,7 +5,7 @@
       flake = false;
     };
     flake-utils.url = github:numtide/flake-utils;
-    nixpkgs.url = github:NixOS/nixpkgs/nixpkgs-unstable;
+    nixpkgs.url = "github:NixOs/nixpkgs/nixpkgs-unstable";
     nix-filter.url = github:numtide/nix-filter;
   };
 

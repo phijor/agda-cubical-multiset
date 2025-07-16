@@ -13,7 +13,6 @@ open import Multiset.FCM.Base as M
 --   ; isPropXor
 --   )
 
-open import Cubical.Foundations.Id using (ap)
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism

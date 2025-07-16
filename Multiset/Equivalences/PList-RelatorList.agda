@@ -11,7 +11,10 @@ open import Multiset.Ordering.Order
 open import Multiset.Ordering.PermEquiv
 --  using (∥Perm∥₁≡Relator≡)
 
-open import Cubical.Foundations.Everything
+open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Function
+open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.List as List hiding ([_])
 open import Cubical.Data.Vec as Vec 
 open import Cubical.HITs.PropositionalTruncation as PT
@@ -66,7 +69,7 @@ module _ {A B : Type} (f : A → B) where
 
   map/∥Perm∥ : List A / ∥Perm∥₁ → List B / ∥Perm∥₁
   map/∥Perm∥ =
-    rec squash/ (λ xs → [ List.map f xs ])
+    SQ.rec squash/ (λ xs → [ List.map f xs ])
         (λ _ _ → PT.rec (squash/ _ _) (λ p → eq/ _ _ PT.∣ mapP f p ∣₁))
 
   map/Perm : List A / Perm → List B / Perm
@@ -74,7 +77,7 @@ module _ {A B : Type} (f : A → B) where
 
   map/Relator≡ : List A / Relator _≡_ → List B / Relator _≡_
   map/Relator≡ = 
-    rec squash/ (λ xs → [ List.map f xs ])
+    SQ.rec squash/ (λ xs → [ List.map f xs ])
         (λ _ _ r → eq/ _ _ (mapDRelator' (cong f) (r .fst) , mapDRelator' (cong f) (r .snd)))
 
   List/∥Perm∥→List/Relator≡-nat : (xs : List A / ∥Perm∥₁)
