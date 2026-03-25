@@ -47,7 +47,7 @@ module Properties (A : Type ℓA) {B : Type ℓB} (R : Rel B B ℓR) where
     pres-pw f g pw = funExt λ a → SQ.eq/ (f a) (g a) (pw a)
 
   unwrapHasSection : (f : A → B / R) → Type _
-  unwrapHasSection f = Σ[ f⁻¹ ∈ ([ A ⇒ B ]/ R) ] (unwrap f⁻¹ ≡ f)
+  unwrapHasSection = fiber unwrap
 
   open BinaryRelation
 
@@ -64,6 +64,9 @@ module Properties (A : Type ℓA) {B : Type ℓB} (R : Rel B B ℓR) where
 
         rec : [ h ] ≡ [ h' ]
         rec = SQ.eq/ h h' pw
+
+  effectiveRel→isPropFibersUnwrap : (isEffective R) → ∀ f → isProp (fiber unwrap f)
+  effectiveRel→isPropFibersUnwrap = effectiveRel→isPropUnwrapSection
 
 open Properties using (unwrapHasSection) public
 
