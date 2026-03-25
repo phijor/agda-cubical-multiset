@@ -23,7 +23,7 @@ open import Cubical.Data.Sigma as Sigma
 open import Cubical.Data.Sum as Sum using (_⊎_ ; inl ; inr)
 open import Cubical.Data.Nat.Base hiding (_^_)
 open import Cubical.Data.Nat.Order as NatOrder
-open import Cubical.Data.Bool
+open import Cubical.Data.Bool hiding (_≤_)
 
 open import Cubical.Relation.Nullary
 
@@ -32,8 +32,9 @@ open import Cubical.HITs.PropositionalTruncation as PT
     ( ∥_∥₁
     ; ∣_∣₁
     )
+open import Cubical.HITs.PropositionalTruncation.Monad using (_>>=_ ; _>>_ ; return)
 
-open import Cubical.HITs.SetQuotients as ST
+open import Cubical.HITs.SetQuotients as SQ
 
 instance
   FunctorM : Functor M
@@ -51,6 +52,10 @@ dec∈M^ : (n : ℕ) (x : M ^ n) (ys : List (M ^ n)) → Dec (x ∈ ys)
 dec∈M^ n x ys with dec∈ (decEqM^ n) x ys
 ... | yes (y , m , p) = yes (subst (λ z → z ∈ ys) (sym p) m)
 ... | no ¬p = no (λ m → ¬p (x , m , refl))
+
+isSetM^ : ∀ n → isSet (M ^ n)
+isSetM^ zero = Unit.isSetUnit*
+isSetM^ (suc n) = isSetM
 
 !^ : ∀ n → M ^ (suc n) → M ^ n
 !^ n = M map-!^ n
@@ -70,10 +75,7 @@ rep!^ (suc n) k k≤n x with ≤-suc-cases k n k≤n
 ... | inr p = J (λ k _ → M ^ k) x (sym p)
 
 limitPath : ∀ {lim₁ lim₂} → (∀ n → lim₁ .elements n ≡ lim₂ .elements n) → lim₁ ≡ lim₂
-limitPath = isSet→LimPath M
-  λ { 0 → Unit.isSetUnit*
-    ; (suc n) → isSetM
-    }
+limitPath = isSet→LimPath M isSetM^
 
 shiftedLimitPath : ∀ {shlim₁ shlim₂} → (∀ n → shlim₁ .elements n ≡ shlim₂ .elements n) → shlim₁ ≡ shlim₂
 shiftedLimitPath = isSet→ShLimPath M λ k → isSetM
@@ -83,6 +85,9 @@ module _ where
 
   cut : (n : ℕ) → Lim M → M ^ n
   cut = TerminalChain.cut M
+
+  _∈?⟨_⟩_ : (x : Lim M) (n : ℕ) (ys : List (Lim M)) → Dec ((cut n x) ∈ (map (cut n) ys))
+  x ∈?⟨ n ⟩ ys = dec∈M^ n (x .elements n) (map (λ y → y .elements n) ys)
 
 pres : M (Lim M) → ShLim M
 pres = TerminalChain.pres M
@@ -95,6 +100,9 @@ rep!Eq x zero k le =
 rep!Eq x (suc n) k le with ≤-suc-cases k n le
 ... | inl p = cong (rep!^ n k p) (x .is-lim n) ∙ rep!Eq x n k p
 ... | inr p = J (λ k eq → J (λ k _ → M ^ k) (cut (suc n) x) eq ≡ cut k x) (JRefl {x = suc n} (λ k _ → M ^ k) _) (sym p)
+
+cut-≤ : ∀ (x y : Lim M) {k n} → k ≤ n → (cut n x ≡ cut n y) → (cut k x ≡ cut k y)
+cut-≤ x y k≤n p = sym (rep!Eq x _ _ k≤n) ∙ cong (rep!^ _ _ k≤n) p ∙ rep!Eq y _ _ k≤n
 
 parity : (a : ℕ → Bool) → Bool → ℕ → Bool
 parity a b zero = (a 0 and b) or (not (a 0) and (not b))
@@ -188,155 +196,328 @@ parity-odd' a (suc n) odd eqt eqf with dichotomyBool (a 0)
 ... | k , false , p , le , eq' , r = _ , _ , p , suc-≤-suc le , eq' , cong (λ b → if b and false or not b and true then false else parity (a ∘ suc) true k) q ∙ r
 ... | k , true , p , le , eq' , r = _ , _ , p , suc-≤-suc le , eq' , cong (λ b → if b and false or not b and true then false else parity (a ∘ suc) true k) q ∙ r
 
-llpo⇒pres-inj : LLPO → isInjective pres
-llpo⇒pres-inj llpo =
-  elimProp2 (λ _ _ → isPropΠ (λ _ → isSetM _ _))
-            (λ xs ys pres-eq →
-              eq/ _ _ (pres-inj' xs ys
-                         (λ n → effective (isPropRelator _≡_)
-                                           (isEquivRelRelator isEquivRel≡)
-                                           _ _
-                                           (funExt⁻ (cong elements pres-eq) n) .fst) ,
-                       pres-inj' ys xs
-                         (λ n → effective (isPropRelator _≡_)
-                                           (isEquivRelRelator isEquivRel≡)
-                                           _ _
-                                           (funExt⁻ (cong elements (sym pres-eq)) n) .fst)))
-  where
-    compl :  (x : Lim M) (ys : List (Lim M))
-      → (∀ n → ∥ cut n x ∈ List.map (cut n) ys ∥₁)
-      → ∥ x ∈ ys ∥₁
-    compl x [] ms = PT.map (λ { () }) (ms 0)
-    compl x (y ∷ ys) ms =
-      PT.rec PT.isPropPropTrunc
-             (Sum.rec (λ r → ∣ here (limitPath (case-even-gen r)) ∣₁) 
-                      λ r → PT.map there (compl x ys (λ n → ∣ case-odd-gen r n ∣₁))) 
-             magic
-      where
-        a : ℕ → Bool
-        a n with decEven n
-        ... | inl _ = not (Dec→Bool (decEqM^ n (cut n x) (cut n y)))
-        ... | inr _ = Dec→Bool (dec∈M^ n (cut n x) (List.map (cut n) ys))
-            
-        par : ℕ → Bool
-        par = parity a true
 
-        magic : ∥ ((n : ℕ) → isEvenT n → par n ≡ false) ⊎
-                  ((n : ℕ) → isOddT n → par n ≡ false) ∥₁
-        magic = llpo par (parity-prop _ true)
+-- Completeness: Given a tree (x : Lim M) and a list of trees (ys : List (Lim M)),
+-- LLPO lets us conclude that, if for each depth n, the approximation xₙ of x is (merely) an approximation of one of the ys,
+-- then x is (merely) one of the ys.
+_∣_ : Lim M → (n : ℕ) → M ^ n
+x ∣ n = cut n x
+infix 20 _∣_
 
-        a-even : ∀ n → isEvenT n
-          → (cut n x ≡ cut n y → ⊥) 
-          → a n ≡ true
-        a-even n ev mn with decEven n
-        ... | inr odd = Empty.rec (even-not-odd n ev odd)
-        ... | inl ev' with decEqM^ n (cut n x) (cut n y)
-        ... | yes q = Empty.rec (mn q)
-        ... | no ¬q = refl
+_≈⟨_⟩_ : (x : Lim M) (n : ℕ) → (y : Lim M) → Type _
+x ≈⟨ n ⟩ y = x .elements n ≡ y .elements n
 
-        a-odd : ∀ n → isOddT n
-          → (cut n x ∈ List.map (cut n) ys → ⊥) 
-          → a n ≡ false
-        a-odd n odd mn with decEven n
-        ... | inl ev = Empty.rec (even-not-odd n ev odd)
-        ... | inr _ with dec∈M^ n (cut n x) (List.map (cut n) ys)
-        ... | yes p = Empty.rec (mn p)
-        ... | no ¬p = refl
+_≈_ : (x y : Lim M) → Type _
+x ≈ y = ∀ n → x ≈⟨ n ⟩ y
+
+Complete : Type _
+Complete = (x y₁ y₂ : Lim M) → (∀ n → (x ≈⟨ n ⟩ y₁) ⊎ (x ≈⟨ n ⟩ y₂)) → ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
+
+_≺⟨_⟩_ : (x : Lim M) → (n : ℕ) → (ys : List (Lim M)) → Type _
+x ≺⟨ n ⟩ ys = ∥ (x ∣ n) ∈ map (_∣ n) ys ∥₁
+
+_≺_ : (x : Lim M) → (ys : List (Lim M)) → Type _
+x ≺ ys = ∀ n → x ≺⟨ n ⟩ ys
+
+Complete* : Type _
+Complete* = (x : Lim M) → (ys : List (Lim M)) → x ≺ ys → ∥ x ∈ ys ∥₁
+
+-- XXX: Complete can be weakened to have a truncation in the assumption
+Complete*⇒Complete : Complete* → Complete
+Complete*⇒Complete complete* x y₁ y₂ approx-≡ = goal where
+  lemma : x ≺ (y₁ ∷ y₂ ∷ [])
+  lemma n = do
+    return (Sum.rec here (there ∘ here) (approx-≡ n))
+
+  goal : ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
+  goal = do
+    here x≡y₂ ← complete* x (y₁ ∷ y₂ ∷ []) lemma
+      where there (here x≡y₂) → return $ inr x≡y₂
+    return $ inl x≡y₂
+
+{-
+Complete⇒Complete* : Complete → Complete*
+Complete⇒Complete* complete x = goal where
+  mangle : (y : Lim M) (ys : List (Lim M)) → x ≺ (y ∷ ys) ≃ (∀ n → ∥ (x ≈⟨ n ⟩ y) ⊎ (x ≺⟨ n ⟩ ys) ∥₁)
+  mangle y ys = equivΠCod λ n →
+    x ≺⟨ n ⟩ (y ∷ ys)
+      ≃⟨ PT.propTrunc≃ (∈-∷-equiv _ _ _) ⟩
+    ∥ (x ≈⟨ n ⟩ y) ⊎ ((x ∣ n) ∈ map (_∣ n) ys) ∥₁
+      ≃⟨ invEquiv PT.∥∥-IdempotentR-⊎-≃ ⟩
+    ∥ (x ≈⟨ n ⟩ y) ⊎ (x ≺⟨ n ⟩ ys) ∥₁
+      ■
+
+  goal : (ys : List (Lim M)) → x ≺ ys → ∥ x ∈ ys ∥₁
+  goal [] x≺[] = do
+    x₀∈[] ← x≺[] 0
+    Empty.rec (∉[] x₀∈[])
+  goal (y ∷ []) x≺[y] = PT.∣ here x≡y ∣₁ where
+    x≡y : x ≡ y
+    x≡y = limitPath λ n → PT.rec (isSetM^ n _ _) (λ { (here xₙ≡yₙ) → xₙ≡yₙ }) (x≺[y] n)
+  goal (y₁ ∷ y₂ ∷ ys) x≺y₁∷y₂∷ys = go where
+    c : (∀ n → (x ≈⟨ n ⟩ y₁) ⊎ (x ≈⟨ n ⟩ y₂)) → ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
+    c = complete x y₁ y₂
+
+    suffices : ∥ (x ≡ y₁) ⊎ ((x ≡ y₂) ⊎ (x ∈ ys)) ∥₁
+    suffices = do
+      {!goal (y₂ ∷ ys)  !}
+
+    go : ∥ x ∈ (y₁ ∷ y₂ ∷ ys) ∥₁
+    go = suffices >>= λ where
+      (inl x≡y₁) → return $ here x≡y₁
+      (inr (inl x≡y₂)) → return $ there $ here x≡y₂
+      (inr (inr x∈ys)) → return $ there $ there x∈ys
+  -- goal (y ∷ ys) x≺y∷ys = do
+  --   let h : ∀ n → ∥ (x ≈⟨ n ⟩ y) ⊎ (x ≺⟨ n ⟩ ys) ∥₁
+  --       h = equivFun (mangle y ys) x≺y∷ys
+  --       h′ : ∀ n → ∥ (x ≈⟨ n ⟩ y) ⊎ {! !} ∥₁
+  --       h′ = PT.map (Sum.map (λ p → p) (λ x≺ys → {!goal ys x≺ys !})) ∘ h
+  --   {! !}
+  --   where
+  --     foo = {! complete  !}
+-}
+
+complete*⇒pres-inj : Complete* → isInjective pres
+complete*⇒pres-inj complete* = pres-inj where
+  pres-inj-drel : (xs ys : List (Lim M))
+    → (∀ n → DRelator _≡_ (List.map (cut n) xs) (List.map (cut n) ys))
+    → DRelator _≡_ xs ys
+  pres-inj-drel [] ys drel = nil
+  pres-inj-drel (x ∷ xs) ys drel = goal where
+    drel∃ : ∀ n → ∃[ m ∈ (cut n x ∈ List.map (cut n) ys) ]
+      DRelator _≡_ (List.map (cut n) xs)  (remove (List.map (cut n) ys) m)
+    drel∃ n = do
+      (y , xₙ≡y , r) ← consInvDRelator (drel n)
+      return $ subst
+        (λ y → Σ[ y∈ysₙ ∈ (y ∈ map (_∣ n) ys) ] DRelator _≡_ (map (_∣ n) xs) (remove (map (_∣ n) ys) y∈ysₙ))
+        (sym xₙ≡y)
+        r
+
+    x∈ys-approx : ∀ n → ∥ cut n x ∈ map (cut n) ys ∥₁
+    x∈ys-approx n = do
+      (xₙ∈ysₙ , _) ← drel∃ n
+      return xₙ∈ysₙ
+
+    ∥x∈ys∥ : ∥ x ∈ ys ∥₁
+    ∥x∈ys∥ = complete* x ys x∈ys-approx
+
+    goal* : x ∈ ys → DRelator _≡_ (x ∷ xs) ys
+    goal* x∈ys = cons ∣ x , (refl {x = x}) , x∈ys , ind ∣₁ where
+      ys∖x = remove ys x∈ys
+
+      ind-approx : ∀ n → DRelator _≡_ (map (cut n) xs) (map (cut n) ys∖x)
+      ind-approx n = equivFun (PT.propTruncIdempotent≃ (isPropDRelator _ _ _)) $ do
+        (xₙ∈ysₙ , drel) ← drel∃ n
+        let ysₙ = map (cut n) ys
+            xsₙ = map (cut n) xs
+
+            xₙ∈ysₙ′ : cut n x ∈ ysₙ
+            xₙ∈ysₙ′ = ∈mapList x∈ys
+
+            ysₙ∖xₙ  = remove ysₙ xₙ∈ysₙ
+            ysₙ∖xₙ′ = remove ysₙ xₙ∈ysₙ′
+
+            d₁ : DRelator _≡_ ysₙ∖xₙ ysₙ∖xₙ′
+            d₁ = removeDRelator (λ _ → refl) xₙ∈ysₙ xₙ∈ysₙ′
+
+            d₂ : DRelator _≡_ xsₙ ysₙ∖xₙ
+            d₂ = drel
+
+            d : DRelator _≡_ xsₙ ysₙ∖xₙ′
+            d = transDRelator _∙_ d₂ d₁
+
+        let remove-path : remove ysₙ (∈mapList x∈ys) ≡ map (cut n) ys∖x
+            remove-path = sym (remove-mapList x∈ys)
+        return $ subst (DRelator _≡_ (map (cut n) xs)) remove-path d
+
+      ind : DRelator _≡_ xs ys∖x
+      ind = pres-inj-drel _ _ ind-approx
+
+    goal : DRelator _≡_ (x ∷ xs) ys
+    goal = PT.rec (isPropDRelator _ _ _) goal* ∥x∈ys∥
+
+  cut-rel : {xs ys : List (Lim M)}
+    → (pres-≡ : pres [ xs ] ≡ pres [ ys ])
+    → ∀ n → Relator _≡_ (map (cut n) xs) (map (cut n) ys)
+  cut-rel {xs} {ys} pres-≡ n = effective (isPropRelator _≡_) (isEquivRelRelator isEquivRel≡) _ _ goal
+    where
+      goal : [ map (cut n) xs ] ≡ [ map (cut n) ys ]
+      goal = cong elements pres-≡ ≡$ n
+
+  module _ (xs ys : List (Lim M)) (pres-≡ : pres [ xs ] ≡ pres [ ys ]) where
+    pres-inj-rel : Relator _≡_ xs ys
+    pres-inj-rel .fst = pres-inj-drel xs ys (fst ∘ cut-rel pres-≡)
+    pres-inj-rel .snd = pres-inj-drel ys xs (snd ∘ cut-rel pres-≡)
+
+    pres-inj* : [ xs ] ≡ [ ys ]
+    pres-inj* = SQ.eq/ xs ys pres-inj-rel
+
+  is-prop-pres-inj* : (x y : List (Lim M) / Relator _≡_) → isProp (pres x ≡ pres y → x ≡ y)
+  is-prop-pres-inj* x y = isPropΠ λ _ → isSetM x y
+
+  pres-inj : isInjective pres
+  pres-inj = SQ.elimProp2 is-prop-pres-inj* pres-inj*
+
+_≟⟨_⟩_ : (x : Lim M) → (n : ℕ) → (y : Lim M) → Dec (x ∣ n ≡ y ∣ n)
+_≟⟨_⟩_ x n y = decEqM^ n (x ∣ n) (y ∣ n)
+
+{-
+llpo⇒complete : LLPO → Complete
+llpo⇒complete llpo x y₁ y₂ approx-≡ = goal where
+  a : ℕ → Bool
+  a n with decEven n
+  ... | (inl even) = not $ x ≟⟨ n ⟩ y₁
+  ... | (inr  odd) = x ≟⟨ n ⟩ y₂
+
+  par : ℕ → Bool
+  par = parity a true
+
+  magic : ∥ (∀ n → isEvenT n → par n ≡ false) ⊎ (∀ n → isOddT n → par n ≡ false) ∥₁
+  magic = llpo par (parity-prop _ true)
+
+  even-approx : (∀ n → isEvenT n → par n ≡ false) → ∀ n → x ∣ n ≡ y₁ ∣ n
+  even-approx par-even n with (decEven n)
+  ... | (inr  odd) = Empty.rec (even-not-odd n {! !} odd)
+  ... | (inl even) = {! !}
+
+  -- ... | (inl even) | (inl x≈y₁) = x≈y₁
+  -- ... | (inl even) | (inr x≈y₂) = {! par-even n even !}
+  -- ... | (inr  odd) | (inl x≈y₁) = {! !}
+  -- ... | (inr  odd) | (inr x≈y₂) = {! !}
+
+  even : (∀ n → isEvenT n → par n ≡ false) → x ≡ y₁
+  even par-even = limitPath $ even-approx par-even
+
+  odd : (∀ n → isOddT n → par n ≡ false) → x ≡ y₂
+  odd = {! !}
+
+  map-dec : _
+  map-dec = Sum.map even odd
+
+  goal : ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
+  goal = PT.map map-dec magic
+-}
+
+private
+  ∈-≤-weaken : ∀ x ys k n → k ≤ n
+    → (x ∣ n) ∈ (map (_∣ n) ys)
+    → (x ∣ k) ∈ (map (_∣ k) ys)
+  ∈-≤-weaken x ys k n k≤n xₙ∈ysₙ using (x* , (x*∈ys , x*≈x)) ← pre∈mapList xₙ∈ysₙ = abs x* x*∈ys x*≈x where
+    abs : (x* : Lim M) → x* ∈ ys → (x* ∣ n ≡ x ∣ n) → (x ∣ k) ∈ (map (_∣ k) ys)
+    abs x* x*∈ys x*≈x = subst (_∈ (map (_∣ k) ys)) (cut-≤ x* x k≤n x*≈x) (∈mapList x*∈ys)
+
+  ∈-<-weaken : ∀ x ys k n → k < n
+    → (x ∣ n) ∈ (map (_∣ n) ys)
+    → (x ∣ k) ∈ (map (_∣ k) ys)
+  ∈-<-weaken x ys k n k<n = ∈-≤-weaken x ys k n (<-weaken k<n)
+
+llpo⇒complete* : LLPO → Complete*
+llpo⇒complete* llpo x = goal where
+  goal : ∀ ys → x ≺ ys → ∥ x ∈ ys ∥₁
+  goal [] x≺[] = do
+    x₀∈[] ← x≺[] 0
+    Empty.rec (∉[] x₀∈[])
+  goal (y ∷ ys) x≺y∷ys = ∥x∈y∷ys∥₁ where
+    a : ℕ → Bool
+    a n with decEven n
+    ... | inl _ = not $ Dec→Bool $ x ≟⟨ n ⟩ y
+    ... | inr _ = Dec→Bool $ x ∈?⟨ n ⟩ ys
+
+    a-even : ∀ n → isEvenT n → ¬ (cut n x ≡ cut n y) → a n ≡ true
+    a-even n ev mn with decEven n
+    ... | inr odd = Empty.rec (even-not-odd n ev odd)
+    ... | inl ev' with decEqM^ n (cut n x) (cut n y)
+    ... | yes q = Empty.rec (mn q)
+    ... | no ¬q = refl
+
+    a-odd : ∀ n → isOddT n → ¬ (cut n x ∈ List.map (cut n) ys) → a n ≡ false
+    a-odd n odd mn with decEven n
+    ... | inl ev = Empty.rec (even-not-odd n ev odd)
+    ... | inr _ with dec∈M^ n (cut n x) (List.map (cut n) ys)
+    ... | yes p = Empty.rec (mn p)
+    ... | no ¬p = refl
     
-        ¬¬case-even : (∀ n → isEvenT n → par n ≡ false)
-          → ∀ n → isEvenT n → (cut n x ≡ cut n y → ⊥) → ⊥
-        ¬¬case-even r n evn ¬mn with parity-even a n evn (r n evn) (a-even n evn ¬mn)
-        ... | k , true , evk , le , c , eqk = false≢true (sym (r k evk) ∙ eqk)
-        ... | k , false , oddk , le , c , eqk with decEven k
-        ... | inl evk = Empty.rec (even-not-odd k evk oddk)
-        ... | inr _ with dec∈M^ k (cut k x) (List.map (cut k) ys)
-        ... | yes mk = Empty.rec (true≢false c)
-        ... | no ¬mk =
-          PT.rec isProp⊥
-                 (λ msn →
-                   Sum.rec (λ mn → ¬mn (mn .fst))
-                           (λ mn →
-                             let (y , my , eqy) = pre∈mapList (mn .fst) in
-                               ¬mk (subst (λ z → z ∈ List.map (cut k) ys)
-                                          (sym (rep!Eq y n k (<-weaken le))
-                                            ∙ cong (rep!^ n k (<-weaken le)) eqy
-                                            ∙ rep!Eq x n k (<-weaken le))
-                                          (∈mapList my)))
-                           (inv∈ msn))
-                 (ms n)
+    par : ℕ → Bool
+    par = parity a true
 
-        ¬¬case-odd : (∀ n → isOddT n → par n ≡ false)
-          → ∀ n → isOddT n → (cut n x ∈ List.map (cut n) ys → ⊥) → ⊥
-        ¬¬case-odd r n oddn ¬mn with parity-odd a n oddn (r n oddn) (a-odd n oddn ¬mn)
-        ... | k , false , oddk , le , c , eqk = false≢true (sym (r k oddk) ∙ eqk)
-        ... | k , true , evk , le , c , eqk with decEven k
-        ... | inr oddk = Empty.rec (even-not-odd k evk oddk)
-        ... | inl _ with decEqM^ k (cut k x) (cut k y)
-        ... | yes mk = Empty.rec (false≢true c)
-        ... | no ¬mk =
-          PT.rec isProp⊥
-                 (λ msn →
-                   Sum.rec (λ mn → ¬mk (sym (rep!Eq x n k (<-weaken le))
-                                          ∙ cong (rep!^ n k (<-weaken le)) (mn .fst)
-                                          ∙ rep!Eq y n k (<-weaken le)))
-                           (λ mn → ¬mn (mn .fst))
-                           (inv∈ msn))
-                 (ms n)
+    magic : ∥ ((n : ℕ) → isEvenT n → par n ≡ false) ⊎
+              ((n : ℕ) → isOddT n → par n ≡ false) ∥₁
+    magic = llpo par (parity-prop _ true)
 
-        case-even : (∀ n → isEvenT n → par n ≡ false)
-          → ∀ n → isEvenT n → cut n x ≡ cut n y
-        case-even r n ev with decEqM^ n (cut n x) (cut n y)
-        ... | yes p = p
-        ... | no ¬p = Empty.rec (¬¬case-even r n ev ¬p)
+    case-even : ((n : ℕ) → isEvenT n → par n ≡ false) → x ∈ (y ∷ ys)
+    case-even par-even = here (limitPath x≈y)
+      where
+      module is-even {n} (even : isEvenT n) where
+        ¬¬x≈y : ¬ ¬ x ≈⟨ n ⟩ y
+        ¬¬x≈y ¬xₙ≡yₙ with (parity-even a n even (par-even n even) (a-even n even ¬xₙ≡yₙ))
+        ... | (k , true , k-even , _ , _ , par≡true) = false≢true false≡true where
+          false≡true =
+            false ≡⟨ sym $ par-even k k-even ⟩
+            par k ≡⟨ par≡true ⟩
+            true  ∎
+        ... | (k , false , k-odd , k<n , c , _) with decEven k
+        ... | inl k-even = Empty.rec (even-not-odd k k-even k-odd)
+        ... | inr _ with x ∈?⟨ k ⟩ ys
+        ... | yes xₖ∈ysₖ = true≢false c
+        ... | no ¬xₖ∈ysₖ = PT.rec isProp⊥ (λ ()) bot where
+          bot : ∥ ⊥ ∥₁
+          bot = x≺y∷ys n >>= λ where
+            (here xₙ≡yₙ) → return $ ¬xₙ≡yₙ xₙ≡yₙ
+            (there xₙ∈ysₙ) → do
+              return $ ¬xₖ∈ysₖ (∈-<-weaken x ys k n k<n xₙ∈ysₙ)
 
-        case-even-gen : (∀ n → isEvenT n → par n ≡ false)
-          → ∀ n → cut n x ≡ cut n y
-        case-even-gen r n with decEven n
-        ... | inl ev = case-even r n ev
-        ... | inr odd =
-          sym (x .is-lim n)
-          ∙ cong (!^ n) (case-even r (suc n) odd)
-          ∙ y .is-lim n
+        x≈y : x ≈⟨ n ⟩ y
+        x≈y with (decEqM^ n (x ∣ n) (y ∣ n))
+        ... | yes xₙ≡yₙ = xₙ≡yₙ
+        ... | no ¬xₙ≡yₙ = Empty.rec (¬¬x≈y ¬xₙ≡yₙ)
 
-        case-odd : (∀ n → isOddT n → par n ≡ false)
-          → ∀ n → isOddT n → cut n x ∈ List.map (cut n) ys
-        case-odd r n ev with dec∈M^ n (cut n x) (List.map (cut n) ys)
-        ... | yes p = p
-        ... | no ¬p = Empty.rec (¬¬case-odd r n ev ¬p)
+      x≈y : x ≈ y
+      x≈y n with decEven n
+      ... | inl even = is-even.x≈y even
+      ... | inr odd =
+        (x ∣ n) ≡⟨ sym $ x .is-lim n ⟩
+        !^ n (x ∣ suc n) ≡⟨ cong (!^ n) (is-even.x≈y {n = suc n} odd) ⟩
+        !^ n (y ∣ suc n) ≡⟨ y .is-lim n ⟩
+        y ∣ n ∎
 
-        case-odd-gen : (∀ n → isOddT n → par n ≡ false)
-          → ∀ n → cut n x ∈ List.map (cut n) ys
-        case-odd-gen r n with decEven n
-        ... | inr odd = case-odd r n odd
-        ... | inl ev =
-          let (y , my , eqy) = pre∈mapList (case-odd r (suc n) ev)
-          in subst (λ z → z ∈ List.map (cut n) ys)
-                   (sym (y .is-lim n)
-                    ∙ cong (!^ n) eqy
-                    ∙ x .is-lim n)
-                   (∈mapList my)
+    case-odd : ((n : ℕ) → isOddT n → par n ≡ false) → ∥ x ∈ (y ∷ ys) ∥₁
+    case-odd par-odd = do
+      x∈ys ← goal ys x≺ys
+      return $ there $ x∈ys
+      where module _ where
+        ¬¬xₙ∈ysₙ-odd : ∀ n → isOddT n → ¬ ¬ (x ∣ n) ∈ map (_∣ n) ys
+        ¬¬xₙ∈ysₙ-odd n odd ¬xₙ∈ysₙ with parity-odd a n odd (par-odd n odd) (a-odd n odd ¬xₙ∈ysₙ)
+        ... | (k , false , k-odd , k<n , c , par≡true) = false≢true $
+          false ≡⟨ sym $ par-odd k k-odd ⟩
+          par k ≡⟨ par≡true ⟩
+          true  ∎
+        ... | (k , true , k-even , k<n , c , _) with decEven k
+        ... | inr k-odd = Empty.rec (even-not-odd k k-even k-odd)
+        ... | inl _ with x ≟⟨ k ⟩ y
+        ... | yes xₖ≡yₖ = false≢true c
+        ... | no ¬xₖ≡yₖ = PT.rec isProp⊥ (λ ()) bot where
+          bot : ∥ ⊥ ∥₁
+          bot = x≺y∷ys n >>= λ where
+            (here xₙ≡yₙ) → return $ ¬xₖ≡yₖ $
+              x ∣ k ≡⟨ cut-≤ x y (<-weaken k<n) xₙ≡yₙ ⟩
+              y ∣ k ∎
+            (there xₙ∈ysₙ) → return $ Empty.rec $ ¬xₙ∈ysₙ $ xₙ∈ysₙ
 
-    pres-inj' : (xs ys : List (Lim M))
-      → (∀ n → DRelator _≡_ (List.map (cut n) xs) (List.map (cut n) ys))
-      → DRelator _≡_ xs ys
-    pres-inj' [] ys drel = nil
-    pres-inj' (x ∷ xs) ys drel =
-      PT.rec (isPropDRelator _ _ _)
-        (λ m → cons ∣ x ,
-                      refl ,
-                      m ,
-                      pres-inj' xs (remove ys m)
-                        (λ n → PT.rec (isPropDRelator _ _ _)
-                                       (λ d →  subst (DRelator _≡_ (map (cut n) xs))
-                                                     (sym (remove-mapList m))
-                                                     (transDRelator _∙_ (d .snd) (removeDRelator (λ _ → refl) (d .fst) (∈mapList m))) )
-                                        (drel∃ n)) ∣₁)
-        (compl x ys λ n → PT.map fst (drel∃ n) )
-        where
-        drel∃ : ∀ n → ∃[ m ∈ (cut n x ∈ List.map (cut n) ys) ]
-          DRelator _≡_ (List.map (cut n) xs)  (remove (List.map (cut n) ys) m)
-        drel∃ n =
-          PT.map
-            (λ { (y , p , r) →
-              J (λ z _ → Σ (z ∈ map (cut n) ys) (λ m → DRelator _≡_ (map (cut n) xs) (remove (map (cut n) ys) m))) r (sym p) })
-            (consInvDRelator (drel n))
+        x≺ys-odd : ∀ n → isOddT n → ∥ (x ∣ n) ∈ map (_∣ n) ys ∥₁
+        x≺ys-odd n odd with x ∈?⟨ n ⟩ ys
+        ... | yes xₙ∈ysₙ = return xₙ∈ysₙ
+        ... | no ¬xₙ∈ysₙ = Empty.rec (¬¬xₙ∈ysₙ-odd n odd ¬xₙ∈ysₙ)
+
+        x≺ys-even : ∀ n → isEvenT n → ∥ (x ∣ n) ∈ map (_∣ n) ys ∥₁
+        x≺ys-even n even = do
+          xₙ₊₁∈ysₙ₊₁ ← x≺ys-odd (suc n) even
+          return $ ∈-≤-weaken x ys n (suc n) (≤-sucℕ {n}) xₙ₊₁∈ysₙ₊₁
+
+        x≺ys : ∀ n → ∥ (x ∣ n) ∈ map (_∣ n) ys ∥₁
+        x≺ys n = Sum.rec (x≺ys-even n) (x≺ys-odd n) (decEven n)
+
+    ∥x∈y∷ys∥₁ : ∥ x ∈ (y ∷ ys) ∥₁
+    ∥x∈y∷ys∥₁ = PT.rec PT.isPropPropTrunc (Sum.elim (∣_∣₁ ∘ case-even) case-odd) magic
+
+llpo⇒pres-inj : LLPO → isInjective pres
+llpo⇒pres-inj = complete*⇒pres-inj ∘ llpo⇒complete*

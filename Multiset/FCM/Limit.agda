@@ -90,9 +90,82 @@ Complete = {x y₁ y₂ : Lim M}
   → (q : ∀ n → cut n x ≡ diag ys n)
   → (x ≡ y₁) ⊎₁ (x ≡ y₂)
 
+Complete' : Type _
+Complete' =
+  ∀ (x y₁ y₂ : Lim M)
+  → (∀ n → (cut n x ≡ cut n y₁) ⊎ (cut n x ≡ cut n y₂))
+  → (x ≡ y₁) ⊎₁ (x ≡ y₂)
+
+Complete→Complete' : Complete → Complete'
+Complete→Complete' complete x y₁ y₂ approx-≡ = complete ys split d where
+  ys : ℕ → Lim M
+  ys n with approx-≡ n
+  ... | (inl _) = y₁
+  ... | (inr _) = y₂
+
+  split : ∀ n → (ys n ≡ y₁) ⊎ (ys n ≡ y₂)
+  split n with approx-≡ n
+  ... | (inl _) = inl refl
+  ... | (inr _) = inr refl
+
+  d : ∀ n → cut n x ≡ diag ys n
+  d n with approx-≡ n
+  ... | (inl eq-y₁) = eq-y₁
+  ... | (inr eq-y₂) = eq-y₂
+
+Complete'→Complete : Complete' → Complete
+Complete'→Complete complete' {x} {y₁} {y₂} ys split diag-≡ = complete' x y₁ y₂ goal where
+  goal : ∀ n → (cut n x ≡ cut n y₁) ⊎ (cut n x ≡ cut n y₂)
+  goal n with (split n)
+  ... | (inl p) = inl $ diag-≡ n ∙ cong (cut n) p
+  ... | (inr q) = inr $ diag-≡ n ∙ cong (cut n) q
+
 isPropComplete : isProp Complete
 isPropComplete =
   isPropImplicitΠ2 λ _ _ → isPropImplicitΠ λ _ → isPropΠ3 λ _ _ _ → PT.isPropPropTrunc
+
+pres-inj⇒complete' : isInjective pres → Complete'
+pres-inj⇒complete' inj x y₁ y₂ approx-≡ = goal where
+  xᶜ-approx : ∀ n → M ^ n
+  xᶜ-approx n with (approx-≡ n)
+  ... | (inl _) = y₂ .elements n
+  ... | (inr _) = y₁ .elements n
+
+  xᶜ : Lim M
+  xᶜ .elements = xᶜ-approx
+  xᶜ .is-lim n with (approx-≡ n) | (approx-≡ (suc n))
+  ... | (inl _) | (inl _) = y₂ .is-lim n
+  ... | (inl p) | (inr q) = y₁ .is-lim n ∙ sym p ∙ sym (x .is-lim n) ∙ cong (!^ n) q ∙ y₂ .is-lim n
+  ... | (inr q) | (inl p) = y₂ .is-lim n ∙ sym q ∙ sym (x .is-lim n) ∙ cong (!^ n) p ∙ y₁ .is-lim n
+  ... | (inr _) | (inr _) = y₁ .is-lim n
+
+  pres-diags-pair-path-approx : ∀ n → ⟅ cut n x  , cut n xᶜ ⟆ ≡ ⟅ cut n y₁ , cut n y₂ ⟆
+  pres-diags-pair-path-approx n with (approx-≡ n)
+  ... | (inl x-approx-y₁) =
+    ⟅ cut n x  , cut n y₂ ⟆ ≡⟨ cong ⟅_, _ ⟆ x-approx-y₁ ⟩
+    ⟅ cut n y₁ , cut n y₂ ⟆ ∎
+  ... | (inr x-approx-y₂) =
+    ⟅ cut n x  , cut n y₁ ⟆ ≡⟨ cong ⟅_, _ ⟆ x-approx-y₂ ⟩
+    ⟅ cut n y₂ , cut n y₁ ⟆ ≡⟨ ⟅,⟆-comm _ _ ⟩
+    ⟅ cut n y₁ , cut n y₂ ⟆ ∎
+
+  pres-diags-pair-path : pres ⟅ x , xᶜ ⟆ ≡ pres ⟅ y₁ , y₂ ⟆
+  pres-diags-pair-path = shiftedLimitPath λ n →
+    map (cut n) ⟅ x , xᶜ ⟆ ≡⟨⟩
+    ⟅ cut n x  , cut n xᶜ ⟆ ≡⟨ pres-diags-pair-path-approx n ⟩
+    ⟅ cut n y₁ , cut n y₂ ⟆ ≡⟨⟩
+    map (cut n) ⟅ y₁ , y₂ ⟆ ∎
+
+  diags-pair-path : ⟅ x , xᶜ ⟆ ≡ ⟅ y₁ , y₂ ⟆
+  diags-pair-path = inj ⟅ x , xᶜ ⟆ ⟅ y₁ , y₂ ⟆ pres-diags-pair-path
+
+  goal : ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
+  goal = PT.rec PT.isPropPropTrunc (Sum.elim (PT.map inl) (PT.map inr)) x∈⟅y₁,y₂⟆ where
+    x∈⟅x,xᶜ⟆ : x ∈ ⟅ x , xᶜ ⟆
+    x∈⟅x,xᶜ⟆ = ∣ inl ∣ refl {x = x} ∣₁ ∣₁
+
+    x∈⟅y₁,y₂⟆ : x ∈ ⟅ y₁ , y₂ ⟆
+    x∈⟅y₁,y₂⟆ = subst (x ∈_) diags-pair-path x∈⟅x,xᶜ⟆
 
 pres-inj⇒complete : isInjective pres → Complete
 pres-inj⇒complete inj {x} {y₁} {y₂} ys p q = goal where
@@ -372,6 +445,67 @@ seq-ch-cases a x y true (suc n) with a 0
 ... | false = seq-ch-cases (a ∘ suc) x y false n
 ... | true = inr refl
 
+complete'⇒llpo : Complete' → LLPO
+complete'⇒llpo complete' a a-true-at-most-once = PT.map decide complete-x where
+  y₁ : Lim M
+  y₁ = long-ch
+
+  y₂ : Lim M
+  y₂ = long?-ch a
+
+  z : ℕ → Lim M
+  z = seq-ch a y₁ y₂ true
+
+  x : Lim M
+  x .elements n = z n .elements n
+  x .is-lim = diag-seq-ch a a-true-at-most-once
+
+  lem : ∀ n → (z n ≡ y₁) ⊎ (z n ≡ y₂)
+  lem n = (seq-ch-cases a y₁ y₂ true n)
+
+  x-approx : ∀ n → (cut n x ≡ cut n y₁) ⊎ (cut n x ≡ cut n y₂)
+  x-approx n = Sum.map (cong (cut n)) (cong (cut n)) (lem n)
+
+  complete-x : ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
+  complete-x = complete' x y₁ y₂ x-approx
+
+  decide : (x ≡ y₁) ⊎ (x ≡ y₂)
+    → (∀ n → isEvenT n → a n ≡ false) ⊎ (∀ n → isOddT n → a n ≡ false)
+  decide (inl x≡y₁) = inl from-even where
+    from-even : ∀ n → isEvenT n → a n ≡ false
+    from-even n even with (dichotomyBool (a n))
+    ... | (inr aₙ≡false) = aₙ≡false
+    ... | (inl aₙ≡true)  = Empty.rec absurd where
+      bad : long? a (suc n) ≡ long (suc n)
+      bad =
+        long? a (suc n) ≡⟨ sym (cong elements (seq-ch-lem2 a long-ch (long?-ch a) true (suc n) n (≤-suc ≤-refl) aₙ≡true even)) ≡$ (suc n) ⟩
+        (z (suc n) .elements (suc n)) ≡⟨ cong elements x≡y₁ ≡$ (suc n) ⟩
+        long (suc n) ∎
+
+      absurd : ⊥
+      absurd = false≢true $
+        false ≡⟨ sym $ long?≠long a a-true-at-most-once n bad ⟩
+        a n ≡⟨ aₙ≡true ⟩
+        true ∎
+
+  decide (inr x≡y₂) = inr from-odd where
+    from-odd : ∀ n → isOddT n → a n ≡ false
+    from-odd n odd with (dichotomyBool (a n))
+    ... | (inr aₙ≡false) = aₙ≡false
+    ... | (inl aₙ≡true)  = Empty.rec absurd where
+      bad : long? a (suc n) ≡ long (suc n)
+      bad =
+        long? a (suc n) ≡⟨ sym $ cong elements x≡y₂ ≡$ (suc n) ⟩
+        (z (suc n) .elements (suc n)) ≡⟨ cong elements (seq-ch-lem3 a a-true-at-most-once long-ch (long?-ch a) false (suc n) n (≤-suc ≤-refl) aₙ≡true odd) ≡$ (suc n) ⟩
+        long (suc n) ∎
+
+      absurd : ⊥
+      absurd = false≢true $
+        false ≡⟨ sym $ long?≠long a a-true-at-most-once n bad ⟩
+        a n ≡⟨ aₙ≡true ⟩
+        true ∎
+
+
 complete⇒llpo : Complete → LLPO
 complete⇒llpo complete a aP =
   PT.map (Sum.rec (λ eq → inl λ n ev → Sum.rec (λ p → Empty.rec (case1 eq n ev p))
@@ -416,9 +550,8 @@ complete⇒llpo complete a aP =
           sym (funExt⁻ (cong elements (seq-ch-lem3 a aP long-ch (long?-ch a) false (suc n) n (≤-suc ≤-refl) eq ev)) (suc n))
           ∙ funExt⁻ (cong elements eqx) (suc n)
 
-
-
-
-
 pres-inj⇒llpo : isInjective pres → LLPO
 pres-inj⇒llpo = complete⇒llpo ∘ pres-inj⇒complete
+
+pres-inj⇒llpo-2 : isInjective pres → LLPO
+pres-inj⇒llpo-2 = complete'⇒llpo ∘ pres-inj⇒complete'

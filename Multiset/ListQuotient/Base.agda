@@ -5,6 +5,8 @@ module Multiset.ListQuotient.Base where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Isomorphism hiding (iso)
 open import Cubical.Data.List hiding ([_]) renaming (map to mapList)
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty
@@ -45,6 +47,23 @@ infix 21 _∈_
 data _∈_ {ℓ}{X : Type ℓ} (x : X) : List X → Type ℓ where
   here : ∀{y xs} → x ≡ y → x ∈ (y ∷ xs)
   there : ∀{y xs} → x ∈ xs → x ∈ (y ∷ xs)
+
+∉[] : ∀ {ℓ} {X : Type ℓ} {x : X} → ¬ x ∈ []
+∉[] ()
+
+∈-∷-equiv : ∀ {ℓ} {X : Type ℓ}
+  → (x y : X) (ys : List X)
+  → (x ∈ (y ∷ ys)) ≃ (x ≡ y) ⊎ (x ∈ ys)
+∈-∷-equiv x y ys = isoToEquiv iso module ∈-∷-equiv where
+  iso : Iso _ _
+  iso .Iso.fun (here p) = inl p
+  iso .Iso.fun (there x) = inr x
+  iso .Iso.inv (inl p) = here p
+  iso .Iso.inv (inr x) = there x
+  iso .Iso.rightInv (inl _) = refl
+  iso .Iso.rightInv (inr _) = refl
+  iso .Iso.leftInv (here _) = refl
+  iso .Iso.leftInv (there _) = refl
 
 inv∈ : ∀ {ℓ}{X : Type ℓ} {x y : X} {xs : List X}
   → (m : x ∈ (y ∷ xs)) → (Σ (x ≡ y) λ p → m ≡ here p) ⊎ (Σ (x ∈ xs) λ m' → m ≡ there m')
