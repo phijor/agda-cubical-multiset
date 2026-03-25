@@ -106,11 +106,11 @@ MPathEquiv {X = _} {xs} {ys} = propBiimpl→Equiv (isSetM xs ys) PT.isPropPropTr
 isSingl≈′ : ∀ {ℓ} {X : Type ℓ} (xs : M X) → Type ℓ
 isSingl≈′ {X = X} xs = Σ[ x ∈ X ] (xs ≈′ η x)
 
-η≈′ToPath : ∀ {x y : X} → η x ≈′ η y → x ≡ y
-η≈′ToPath {X = X} {x = x} {y = y} p = {! !}
+-- η≈′ToPath : ∀ {x y : X} → η x ≈′ η y → x ≡ y
+-- η≈′ToPath {X = X} {x = x} {y = y} p = {! !}
  
-η≈ToPath : ∀ {x y : X} → η x ≈ η y → x ≡ y
-η≈ToPath {X = _} {x = x} {y = y} p = {! !}
+-- η≈ToPath : ∀ {x y : X} → η x ≈ η y → x ≡ y
+-- η≈ToPath {X = _} {x = x} {y = y} p = {! !}
 
 -- inj-η : ∀ {x y : X} → η x ≡ η y → x ≡ y
 -- inj-η {x = x} {y = y} p = η≈ToPath $ equivFun MPathEquiv p where
