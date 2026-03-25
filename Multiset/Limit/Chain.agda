@@ -177,20 +177,3 @@ ChainEquiv→ChainHAEquiv : ∀ {ℓ} {C C' : Chain ℓ}
   → ChainEquiv C C' → ChainHAEquiv C C'
 ChainEquiv→ChainHAEquiv (chain-equiv α α-nat α-eq) =
   chain-ha α α-nat (λ n → equiv→HAEquiv (α n , α-eq n) .snd)
-
-module Completeness {ℓ} (C : Chain ℓ) where
-  open import Cubical.Data.Sum using (_⊎_)
-  open import Cubical.HITs.PropositionalTruncation as PT using (∥_∥₁)
-  open import Multiset.Omniscience
-
-  open Limit
-
-  Complete : Type ℓ
-  Complete = ∀ {x y₁ y₂ : Limit C}
-    → (ys : ℕ → Limit C)
-    → (split : ∀ n → (ys n ≡ y₁) ⊎ (ys n ≡ y₂))
-    → (approx : ∀ n → x .elements n ≡ ys n .elements n)
-    → ∥ (x ≡ y₁) ⊎ (x ≡ y₂) ∥₁
-
-  -- LLPO→Complete : LLPO → Complete
-  -- LLPO→Complete llpo ys split approx = {! ys !}
