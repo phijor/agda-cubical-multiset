@@ -196,10 +196,7 @@ module PresSection where
           (sz , [ approx (depth n) ]∼)      ∎
 
     inhFibers : (islim : isShLim FMSet (constSzLim ∘ depth)) → fiber pres (lim (constSzLim ∘ depth) islim)
-    inhFibers islim =
-      subst (fiber pres)
-            (shiftedLimitPath (λ d → cong (sz ,_) (section-sort^ sz (depth d) (xs (depth d)))))
-            (inhFibers' approx islim-approx)
+    inhFibers islim = subst (fiber pres) lim-path (inhFibers' approx islim-approx)
       where
         approx : ∀ d → Fin sz → FMSet ^ undepth d
         approx d = sort^ sz d (xs d)
@@ -210,9 +207,12 @@ module PresSection where
           sz , map-members (FMSet map-!^ d) (xs (depth (suc d)))        ≡⟨ islim d ⟩ 
           sz , xs (depth d)                                             ≡⟨ (λ i → sz , section-sort^ sz (depth d) (xs (depth d)) (~ i)) ⟩
           sz , [ approx (depth d) ]∼                                    ∎
+
+        lim-path : lim (λ d → sz , [ sort^ sz (depth d) (xs (depth d)) ]∼) islim-approx ≡ lim (λ d → sz , xs (depth d)) islim
+        lim-path = shiftedLimitPath (λ d → cong (sz ,_) (section-sort^ sz (depth d) (xs (depth d))))
         
   inhFibers : (base : ShLim FMSet) → fiber pres base
-  inhFibers base = subst (fiber pres) (shiftedLimitPath (sym ∘ elements-path)) (ConstSize.inhFibers (base .elements 0 .size) xs islim-xs) where
+  inhFibers base = subst (fiber pres) base-path (ConstSize.inhFibers (base .elements 0 .size) xs islim-xs) where
 
      sz = base .elements 0 .size
 
@@ -232,6 +232,13 @@ module PresSection where
 
      islim-xs : isShLim FMSet xs-elems
      islim-xs d = cong (!^ (suc d)) (sym (elements-path (suc d))) ∙∙ (base .is-lim d) ∙∙ elements-path d
+
+     xs-lim : ShLim FMSet
+     xs-lim .elements = xs-elems
+     xs-lim .is-lim = islim-xs
+
+     base-path : xs-lim ≡ base
+     base-path = shiftedLimitPath (sym ∘ elements-path)
 
   pres⁻¹ : ShLim FMSet → FMSet (Lim FMSet)
   pres⁻¹ = fst ∘ inhFibers
