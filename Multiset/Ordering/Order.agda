@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --lossy-unification #-}
 
 module Multiset.Ordering.Order where
 
@@ -361,6 +361,16 @@ module Sorting {A : Type} (setA : isSet A)
 
   sort : List A → List A
   sort xs = sort-acc xs []
+
+  sort'-acc : (xs acc : List A) → List A
+  sort'-acc acc xs = foldl (flip insert) xs acc
+
+  sort' : List A → List A
+  sort' = sort'-acc []
+
+  sort-test : ∀ xs acc → sort-acc xs acc ≡ sort'-acc xs acc
+  sort-test [] acc = refl
+  sort-test (x ∷ xs) acc = sort-test xs (insert x acc)
 
   lengthSortAcc : (xs acc : List A) → length (sort-acc xs acc) ≡ length xs + length acc
   lengthSortAcc [] acc = refl
