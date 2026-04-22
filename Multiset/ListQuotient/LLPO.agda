@@ -321,10 +321,9 @@ complete→llpo complete as as-true-once = PT.map
   approx : ℕ → Tree
   approx = latch-even as long (long? as)
 
-  private
-    ≤-suc : ∀ m {n} → m ≤ n → m ≤ suc n
-    ≤-suc zero _ = _
-    ≤-suc (suc m) {suc n} p = ≤-suc m p
+  ≤-suc : ∀ m {n} → m ≤ n → m ≤ suc n
+  ≤-suc zero _ = _
+  ≤-suc (suc m) {suc n} p = ≤-suc m p
 
   abstract
     module _ {n : ℕ} (¬≤n-true : ¬ (Σ[ k ∈ ℕ ] (k ≤ n) × (as k ≡ true))) where
